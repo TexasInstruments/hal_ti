@@ -221,6 +221,31 @@ const UDMALPF3_Config UDMALPF3_config = {
 };
 
 /*
+ *  =============================== ECDH ===============================
+ */
+
+#include <ti/drivers/ECDH.h>
+#include <ti/drivers/ecdh/ECDHLPF3SW.h>
+
+#define CONFIG_ECDH_COUNT 1
+
+ECDHLPF3SW_Object ecdhLpf3swObjects[CONFIG_ECDH_COUNT];
+
+/*
+ *  ======== ecdhLpf3swHWAttrs ========
+ */
+const ECDHLPF3SW_HWAttrs ecdhLpf3swHWAttrs[CONFIG_ECDH_COUNT] = {
+    {0},
+};
+
+const ECDH_Config ECDH_config[CONFIG_ECDH_COUNT] = {
+    {   /* CONFIG_ECDH_0 */
+        .object         = &ecdhLpf3swObjects[CONFIG_ECDH_0],
+        .hwAttrs        = &ecdhLpf3swHWAttrs[CONFIG_ECDH_0]
+    },
+};
+
+/*
  *  =============================== BatMon Support ===============================
  */
 #include <ti/drivers/batterymonitor/BatMonSupportLPF3.h>

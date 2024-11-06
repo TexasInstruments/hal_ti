@@ -156,6 +156,11 @@ void HwiP_Params_init(HwiP_Params *params)
     params->priority = ~0;
 }
 
+void HwiP_plug(int interruptNum, void *fxn)
+{
+    IntRegister((uint32_t)interruptNum, (void (*)(void))fxn);
+}
+
 /* Zephyr has no functions for clearing an interrupt, so use driverlib: */
 void HwiP_clearInterrupt(int interruptNum)
 {

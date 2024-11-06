@@ -7,7 +7,7 @@
 // This file is generated
 //
 // Tool name              SmartRF Studio 8
-// Tool version           0.6.0.327 INTERNAL
+// Tool version           0.6.0.328 INTERNAL
 //
 //
 // WORKSPACE INFORMATION
@@ -16,7 +16,7 @@
 // Device                 CC2340R5
 //     Package            QFN40 5x5 RKP
 //     Revision(s)        B (2.0)
-// SDK                    SimpleLink LPF3 SDK 8.11.00.09
+// SDK                    SimpleLink LPF3 SDK 8.20.00.41
 // Board                  LP-EM-CC2340R5
 // PHY                    2.4 GHz - Bluetooth 5, LE - 1 Mbps / 2 Mbps / Coded
 //

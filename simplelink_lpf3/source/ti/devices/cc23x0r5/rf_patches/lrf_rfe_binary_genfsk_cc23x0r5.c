@@ -1,9 +1,9 @@
-// This code snippet was auto-generated on Thu May 23 12:10:03 2024 using command: 
-// perl /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/lrfbledig/../tools/topsm/bin2csource_v2.pl --cpu rfe --fwname genfsk --fwdesc CC2340R5 LRF firmware for rfe, mode genfsk /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/genfsk/rfe_genfsk_ram.bin /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/genfsk/lrf_rfe_binary_genfsk.c
+// This code snippet was auto-generated on Tue Jul  9 07:41:01 2024 using command: 
+// perl /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/lrfbledig/../tools/topsm/bin2csource_v2.pl --cpu rfe --fwname genfsk --fwdesc CC2340R5 LRF firmware for rfe, mode genfsk /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/genfsk/rfe_genfsk_ram.bin /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/genfsk/lrf_rfe_binary_genfsk.c
 
 
-// Binary source file: /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/genfsk/rfe_genfsk_ram.bin
-// Binary source last modified: 23-May-2024 12:10
+// Binary source file: /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/genfsk/rfe_genfsk_ram.bin
+// Binary source last modified: 09-Jul-2024 07:41
 
 
 #include "lrf_rfe_binary_genfsk.h"

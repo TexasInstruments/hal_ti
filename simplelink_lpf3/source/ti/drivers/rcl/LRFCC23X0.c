@@ -124,7 +124,7 @@ LRF_SetupResult LRF_setupRadio(const LRF_Config *lrfConfig, uint16_t phyFeatures
         if (lrfState < RadioState_Configured)
         {
             includeBase = LRF_ApplySettings_IncludeBase;
-            Log_printf(RclCore, Log_VERBOSE, "Performing full setup");
+            Log_printf(LogModule_RCL, Log_INFO, "LRF_setupRadio: Performing full setup");
             trimUpdate = trimFullUpdate;
         }
         else
@@ -132,7 +132,7 @@ LRF_SetupResult LRF_setupRadio(const LRF_Config *lrfConfig, uint16_t phyFeatures
             includeBase = LRF_ApplySettings_NoBase;
             if (phyFeatures != lrfPhyState.phyFeatures)
             {
-                Log_printf(RclCore, Log_VERBOSE, "Changing PHY features");
+                Log_printf(LogModule_RCL, Log_INFO, "LRF_setupRadio: Changing PHY features");
                 trimUpdate = trimPartialUpdate;
             }
         }
@@ -1193,15 +1193,15 @@ static uint32_t LRF_programPQ(uint32_t pllMBase)
 
     if (demFracP >= demFracQ)
     {
-        Log_printf(RclCore, Log_ERROR, "Error: resampler fraction greater than 1; demodulator will not work");
+        Log_printf(LogModule_RCL, Log_ERROR, "LRF_programPQ: Error, resampler fraction greater than 1; demodulator will not work");
     }
     if (roundingError)
     {
-        Log_printf(RclCore, Log_WARNING, "Rounding error in fractional resampler");
+        Log_printf(LogModule_RCL, Log_WARNING, "LRF_programPQ: Rounding error in fractional resampler");
     }
     if (pllMBaseRounded != pllMBase)
     {
-        Log_printf(RclCore, Log_INFO, "PLLM base rounded from %08X to %08X to fit in fractional resampler", pllMBase, pllMBaseRounded);
+        Log_printf(LogModule_RCL, Log_VERBOSE, "LRF_programPQ: PLLM base rounded from %08X to %08X to fit in fractional resampler", pllMBase, pllMBaseRounded);
     }
 
 #ifdef DeviceFamily_CC27XX

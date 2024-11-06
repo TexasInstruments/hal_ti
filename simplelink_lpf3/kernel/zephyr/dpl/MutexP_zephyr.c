@@ -58,8 +58,10 @@ MutexP_Handle MutexP_create(MutexP_Params *params)
     if (mutex)
     {
         k_mutex_init(mutex);
+        return ((MutexP_Handle)mutex);
     }
-    return ((MutexP_Handle)mutex);
+    return NULL;
+
 }
 
 void MutexP_delete(MutexP_Handle handle)

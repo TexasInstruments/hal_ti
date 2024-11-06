@@ -211,6 +211,13 @@ extern void TaskP_destruct(TaskP_Struct *obj);
  *   TaskP_State_INACTIVE  -  eSuspended  -  Task_Mode_INACTIVE
  *   TaskP_State_INVALID   -  eInvalid    -  N.A
  *
+ *   Zephyr:
+ *   Running (No define)
+ *   _THREAD_QUEUED
+ *   _THREAD_PENDING
+ *   _THREAD_DEAD
+ *   _THREAD_SUSPENDED / _THREAD_PRESTART
+ *   _THREAD_DUMMY
  *
  * @retval Current state of the task pointed to by the task parameter
  */
@@ -272,6 +279,18 @@ extern void TaskP_yield(void);
  *
  */
 extern void TaskP_Params_init(TaskP_Params *params);
+
+/*!
+ * @brief Assign a resource memory pool to a thread.
+
+   By default, threads have no resource pool assigned unless their parent
+   thread has a resource pool, in which case it is inherited.
+   Multiple threads may be assigned to the same memory pool.
+
+   Changing a thread's resource pool will not migrate allocations from the
+   previous pool.
+ */
+extern void TaskP_setTaskResourcePool(struct k_heap *heap);
 
 #ifdef __cplusplus
 }

@@ -176,7 +176,7 @@ struct RCL_CmdIeee_RxAction_t
 {
     List_List rxBuffers;                /*!< Linked list of buffers for storing received packets */
     uint8_t numPan;                     /*!< Number of PANs to support. 0: Frame filtering disabled (promiscuous mode). 1: Single PAN. 2: Dual PAN (not supported in this version). */
-    bool frameFiltStop;                 /*!< 0: Receive frame to the end on frame filtering mismatch. 1: Go back to sync search on frame filtering mismatch. Not supported in this version. */
+    bool frameFiltStop;                 /*!< 0: Receive frame to the end on frame filtering mismatch. 1: Go back to sync search on frame filtering mismatch. */
     bool disableSync;                   /*!< 0: Receive packets normally. 1: Do not sync to received SFD (not supported in this version). */
     bool alwaysStoreAck;                /*!< 0: Store ACKs received after transmission only. 1: Store all received ACKs. */
     RCL_CmdIeee_PanConfig panConfig[RCL_CMD_IEEE_MAX_NUM_PAN];  /*!< PAN configuration for the supplied PANs */

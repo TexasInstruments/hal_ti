@@ -42,6 +42,7 @@ if(CONFIG_HAS_CC23X0_SDK)
   zephyr_include_directories(
     .
     source
+    source/ti/ble5stack_flash/inc
     )
 
   zephyr_library()
@@ -69,9 +70,12 @@ if(CONFIG_HAS_CC23X0_SDK)
     source/ti/drivers/aesecb/AESECBLPF3.c
     source/ti/drivers/cryptoutils/aes/AESCommonLPF3.c
     source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
+    source/ti/drivers/cryptoutils/ecc/ECCParamsLPF3SW.c
+    source/ti/drivers/cryptoutils/ecc/ECCInitLPF3SW.c
     source/ti/drivers/cryptoutils/sharedresources/CryptoResourceLPF3.c
     source/ti/drivers/cryptoutils/utils/CryptoUtils.c
     source/ti/drivers/dma/UDMALPF3.c
+    source/ti/drivers/ecdh/ECDHLPF3SW.c
     source/ti/drivers/rng/RNGLPF3RF.c
 
     source/ti/drivers/Temperature.c
@@ -81,6 +85,7 @@ if(CONFIG_HAS_CC23X0_SDK)
     source/ti/drivers/batterymonitor/BatteryMonitorLPF3.c
 
     # DPL
+    kernel/zephyr/dpl/dpl.c
     kernel/zephyr/dpl/MutexP_zephyr.c
     kernel/zephyr/dpl/SemaphoreP_zephyr.c
     kernel/zephyr/dpl/ClockP_zephyr.c
@@ -92,6 +97,9 @@ if(CONFIG_HAS_CC23X0_SDK)
   if(CONFIG_EVENTS)
     zephyr_library_sources(kernel/zephyr/dpl/EventP_zephyr.c)
   endif()
+  zephyr_link_libraries(
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m0p/ecc.a
+    )
   zephyr_linker_sources(RAM_SECTIONS
     ${CMAKE_CURRENT_SOURCE_DIR}/source/ti/drivers/dma/dma.ld
   )
@@ -115,4 +123,20 @@ if(CONFIG_HAS_CC23X0_SDK)
       source/ti/drivers/rcl/wrappers/RCL_AdcNoise.c
       )
   endif()
+
+  function(add_prebuilt_library lib_name prebuilt_path)
+    add_library(${lib_name} STATIC IMPORTED GLOBAL)
+     set_target_properties(${lib_name} PROPERTIES
+       IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/${prebuilt_path}
+     )
+    zephyr_link_libraries(${lib_name})
+  endfunction()
+
+ # prebuilt libs
+  if (CONFIG_BT_PERIPHERAL)
+    add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller_peripheral.a)
+  else()
+    add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller.a)
+  endif()
+ 
 endif()

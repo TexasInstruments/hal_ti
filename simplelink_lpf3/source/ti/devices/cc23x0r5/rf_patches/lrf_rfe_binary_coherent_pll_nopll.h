@@ -1,9 +1,9 @@
-// This code snippet was auto-generated on Thu May 23 12:10:03 2024 using command: 
-// perl /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/lrfbledig/../tools/topsm/bin2csource_v2.pl --cpu rfe --fwname coherent_pll_nopll --fwdesc CC2340R5 LRF firmware for rfe, mode coherent_pll, NOPLL=1 /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/coherent_pll_nopll/rfe_coherent_pll_nopll_ram.bin /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/coherent_pll_nopll/lrf_rfe_binary_coherent_pll_nopll.c
+// This code snippet was auto-generated on Tue Jul  9 07:41:00 2024 using command: 
+// perl /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/lrfbledig/../tools/topsm/bin2csource_v2.pl --cpu rfe --fwname coherent_pll_nopll --fwdesc CC2340R5 LRF firmware for rfe, mode coherent_pll, NOPLL=1 /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/coherent_pll_nopll/rfe_coherent_pll_nopll_ram.bin /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/coherent_pll_nopll/lrf_rfe_binary_coherent_pll_nopll.c
 
 
-// Binary source file: /home/developer/.conan/data/loki-lrf/8.11.00.04/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/coherent_pll_nopll/rfe_coherent_pll_nopll_ram.bin
-// Binary source last modified: 23-May-2024 12:10
+// Binary source file: /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/rfe/coherent_pll_nopll/rfe_coherent_pll_nopll_ram.bin
+// Binary source last modified: 09-Jul-2024 07:41
 
 
 #ifndef _LRF_RFE_BINARY_COHERENT_PLL_NOPLL_C

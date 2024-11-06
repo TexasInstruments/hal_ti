@@ -88,6 +88,7 @@
 #define BLE_CS_TONE_QUALITY_MEDIUM_THR  50
 #define BLE_CS_TONE_EXTENSION_INITIATOR_TX 0b01
 #define BLE_CS_TONE_EXTENSION_REFLECTOR_TX 0b10
+#define BLE_CS_COMBINE_IQ(i, q)         ((((int32_t) i) & 0xFFFF) | ((((int32_t) q) & 0xFFFF) << 16))
 #define DECODE_ANTENNA(x, y)            (((x) >> ((y)*2)) & 0x03)
 #define ENCODE_ANTENNA(x, y)            (((x) << ((y)*4)))
 #define INT16_MSB(x)                    (((x) >> 8) & 0xFF)
@@ -747,7 +748,7 @@ static void RCL_Handler_BLE_CS_retrieveAndStoreNextResult(RCL_CmdBleCs* pCmd, bo
     RCL_MultiBuffer *pResultBuffer = RCL_Handler_BLE_CS_findBufferFitNumberOfBytes(&pCmd->resultBuffers, requiredSpaceInBytes);
 
     /* Increment if either internal or HCI format is used */
-    if (pResult || pResultBuffer) 
+    if (pResult || pResultBuffer)
     {
         pCmd->stats->nResultsRead++;
     }
@@ -774,7 +775,7 @@ static void RCL_Handler_BLE_CS_retrieveAndStoreNextResult(RCL_CmdBleCs* pCmd, bo
         pSubeventResults->referencePowerLevel   = result.gain;
         pSubeventResults->frequencyCompensation = RCL_Handler_BLE_CS_convertFreqOffset(HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE_CS_RAM_O_FOFFCOMP) << 2);
 
-        if (pCmd->stats->nResultsRead == 1) 
+        if (pCmd->stats->nResultsRead == 1)
         {
             pCmd->stats->reserved0 = result.gain;
         }
@@ -861,9 +862,9 @@ static void RCL_Handler_BLE_CS_configureS2R(RCL_CmdBleCs *pCmd)
         /* Store 32bit words in S2R (offset 3072) memory; don't arm yet */
         HWREG_WRITE_LRF(LRFDS2R_BASE + LRFDS2R_O_START) = BLE_CS_S2R_MEMORY_OFFSET;
         HWREG_WRITE_LRF(LRFDS2R_BASE + LRFDS2R_O_STOP)  = HWREG_READ_LRF(LRFDS2R_BASE + LRFDS2R_O_START) + (RCL_BLE_CS_MAX_S2R_LEN >> pCmd->mode.phy);
-        HWREG_WRITE_LRF(LRFDS2R_BASE + LRFDS2R_O_CFG)   = LRFDS2R_CFG_CTL_EN 
-                                                        | LRFDS2R_CFG_SEL_FRONTEND 
-                                                        | LRFDS2R_CFG_TRIGMODE_ONESHOT 
+        HWREG_WRITE_LRF(LRFDS2R_BASE + LRFDS2R_O_CFG)   = LRFDS2R_CFG_CTL_EN
+                                                        | LRFDS2R_CFG_SEL_FRONTEND
+                                                        | LRFDS2R_CFG_TRIGMODE_ONESHOT
                                                         | LRFDS2R_CFG_LAST0_DIS;
     }
 }
@@ -947,7 +948,7 @@ RCL_Events RCL_Handler_BLE_CS_readS2RSamples(RCL_CmdBleCs *pCmd)
  */
 static void RCL_Handler_BLE_CS_readStatistics(RCL_CmdBleCs *pCmd)
 {
-    if (pCmd->stats) 
+    if (pCmd->stats)
     {
         pCmd->stats->nStepsDone = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE_CS_RAM_O_NSTEPSDONE);
         pCmd->stats->lastRssi   = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE_CS_RAM_O_RSSILAST);
@@ -1066,7 +1067,7 @@ static void RCL_Handler_BLE_CS_preprocessCommand(RCL_CmdBleCs *pCmd)
     HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMFIFE0) = 0x0007;
 
     /* Use precalibration values or mode-0 estimates */
-    if ((pCmd->precalTable) && (pCmd->precalTable->valid))
+    if ((pCmd->precalTable) && (pCmd->precalTable->valid) && (pCmd->mode.precal))
     {
         HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_SPARE1) = (1<<8);
     }
@@ -1293,7 +1294,7 @@ static void RCL_Handler_BLE_CS_preprocessStep(RCL_CmdBleCs *pCmd, RCL_CmdBleCs_S
         pCmd->precalTable->callback(pCmd->precalTable, pStepI->channelIdx, (uint32_t *)&pStepI->dcComp[0], (uint32_t *)&pStepI->dcComp[1]);
     }
     else
-    {   
+    {
         pStepI->dcComp[0].i = 0;
         pStepI->dcComp[0].q = 0;
         pStepI->dcComp[1].i = 0;
@@ -1355,7 +1356,7 @@ static int16_t RCL_Handler_BLE_CS_convertFreqOffset(int16_t foffMeasured)
 {
     /* Intermediate arithmetics on 32bit
        freqOffset = foff * 100 * 1e6 / 2^23
-                  = foff * (100 * 1e6 / 2^7) / 2^16 
+                  = foff * (100 * 1e6 / 2^7) / 2^16
                   = foff * 0xBEBC2 / 2^16 [0.01 ppm] */
     int32_t freqOffset = (int32_t)foffMeasured;
     freqOffset *= 0xBEBC2;
@@ -1757,7 +1758,7 @@ static RCL_CommandStatus RCL_Handler_BLE_CS_findPbeErrorEndStatus(uint16_t pbeEn
         status = RCL_CommandStatus_Error_UnknownOp;
         break;
     default:
-        Log_printf(RclCore, Log_ERROR, "Unexpected error 0x%04X from PBE", pbeEndStatus);
+        Log_printf(LogModule_RCL, Log_ERROR, "RCL_Handler_BLE_CS_findPbeErrorEndStatus: Unexpected error 0x%04X from PBE", pbeEndStatus);
         status = RCL_CommandStatus_Error;
         break;
     }
@@ -1778,17 +1779,6 @@ RCL_Events RCL_Handler_BLE_CS(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Events
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
-
-        /* Check if valid PLLDIV0 synth setting is used. */
-        /* BLE CS currently supports only either 3 => FREF0=16MHz or 12 => FREF0=4MHz */
-        uint32_t plldiv0 = (HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_PRE0) & LRFDRFE_PRE0_PLLDIV0_M) >> LRFDRFE_PRE0_PLLDIV0_S;
-        if ((plldiv0 != 3U) && (plldiv0 != 12U))
-        {
-            /* Override to use PLLDIV0=12, gives FREF0=4MHz */
-            Log_printf(RclCore, Log_WARNING, "Unsupported RFE_PRE0_PLLDIV0 synth setting detected. Will override to use 12 (FREF=4MHz)");
-            HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_PRE0) = ((12U << LRFDRFE_PRE0_PLLDIV0_S) & LRFDRFE_PRE0_PLLDIV0_M) |
-                                                             ((12U << LRFDRFE_PRE0_PLLDIV1_S) & LRFDRFE_PRE0_PLLDIV1_M);
-        }
 
         /* Mark as active */
         cmd->status = RCL_CommandStatus_Active;
@@ -2022,7 +2012,7 @@ RCL_Events RCL_Handler_BLE_CS_Precal(RCL_Command *cmd, LRF_Events lrfEvents, RCL
 /*
  *  ======== RCL_Handler_BLE_CS_PrecalDefaultCallback ========
  */
-void RCL_Handler_BLE_CS_PrecalDefaultCallback(RCL_CmdBleCs_PrecalTable *table, uint8_t channel, uint32_t *hdc, uint32_t *ldc)    
+void RCL_Handler_BLE_CS_PrecalDefaultCallback(RCL_CmdBleCs_PrecalTable *table, uint8_t channel, uint32_t *hdc, uint32_t *ldc)
 {
     *hdc = 0;
     *ldc = 0;
@@ -2039,11 +2029,11 @@ void RCL_Handler_BLE_CS_PrecalDefaultCallback(RCL_CmdBleCs_PrecalTable *table, u
             /* Populate the DC measured with high gain */
             uint32_t i = table->entries[k].hdc.i;
             uint32_t q = table->entries[k].hdc.q;
-            *hdc = (q << 16 | i);
+            *hdc = BLE_CS_COMBINE_IQ(i, q);
 
             i = table->entries[k].ldc.i;
             q = table->entries[k].ldc.q;
-            *ldc = (q << 16 | i);
+            *ldc = BLE_CS_COMBINE_IQ(i, q);
         }
     }
 }

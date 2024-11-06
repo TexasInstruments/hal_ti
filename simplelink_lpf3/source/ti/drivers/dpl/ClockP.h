@@ -124,8 +124,6 @@ typedef  void *ClockP_Handle;
 
 #define ClockP_handle(x) ((ClockP_Handle)(x))
 
-extern uint32_t ClockP_tickPeriod;
-
 /*!
  *  @brief    Basic ClockP Parameters
  *
