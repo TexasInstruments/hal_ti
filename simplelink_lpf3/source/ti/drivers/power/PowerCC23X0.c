@@ -318,15 +318,15 @@ int_fast16_t Power_init()
                      HFXT_AMP_COMP_START_TIMEOUT_US / ClockP_getSystemTickPeriod(),
                      NULL);
 
+    uintptr_t hwiKey = HwiP_disable();
+
     /* Start HFXT */
     PowerCC23X0_startHFXT();
 
-    /* Start timeout clock.
-     * Note, interrupts are guaranteed to be disabled during Power_init(), so
-     * there is no risk of the AMPSETTLED callback stopping the clock before it
-     * is started.
-     */
+    /* Start timeout clock. */
     ClockP_start(&hfxtAmpCompClock);
+
+    HwiP_restore(hwiKey);
 
     /* Enable tracking loop with HFXT as reference. This will automatically
      * calibrate LFOSC against HFXT whenever HFXT is enabled; usually after
