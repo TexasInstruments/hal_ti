@@ -59,7 +59,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,15 +66,21 @@ extern "C" {
 /*!
  *  @brief    Number of bytes greater than or equal to the size of any RTOS Task object.
  *
- *  Zephyr: 160
+ *  BIOS 6.x: 80
+ *  BIOS 7.x: 88
+ *  FreeRTOS: 104(llvm)/340(gcc)
  */
-#define TaskP_STRUCT_SIZE (160)
+#if (defined(__ti_version__) && defined(__clang__)) || defined(__IAR_SYSTEMS_ICC__)
+    #define TaskP_STRUCT_SIZE (104)
+#elif defined(__GNUC__)
+    #define TaskP_STRUCT_SIZE (340)
+#endif
 
 /*!
  *  @brief    Number of bytes for the default stack size of any RTOS Task object.
  *
  */
-#define TaskP_DEFAULT_STACK_SIZE (CONFIG_DYNAMIC_THREAD_STACK_SIZE)
+#define TaskP_DEFAULT_STACK_SIZE (512)
 
 /*!
  *  @brief    TaskP structure.
@@ -164,6 +169,8 @@ extern TaskP_Handle TaskP_create(TaskP_Function fxn, const TaskP_Params *params)
  *
  * \note This API cannot be called from interrupt contexts.
  *
+ * For FreeRTOS, INCLUDE_vTaskDelete has to be set to 1 in FreeRTOSConfig.h.
+ * See 'Configuration with FreeRTOS' in the Core SDK User's Guide for how to do this.
  *
  */
 extern void TaskP_delete(TaskP_Handle task);
@@ -179,6 +186,8 @@ extern void TaskP_delete(TaskP_Handle task);
  *
  * \note This API cannot be called from interrupt contexts.
  *
+ * For FreeRTOS, configSUPPORT_STATIC_ALLOCATION has to be set to 1 in FreeRTOSConfig.h.
+ * See 'Configuration with FreeRTOS' in the Core SDK User's Guide for how to do this.
  *
  * @retval TaskP handle (NULL on failure)
  */
@@ -211,13 +220,8 @@ extern void TaskP_destruct(TaskP_Struct *obj);
  *   TaskP_State_INACTIVE  -  eSuspended  -  Task_Mode_INACTIVE
  *   TaskP_State_INVALID   -  eInvalid    -  N.A
  *
- *   Zephyr:
- *   Running (No define)
- *   _THREAD_QUEUED
- *   _THREAD_PENDING
- *   _THREAD_DEAD
- *   _THREAD_SUSPENDED / _THREAD_PRESTART
- *   _THREAD_DUMMY
+ * For FreeRTOS, INCLUDE_eTaskGetState has to be set to 1 in FreeRTOSConfig.h.
+ * See 'Configuration with FreeRTOS' in the Core SDK User's Guide for how to do this.
  *
  * @retval Current state of the task pointed to by the task parameter
  */
@@ -228,6 +232,8 @@ extern TaskP_State TaskP_getState(TaskP_Handle task);
  *
  * \note Must be called from task context.
  *
+ * For FreeRTOS, INCLUDE_xTaskGetCurrentTaskHandle has to be set to 1 in FreeRTOSConfig.h.
+ * See 'Configuration with FreeRTOS' in the Core SDK User's Guide for how to do this.
  *
  * @retval The handle for the calling task
  */
@@ -248,6 +254,8 @@ extern TaskP_Handle TaskP_getCurrentTask(void);
  *
  * \note This API cannot be called from interrupt contexts.
  *
+ * For FreeRTOS the key value returned is always 0.
+ *
  * @return A key to pass to TaskP_restoreScheduler to re-enable the scheduler.
  */
 extern uintptr_t TaskP_disableScheduler(void);
@@ -256,6 +264,8 @@ extern uintptr_t TaskP_disableScheduler(void);
  * @brief  Function to re-enable task scheduling
  *
  * \note This API cannot be called from interrupt contexts.
+ *
+ * For FreeRTOS the key value is ignored.
  *
  * @param  key returned from TaskP_disableScheduler
  */
@@ -279,18 +289,6 @@ extern void TaskP_yield(void);
  *
  */
 extern void TaskP_Params_init(TaskP_Params *params);
-
-/*!
- * @brief Assign a resource memory pool to a thread.
-
-   By default, threads have no resource pool assigned unless their parent
-   thread has a resource pool, in which case it is inherited.
-   Multiple threads may be assigned to the same memory pool.
-
-   Changing a thread's resource pool will not migrate allocations from the
-   previous pool.
- */
-extern void TaskP_setTaskResourcePool(struct k_heap *heap);
 
 #ifdef __cplusplus
 }

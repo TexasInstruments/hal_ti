@@ -17,6 +17,17 @@
 #include DeviceFamily_constructPath(inc/hw_memmap.h)
 #include DeviceFamily_constructPath(inc/hw_systim.h)
 
+
+#define ClockP_TICK_PERIOD (USEC_PER_SEC / CONFIG_SYS_CLOCK_TICKS_PER_SEC)
+
+/* Override ClockP defines */
+#ifdef ClockP_STRUCT_SIZE
+#undef ClockP_STRUCT_SIZE
+#endif
+#define ClockP_STRUCT_SIZE   (sizeof(struct k_timer) + \
+	sizeof(ClockP_Fxn) + sizeof(uintptr_t) + \
+	sizeof(uint32_t) * 2) + sizeof(bool)
+
 /** Max number of ClockP ticks into the future supported by this ClockP
  * implementation.
  *

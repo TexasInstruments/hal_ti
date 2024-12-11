@@ -19,6 +19,16 @@
 #include <ti/drivers/dpl/ClockP.h>
 #include <ti/drivers/dpl/HwiP.h>
 
+#ifdef TaskP_STRUCT_SIZE
+#undef TaskP_STRUCT_SIZE
+#endif
+#define TaskP_STRUCT_SIZE (160)
+
+#ifdef TaskP_DEFAULT_STACK_SIZE
+#undef TaskP_DEFAULT_STACK_SIZE
+#endif
+#define TaskP_DEFAULT_STACK_SIZE (CONFIG_DYNAMIC_THREAD_STACK_SIZE)
+
 #if (defined(CONFIG_DYNAMIC_DPL_OBJECTS) && defined(CONFIG_DYNAMIC_THREAD) && defined(CONFIG_DYNAMIC_THREAD_ALLOC) && defined(CONFIG_THREAD_STACK_INFO))
     #define DYNAMIC_THREADS
 #endif

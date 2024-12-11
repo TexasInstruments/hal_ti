@@ -60,9 +60,10 @@ extern "C" {
 /*!
  *  @brief    Number of bytes greater than or equal to the size of any RTOS Queue/Mailbox data structure.
  *
- *  Zephyr: 44
+ *  TI-RTOS7: 104
+ *  FreeRTOS: 80
  */
-#define MessageQueueP_STRUCT_SIZE (44)
+#define MessageQueueP_STRUCT_SIZE (104)
 
 /*!
  *  @brief    Required number of bytes of a statically allocated message queue buffer.
@@ -71,9 +72,20 @@ extern "C" {
  * buffer. A pointer to this user defined buffer is one of the arguments of the
  * #MessageQueueP_construct() function.
  * The macro gives the minimal number of bytes required for the message queue.
+ * Please note the following for devices supporting TI-RTOS7:
+ * - The macro takes into account an eight byte message header which is only required
+ *   by TI-RTOS and not by FreeRTOS. For user applications only targeting FreeRTOS,
+ *   SRAM usage can be limited by setting the buffer size to (msgCount * msgSize)
+ *   instead of using this macro.
  */
-
-#define MessageQueueP_BUFFER_SIZE(msgSize, msgCount) ((msgCount) * (msgSize))
+#if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC13X0_CC26X0) || \
+     (DeviceFamily_PARENT == DeviceFamily_PARENT_CC13X2_CC26X2) || \
+     (DeviceFamily_PARENT == DeviceFamily_PARENT_CC13X1_CC26X1) || \
+     (DeviceFamily_PARENT == DeviceFamily_PARENT_CC13X4_CC26X3_CC26X4))
+    #define MessageQueueP_BUFFER_SIZE(msgSize, msgCount) ((msgCount) * ((msgSize) + 8))
+#else
+    #define MessageQueueP_BUFFER_SIZE(msgSize, msgCount) ((msgCount) * (msgSize))
+#endif
 
 /*!
  *  @brief    MessageQueueP structure.
