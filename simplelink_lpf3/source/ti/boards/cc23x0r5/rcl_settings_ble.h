@@ -1,32 +1,33 @@
 // SETTINGS FOR PHY BASED ON RADIO CONTROL LAYER (HEADER FILE)
 //
-// Usage                  Protocol stack
+// Usage                    Protocol stack
 //
 //
 // CODE EXPORT INFORMATION
 // This file is generated
 //
-// Tool name              SmartRF Studio 8
-// Tool version           0.6.0.328 INTERNAL
+// Tool name                SmartRF Studio 8
+// Tool version             0.6.0.354 INTERNAL
 //
 //
 // WORKSPACE INFORMATION
 //
-// Workspace file         srf_cli.workspace
-// Device                 CC2340R5
-//     Package            QFN40 5x5 RKP
-//     Revision(s)        B (2.0)
-// SDK                    SimpleLink LPF3 SDK 8.20.00.41
-// Board                  LP-EM-CC2340R5
-// PHY                    2.4 GHz - Bluetooth 5, LE - 1 Mbps / 2 Mbps / Coded
+// Workspace file           srf_cli.workspace
+// Device                   CC2340R5
+//     Package              QFN40 5x5 RKP
+//     Revision(s)          B (2.0)
+// SDK                      SimpleLink LPF3 SDK 8.40.00.10
+// Board                    LP-EM-CC2340R5
+// PHY                      2.4 GHz - Bluetooth 5, LE - 1 Mbps / 2 Mbps / Coded
+//     State                Characterized
 //
 //
 // PHY PROPERTIES
 //
 // Run-time properties:
-//     Sub-PHY            1 Mbps 
-//     Channel            17 (2440 MHz) 
-//     TX output power    5.0 dBm 
+//     Sub-PHY              1 Mbps 
+//     Channel              17 (2440 MHz) 
+//     TX output power      5.0 dBm 
 
 #ifndef RCLSETTINGS_H
 #define RCLSETTINGS_H
@@ -233,7 +234,7 @@ extern const LRF_Config       LRF_config;
 // 0x2020     PBE_BLE5_RAM      PHY                  [1:0]      SEL                0x0               0x1               0x3
 // 0x2022     PBE_BLE5_RAM      PRETXIFS500K         [15:0]     VAL                -                 -                 0x0120
 // 0x2024     PBE_BLE5_RAM      PRETXIFS             [15:0]     VAL                0x018E            0x01B2            0x0102
-// 0x2026     PBE_BLE5_RAM      PRERXIFS             [15:0]     VAL                0x01AE            0x018C            0x012C
+// 0x2026     PBE_BLE5_RAM      PRERXIFS             [15:0]     VAL                0x0186            0x018C            0x012C
 // 0x2028     PBE_BLE5_RAM      RXTIMEOUT            [15:0]     VAL                0x0226            0x01C2            0x07EA
 // 0x202A     PBE_BLE5_RAM      SYNTHCALTIMEOUT      [15:0]     VAL                0x00B4            0x00B4            0x00B4
 // 0x202C     PBE_BLE5_RAM      RECALTIMEOUT         [15:0]     VAL                0x00B4            0x00B4            0x00B4

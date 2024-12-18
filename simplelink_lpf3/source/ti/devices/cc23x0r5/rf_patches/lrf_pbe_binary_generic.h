@@ -1,9 +1,9 @@
-// This code snippet was auto-generated on Tue Jul  9 07:40:50 2024 using command: 
-// perl /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/lrfbledig/../tools/topsm/bin2csource_v2.pl --cpu pbe --fwname generic --fwdesc CC2340R5 LRF firmware for pbe, mode generic /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/pbe/generic/pbe_generic_ram.bin /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/pbe/generic/lrf_pbe_binary_generic.c
+// This code snippet was auto-generated on Wed Nov 27 13:30:19 2024 using command: 
+// perl /home/developer/.conan/data/loki-lrf/8.40.00.09/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/lrfbledig/../tools/topsm/bin2csource_v2.pl --cpu pbe --fwname generic --fwdesc CC2340R5 LRF firmware for pbe, mode generic /home/developer/.conan/data/loki-lrf/8.40.00.09/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/pbe/generic/pbe_generic_ram.bin /home/developer/.conan/data/loki-lrf/8.40.00.09/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/pbe/generic/lrf_pbe_binary_generic.c
 
 
-// Binary source file: /home/developer/.conan/data/loki-lrf/8.20.00.06/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/pbe/generic/pbe_generic_ram.bin
-// Binary source last modified: 09-Jul-2024 07:40
+// Binary source file: /home/developer/.conan/data/loki-lrf/8.40.00.09/library-lprf/eng/build/0c46501566d33cb4afdce9818f8c3e61ffe04c9a/build/lrfbledig/iar/pbe/generic/pbe_generic_ram.bin
+// Binary source last modified: 27-Nov-2024 13:30
 
 
 #ifndef _LRF_PBE_BINARY_GENERIC_C
@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 /* Length of binary image. */
-#define LRF_PBE_BINARY_GENERIC_LENGTH 738 
+#define LRF_PBE_BINARY_GENERIC_LENGTH 745 
 
 /* Declaration of raw binary. */
 extern const uint32_t LRF_PBE_binary_generic[LRF_PBE_BINARY_GENERIC_LENGTH];

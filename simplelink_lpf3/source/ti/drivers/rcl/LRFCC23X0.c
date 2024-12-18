@@ -39,6 +39,7 @@
 #include <ti/drivers/rcl/LRF.h>
 #include <ti/drivers/rcl/RCL_Scheduler.h>
 #include <ti/drivers/rcl/RCL_Command.h>
+#include <ti/drivers/rcl/RCL_Feature.h>
 #include <ti/log/Log.h>
 #include <ti/drivers/dpl/HwiP.h>
 
@@ -53,6 +54,49 @@
 #include DeviceFamily_constructPath(inc/rfe_common_ram_regs.h)
 
 
+/* Definitions for trim */
+#define LRF_TRIM_NORMAL_BW    0
+#define LRF_TRIM_HIGH_BW      1                 /* Revision >= 4 only */s
+#define LRF_TRIM_MIN_VERSION_FULL_FEATURES  4    /* Only AppTrims revision 4 and above has all features */
+#define LRF_TRIM_VERSION_DCOLDO_TEMPERATURE_COMPENSATION 8 /* Only AppTrims revision 8 and above have DCOLDO temperature compensation */
+
+/* RCL-335: Some CC23X0R5 devices (State D) have an error in the programmed RSSI offset */
+#define LRF_TRIM_VERSION_RSSIOFFSET_ISSUE_CC23X0R5 4     /* AppTrims revision with issue in rssiOffset field */
+#define LRF_TRIM_LIMIT_RSSIOFFSET_ISSUE_CC23X0R5  (-4)   /* If rssiOffset is less or equal to this, apply correction */
+#define LRF_TRIM_CORRECTION_RSSIOFFSET_ISSUE_CC23X0R5 5  /* Correction to apply to devices with wrong RSSI offset */
+
+/* RCL-616: DCOLDO0:FIRSTTRIM is hardcoded to 8 and DCOLDO0:SECONDTRIM is increased by 10 for CC27XX state B devices */
+#define LRF_TRIM_DCOLDO0_SECONDTRIM_INC_STATE_B_DCOLDO_WORKAROUND_CC27XX 10U    /* DCOLDO0:SECONDTRIM needs to be increased by 10 on CC27XX state B devices */
+#define LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK ((1U << 3U) | (1U << 5U))    /* Bits mask for bit 3 and 5 of DCOLDO0:SECONDTRIM */
+#define LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE 63U    /* DCOLDO0:SECONDTRIM maximum value allowed within the range of 6-bit representation */
+#define LRF_TRIM_DCOLDO0_FIRSTTRIM_MIN_STATE -8    /* DCOLDO0:FIRSTTRIM minimum value allowed within the range of 4-bit two's complement representation */
+
+/* Constants used for calculating DCOLDO max offset when doing DCOLDO temperature compensation */
+#define LRF_DCOLDOSECOND_HIGH_TEMP_ADJ_FACTOR 5
+#define LRF_DCOLDOSECOND_LOW_TEMP_ADJ_FACTOR  5
+#define LRF_DCOLDO_DEADBAND 10
+#define LRF_DCOLDO_OFFSET_LOWER_SATURATION 0
+/* The adjacent factor for DCOLDOFIRST is 2.5, this is represented as "5 >> 1" with following macros to avoid using float values */
+#define LRF_DCOLDOFIRST_HIGH_TEMP_ADJ_FACTOR_S  1
+#define LRF_DCOLDOFIRST_HIGH_TEMP_ADJ_FACTOR_MUL 5
+#define LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_S   1
+#define LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_MUL 5
+/* Factor which is only needed for DCOLDOSECOND */
+#define LRF_DCOLDOSECOND_FACTOR 2
+/* This constant shifted 24 bits to approximates to 1/9 */
+#define DIV_BY_NINE_CONSTANT 1864135
+/* Offest values in the DCOLDO compensation calculations */
+#define LRF_DCOLDO_OFFSET_HIGH_TEMP 16
+#define LRF_DCOLDO_OFFSET_LOW_TEMP 9
+/* Shift values in the DCOLDO compensation calculations */
+#define LRF_DCOLDO_SHIFT_HIGH_TEMP 5
+#define LRF_DCOLDO_SHIFT_LOW_TEMP 25
+
+/* Nominal temperature (degrees C) for offset definitions */
+#define LRF_TEMPERATURE_NOM 25
+
+#define LRF_DCDC_IPEAK_RF_ACTIVITY  3
+
 static uint32_t LRF_findPllMBase(uint32_t frequency);
 static uint32_t countLeadingZeros(uint16_t value);
 static uint32_t LRF_findCalM(uint32_t frequency, uint32_t prediv);
@@ -66,11 +110,13 @@ static void LRF_updateTrim(const LRF_TrimDef *trimDef, const LRF_SwConfig *swCon
 static void LRF_setTrimCommon(const LRF_TrimDef *trimDef, const LRF_SwConfig *swConfig);
 static void LRF_setTemperatureTrim(const LRF_TrimDef *trimDef);
 static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef);
+static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimDef *trimDef);
 static uint32_t LRF_findExtTrim1TrimAdjustment(uint32_t temperatureDiff, uint32_t tempThreshFactor, uint32_t maxAdjustment);
 static int32_t LRF_findExtTrim0TrimAdjustment(int32_t temperature, int32_t tempCompFactor, int32_t offset);
 static uint32_t LRF_scaleFreqWithHFXTOffset(uint32_t frequency);
 static void LRF_writeFifoPtr(uint32_t value, uintptr_t regAddr);
 static void LRF_writeFifoPtrs(uint32_t value, uintptr_t regAddr0, uintptr_t regAddr1);
+static void LRF_temperatureNotification(int16_t currentTemperature);
 
 uint32_t swParamList[sizeof(LRF_SwParam)/sizeof(uint32_t)];
 const size_t swParamListSz = sizeof(LRF_SwParam);
@@ -80,6 +126,7 @@ static struct {
     const LRF_TOPsmImage   *mceLoaded;
     const LRF_TOPsmImage   *rfeLoaded;
     uint16_t                phyFeatures;
+    int16_t                 lastTrimTemperature;
     LRF_TxPowerTable_Entry  currentTxPower;
     LRF_TxPowerTable_Entry  rawTxPower;
 } lrfPhyState = {0};
@@ -89,6 +136,14 @@ static struct {
 
 /* Status to tell if the RX FIFO is already in a deallocated state (SRP and RP being the same) */
 static bool rxFifoDeallocated = true;
+
+#ifdef DeviceFamily_CC27XX
+/* Stores the previous DCDC IPEAK setting to be set after RF activity */
+static uint8_t dcdcIpeakRestoreSetting;
+#endif
+
+/* Temperature threshold (degrees C) for use by the temperature monitoring. A value of 0 disables the feature. */
+uint16_t rclTemperatureThreshold = 8;
 
 LRF_SetupResult LRF_setupRadio(const LRF_Config *lrfConfig, uint16_t phyFeatures, LRF_RadioState lrfState)
 {
@@ -200,18 +255,8 @@ static void LRF_applyTrim(const LRF_TrimDef *trimDef, const LRF_SwConfig *swConf
     if (trimDef != NULL)
     {
 #ifdef DeviceFamily_CC27XX
-        if (trimDef->revision >= LRF_TRIM_VERSION_CORRECT_AMOUNT_OF_PA_TRIMS_CC27XX)
-        {
-            HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM01) = trimDef->trim0.pa2trim01;
-            HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM23) = trimDef->trim4.pa2trim23;
-        }
-        else
-        {
-            /* Workaround: Write trim0.pa2trim01 to all trim fields for revisions where all trim fields are not available in apptrims */
-            uint16_t paTrim = trimDef->trim0.pa2trim01;
-            HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM01) = (paTrim << RFE_COMMON_RAM_PATRIM01_VAL1_S) | (paTrim << RFE_COMMON_RAM_PATRIM01_VAL0_S);
-            HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM23) = (paTrim << RFE_COMMON_RAM_PATRIM23_VAL3_S) | (paTrim << RFE_COMMON_RAM_PATRIM23_VAL2_S);
-        }
+        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM01) = trimDef->trim0.pa2trim01;
+        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM23) = trimDef->trim4.pa2trim23;
 #else
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_PA0)        = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_PA0) | trimDef->trim0.pa0;
 #endif
@@ -220,41 +265,6 @@ static void LRF_applyTrim(const LRF_TrimDef *trimDef, const LRF_SwConfig *swConf
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_LNA)        = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_LNA) | trimDef->trim1.lna;
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_IFAMPRFLDO) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_IFAMPRFLDO) | trimDef->trim1.ifampRfLdo;
 
-#ifdef DeviceFamily_CC27XX
-        /* DCOLDO0 Workaround: DCOLDO0:FIRSTTRIM is hardcoded to 8U and DCOLDO0:SECONDTRIM is increased by 10 for CC27XX state B devices (see: RCL-616)
-         * ASSUMPTION: AppTrims revision on CC27XX state C devices is not smaller than 7
-         */
-        if (trimDef->revision >= LRF_TRIM_VERSION_STATE_C_TRIM_WORKAROUND_CC27XX)
-        {
-            HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) | trimDef->trim2.dcoLdo0;
-        }
-        else
-        {
-            uint32_t trimDcoldo0Val = trimDef->trim2.dcoLdo0;
-            uint32_t secondTrimVal = (trimDcoldo0Val & LRFDRFE_DCOLDO0_SECONDTRIM_M) >> LRFDRFE_DCOLDO0_SECONDTRIM_S;
-
-            /* Invert bit 3 and 5 to decode the SECONDTRIM value */
-            uint32_t secondTrimValDecoded = secondTrimVal ^ LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK_STATE_B_DCOLDO_WORKAROUND_CC27XX;
-            uint32_t newSecondTrimVal = secondTrimValDecoded + LRF_TRIM_DCOLDO0_SECONDTRIM_INC_STATE_B_DCOLDO_WORKAROUND_CC27XX;
-
-            /* DCOLDO0[13:8]SECONDTRIM is saturated at 63U */
-            if (newSecondTrimVal > LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE_B_DCOLDO_WORKAROUND_CC27XX)
-            {
-                newSecondTrimVal = LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE_B_DCOLDO_WORKAROUND_CC27XX;
-            }
-
-            /* Invert bit 3 and 5 to encode the SECONDTRIM value */
-            uint32_t newSecondTrimValCoded = newSecondTrimVal ^ LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK_STATE_B_DCOLDO_WORKAROUND_CC27XX;
-
-            /* Hardcode the FIRSTTRIM to 8U */
-            trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_FIRSTTRIM_M) | (LRF_TRIM_DCOLDO0_FIRSTTRIM_VALUE_STATE_B_DCOLDO_WORKAROUND_CC27XX << LRFDRFE_DCOLDO0_FIRSTTRIM_S);
-
-            trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_SECONDTRIM_M) | (newSecondTrimValCoded << LRFDRFE_DCOLDO0_SECONDTRIM_S);
-            HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) | trimDcoldo0Val;
-        }
-#else
-        HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0)    = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) | trimDef->trim2.dcoLdo0;
-#endif
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_IFADCALDO)  = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_IFADCALDO) | trimDef->trim2.ifadcAldo;
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_IFADCDLDO)  = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_IFADCDLDO) | trimDef->trim2.ifadcDldo;
 
@@ -323,6 +333,7 @@ static void LRF_setTemperatureTrim(const LRF_TrimDef *trimDef)
         HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) & (~RFE_COMMON_RAM_DIVLDOI_VOUTTRIM_M);
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO)              = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO) & (~LRFDRFE_TDCLDO_VOUTTRIM_M);
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCO)                 = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCO) & (~LRFDRFE_DCO_TAILRESTRIM_M);
+        HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0)             = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) &  (~(LRFDRFE_DCOLDO0_SECONDTRIM_M | LRFDRFE_DCOLDO0_FIRSTTRIM_M));
 
         LRF_temperatureCompensateTrim(trimDef);
     }
@@ -352,8 +363,6 @@ static void LRF_setTemperatureTrim(const LRF_TrimDef *trimDef)
 #define LRF_TEMPERATURE_MIN (-40)
 /* Highest temperature supported */
 #define LRF_TEMPERATURE_MAX 125
-/* Nominal temperature for offset definitions */
-#define LRF_TEMPERATURE_NOM 25
 
 /* Bit masks and positions in SPARE0 and SPARE1 */
 /* RFE_SPARE0: Fast AGC only */
@@ -375,11 +384,12 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     int32_t agcValOffset = 0;
     int32_t agcHighGainOffset = 0;
     int32_t agcLowGainOffset = 0;
+    int32_t temperature = hal_get_temperature();
+
+    lrfPhyState.lastTrimTemperature = temperature;
 
     if (trimDef->revision >= LRF_TRIM_MIN_VERSION_FULL_FEATURES)
     {
-        int32_t temperature = hal_get_temperature();
-
         LRF_Trim_tempLdoRtrim tempLdoRtrim = trimDef->trim3.fields.lrfdrfeExtTrim1.tempLdoRtrim;
 
         int32_t tempThreshLow = LRF_TEMPERATURE_MIN + tempLdoRtrim.tThrl * (1 << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP);
@@ -424,6 +434,8 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
                                                           trimDef->trim3.fields.lrfdrfeExtTrim0.magnOffset);
         }
     }
+
+    LRF_temperatureCompensateDcoldo(temperature, trimDef);
 
     uint32_t divLdoVoutTrim = trimDef->trim1.fields.divLdo.voutTrim;
 
@@ -472,22 +484,8 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     /* Write back */
     HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO) | (tdcLdoVoutTrim << LRFDRFE_TDCLDO_VOUTTRIM_S);
 
-#ifdef DeviceFamily_CC27XX
-    /* RTRIM Workaround: hardcode the RTRIM to 10U rather than read it from FCFG for CC27XX state B devices (see: RCL-591)
-     * ASSUMPTION: AppTrims revision on CC27XX state C devices is not smaller than 7
-     */
-    uint32_t rtrim;
-    if (trimDef->revision >= LRF_TRIM_VERSION_STATE_C_TRIM_WORKAROUND_CC27XX)
-    {
-        rtrim = trimDef->trim2.fields.dco.tailresTrim;
-    }
-    else
-    {
-        rtrim = LRF_TRIM_RTRIM_VALUE_STATE_B_RTRIM_WORKAROUND_CC27XX;
-    }
-#else
     uint32_t rtrim = trimDef->trim2.fields.dco.tailresTrim;
-#endif
+
     /* Temperature compensation and PHY offset can only be applied if the value is not above the saturation level */
     /* If RTRIM from FCFG is above this, always use that level */
     if (rtrim < LRF_DEFAULT_RTRIM_MAX)
@@ -646,10 +644,122 @@ static int32_t LRF_findExtTrim0TrimAdjustment(int32_t temperature, int32_t tempC
     return (((temperature - LRF_TEMPERATURE_NOM) * tempCompFactor) >> LRF_EXTTRIM0_TEMPERATURE_SCALE_EXP) + offset;
 }
 
+/* Calculate temperature compensation for Dcoldo values */
+/* temperature: temperature (degrees C) */
+/* Function uses FCFG values dcoldoSecondMaxOffset, dcoldoSecondMinOffset, dcoldoFirstMaxOffset and dcoldoFirstMinOffset
+   to adjust offset of the DCOLDO values based on temperature.
+   For temperatures over 35:
+       offsetDcoLdoSecond = (((-(25-temperature)-10) * 2 * dcoldoSecondMaxOffset) + 16) / 32
+       offsetDcoLdoFirst  = (((-(25-temperature)-10) * dcoldoSecondMaxOffset) + 16) / 32
+   For temperatures under 15:
+       offsetDcoLdoSecond = (((25-temperature)-10) * 2 * dcoldoSecondMinOffset) + 9) / 18
+       offsetDcoLdoFirst  = (((25-temperature)-10) * dcoldoSecondMinOffset) + 9) / 18
+   For temperatures between 15 and 35:
+       offsetDcoLdoSecond = 0
+       offsetDcoLdoFirst  = 0    */
+static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimDef *trimDef)
+{
+    uint32_t trimDcoldo0Val;
+    if (trimDef->revision >= LRF_TRIM_VERSION_DCOLDO_TEMPERATURE_COMPENSATION) {
+        /* Only compensate if temperature is outside deadband limits */
+        int32_t offsetDcoLdoFirst = 0;
+        int32_t offsetDcoLdoSecond = 0;
+        if ((temperature >= LRF_TEMPERATURE_NOM + LRF_DCOLDO_DEADBAND) || (temperature <=  LRF_TEMPERATURE_NOM - LRF_DCOLDO_DEADBAND))
+        {
+            int32_t dcoldoSecondMaxOffset = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoSecondMaxOffset;
+            int32_t dcoldoSecondMinOffset = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoSecondMinOffset;
+            int32_t dcoldoFirstMaxOffset  = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoFirstMaxOffset;
+            int32_t dcoldoFirstMinOffset  = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoFirstMinOffset;
+
+            int32_t tempDiff = LRF_TEMPERATURE_NOM - temperature;
+            int32_t upperSaturationFirst;
+            int32_t upperSaturationSecond;
+            /* Calculate offset values for the trims, also set upper saturation */
+            if (temperature > LRF_TEMPERATURE_NOM)
+            {
+                offsetDcoLdoSecond = (int32_t) (((-tempDiff-LRF_DCOLDO_DEADBAND) * LRF_DCOLDOSECOND_FACTOR * dcoldoSecondMaxOffset) + LRF_DCOLDO_OFFSET_HIGH_TEMP) >> LRF_DCOLDO_SHIFT_HIGH_TEMP;
+                offsetDcoLdoFirst  = (int32_t) (((-tempDiff-LRF_DCOLDO_DEADBAND) * dcoldoFirstMaxOffset) + LRF_DCOLDO_OFFSET_HIGH_TEMP) >> LRF_DCOLDO_SHIFT_HIGH_TEMP;
+                upperSaturationSecond = dcoldoSecondMaxOffset * LRF_DCOLDOSECOND_HIGH_TEMP_ADJ_FACTOR;
+                upperSaturationFirst  = (dcoldoFirstMaxOffset * LRF_DCOLDOFIRST_HIGH_TEMP_ADJ_FACTOR_MUL) >> LRF_DCOLDOFIRST_HIGH_TEMP_ADJ_FACTOR_S;
+            }
+            else
+            {
+                offsetDcoLdoSecond = (int32_t) ((((tempDiff-LRF_DCOLDO_DEADBAND) * LRF_DCOLDOSECOND_FACTOR * dcoldoSecondMinOffset) + LRF_DCOLDO_OFFSET_LOW_TEMP) * DIV_BY_NINE_CONSTANT) >> LRF_DCOLDO_SHIFT_LOW_TEMP;
+                offsetDcoLdoFirst  = (int32_t) ((((tempDiff-LRF_DCOLDO_DEADBAND) * dcoldoFirstMinOffset) + LRF_DCOLDO_OFFSET_LOW_TEMP)  * DIV_BY_NINE_CONSTANT) >> LRF_DCOLDO_SHIFT_LOW_TEMP;
+                upperSaturationSecond = dcoldoSecondMinOffset * LRF_DCOLDOSECOND_LOW_TEMP_ADJ_FACTOR;
+                upperSaturationFirst  = (dcoldoFirstMinOffset * LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_MUL) >> LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_S;;
+            }
+
+            /* Saturate values if out of bounds */
+            if (offsetDcoLdoSecond > upperSaturationSecond)
+            {
+                offsetDcoLdoSecond = upperSaturationSecond;
+            }
+            if (offsetDcoLdoSecond < LRF_DCOLDO_OFFSET_LOWER_SATURATION)
+            {
+                offsetDcoLdoSecond = LRF_DCOLDO_OFFSET_LOWER_SATURATION;
+            }
+
+            if (offsetDcoLdoFirst > upperSaturationFirst)
+            {
+                offsetDcoLdoFirst = upperSaturationFirst;
+            }
+            if (offsetDcoLdoFirst < LRF_DCOLDO_OFFSET_LOWER_SATURATION)
+            {
+                offsetDcoLdoFirst = LRF_DCOLDO_OFFSET_LOWER_SATURATION;
+            }
+        }
+
+        /* Get trim values to add offset */
+        trimDcoldo0Val = trimDef->trim2.dcoLdo0;
+        uint32_t secondTrimVal = (trimDcoldo0Val & LRFDRFE_DCOLDO0_SECONDTRIM_M) >> LRFDRFE_DCOLDO0_SECONDTRIM_S;
+        int32_t firstTrimVal = (trimDcoldo0Val & LRFDRFE_DCOLDO0_FIRSTTRIM_M) >> LRFDRFE_DCOLDO0_FIRSTTRIM_S;
+
+        /* Sign extend DCOLDO0:FIRSTTRIM since it is a negative value */
+        firstTrimVal = ((firstTrimVal << (32 - LRFDRFE_DCOLDO0_FIRSTTRIM_W )) >> (32 - LRFDRFE_DCOLDO0_FIRSTTRIM_W));
+
+        /* Invert bit 3 and 5 to decode the SECONDTRIM value */
+        uint32_t secondTrimValDecoded = secondTrimVal ^ LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK;
+
+        /* Add offset to trim values */
+        uint32_t newSecondTrimVal = secondTrimValDecoded + offsetDcoLdoSecond;
+
+        /* The voltage output of DCOLDO0:FIRSTTRIM has a negative slope where the minimum trim value gives the maximum output voltage.
+        For this reason we need to subtract the temperature offset instead of adding it. */
+        int32_t newFirstTrimVal =  firstTrimVal - offsetDcoLdoFirst;
+
+        /* DCOLDO0.SECONDTRIM is saturated at 63U */
+        if (newSecondTrimVal > LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE)
+        {
+            newSecondTrimVal = LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE;
+        }
+        /* DCOLDO0.FIRSTTRIM is saturated at -8 since it is a negative value */
+        if (newFirstTrimVal < LRF_TRIM_DCOLDO0_FIRSTTRIM_MIN_STATE)
+        {
+            newFirstTrimVal = LRF_TRIM_DCOLDO0_FIRSTTRIM_MIN_STATE;
+        }
+
+        /* Invert bit 3 and 5 to encode the SECONDTRIM value */
+        uint32_t newSecondTrimValCoded = newSecondTrimVal ^ LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK;
+
+        /* Write offseted trim values to their register */
+        trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_FIRSTTRIM_M) | ((newFirstTrimVal << LRFDRFE_DCOLDO0_FIRSTTRIM_S) &  LRFDRFE_DCOLDO0_FIRSTTRIM_M );
+        trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_SECONDTRIM_M) | (newSecondTrimValCoded << LRFDRFE_DCOLDO0_SECONDTRIM_S);
+    }
+    else
+    {
+        trimDcoldo0Val = trimDef->trim2.dcoLdo0;
+    }
+    HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) | trimDcoldo0Val;
+}
+
 void LRF_enable(void)
 {
     /* Set MSGBOX register to 0 */
     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_MSGBOX) = 0;
+#ifdef DeviceFamily_CC27XX
+    dcdcIpeakRestoreSetting = hal_set_dcdc_ipeak_setting(LRF_DCDC_IPEAK_RF_ACTIVITY);
+#endif
 
     /* Initialize and enable PBE TOPsm and FIFO */
     HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_INIT)   = ((1 << LRFDPBE_INIT_MDMF_S)   |
@@ -670,6 +780,10 @@ void LRF_enable(void)
 
 void LRF_disable(void)
 {
+#ifdef DeviceFamily_CC27XX
+    hal_set_dcdc_ipeak_setting(dcdcIpeakRestoreSetting);
+#endif
+
     /* Request PBE powerdown */
     HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_PDREQ) = LRFDPBE_PDREQ_TOPSMPDREQ_M;
     /* Disable all PBE modules */
@@ -722,7 +836,7 @@ uint32_t LRF_prepareRxFifo(void)
 
 uint32_t LRF_prepareTxFifo(void)
 {
-    /* Reset RXFIFO. NOTE: Only allowed while PBE is not running, ref. RCL-367 */
+    /* Reset TXFIFO. NOTE: Only allowed while PBE is not running, ref. RCL-367 */
     HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_FCMD) = (LRFDPBE_FCMD_DATA_TXFIFO_RESET >> LRFDPBE_FCMD_DATA_S);
     /* Set up TXFIFO with auto commit, without auto deallocate */
     uint32_t fcfg0 = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG0);
@@ -1415,6 +1529,16 @@ int8_t LRF_readRssi(void)
     return (int8_t)(HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_RSSI) & LRFDRFE_RSSI_VAL_M);
 }
 
+int8_t LRF_readMaxRssi(void)
+{
+    return (int8_t)(HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_RSSIMAX) & LRFDRFE_RSSIMAX_VAL_M);
+}
+
+void LRF_initializeMaxRssi(int8_t initRssi)
+{
+    HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_RSSIMAX) = ((uint32_t)initRssi) & LRFDRFE_RSSIMAX_VAL_M;
+}
+
 void LRF_setRawTxPower(uint32_t value, uint32_t temperatureCoefficient)
 {
     lrfPhyState.rawTxPower.value.rawValue = value;
@@ -1535,4 +1659,70 @@ static uint32_t LRF_scaleFreqWithHFXTOffset(uint32_t frequency)
     }
 
     return frequency;
+}
+
+/*
+ *  ======== LRF_temperatureNotification ========
+ */
+static void LRF_temperatureNotification(int16_t currentTemperature)
+{
+    (void) currentTemperature;
+    /* Post event to tell handler that radio operation should be restarted */
+    RCL_Scheduler_postEvent(rclSchedulerState.currCmd, RCL_EventSilentlyRestartRadio);
+}
+
+/*
+ *  ======== LRF_enableTemperatureMonitoring ========
+ */
+void LRF_enableTemperatureMonitoring(void)
+{
+    if (rclFeatureControl.enableTemperatureMonitoring)
+    {
+        if (rclTemperatureThreshold != 0)
+        {
+            hal_set_temperature_notification(lrfPhyState.lastTrimTemperature, rclTemperatureThreshold, LRF_temperatureNotification);
+        }
+    }
+}
+
+/*
+ *  ======== LRF_disableTemperatureMonitoring ========
+ */
+void LRF_disableTemperatureMonitoring(void)
+{
+    if (rclFeatureControl.enableTemperatureMonitoring)
+    {
+        hal_stop_temperature_notification();
+    }
+}
+
+/*
+ *  ======== LRF_updateTemperatureCompensation ========
+ */
+void LRF_updateTemperatureCompensation(uint32_t rfFrequency, bool tx)
+{
+    if (rclFeatureControl.enableTemperatureMonitoring)
+    {
+        LRF_SwParam *swParam = (LRF_SwParam *) swParamList;
+        /* Allow SWTCXO updates and adjust HFXT with missed updates */
+        hal_power_release_swtcxo_update_constraint();
+        /* Set RF frequency word based on updated HFXT value */
+        LRF_programFrequency(rfFrequency, tx);
+        /* Re-calculate temperature dependent trims */
+        LRF_setTemperatureTrim(swParam->trimDef);
+        /* Re-calculate TX power */
+        LRF_programTemperatureCompensatedTxPower();
+        /* Set new limit for temperature monitoring */
+        LRF_enableTemperatureMonitoring();
+        /* Stop SWTCXO updates again */
+        hal_power_set_swtcxo_update_constraint();
+    }
+}
+
+/*
+ *  ======== LRF_updateTemperatureCompensation ========
+ */
+int16_t LRF_getLastTrimTemperature(void)
+{
+    return lrfPhyState.lastTrimTemperature;
 }

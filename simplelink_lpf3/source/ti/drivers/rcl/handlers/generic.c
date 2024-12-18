@@ -78,7 +78,8 @@ struct
         uint16_t            rxFifoSize;
         RCL_CommandStatus   endStatus;
         bool                activeUpdate;
-        bool                powerConstraintsSet;
+        bool                powerStandbyConstraintSet;
+        bool                powerSwtcxoConstraintSet;
         RCL_MultiBuffer     *curBuffer;
     } common;
     union {
@@ -110,11 +111,18 @@ struct
             uint32_t        longRxIgnoredCount;
             uint32_t        longRxAddrMismatchCount;
             uint32_t        longRxBufFullCount;
+            uint16_t        demc1be1;
+            uint16_t        demc1be2;
+#ifdef DeviceFamily_CC27XX
+            uint16_t        demc1be12;
+#endif
+            bool            restoreThresh;
         } nesb;
     };
 } genericHandlerState;
 
 
+static uint32_t RCL_Handler_Generic_prepareSynth(void);
 static void RCL_Handler_Generic_setSynthPowerState(bool fsOff);
 static void RCL_Handler_Generic_updateRxCurBufferAndFifo(List_List *rxBuffers);
 static RCL_CommandStatus RCL_Handler_Generic_findPbeErrorEndStatus(uint16_t pbeEndStatus);
@@ -143,7 +151,7 @@ RCL_Events RCL_Handler_Generic_Fs(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
         uint32_t earliestStartTime;
 
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
 
         /* Program frequency word */
         LRF_programFrequency(fsCmd->rfFrequency, fsCmd->fsType == RCL_FsType_Tx);
@@ -188,10 +196,10 @@ RCL_Events RCL_Handler_Generic_Fs(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
             RCL_Handler_Generic_setSynthPowerState(false);
 
             /* Set additional power constraints if necessary */
-            if(!genericHandlerState.common.powerConstraintsSet)
+            if(!genericHandlerState.common.powerStandbyConstraintSet)
             {
-                genericHandlerState.common.powerConstraintsSet = true;
-                hal_power_set_constraint();
+                genericHandlerState.common.powerStandbyConstraintSet = true;
+                hal_power_set_standby_constraint();
             }
             rclEvents.lastCmdDone = 1;
         }
@@ -294,7 +302,7 @@ RCL_Events RCL_Handler_Generic_Tx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
         uint32_t earliestStartTime;
 
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
 
         if ((txCmd->rfFrequency == 0) && ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE4) & 0x0001) == 0))
         {
@@ -440,7 +448,7 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
         uint32_t earliestStartTime;
 
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
 
         if ((txCmd->rfFrequency == 0) && ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE4) & 0x0001) == 0))
         {
@@ -701,7 +709,7 @@ RCL_Events RCL_Handler_Generic_TxTest(RCL_Command *cmd, LRF_Events lrfEvents, RC
         uint32_t earliestStartTime;
 
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
         genericHandlerState.txTest.restoreOpt = RCL_HANDLER_GENERIC_RESTORE_NONE;
         if ((txCmd->rfFrequency == 0) && ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE4) & 0x0001) == 0))
         {
@@ -879,7 +887,7 @@ RCL_Events RCL_Handler_Generic_Rx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
         uint32_t earliestStartTime;
 
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
 
         if ((rxCmd->rfFrequency == 0) && ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE4) & 0x0001) == 0))
         {
@@ -1197,7 +1205,7 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
     if (rclEventsIn.setup != 0)
     {
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
 
         if ((txCmd->rfFrequency == 0) && ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE4) & 0x0001) == 0))
         {
@@ -1246,7 +1254,8 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
 
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_FIRSTRXTIMEOUT) = 2500;
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_RXTIMEOUT) = 800;
-            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_MAXLEN) = 255;
+            /* PBE currently only supports ACKs with a payload equal to the used address. Maximum 4 bytes. */
+            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_MAXLEN) = 4;
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_OPCFG) = opCfgVal;
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_NESB) = nesbVal;
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_SEQSTAT0) = seqStat0Val;
@@ -1503,7 +1512,10 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
         uint32_t earliestStartTime;
 
         /* Start by enabling refsys */
-        earliestStartTime = LRF_enableSynthRefsys();
+        earliestStartTime = RCL_Handler_Generic_prepareSynth();
+
+        /* Make sure that restoreThresh is false, in case the RF frequency was 0 without the synth running */
+        genericHandlerState.nesb.restoreThresh = false;
 
         if ((rxCmd->rfFrequency == 0) && ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE4) & 0x0001) == 0))
         {
@@ -1568,6 +1580,13 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_PEERADR0BL) = (rxCmd->syncWord[1].address & PBE_GENERIC_RAM_PEERADR0BL_VAL_M);
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_PEERADR0BH) = (rxCmd->syncWord[1].address >> 0x10) & PBE_GENERIC_RAM_PEERADR0BH_VAL_M;
 
+            /* Initialize PEERADR1 and NRXTIMEOUT even if not in use */
+            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_PEERADR1AL) = 0;
+            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_PEERADR1AH) = 0;
+            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_PEERADR1BL) = 0;
+            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_PEERADR1BH) = 0;
+            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_NRXTIMEOUT) = 0;
+
             /* Set timeouts for the Rx operation */
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_FIRSTRXTIMEOUT) = 0; /* No timeout except from SYSTIM */
             HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_GENERIC_RAM_O_RXTIMEOUT) = 0; /* No timeout except from SYSTIM */
@@ -1584,9 +1603,9 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             {
                 uint16_t demc1be1 = HWREG_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1);
                 uint16_t demc1be2 = HWREG_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2);
-                genericHandlerState.rx.restoreThresh = true;
-                genericHandlerState.rx.demc1be1 = demc1be1;
-                genericHandlerState.rx.demc1be2 = demc1be2;
+                genericHandlerState.nesb.restoreThresh = true;
+                genericHandlerState.nesb.demc1be1 = demc1be1;
+                genericHandlerState.nesb.demc1be2 = demc1be2;
                 if (rxCmd->config.disableSyncA != 0)
                 {
                     demc1be1 = (demc1be1 & ~LRFDMDM_DEMC1BE1_THRESHOLDA_M) | (0x7F << LRFDMDM_DEMC1BE1_THRESHOLDA_S);
@@ -1601,7 +1620,7 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             }
             else
             {
-                genericHandlerState.rx.restoreThresh = false;
+                genericHandlerState.nesb.restoreThresh = false;
             }
 
             /* Mark as active */
@@ -1774,14 +1793,28 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
         RCL_Handler_Generic_setSynthPowerState(rxCmd->config.fsOff);
         RCL_Handler_Nesb_updateStats(rxCmd->stats, rclSchedulerState.actualStartTime);
         /* Restore changed thresholds */
-        if (genericHandlerState.rx.restoreThresh)
+        if (genericHandlerState.nesb.restoreThresh)
         {
-            HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1) = genericHandlerState.rx.demc1be1;
-            HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2) = genericHandlerState.rx.demc1be2;
+            HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1) = genericHandlerState.nesb.demc1be1;
+            HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2) = genericHandlerState.nesb.demc1be2;
         }
     }
 
     return rclEvents;
+}
+
+/*
+ *  ======== RCL_Handler_Generic_prepareSynth ========
+ */
+static uint32_t RCL_Handler_Generic_prepareSynth(void)
+{
+    /* Power up synth refsys and set a constraint on swtcxo to ensure it is not changed while radio is running */
+    if (!genericHandlerState.common.powerSwtcxoConstraintSet)
+    {
+        genericHandlerState.common.powerSwtcxoConstraintSet = true;
+        hal_power_set_swtcxo_update_constraint();
+    }
+    return LRF_enableSynthRefsys();
 }
 
 /*
@@ -1790,25 +1823,31 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
 static void RCL_Handler_Generic_setSynthPowerState(bool fsOff)
 {
     /* Do power management for synth at the end of a command.
-       If synth is off, turn off refsys and remove constraint on standby.
+       If synth is off, turn off refsys and remove constraint on standby and swtcxo.
        If synth is on, keep refsys on and ensure constraint on standby is set */
     if (fsOff)
     {
         LRF_disableSynthRefsys();
-        /* Release additional power constraints if necessary */
-        if(genericHandlerState.common.powerConstraintsSet)
+        /* Release additional power standby constraints if necessary */
+        if (genericHandlerState.common.powerStandbyConstraintSet)
         {
-            genericHandlerState.common.powerConstraintsSet = false;
-            hal_power_release_constraint();
+            genericHandlerState.common.powerStandbyConstraintSet = false;
+            hal_power_release_standby_constraint();
+        }
+        /* Release power SWTCXO constraints if necessary */
+        if (genericHandlerState.common.powerSwtcxoConstraintSet)
+        {
+            genericHandlerState.common.powerSwtcxoConstraintSet = false;
+            hal_power_release_swtcxo_update_constraint();
         }
     }
     else
     {
         /* Set additional power constraints if necessary */
-        if(!genericHandlerState.common.powerConstraintsSet)
+        if (!genericHandlerState.common.powerStandbyConstraintSet)
         {
-            genericHandlerState.common.powerConstraintsSet = true;
-            hal_power_set_constraint();
+            genericHandlerState.common.powerStandbyConstraintSet = true;
+            hal_power_set_standby_constraint();
         }
     }
 }

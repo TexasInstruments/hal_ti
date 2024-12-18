@@ -152,13 +152,13 @@ uint32_t RCL_BLE5_getRxTimestamp(const RCL_Buffer_DataEntry *rxEntry);
  *  sent over a specific PHY on a defined channel map, and the start time of an AUX_ADV_IND that contains
  *  the SyncInfo field needed for periodic advertising establishment.
  *
- *  @param  phyFeatures         PHY feature selector
- *  @param  chMap               Channel map. Bit positions 0-2 correspond to channels 37-39
- *  @param  advPayloadLen       Payload length of ADV_EXT_IND
+ *  @param  primaryPhyFeatures         PHY feature selector corresponding to the primary PHY
+ *  @param  secondaryPhyFeatures       PHY feature selector corresponding to the secondary PHY
+ *  @param  chMap                      Channel map. Bit positions 0-2 correspond to channels 37-39
+ *  @param  advPayloadLen              Payload length of ADV_EXT_IND
  *
  *  @return Time delta in 250[ns] units between the start time of the ADV_EXT_IND and the start time of the AUX_ADV_IND
  */
-uint32_t RCL_BLE5_getAuxAdvStartTimeDelta(uint16_t phyFeatures, uint8_t chMap, uint8_t advPayloadLen);
-
+uint32_t RCL_BLE5_getAuxAdvStartTimeDelta(uint16_t primaryPhyFeatures, uint16_t secondaryPhyFeatures, uint8_t chMap, uint8_t advPayloadLen);
 
 #endif /* ti_drivers_RCL_handlers_ble5_h__include */

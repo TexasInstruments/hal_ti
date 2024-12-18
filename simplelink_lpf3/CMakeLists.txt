@@ -109,17 +109,20 @@ if(CONFIG_HAS_CC23X0_SDK)
     zephyr_library_sources(
       source/ti/drivers/rcl/LRF.c
       source/ti/drivers/rcl/LRFCC23X0.c
+      source/ti/drivers/rcl/RCL.c
       source/ti/drivers/rcl/RCL_Buffer.c
       source/ti/drivers/rcl/RCL_Debug.c
+      source/ti/drivers/rcl/RCL_Feature.c
+      source/ti/drivers/rcl/RCL_Gpio.c
       source/ti/drivers/rcl/RCL_Profiling.c
       source/ti/drivers/rcl/RCL_Scheduler.c
       source/ti/drivers/rcl/RCL_Tracer.c
-      source/ti/drivers/rcl/RCL.c
-      source/ti/drivers/rcl/handlers/adc_noise.c
-      source/ti/drivers/rcl/handlers/ble_cs.c
-      source/ti/drivers/rcl/handlers/ble5.c
-      source/ti/drivers/rcl/handlers/generic.c
       source/ti/drivers/rcl/hal/cc23x0/hal_cc23x0.c
+      source/ti/drivers/rcl/handlers/adc_noise.c
+      source/ti/drivers/rcl/handlers/ble5.c
+      source/ti/drivers/rcl/handlers/ble_cs.c
+      source/ti/drivers/rcl/handlers/generic.c
+      source/ti/drivers/rcl/handlers/ieee.c
       source/ti/drivers/rcl/wrappers/RCL_AdcNoise.c
       )
   endif()

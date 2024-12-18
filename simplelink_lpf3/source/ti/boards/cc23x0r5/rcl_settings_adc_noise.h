@@ -5,7 +5,7 @@
 // This file is generated
 //
 // Tool name           SmartRF Studio 8
-// Tool version        0.6.0.328 INTERNAL
+// Tool version        0.6.0.354 INTERNAL
 //
 //
 // WORKSPACE INFORMATION
@@ -14,10 +14,10 @@
 // Device              CC2340R5
 //     Package         QFN40 5x5 RKP
 //     Revision(s)     B (2.0)
-// SDK                 SimpleLink LPF3 SDK 8.20.00.41
+// SDK                 SimpleLink LPF3 SDK 8.40.00.10
 // Board               LP-EM-CC2340R5
 // PHY                 ADC Noise
-// PHY abbreviation    adc_noise
+//     State           Characterized
 
 #ifndef RCLSETTINGSADCNOISE_H
 #define RCLSETTINGSADCNOISE_H

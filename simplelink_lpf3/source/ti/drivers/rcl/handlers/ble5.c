@@ -51,7 +51,6 @@
 #include <ti/drivers/dpl/HwiP.h>
 #include <ti/drivers/utils/Random.h>
 
-#include DeviceFamily_constructPath(inc/pbe_ble5_ram_regs.h)
 #include DeviceFamily_constructPath(inc/hw_lrfdtxf.h)
 #include DeviceFamily_constructPath(inc/hw_lrfdrxf.h)
 #include DeviceFamily_constructPath(inc/hw_lrfddbell.h)
@@ -152,6 +151,7 @@ struct
         struct {
             bool          followAuxPtr;
             bool          gracefulStopDisabled;
+            uint16_t      filterListInvertMask;
         } perScan;
         struct {
             bool          isPeripheral;
@@ -459,11 +459,13 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
     {
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         ble5HandlerState.adv.chanMap = advCmd->chanMap;
 
         /* Keep track of the number of primary channel packets to be sent based on the channel map */
-        ble5HandlerState.common.auxPtrInfo.numPrimaryChPackets = (advCmd->chanMap & 1) + ((advCmd->chanMap >> 1) & 1) + ((advCmd->chanMap >> 2) & 1);
+        ble5HandlerState.common.auxPtrInfo = (RCL_AuxPtrInfo){ .numPrimaryChPackets = (advCmd->chanMap & 1) + ((advCmd->chanMap >> 1) & 1) + ((advCmd->chanMap >> 2) & 1), };
         HWREG_WRITE_LRF(LRFDPBE32_BASE + LRFDPBE32_O_MDMSYNCA) = ADV_ACCESS_ADDRESS;
 
         /* 32-bit access to also write CRCINITH */
@@ -471,6 +473,7 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
 
         ble5HandlerState.common.fifoCfg = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FIFOCFG);
         HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_EXTRABYTES) = RCL_Handler_BLE5_findNumExtraBytes(ble5HandlerState.common.fifoCfg);
+        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SEQSTAT) = 0;
 
         /* Default end status */
         ble5HandlerState.common.endStatus = RCL_CommandStatus_Finished;
@@ -501,12 +504,12 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
 
             /* Find which type of advertising */
             RCL_Buffer_TxBuffer *txBuffer = RCL_TxBuffer_head(&advCmd->ctx->txBuffers);
-            uint16_t advCfg = 0;
+            uint16_t advCfg;
+            uint16_t aeCfg = PBE_BLE5_RAM_AECFG_CHNL_PRIMARY;
 
             if (txBuffer != NULL)
             {
                 uint8_t header = txBuffer->data[txBuffer->numPad - 1];
-                ble5HandlerState.common.auxPtrInfo = (RCL_AuxPtrInfo) { 0 };
 
                 /* Check advertising type */
                 switch (header & BLE_PDU_TYPE_BM)
@@ -595,10 +598,11 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
                 else
                 {
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADVCFG) = advCfg;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_AECFG) = aeCfg;
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FILTPOLICY) = (advCmd->ctx->filterPolicy << PBE_BLE5_RAM_FILTPOLICY_ADV_S) &
                                                                                       PBE_BLE5_RAM_FILTPOLICY_ADV_M;
-                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPAMODE) = (advCmd->ctx->rpaModePeer << PBE_BLE5_RAM_RPAMODE_PEERADR_S);
-                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = advCmd->ctx->acceptAllRpaConnectInd << PBE_BLE5_RAM_RPACONNECT_ENDADV_S;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADRMODE) = (advCmd->ctx->addrModePeer << PBE_BLE5_RAM_ADRMODE_PEERADR_S);
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = advCmd->ctx->acceptAllConnectInd << PBE_BLE5_RAM_RPACONNECT_ENDADV_S;
 
                     if ((advCfg & PBE_BLE5_RAM_ADVCFG_SCANNABLE_M) != 0)
                     {
@@ -770,7 +774,7 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
                             {
                                 /* LRF workaround. Perform additional check to the Rx Status byte, ref. RCL-770 */
                                 RCL_Ble5_RxPktStatus status = RCL_BLE5_getRxStatus((RCL_Buffer_DataEntry *) data32);
-                                if (status.ignoredRpa)
+                                if (status.ignoredAddr)
                                 {
                                     /* Conclude the operation and don't send any auxiliary packets if the AUX_SCAN_REQ was ignored */
                                     ble5HandlerState.common.auxPtrInfo.auxPtrPresent = false;
@@ -805,7 +809,6 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
         if (lrfEvents.opDone != 0 && rclEventsIn.handlerCmdUpdate == 0)
         {
             uint16_t endCause = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_ENDCAUSE);
-
             if (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_CONNECT)
             {
                 /* 32-bit access to also read LASTTIMESTAMPH */
@@ -1268,8 +1271,8 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_AECFG) = aeCfg;
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FILTPOLICY) = (advCmd->ctx->filterPolicy << PBE_BLE5_RAM_FILTPOLICY_ADV_S) &
                                                                                       PBE_BLE5_RAM_FILTPOLICY_ADV_M;
-                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPAMODE) = (advCmd->ctx->rpaModePeer << PBE_BLE5_RAM_RPAMODE_PEERADR_S);
-                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = advCmd->ctx->acceptAllRpaConnectInd << PBE_BLE5_RAM_RPACONNECT_ENDADV_S;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADRMODE) = (advCmd->ctx->addrModePeer << PBE_BLE5_RAM_ADRMODE_PEERADR_S);
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = advCmd->ctx->acceptAllConnectInd << PBE_BLE5_RAM_RPACONNECT_ENDADV_S;
 
                     if (ble5HandlerState.adv.targetRpaReplacement)
                     {
@@ -1437,6 +1440,8 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
     {
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -1458,6 +1463,8 @@ RCL_Events RCL_Handler_BLE5_aux_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_
     {
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         HWREG_WRITE_LRF(LRFDPBE32_BASE + LRFDPBE32_O_MDMSYNCA) = ADV_ACCESS_ADDRESS;
 
@@ -1466,6 +1473,7 @@ RCL_Events RCL_Handler_BLE5_aux_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_
 
         ble5HandlerState.common.fifoCfg = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FIFOCFG);
         HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_EXTRABYTES) = RCL_Handler_BLE5_findNumExtraBytes(ble5HandlerState.common.fifoCfg);
+        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SEQSTAT) = 0;
 
         /* Default end status */
         ble5HandlerState.common.endStatus = RCL_CommandStatus_Finished;
@@ -1617,8 +1625,8 @@ RCL_Events RCL_Handler_BLE5_aux_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADVCFG) = auxAdvCfg;
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FILTPOLICY) = (auxAdvCmd->ctx->filterPolicy << PBE_BLE5_RAM_FILTPOLICY_ADV_S) &
                                                                                   PBE_BLE5_RAM_FILTPOLICY_ADV_M;
-                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPAMODE) = (auxAdvCmd->ctx->rpaModePeer << PBE_BLE5_RAM_RPAMODE_PEERADR_S);
-                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = auxAdvCmd->ctx->acceptAllRpaConnectInd << PBE_BLE5_RAM_RPACONNECT_ENDADV_S;
+                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADRMODE) = (auxAdvCmd->ctx->addrModePeer << PBE_BLE5_RAM_ADRMODE_PEERADR_S);
+                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = auxAdvCmd->ctx->acceptAllConnectInd << PBE_BLE5_RAM_RPACONNECT_ENDADV_S;
 
                 if ((auxAdvCfg & PBE_BLE5_RAM_ADVCFG_SCANNABLE_M) != 0)
                 {
@@ -1763,7 +1771,6 @@ RCL_Events RCL_Handler_BLE5_aux_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_
             {
                 /* 32-bit access to also read LASTTIMESTAMPH */
                 auxAdvCmd->connectPktTime = HWREG_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_LASTTIMESTAMPL) - ble5HandlerState.common.timestampAdjust;
-
                 ble5HandlerState.common.endStatus = RCL_CommandStatus_Connect;
                 runAuxAdv = false;
                 runAuxChain = false;
@@ -2085,6 +2092,8 @@ RCL_Events RCL_Handler_BLE5_aux_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_
     {
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -2106,6 +2115,8 @@ RCL_Events RCL_Handler_BLE5_periodicAdv(RCL_Command *cmd, LRF_Events lrfEvents, 
     {
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         RCL_CtxPeriodicAdvertiser *ctx = perAdvCmd->ctx;
         uint32_t crcInit = ctx->crcInit;
@@ -2119,6 +2130,7 @@ RCL_Events RCL_Handler_BLE5_periodicAdv(RCL_Command *cmd, LRF_Events lrfEvents, 
 
         ble5HandlerState.common.fifoCfg = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FIFOCFG);
         HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_EXTRABYTES) = RCL_Handler_BLE5_findNumExtraBytes(ble5HandlerState.common.fifoCfg);
+        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SEQSTAT) = 0;
 
         /* Default end status */
         ble5HandlerState.common.endStatus = RCL_CommandStatus_Finished;
@@ -2173,7 +2185,7 @@ RCL_Events RCL_Handler_BLE5_periodicAdv(RCL_Command *cmd, LRF_Events lrfEvents, 
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADVCFG) = advCfg;
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_AECFG) = aeCfg;
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FILTPOLICY) = 0;
-                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPAMODE) = 0;
+                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADRMODE) = 0;
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = 0;
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FL1MASK) = 0;
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FL2MASK) = 0;
@@ -2227,7 +2239,7 @@ RCL_Events RCL_Handler_BLE5_periodicAdv(RCL_Command *cmd, LRF_Events lrfEvents, 
                 runAuxChain = false;
             }
             else if (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_EOPSTOP ||
-                        ble5HandlerState.adv.gracefulStopObserved ||
+                        ble5HandlerState.perAdv.gracefulStopObserved ||
                         rclEventsIn.gracefulStop != 0)
             {
                 ble5HandlerState.common.endStatus = RCL_Scheduler_findStopStatus(RCL_StopType_Graceful);
@@ -2476,6 +2488,8 @@ RCL_Events RCL_Handler_BLE5_periodicAdv(RCL_Command *cmd, LRF_Events lrfEvents, 
     {
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -2505,6 +2519,8 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         HWREG_WRITE_LRF(LRFDPBE32_BASE + LRFDPBE32_O_MDMSYNCA) = ADV_ACCESS_ADDRESS;
 
@@ -2516,6 +2532,7 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
 
         ble5HandlerState.common.fifoCfg = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FIFOCFG);
         HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_EXTRABYTES) = RCL_Handler_BLE5_findNumExtraBytes(ble5HandlerState.common.fifoCfg);
+        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SEQSTAT) = 0;
 
         /* Default end status */
         ble5HandlerState.common.endStatus = RCL_CommandStatus_Finished;
@@ -2628,13 +2645,12 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                 rclEventsIn.rxBufferUpdate = 0;
                 ble5HandlerState.common.txFifoSz = LRF_prepareTxFifo();
 
-                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPAMODE) = (ctx->rpaModeOwn << PBE_BLE5_RAM_RPAMODE_OWNADR_S) |
-                                                                              (ctx->rpaModePeer << PBE_BLE5_RAM_RPAMODE_PEERADR_S);
+                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADRMODE) = (ctx->addrModePeer << PBE_BLE5_RAM_ADRMODE_PEERADR_S);
 
                 ble5HandlerState.common.filterListUpdateIndex = -1;
                 /* Make sure status is correctly initialized */
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FLSTAT) = 0;
-                if (ble5HandlerState.scanInit.initiator)
+                if (ble5HandlerState.scanInit.initiator) /* Initiator */
                 {
                     if (ctx->filterPolicy != 0)
                     {
@@ -2703,6 +2719,12 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = (ctx->acceptAllRpaConnectRsp << PBE_BLE5_RAM_RPACONNECT_ENDINTOR_S) &
                                                                                       PBE_BLE5_RAM_RPACONNECT_ENDINTOR_M;
 
+                    /* Initialize SCANADR and SCANATYPE. Not needed for the initiator command */
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRL) = 0;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRM) = 0;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRH) = 0;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANATYPE) = 0;
+
                     RCL_Buffer_TxBuffer *txBuffer = RCL_TxBuffer_head(&ctx->txBuffers);
                     uint32_t numPad = txBuffer->numPad;
                     ble5HandlerState.scanInit.winOffsetFifoPtr =
@@ -2755,8 +2777,24 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                         status = RCL_CommandStatus_Error_MissingTxBuffer;
                     }
                 }
-                else
+                else /* Scanner */
                 {
+                    /* Select the address which will be used in the ScanA field when sending SCAN_REQ/AUX_SCAN_REQ.
+                     * If no address has been provided in scanA, use ownA. */
+                    if (ctx->scanReqA[0] | ctx->scanReqA[1] | ctx->scanReqA[2])
+                    {
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRL) = ctx->scanReqA[0];
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRM) = ctx->scanReqA[1];
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRH) = ctx->scanReqA[2];
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANATYPE) = ctx->addrType.scanReq;
+                    }
+                    else
+                    {
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRL) = ctx->ownA[0];
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRM) = ctx->ownA[1];
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANADRH) = ctx->ownA[2];
+                        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANATYPE) = ctx->addrType.own;
+                    }
                     if (ctx->filterPolicy != 0)
                     {
                         /* Set filter list masks to normal accept list use: */
@@ -2794,6 +2832,7 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                     /* Set active/passive scanner configuration */
                     uint16_t scanCfg = (scanCmd->activeScan << PBE_BLE5_RAM_SCANCFG_ACTPASS_S) & PBE_BLE5_RAM_SCANCFG_ACTPASS_M;
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SCANCFG) = scanCfg;
+                    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPACONNECT) = 0;
 
                     /* Set legacy/extended acceptance configuration */
                     uint16_t aeCfg = (acceptLegacy << PBE_BLE5_RAM_AECFG_LEGACY_S) & PBE_BLE5_RAM_AECFG_LEGACY_M;
@@ -3022,6 +3061,7 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
             {
                 /* Backoff updates are handled differently depending on whether it's a scanner or an initiator */
                 ctx = (ble5HandlerState.scanInit.initiator) ? initCmd->ctx : scanCmd->ctx;
+
                 if (!ble5HandlerState.scanInit.initiator) /* Scanner */
                 {
                     if (ble5HandlerState.scanInit.isExtAdv) /* Extended Advertising */
@@ -3358,6 +3398,7 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                         HWREGH_WRITE_LRF(ble5HandlerState.scanInit.intervalFifoPtr) = connParams.ble2M.interval;
                         HWREGH_WRITE_LRF(((uintptr_t) ble5HandlerState.scanInit.intervalFifoPtr) + (BLE_LATENCY_POS - BLE_INTERVAL_POS)) = connParams.ble2M.latency;
                         HWREGH_WRITE_LRF(((uintptr_t) ble5HandlerState.scanInit.intervalFifoPtr) + (BLE_TIMEOUT_POS - BLE_INTERVAL_POS)) = connParams.ble2M.timeout;
+                        ble5HandlerState.scanInit.connectInterval = connParams.ble2M.interval;
                     }
                     else if (ble5HandlerState.common.auxPtrInfo.auxPhy == BLE_PHY_FEATURE_PHY_CODED)
                     {
@@ -3368,6 +3409,7 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                         HWREGH_WRITE_LRF(ble5HandlerState.scanInit.intervalFifoPtr) = connParams.bleCoded.interval;
                         HWREGH_WRITE_LRF(((uintptr_t) ble5HandlerState.scanInit.intervalFifoPtr) + (BLE_LATENCY_POS - BLE_INTERVAL_POS)) = connParams.bleCoded.latency;
                         HWREGH_WRITE_LRF(((uintptr_t) ble5HandlerState.scanInit.intervalFifoPtr) + (BLE_TIMEOUT_POS - BLE_INTERVAL_POS)) = connParams.bleCoded.timeout;
+                        ble5HandlerState.scanInit.connectInterval = connParams.bleCoded.interval;
                     }
                     else
                     {
@@ -3392,16 +3434,20 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                 startTime += offset;
 
                 /* Use the local and remote clock accuracies to find the clock error contribution */
-                uint16_t localClkAccuracy = RCL_SCHEDULER_SYSTIM_US(ble5HandlerState.scanInit.initiator ?
-                                                                    initCmd->ctx->localClockAccuracy :
-                                                                    scanCmd->ctx->localClockAccuracy);
-                uint16_t remoteClkAccuracy = RCL_SCHEDULER_SYSTIM_US(ble5HandlerState.common.auxPtrInfo.offsetUnits ?
-                                                                     BLE_SCALED_CLK_ACCURACY_500PPM :
-                                                                     BLE_SCALED_CLK_ACCURACY_50PPM);
+                uint16_t localClkAccuracy = ble5HandlerState.scanInit.initiator ?
+                                            initCmd->ctx->localClockAccuracy :
+                                            scanCmd->ctx->localClockAccuracy;
+                uint16_t remoteClkAccuracy = ble5HandlerState.common.auxPtrInfo.offsetUnits ?
+                                             BLE_SCALED_CLK_ACCURACY_500PPM :
+                                             BLE_SCALED_CLK_ACCURACY_50PPM;
 
                 /* Find clock error contribution. Add 1 us (4 systim units) to correct for rounding down. Also consider the sleep/active clock adjustments */
-                uint16_t remoteClkError = (uint16_t)((((offset * remoteClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR)) + 4 + RCL_SCHEDULER_SYSTIM_US(2));
-                uint16_t localClkError = (uint16_t)((((offset * localClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR)) + 4 + RCL_SCHEDULER_SYSTIM_US(16));
+                uint16_t remoteClkError = (uint16_t)((((offset >> 16) * remoteClkAccuracy) >> (BLE_CLK_ACCURACY_SCALE_FACTOR - 16)) +
+                                                     (((offset & 0xFFFF) * remoteClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR) +
+                                                     4 + RCL_SCHEDULER_SYSTIM_US(2));
+                uint16_t localClkError = (uint16_t)((((offset >> 16) * localClkAccuracy) >> (BLE_CLK_ACCURACY_SCALE_FACTOR - 16)) +
+                                                    (((offset & 0xFFFF) * localClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR) +
+                                                    4 + RCL_SCHEDULER_SYSTIM_US(16));
 
                 /* Calculate the needed window widening. Consider the allowed deviations for active clock accuracy and sleep clock accuracy */
                 uint16_t windowWidening = remoteClkError + localClkError;
@@ -3437,7 +3483,7 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
                     HWREG_WRITE_LRF(LRFDPBE32_BASE + LRFDPBE32_O_MDMSYNCA) = ADV_ACCESS_ADDRESS ^ (whitenInit << 24);
                 }
 
-                if (ble5HandlerState.scanInit.dynamicWinOffset)
+                if (ble5HandlerState.scanInit.initiator && ble5HandlerState.scanInit.dynamicWinOffset)
                 {
                     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_WINMOD) = RCL_BLE5_CONNECT_INT_SUB_DIV * ble5HandlerState.scanInit.connectInterval + RCL_BLE5_CONNECT_INT_SUB_DIV - 1;
                 }
@@ -3522,6 +3568,8 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
         ble5HandlerState.common.updatableFilterList = NULL;
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -3544,6 +3592,8 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         HWREG_WRITE_LRF(LRFDPBE32_BASE + LRFDPBE32_O_MDMSYNCA) = perScanCmd->ctx->accessAddress;
 
@@ -3555,6 +3605,7 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
 
         ble5HandlerState.common.fifoCfg = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FIFOCFG);
         HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_EXTRABYTES) = RCL_Handler_BLE5_findNumExtraBytes(ble5HandlerState.common.fifoCfg);
+        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_SEQSTAT) = 0;
 
         ble5HandlerState.common.auxPtrInfo = (RCL_AuxPtrInfo) { 0 }; /* Default */
 
@@ -3627,7 +3678,7 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
                 RCL_Handler_BLE5_updateRxCurBufferAndFifo(&perScanCmd->ctx->rxBuffers);
                 rclEventsIn.rxBufferUpdate = 0;
 
-                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_RPAMODE) = 0;
+                HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_ADRMODE) = 0;
 
                 ble5HandlerState.common.filterListUpdateIndex = -1;
                 /* Make sure status is correctly initialized */
@@ -3641,7 +3692,7 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FL1MASK) = PBE_BLE5_RAM_FL1MASK_MATCH_M |
                                                                               PBE_BLE5_RAM_FL1MASK_DUPLICATEIGN_M |
                                                                               PBE_BLE5_RAM_FL1MASK_TYPE_M;
-                ble5HandlerState.scanInit.filterListInvertMask = PBE_BLE5_RAM_FL1MASK_DUPLICATEIGN_M;
+                ble5HandlerState.perScan.filterListInvertMask = PBE_BLE5_RAM_FL1MASK_DUPLICATEIGN_M;
 
                 HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_FL2MASK) = 0;
 
@@ -3662,7 +3713,7 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
                                                                                 LRF_EventRxNok.value | LRF_EventRxBufFull.value,
                                                                                 fifoCfg, ble5HandlerState.common.activeUpdate));
 
-                    Log_printf(LogModule_RCL, Log_VERBOSE, "RCL_Handler_BLE5_scan_init: Starting periodic scanner");
+                    Log_printf(LogModule_RCL, Log_VERBOSE, "RCL_Handler_BLE5_periodicScan: Starting periodic scanner");
                     LRF_waitForTopsmReady();
                     RCL_Profiling_eventHook(RCL_ProfilingEvent_PreprocStop);
                     /* Post cmd */
@@ -3759,7 +3810,10 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
         if (lrfEvents.opDone != 0 || lrfEvents.opError != 0)
         {
             uint16_t endCause = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_ENDCAUSE);
-            if (lrfEvents.opError == 0)
+
+            if (lrfEvents.opError == 0 && (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_ENDOK ||
+                                           endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_RXERR ||
+                                           endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_NOSYNC))
             {
                 if (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_ENDOK)
                 {
@@ -3880,14 +3934,18 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
                 startTime += offset;
 
                 /* Use the local and remote clock accuracies to find the clock error contribution */
-                uint16_t localClkAccuracy = RCL_SCHEDULER_SYSTIM_US(perScanCmd->ctx->localClockAccuracy);
-                uint16_t remoteClkAccuracy = RCL_SCHEDULER_SYSTIM_US(ble5HandlerState.common.auxPtrInfo.offsetUnits ?
-                                                                     BLE_SCALED_CLK_ACCURACY_500PPM :
-                                                                     BLE_SCALED_CLK_ACCURACY_50PPM);
+                uint16_t localClkAccuracy = perScanCmd->ctx->localClockAccuracy;
+                uint16_t remoteClkAccuracy = ble5HandlerState.common.auxPtrInfo.offsetUnits ?
+                                             BLE_SCALED_CLK_ACCURACY_500PPM :
+                                             BLE_SCALED_CLK_ACCURACY_50PPM;
 
                 /* Find clock error contribution. Add 1 us (4 systim units) to correct for rounding down. Also consider the sleep/active clock adjustments */
-                uint16_t remoteClkError = (uint16_t)((((offset * remoteClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR)) + 4 + RCL_SCHEDULER_SYSTIM_US(2));
-                uint16_t localClkError = (uint16_t)((((offset * localClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR)) + 4 + RCL_SCHEDULER_SYSTIM_US(16));
+                uint16_t remoteClkError = (uint16_t)((((offset >> 16) * remoteClkAccuracy) >> (BLE_CLK_ACCURACY_SCALE_FACTOR - 16)) +
+                                                     (((offset & 0xFFFF) * remoteClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR) +
+                                                     4 + RCL_SCHEDULER_SYSTIM_US(2));
+                uint16_t localClkError = (uint16_t)((((offset >> 16) * localClkAccuracy) >> (BLE_CLK_ACCURACY_SCALE_FACTOR - 16)) +
+                                                    (((offset & 0xFFFF) * localClkAccuracy) >> BLE_CLK_ACCURACY_SCALE_FACTOR) +
+                                                    4 + RCL_SCHEDULER_SYSTIM_US(16));
 
                 /* Calculate the needed window widening. Consider the allowed deviations for active clock accuracy and sleep clock accuracy */
                 uint16_t windowWidening = remoteClkError + localClkError;
@@ -3924,7 +3982,7 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
                  * Consider the new start time, and the maximum duration of an auxiliary packet, so that the operation can stop without interrupting
                  * the reception of the auxiliary packet.
                  */
-                int32_t newGracefulStopTime =  startTime + RCL_Handler_BLE5_findPacketDuration(BLE_MAX_PKT_LEN, ble5HandlerState.common.phyFeatures) + 
+                int32_t newGracefulStopTime =  startTime + RCL_Handler_BLE5_findPacketDuration(BLE_MAX_PKT_LEN, ble5HandlerState.common.phyFeatures) +
                                                 RCL_SCHEDULER_SYSTIM_US(20);
                 RCL_Scheduler_setCmdStopTime(&rclSchedulerState.gracefulStopInfo, newGracefulStopTime);
 
@@ -3946,7 +4004,7 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
                                                                                 LRF_EventRxOk.value | LRF_EventRxIgnored.value |
                                                                                 LRF_EventRxNok.value | LRF_EventRxBufFull.value,
                                                                                 fifoCfg, ble5HandlerState.common.activeUpdate));
-                    Log_printf(LogModule_RCL, Log_VERBOSE, "RCL_Handler_BLE5_scan_init: Following AuxPointer on channel: %d", nextChannel);
+                    Log_printf(LogModule_RCL, Log_VERBOSE, "RCL_Handler_BLE5_periodicScan: Following AuxPointer on channel: %d", nextChannel);
                     LRF_waitForTopsmReady();
 
                     /* Post cmd */
@@ -3966,6 +4024,8 @@ RCL_Events RCL_Handler_BLE5_periodicScan(RCL_Command *cmd, LRF_Events lrfEvents,
         ble5HandlerState.common.updatableFilterList = NULL;
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -3985,6 +4045,8 @@ RCL_Events RCL_Handler_BLE5_conn(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         uint32_t startDelay = 0;
         RCL_CtxConnection *ctx = connCmd->ctx;
@@ -4303,6 +4365,8 @@ RCL_Events RCL_Handler_BLE5_conn(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
     {
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
 
     return rclEvents;
@@ -4327,6 +4391,8 @@ RCL_Events RCL_Handler_BLE5_dtmTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         HWREG_WRITE_LRF(LRFDPBE32_BASE + LRFDPBE32_O_MDMSYNCA) = DTM_ACCESS_ADDRESS;
         /* 32-bit access to also write CRCINITH */
@@ -4542,6 +4608,8 @@ RCL_Events RCL_Handler_BLE5_dtmTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
         LRF_disableSynthRefsys();
         /* Restore PBE timer 1 prescaler */
         HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_TIMPRE) = ble5HandlerState.dtmTx.storedPbeTimPre;
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -4564,6 +4632,8 @@ RCL_Events RCL_Handler_BLE5_genericRx(RCL_Command *cmd, LRF_Events lrfEvents, RC
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         uint32_t crcInit = ctx->crcInit;
         uint32_t accessAddress = ctx->accessAddress;
@@ -4802,6 +4872,8 @@ RCL_Events RCL_Handler_BLE5_genericRx(RCL_Command *cmd, LRF_Events lrfEvents, RC
 
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -4822,6 +4894,8 @@ RCL_Events RCL_Handler_BLE5_genericTx(RCL_Command *cmd, LRF_Events lrfEvents, RC
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         RCL_CtxGenericTx *ctx = txCmd->ctx;
         uint32_t crcInit = ctx->crcInit;
@@ -4934,6 +5008,8 @@ RCL_Events RCL_Handler_BLE5_genericTx(RCL_Command *cmd, LRF_Events lrfEvents, RC
     {
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
     return rclEvents;
 }
@@ -4954,6 +5030,8 @@ RCL_Events RCL_Handler_Ble5_txTest(RCL_Command *cmd, LRF_Events lrfEvents, RCL_E
         earliestStartTime = LRF_enableSynthRefsys();
         ble5HandlerState.txTest.restoreSelector = RCL_HANDLER_BLE5_RESTORE_NONE;
         HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_BLE5_RAM_O_OPCFG) = PBE_BLE5_RAM_OPCFG_TXPATTERN_M;
+        /* Make sure SWTCXO does not adjust clock while radio is running */
+        hal_power_set_swtcxo_update_constraint();
 
         /* Default end status */
         ble5HandlerState.common.endStatus = RCL_CommandStatus_Finished;
@@ -5091,6 +5169,8 @@ RCL_Events RCL_Handler_Ble5_txTest(RCL_Command *cmd, LRF_Events lrfEvents, RCL_E
         }
         LRF_disable();
         LRF_disableSynthRefsys();
+        /* Allow SWTCXO again */
+        hal_power_release_swtcxo_update_constraint();
     }
 
     return rclEvents;
@@ -5269,12 +5349,19 @@ uint32_t RCL_BLE5_getRxTimestamp(const RCL_Buffer_DataEntry *rxEntry)
 /*
  *  ======== RCL_BLE5_getAuxAdvStartTimeDelta ========
  */
-uint32_t RCL_BLE5_getAuxAdvStartTimeDelta(uint16_t phyFeatures, uint8_t chMap, uint8_t advPayloadLen)
+uint32_t RCL_BLE5_getAuxAdvStartTimeDelta(uint16_t primaryPhyFeatures, uint16_t secondaryPhyFeatures, uint8_t chMap, uint8_t advPayloadLen)
 {
     uint8_t numPrimaryChPackets = (chMap & 1) + ((chMap >> 1) & 1) + ((chMap >> 2) & 1);
-    uint32_t advPayloadLenInOffsetUnits = BLE_convertSystimUnitsToOffsetUnits(RCL_Handler_BLE5_findPacketDuration(advPayloadLen, phyFeatures), BLE_AUX_OFFSET_30_US);
-    //TODO:: Account for the time that it might take to do a PHY change. If there is a PHY change, an additional interval needs to be added, ref. RCL-792
-    return (RCL_SCHEDULER_SYSTIM_US((advPayloadLenInOffsetUnits * BLE_AUX_OFFSET_30_US) + EXT_ADV_INTERVAL_US) * numPrimaryChPackets);
+    uint32_t advPayloadLenInOffsetUnits = BLE_convertSystimUnitsToOffsetUnits(RCL_Handler_BLE5_findPacketDuration(advPayloadLen, primaryPhyFeatures), BLE_AUX_OFFSET_30_US);
+
+    if (primaryPhyFeatures != secondaryPhyFeatures)
+    {
+        return (RCL_SCHEDULER_SYSTIM_US((((advPayloadLenInOffsetUnits * BLE_AUX_OFFSET_30_US) + EXT_ADV_INTERVAL_US) * numPrimaryChPackets) + EXT_ADV_PHY_SWITCHING_DELAY_US));
+    }
+    else
+    {
+        return (RCL_SCHEDULER_SYSTIM_US((advPayloadLenInOffsetUnits * BLE_AUX_OFFSET_30_US) + EXT_ADV_INTERVAL_US) * numPrimaryChPackets);
+    }
 }
 
 /*
@@ -6180,7 +6267,7 @@ static void RCL_Handler_BLE5_updateBackoffParams(RCL_CtxScanInit *ctx, uint16_t 
 static void RCL_Handler_BLE5_getAuxPtrFromTxBuffer(RCL_Buffer_TxBuffer *curBuffer, RCL_AuxPtrInfo *auxPtrInfo, uint8_t offset)
 {
     uint8_t payloadIndex = curBuffer->numPad - 1 + BLE_HEADER_LENGTH;
-    uint8_t pktLen = curBuffer->data[payloadIndex - 1];    
+    uint8_t pktLen = curBuffer->data[payloadIndex - 1];
     int8_t  auxPtrIndex = 0;
     uint8_t extHdrFlags = 0;
 
@@ -6197,7 +6284,7 @@ static void RCL_Handler_BLE5_getAuxPtrFromTxBuffer(RCL_Buffer_TxBuffer *curBuffe
 
         if (extHdrFlags != 0 && auxPtrIndex >= 0)
         {
-            /* Consider the bytes taken by the extended header flags and the extended header length fields */ 
+            /* Consider the bytes taken by the extended header flags and the extended header length fields */
             auxPtrIndex += payloadIndex + BLE_EXTENDED_HEADER_LENGTH_LEN + BLE_EXTENDED_HEADER_FLAGS_LEN;
 
             /* Determine Tx FIFO pointer to the AuxPtr bytes */
@@ -6221,7 +6308,7 @@ static void RCL_Handler_BLE5_getAuxPtrFromTxBuffer(RCL_Buffer_TxBuffer *curBuffe
  *  ======== RCL_Handler_BLE5_checkExtHdrField ========
  */
 static int8_t RCL_Handler_BLE5_checkExtHdrField(uint8_t extHdrFlags, uint8_t fieldMask)
-{ 
+{
     int8_t fieldIndex = 0;
 
     /* Check extended header flags to determine the index of the desired field (if present) */
@@ -6320,7 +6407,7 @@ static void RCL_Handler_BLE5_readAuxPtrFromRxBuffer(uint32_t *data32, RCL_AuxPtr
  */
 static bool RCL_Handler_BLE5_updateAuxPtr(RCL_AuxPtrInfo *auxPtr, uint32_t packetDuration, uint8_t chanMap, bool switchPhy)
 {
-    uint16_t auxOffsetUs;
+    uint32_t auxOffsetUs;
     uint16_t auxOffset;
     uint8_t  auxChCaOffsetUnits;
     uint8_t  auxOffsetLow;
