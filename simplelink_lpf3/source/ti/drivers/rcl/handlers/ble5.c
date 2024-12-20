@@ -504,7 +504,7 @@ RCL_Events RCL_Handler_BLE5_adv(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
 
             /* Find which type of advertising */
             RCL_Buffer_TxBuffer *txBuffer = RCL_TxBuffer_head(&advCmd->ctx->txBuffers);
-            uint16_t advCfg;
+            uint16_t advCfg = 0;
             uint16_t aeCfg = PBE_BLE5_RAM_AECFG_CHNL_PRIMARY;
 
             if (txBuffer != NULL)

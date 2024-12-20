@@ -2176,25 +2176,26 @@ static bool RCL_Handler_Ieee_initStats(RCL_StatsIeee *stats, uint32_t startTime)
 
 static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t timeMargin, bool hardStop)
 {
-    uint32_t activeStopTime;
+    bool setCustomEventTime = true;
     if (rclSchedulerState.hardStopInfo.stopReason != RCL_SchedulerStopReason_None)
     {
         if (rclSchedulerState.hardStopInfo.stopReason == RCL_SchedulerStopReason_Timeout)
         {
-            activeStopTime = rclSchedulerState.hardStopInfo.cmdStopTime;
+            /* Only set custom time if the next hard stop (timeout) is expected after the margin */
+            setCustomEventTime = RCL_Scheduler_isLater(eventTime + timeMargin, rclSchedulerState.hardStopInfo.cmdStopTime);
         }
         else if (rclSchedulerState.hardStopInfo.stopReason == RCL_SchedulerStopReason_Scheduling)
         {
-            activeStopTime = rclSchedulerState.hardStopInfo.schedStopTime;
+            /* Only set custom time if the next hard stop (scheduler) is expected after the margin */
+            setCustomEventTime = RCL_Scheduler_isLater(eventTime + timeMargin, rclSchedulerState.hardStopInfo.cmdStopTime);
         }
         else
         {
-            /* Otherwise API stop is active and command should stop shortly */
-            activeStopTime = RCL_Scheduler_getCurrentTime();
+            /* Otherwise API stop is active and command should stop shortly - do not set custom time*/
+            setCustomEventTime = false;
         }
     }
-    if (rclSchedulerState.hardStopInfo.stopReason == RCL_SchedulerStopReason_None ||
-        RCL_Scheduler_isLater(eventTime + timeMargin, activeStopTime))
+    if (setCustomEventTime)
     {
         if (hardStop)
         {
@@ -2214,7 +2215,6 @@ static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t tim
             ieeeHandlerState.common.nextEventTime = eventTime;
             ieeeHandlerState.common.eventTimeType = customEvent;
         }
-        return true;
     }
     else
     {
@@ -2223,8 +2223,8 @@ static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t tim
         {
             RCL_Handler_Ieee_restoreStopTime();
         }
-        return false;
     }
+    return setCustomEventTime;
 }
 
 static bool RCL_Handler_Ieee_restoreStopTime(void)
