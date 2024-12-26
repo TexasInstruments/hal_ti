@@ -47,6 +47,8 @@
 
 #include <ti/log/Log.h>
 
+#include <zephyr/pm/policy.h>
+
 #include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(inc/hw_types.h)
 #include DeviceFamily_constructPath(inc/hw_memmap.h)
@@ -544,6 +546,18 @@ int_fast16_t Power_setConstraint(uint_fast16_t constraintId)
 
     DebugP_assert(constraintId < PowerCC23X0_NUMCONSTRAINTS);
 
+    /* Forward constraint set to Zephyr */
+    switch (constraintId) {
+    case PowerLPF3_DISALLOW_STANDBY:
+        pm_policy_state_lock_get(PM_STATE_STANDBY, PM_ALL_SUBSTATES);
+        break;
+    case PowerLPF3_DISALLOW_IDLE:
+        pm_policy_state_lock_get(PM_STATE_RUNTIME_IDLE, PM_ALL_SUBSTATES);
+        break;
+    default:
+        break;
+    }
+
     key = HwiP_disable();
 
     /* Set the specified constraint in the constraintMask for faster access */
@@ -570,6 +584,18 @@ int_fast16_t Power_releaseConstraint(uint_fast16_t constraintId)
     key = HwiP_disable();
 
     DebugP_assert(constraintCounts[constraintId] != 0);
+
+    /* Forward constraint release to Zephyr */
+    switch (constraintId) {
+    case PowerLPF3_DISALLOW_STANDBY:
+        pm_policy_state_lock_put(PM_STATE_STANDBY, PM_ALL_SUBSTATES);
+        break;
+    case PowerLPF3_DISALLOW_IDLE:
+        pm_policy_state_lock_put(PM_STATE_RUNTIME_IDLE, PM_ALL_SUBSTATES);
+        break;
+    default:
+        break;
+    }
 
     constraintCounts[constraintId]--;
 
