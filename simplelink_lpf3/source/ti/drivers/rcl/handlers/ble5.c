@@ -2944,7 +2944,6 @@ RCL_Events RCL_Handler_BLE5_scan_init(RCL_Command *cmd, LRF_Events lrfEvents, RC
         bool updateStats = false;
         if (lrfEvents.rxOk != 0 || lrfEvents.rxNok != 0 || lrfEvents.rxIgnored != 0 || lrfEvents.rxBufFull != 0)
         {
-            /* TODO: Make sure that ignored packets are signalled with the rxIgnored event, ref. RCL-770 */
             /* Copy received packet from PBE FIFO to buffer */
             /* First, check that there is actually a buffer available */
             while (HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFREADABLE) >= 4)

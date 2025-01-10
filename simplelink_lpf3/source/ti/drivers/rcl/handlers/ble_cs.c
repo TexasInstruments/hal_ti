@@ -1619,10 +1619,10 @@ static int16_t RCL_Handler_BLE_CS_convertRtt(RCL_CmdBleCs *pCmd, uint8_t mode, i
     }
 
     /* Convert to 0.5ns units as per HCI spec requires */
-    toAD *= (float)41.6666;
+    toAD *= 41.6666f;
 
     /* Round */
-    toAD += (float)0.5;
+    toAD += 0.5f;
 
     /* Return the adjusted timeticks */
     return ((int16_t) toAD);

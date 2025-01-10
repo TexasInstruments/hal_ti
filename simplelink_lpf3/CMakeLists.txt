@@ -120,7 +120,6 @@ if(CONFIG_HAS_CC23X0_SDK)
       source/ti/drivers/rcl/RCL_Gpio.c
       source/ti/drivers/rcl/RCL_Profiling.c
       source/ti/drivers/rcl/RCL_Scheduler.c
-      source/ti/drivers/rcl/RCL_Tracer.c
       source/ti/drivers/rcl/hal/cc23x0/hal_cc23x0.c
       source/ti/drivers/rcl/handlers/adc_noise.c
       source/ti/drivers/rcl/handlers/ble5.c
