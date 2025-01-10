@@ -1058,7 +1058,7 @@ static int_fast16_t AESECBLPF3HSM_processOneStep(AESECB_Handle handle)
     KeyStore_PSA_KeyUsage usage;
     #endif
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESECB_STATUS_RESOURCE_UNAVAILABLE;
     }

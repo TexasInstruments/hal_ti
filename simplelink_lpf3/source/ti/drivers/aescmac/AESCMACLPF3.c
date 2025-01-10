@@ -853,7 +853,7 @@ int_fast16_t AESCMAC_setupSign(AESCMAC_Handle handle, const CryptoKey *key)
                 return AESCMAC_STATUS_ERROR;
             }
 
-            if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+            if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
             {
                 return AESCMAC_STATUS_RESOURCE_UNAVAILABLE;
             }
@@ -896,7 +896,7 @@ int_fast16_t AESCMAC_setupVerify(AESCMAC_Handle handle, const CryptoKey *key)
                 return AESCMAC_STATUS_ERROR;
             }
 
-            if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+            if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
             {
                 return AESCMAC_STATUS_RESOURCE_UNAVAILABLE;
             }
@@ -1296,7 +1296,7 @@ static int_fast16_t AESCMACLPF3HSM_oneStepOperation(AESCMAC_Handle handle,
                        (uint8_t)0U,
                        sizeof(object->intermediateTag));
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCMAC_STATUS_RESOURCE_UNAVAILABLE;
     }
@@ -1995,7 +1995,7 @@ static int_fast16_t AESCMACLPF3HSM_addData(AESCMAC_Handle handle, AESCMAC_Operat
 
     object->operation = operation;
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCMAC_STATUS_RESOURCE_UNAVAILABLE;
     }
@@ -2054,7 +2054,7 @@ static int_fast16_t AESCMACLPF3HSM_finalize(AESCMAC_Handle handle, AESCMAC_Opera
         object->operationType = AESCMAC_OP_TYPE_FINALIZE_VERIFY;
     }
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCMAC_STATUS_RESOURCE_UNAVAILABLE;
     }

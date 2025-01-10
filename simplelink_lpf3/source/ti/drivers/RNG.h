@@ -42,16 +42,17 @@
  *  The output is suitable for applications requiring cryptographically
  *  random data such as keying material for private or symmetric keys.
  *
- *  The RNG driver for CC27XX devices is strictly a CRNG/HSM implementation only.
- *
- *  CRNG (Cryptographically Secure Pseudo Random Number) a DRBG method alternative to
- *  True Random Number (TRNG)
+ *  The RNG driver for CC27XX devices is strictly a HSM implementation only. #RNG_init()
+ *  only constructs RTOS-related objects, and #RNG_open() initializes the driver's internal metadata.
+ *  To get random data, use one of the following APIs:
+ *      - #RNG_getRandomBits()
+ *      - #RNG_getLERandomNumberInRange()
+ *      - #RNG_getBERandomNumberInRange()
+ *      - #RNG_generateKey()
+ *      - #RNG_generateLEKeyInRange()
+ *      - #RNG_generateBEKeyInRange()
  *
  *  HSM (Hardware Security Module) is a HW IP used for RNG operations
- *
- *  For CC27XX devices only, the RNG driver accepts two types of cryptoKey encoding
- *      - CryptoKey_BLANK_PLAINTEXT
- *      - CryptoKey_BLANK_PLAINTEXT_HSM
  *
  *  @anchor ti_drivers_RNG_Usage
  *  # Usage #

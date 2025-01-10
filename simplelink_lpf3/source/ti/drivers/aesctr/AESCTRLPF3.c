@@ -1185,7 +1185,7 @@ static int_fast16_t AESCTRLPF3HSM_processOneStepOperation(AESCTR_Handle handle)
                                       ? KEYSTORE_PSA_KEY_USAGE_ENCRYPT
                                       : KEYSTORE_PSA_KEY_USAGE_DECRYPT;
     #endif
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCTR_STATUS_RESOURCE_UNAVAILABLE;
     }

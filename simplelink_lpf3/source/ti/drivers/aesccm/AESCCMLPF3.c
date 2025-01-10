@@ -1208,7 +1208,7 @@ int_fast16_t AESCCM_setLengths(AESCCM_Handle handle, size_t aadLength, size_t pl
 
     if (((aadLength > AES_BLOCK_SIZE) || (plaintextLength > AES_BLOCK_SIZE)) && (object->tempAssetID == 0U))
     {
-        if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+        if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
         {
             return AESCCM_STATUS_RESOURCE_UNAVAILABLE;
         }
@@ -3073,7 +3073,7 @@ static int_fast16_t AESCCMLPF3HSM_oneStepOperation(AESCCM_Handle handle,
         object->macLength = HSM_MAC_MAX_LENGTH;
     }
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCCM_STATUS_RESOURCE_UNAVAILABLE;
     }
@@ -3188,7 +3188,7 @@ static int_fast16_t AESCCMLPF3HSM_setupSegmentedOperation(AESCCM_Handle handle,
 
     if (((totalAADLength > AES_BLOCK_SIZE) || (totalDataLength > AES_BLOCK_SIZE)) && (object->tempAssetID == 0U))
     {
-        if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+        if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
         {
             return AESCCM_STATUS_RESOURCE_UNAVAILABLE;
         }
@@ -3295,7 +3295,7 @@ int_fast16_t AESCCMLPF3HSM_addAAD(AESCCM_Handle handle, AESCCM_SegmentedAADOpera
         return AESCCM_STATUS_SUCCESS;
     }
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCCM_STATUS_RESOURCE_UNAVAILABLE;
     }
@@ -3321,7 +3321,7 @@ static int_fast16_t AESCCMLPF3HSM_addData(AESCCM_Handle handle,
     object->operationType = operationType;
     object->operation     = operation;
 
-    if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+    if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
     {
         return AESCCM_STATUS_RESOURCE_UNAVAILABLE;
     }
@@ -3401,7 +3401,7 @@ static int_fast16_t AESCCMLPF3HSM_finalizeCommon(AESCCM_Handle handle,
             (void)memcpy(operation->mac, (uint8_t *)&object->intermediateTag[0], operation->macLength);
         }
 
-        if (!HSMLPF3_acquireLock(SemaphoreP_NO_WAIT, (uintptr_t)handle))
+        if (!HSMLPF3_acquireLock(object->common.semaphoreTimeout, (uintptr_t)handle))
         {
             return AESCCM_STATUS_RESOURCE_UNAVAILABLE;
         }
