@@ -139,7 +139,7 @@ if(CONFIG_HAS_CC23X0_SDK)
   endfunction()
 
  # prebuilt libs
-  if (CONFIG_BT_PERIPHERAL)
+  if (CONFIG_BT_PERIPHERAL AND (NOT (CONFIG_BT_MESH STREQUAL "y")))
     add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller_peripheral.a)
   else()
     add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller.a)
