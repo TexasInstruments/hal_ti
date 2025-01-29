@@ -25,21 +25,42 @@ extern "C"
 {
 #endif
 
+/*******************************************************************************
+ * INCLUDES
+ */
 #include "hal_types.h"
 #include "hal_assert.h"
 #include "hci_api.h"
 
-typedef struct bleParam
+/********************************************************************************
+* DEFINES
+* */
+#define BLE_INIT_NO_WAIT           0
+#define BLE_INIT_WAIT_FOREVER      ~(0)
+
+/*********************************************************************
+ * TYPEDEFS
+ */
+typedef struct bleServicesParams
 {
-  uint32 bleServices;            	    // Bitwise flags for services initialization.
-  uint32 syncInitTimeoutTics;        	// Timeout in Ticks for the API to wait for the initialization
-                                     	// sequence to complete.
-                                     	// NO_WAIT - the function will return immediately.
-                                     	// WAIT_FOREVER - the function will return only after the initialization is completed
-                                     	// Other values will determine a specific timeout for synchronous initialization sequence.
-  hciController2HostCallbacks_t hciCbs; // Callbacks for the HCI
-  assertCback_t assertCallback;         // Callback for user defined assert handling
+  uint32 bleServices;                    // Bitwise flags for services initialization.
+  uint32 syncInitTimeoutTicks;           // Timeout in Ticks for the API to wait for the initialization
+                                         // sequence to complete.
+                                         // BLE_INIT_NO_WAIT - the function will return immediately.
+                                         // BLE_INIT_WAIT_FOREVER - the function will return only after the initialization is completed
+                                         // Other values will determine a specific timeout for synchronous initialization sequence.
+  hciControllerToHostCallbacks_t hciCbs; // Callbacks for the HCI
+  assertCback_t assertCallback;          // Callback for user defined assert handling
 } bleServicesParams_t;
+
+/*********************************************************************
+ * MACROS
+ */
+
+/*********************************************************************
+ * FUNCTIONS
+ */
+
 
 /********************************************************************************
  * @fn            BLE_ServicesInit
@@ -62,7 +83,7 @@ typedef struct bleParam
  * @return        SUCCESS / FAILURE.
  *
  * */
-extern uint32 BLE_ServicesInit(const bleServicesParams_t *pServiceParams);
+uint32 BLE_ServicesInit(const bleServicesParams_t *pServiceParams);
 
 /********************************************************************************
  * @fn            BLE_ServicesParamsInit
@@ -84,7 +105,7 @@ extern uint32 BLE_ServicesInit(const bleServicesParams_t *pServiceParams);
  *                   - Parameters validation
  *
  * */
-extern uint32 BLE_ServicesParamsInit(bleServicesParams_t *pServiceParams, size_t size);
+uint32 BLE_ServicesParamsInit(bleServicesParams_t *pServiceParams, size_t size);
 
 /*******************************************************************************
  * @fn          RegisterAssertCback
@@ -102,7 +123,7 @@ extern uint32 BLE_ServicesParamsInit(bleServicesParams_t *pServiceParams, size_t
  *
  * @return      None.
  */
-extern void RegisterAssertCback(assertCback_t appAssertHandler);
+void RegisterAssertCback(assertCback_t appAssertHandler);
 
 #ifdef __cplusplus
 }

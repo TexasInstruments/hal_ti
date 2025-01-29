@@ -144,5 +144,5 @@ if(CONFIG_HAS_CC23X0_SDK)
   else()
     add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller.a)
   endif()
- 
+
 endif()
