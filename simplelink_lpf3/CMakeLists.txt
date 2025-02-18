@@ -30,6 +30,8 @@
 
 # All targets in this file are for Cortex-M0P
 
+option(USE_BLE_LIB "Use BLE libraries" ON)
+
 add_subdirectory(source/ti/devices)
 add_subdirectory(source/ti/boards)
 
@@ -46,8 +48,11 @@ if(CONFIG_HAS_CC23X0_SDK)
   zephyr_include_directories(
     .
     source
-    source/ti/ble5stack_flash/inc
     )
+
+  if(USE_BLE_LIB STREQUAL "ON")
+    zephyr_include_directories(source/ti/ble5stack_flash/inc)
+  endif()
 
   zephyr_library()
   zephyr_library_compile_definitions(${COMPILER})
@@ -138,11 +143,13 @@ if(CONFIG_HAS_CC23X0_SDK)
     zephyr_link_libraries(${lib_name})
   endfunction()
 
- # prebuilt libs
-  if (CONFIG_BT_PERIPHERAL AND (NOT (CONFIG_BT_MESH STREQUAL "y")))
-    add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller_peripheral.a)
-  else()
-    add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller.a)
+  if(USE_BLE_LIB STREQUAL "ON")
+  # prebuilt libs
+    if (CONFIG_BT_PERIPHERAL AND (NOT (CONFIG_BT_MESH STREQUAL "y")))
+      add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller_peripheral.a)
+    else()
+      add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller.a)
+    endif()
   endif()
 
 endif()
