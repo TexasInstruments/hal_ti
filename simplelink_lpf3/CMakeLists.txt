@@ -1,4 +1,4 @@
-# Copyright (c) 2024, Texas Instruments Incorporated
+# Copyright (c) 2024-2025, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,8 @@ option(USE_BLE_LIB "Use BLE libraries" ON)
 add_subdirectory(source/ti/devices)
 add_subdirectory(source/ti/boards)
 
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
+
 if(CONFIG_HAS_CC23X0_SDK)
 
   if(CONFIG_SOC_CC2340R5)
@@ -57,55 +59,10 @@ if(CONFIG_HAS_CC23X0_SDK)
   zephyr_library()
   zephyr_library_compile_definitions(${COMPILER})
   zephyr_library_sources(
-    # Default Simplelink configurations
-    source/ti/drivers/ti_drivers_config_cc23xx.c
-
-    # Utils
-    source/ti/drivers/utils/List.c
-    source/ti/drivers/utils/Random.c
-
-    # Drivers
-    source/ti/drivers/AESCCM.c
-    source/ti/drivers/AESCMAC.c
-    source/ti/drivers/AESCTR.c
-    source/ti/drivers/AESCTRDRBG.c
-    source/ti/drivers/AESECB.c
-    source/ti/drivers/ECDH.c
-    source/ti/drivers/RNG.c
-    source/ti/drivers/aesccm/AESCCMLPF3.c
-    source/ti/drivers/aescmac/AESCMACLPF3.c
-    source/ti/drivers/aesctr/AESCTRLPF3.c
-    source/ti/drivers/aesctrdrbg/AESCTRDRBGXX.c
-    source/ti/drivers/aesecb/AESECBLPF3.c
-    source/ti/drivers/cryptoutils/aes/AESCommonLPF3.c
-    source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
-    source/ti/drivers/cryptoutils/ecc/ECCParamsLPF3SW.c
-    source/ti/drivers/cryptoutils/ecc/ECCInitLPF3SW.c
-    source/ti/drivers/cryptoutils/sharedresources/CryptoResourceLPF3.c
-    source/ti/drivers/cryptoutils/utils/CryptoUtils.c
-    source/ti/drivers/dma/UDMALPF3.c
-    source/ti/drivers/ecdh/ECDHLPF3SW.c
-    source/ti/drivers/rng/RNGLPF3RF.c
-
-    source/ti/drivers/Temperature.c
-    source/ti/drivers/power/PowerCC23X0.c
-    source/ti/drivers/temperature/TemperatureLPF3.c
-    source/ti/drivers/batterymonitor/BatMonSupportLPF3.c
-    source/ti/drivers/batterymonitor/BatteryMonitorLPF3.c
-
-    # DPL
-    kernel/zephyr/dpl/dpl.c
-    kernel/zephyr/dpl/MutexP_zephyr.c
-    kernel/zephyr/dpl/SemaphoreP_zephyr.c
-    kernel/zephyr/dpl/ClockP_zephyr.c
-    kernel/zephyr/dpl/HwiP_zephyr.c
-    kernel/zephyr/dpl/SwiP_zephyr.c
-    kernel/zephyr/dpl/TaskP_zephyr.c
-    kernel/zephyr/dpl/MessageQueueP_zephyr.c
+    ${SOURCES_DRIVERS_LF3}
+    ${SOURCES_DRIVERS_CC23X0}
+    ${SOURCES_KERNEL}
     )
-  if(CONFIG_EVENTS)
-    zephyr_library_sources(kernel/zephyr/dpl/EventP_zephyr.c)
-  endif()
   zephyr_link_libraries(
     ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m0p/ecc.a
     )
@@ -116,22 +73,9 @@ if(CONFIG_HAS_CC23X0_SDK)
   # Radio Control Layer (RCL) driver
   if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
     zephyr_library_sources(
-      source/ti/drivers/rcl/LRF.c
-      source/ti/drivers/rcl/LRFCC23X0.c
-      source/ti/drivers/rcl/RCL.c
-      source/ti/drivers/rcl/RCL_Buffer.c
-      source/ti/drivers/rcl/RCL_Debug.c
-      source/ti/drivers/rcl/RCL_Feature.c
-      source/ti/drivers/rcl/RCL_Gpio.c
-      source/ti/drivers/rcl/RCL_Profiling.c
-      source/ti/drivers/rcl/RCL_Scheduler.c
-      source/ti/drivers/rcl/hal/cc23x0/hal_cc23x0.c
-      source/ti/drivers/rcl/handlers/adc_noise.c
-      source/ti/drivers/rcl/handlers/ble5.c
-      source/ti/drivers/rcl/handlers/ble_cs.c
-      source/ti/drivers/rcl/handlers/generic.c
-      source/ti/drivers/rcl/handlers/ieee.c
-      source/ti/drivers/rcl/wrappers/RCL_AdcNoise.c
+        ${SOURCES_RCL}
+        ${SOURCES_RCL_LPF3}
+        ${SOURCES_RCL_CC23X0}
       )
   endif()
 

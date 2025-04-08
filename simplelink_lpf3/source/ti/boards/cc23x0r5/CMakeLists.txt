@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024, Texas Instruments Incorporated
+# Copyright (c) 2022-2025, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,9 @@
 # All targets in this file are for Cortex-M0P
 
 if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
+
+  include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
+
   zephyr_include_directories(
     .
     )
@@ -38,10 +41,10 @@ if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
   zephyr_library()
 
   zephyr_library_sources(
-    rcl_settings_adc_noise.c
+    ${SOURCES_RCL_SETTINGS}
     )
 
-  # [Workaround]: Include the radio settings for ble by defualt
+  # [Workaround]: Include the radio settings for ble by default
   # TODO: radio settings should be selectable, see ZEPHYR-24
-  zephyr_library_sources_ifdef(CONFIG_SIMPLELINK_F3_RF_SETTING_PREGEN rcl_settings_ble.c)
+  zephyr_library_sources_ifdef(CONFIG_SIMPLELINK_F3_RF_SETTING_PREGEN ${SOURCES_RCL_SETTINGS_PREGEN})
 endif()
