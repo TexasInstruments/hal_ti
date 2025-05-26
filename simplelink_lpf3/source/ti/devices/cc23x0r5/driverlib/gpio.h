@@ -3,7 +3,7 @@
  *
  *  Description:    Defines and prototypes for the GPIO.
  *
- *  Copyright (c) 2022 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -146,6 +146,25 @@ __STATIC_INLINE uint32_t GPIOReadDio(uint32_t dioNumber)
 
     // Return the input value from the specified DIO.
     return ((HWREG( GPIO_BASE + GPIO_O_DIN31_0 ) >> dioNumber) & 1);
+}
+
+//*****************************************************************************
+//
+//! \brief Reads output register of a specific DIO.
+//!
+//! \param dioNumber specifies the DIO to read (0-31).
+//!
+//! \return Returns 0 or 1 reflecting the data out value of the specified DIO.
+//!
+//
+//*****************************************************************************
+__STATIC_INLINE uint32_t GPIOReadDioOutputBuffer(uint32_t dioNumber)
+{
+    // Check the arguments.
+    ASSERT(dioNumberLegal(dioNumber));
+
+    // Return the data out value from the specified DIO.
+    return ((HWREG( GPIO_BASE + GPIO_O_DOUT31_0 ) >> dioNumber) & 1);
 }
 
 //*****************************************************************************
