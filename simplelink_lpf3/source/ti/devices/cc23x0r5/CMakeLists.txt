@@ -38,6 +38,7 @@ zephyr_library()
 
 zephyr_library_sources(
   driverlib/aes_gcc.s
+  driverlib/evtsvt.c
   driverlib/udma.c
   driverlib/gpio.c
   driverlib/interrupt.c

@@ -58,7 +58,7 @@ if(CONFIG_HAS_CC23X0_SDK)
   zephyr_library_compile_definitions(${COMPILER})
   zephyr_library_sources(
     # Default Simplelink configurations
-    source/ti/drivers/config_defaults.c
+    source/ti/drivers/ti_drivers_config_cc23xx.c
 
     # Utils
     source/ti/drivers/utils/List.c

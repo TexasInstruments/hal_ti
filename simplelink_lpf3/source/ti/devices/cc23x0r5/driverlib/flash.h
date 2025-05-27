@@ -152,10 +152,7 @@ __STATIC_INLINE uint32_t FlashCheckFsmForError(void)
 //*****************************************************************************
 __STATIC_INLINE uint32_t FlashCheckFsmForReady(void)
 {
-    uint32_t reg = HWREG(FLASH_BASE + FLASH_O_STATCMD);
-
-    if (((reg & FLASH_STATCMD_CMDINPROGRESS_M) == 0) ||
-         (reg & FLASH_STATCMD_CMDDONE_M))
+    if (HWREG(FLASH_BASE + FLASH_O_STATCMD) & FLASH_STATCMD_CMDDONE_M)
     {
         return (FAPI_STATUS_FSM_READY);
     }

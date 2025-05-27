@@ -1,5 +1,5 @@
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /*
  *  ======== AESCCM ========
@@ -245,17 +245,20 @@ const ECDH_Config ECDH_config[CONFIG_ECDH_COUNT] = {
     },
 };
 
+const uint_least8_t CONFIG_ECDH_0_CONST = CONFIG_ECDH_0;
+const uint_least8_t ECDH_count = CONFIG_ECDH_COUNT;
+
 /*
  *  =============================== BatMon Support ===============================
  */
 #include <ti/drivers/batterymonitor/BatMonSupportLPF3.h>
 
 #include <ti/devices/DeviceFamily.h>
-#include DeviceFamily_constructPath(inc/hw_evtsvt.h)
 #include DeviceFamily_constructPath(inc/hw_ints.h)
+#include DeviceFamily_constructPath(driverlib/evtsvt.h)
 
 const BatMonSupportLPF3_Config BatMonSupportLPF3_config = {
-    .intNum = INT_CPUIRQ0,
+    .intNum = INT_CPUIRQ2,
     .intPriority = (~0),
-    .intMux = EVTSVT_CPUIRQ0SEL_PUBID_AON_PMU_COMB
+    .intSubscriberId = EVTSVT_SUB_CPUIRQ2,
 };

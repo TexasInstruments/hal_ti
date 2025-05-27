@@ -1,9 +1,9 @@
 /******************************************************************************
  *  Filename:       clkctl.h
  *
- *  Description:    Defines and prototypes for the Clock Control (CLKCTL).
+ *  Description:    Defines and prototypes for the CLKCTL module.
  *
- *  Copyright (c) 2024 Texas Instruments Incorporated
+ *  Copyright (c) 2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -38,7 +38,7 @@
 
 //*****************************************************************************
 //
-//! \addtogroup peripheral_group
+//! \addtogroup system_control_group
 //! @{
 //! \addtogroup clkctl_api
 //! @{
@@ -57,6 +57,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stdint.h>
+
 #include "../inc/hw_ints.h"
 #include "../inc/hw_memmap.h"
 #include "../inc/hw_types.h"
@@ -88,7 +89,6 @@ extern "C" {
 //
 //*****************************************************************************
 
-#ifdef DRIVERLIB_DEBUG
 //*****************************************************************************
 //
 //! \internal
@@ -103,11 +103,10 @@ extern "C" {
 //! otherwise.
 //
 //*****************************************************************************
-static bool CLKCTLBaseValid(uint32_t base)
+__STATIC_INLINE bool CLKCTLBaseValid(uint32_t base)
 {
     return (base == CLKCTL_BASE);
 }
-#endif
 
 //*****************************************************************************
 //
@@ -175,6 +174,38 @@ __STATIC_INLINE void CLKCTLDisable(uint32_t base, uint32_t peripheral)
 
     // Read-modify-write the clear bit
     HWREG(base + CLKCTL_O_CLKENCLR0) |= peripheral;
+}
+
+//*****************************************************************************
+//
+//! \brief Enable clock for LRFD
+//!
+//! \warning This API is only meant to be used by the LRFD driverlib module and
+//! should not be used directly.
+//
+//*****************************************************************************
+__STATIC_INLINE void CLKCTLEnableLrfdClock(void)
+{
+    // Enable LRFD module clock
+    HWREG( CLKCTL_BASE + CLKCTL_O_CLKENSET0 ) = CLKCTL_CLKENSET0_LRFD;
+
+    // Wait for LRFD clock to be enabled. It is not expected that the LRFD clock
+    // will ever be disabled, but this will add sufficient delay before
+    // potentially using LRFD directly after this function.
+    while ((HWREG(CLKCTL_BASE + CLKCTL_O_CLKCFG0) & CLKCTL_CLKCFG0_LRFD_M) != CLKCTL_CLKCFG0_LRFD_CLK_EN) {}
+}
+
+//*****************************************************************************
+//
+//! \brief Disable clock for LRFD
+//!
+//! \note This API is only meant to be used by the LRFD driverlib module and
+//! should not be used directly.
+//
+//*****************************************************************************
+__STATIC_INLINE void CLKCTLDisableLrfdClock(void)
+{
+    HWREG( CLKCTL_BASE + CLKCTL_O_CLKENCLR0 ) = CLKCTL_CLKENCLR0_LRFD;
 }
 
 //*****************************************************************************

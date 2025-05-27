@@ -272,7 +272,7 @@ extern MessageQueueP_Status MessageQueueP_post(MessageQueueP_Handle handle, cons
  *
  * @param handle     The handle to the message queue to which the item is to be posted
  * @param message    Pointer to the buffer from which the item to be posted is copied
- * @param timeout    The maximum duration in system clock ticks a task should block waiting
+ * @param timeout    The maximum duraton in system clock ticks a task should block waiting
  *                   for an item to be posted. When no wait or wait forever options are
  *                   wanted the #MessageQueueP_NO_WAIT and #MessageQueueP_WAIT_FOREVER defines
  *                   can be used.
