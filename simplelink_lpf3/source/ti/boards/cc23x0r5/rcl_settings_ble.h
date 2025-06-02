@@ -7,7 +7,7 @@
 // This file is generated
 //
 // Tool name                SmartRF Studio 8
-// Tool version             0.6.0.354 INTERNAL
+// Tool version             0.6.0.392 INTERNAL
 //
 //
 // WORKSPACE INFORMATION
@@ -16,7 +16,7 @@
 // Device                   CC2340R5
 //     Package              QFN40 5x5 RKP
 //     Revision(s)          B (2.0)
-// SDK                      SimpleLink LPF3 SDK 8.40.00.10
+// SDK                      SimpleLink LPF3 SDK 9.10.00.54
 // Board                    LP-EM-CC2340R5
 // PHY                      2.4 GHz - Bluetooth 5, LE - 1 Mbps / 2 Mbps / Coded
 //     State                Characterized
@@ -25,12 +25,12 @@
 // PHY PROPERTIES
 //
 // Run-time properties:
-//     Sub-PHY              1 Mbps 
-//     Channel              17 (2440 MHz) 
-//     TX output power      5.0 dBm 
+//     Sub-PHY              1 Mbps
+//     Channel              17 (2440 MHz)
+//     TX output power      5.0 dBm
 
-#ifndef RCLSETTINGS_H
-#define RCLSETTINGS_H
+#ifndef RCLSETTINGSBLE_H
+#define RCLSETTINGSBLE_H
 
 #include <ti/devices/DeviceFamily.h>
 #include <ti/drivers/rcl/LRF.h>
