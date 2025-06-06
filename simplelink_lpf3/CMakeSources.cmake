@@ -35,9 +35,6 @@ set(SOURCES_DRIVERS_LPF3
     # Drivers
     batterymonitor/BatMonSupportLPF3.c
     batterymonitor/BatteryMonitorLPF3.c
-    dma/UDMALPF3.c
-    RNG.c
-    rng/RNGLPF3RF.c
     Temperature.c
     temperature/TemperatureLPF3.c
 )
@@ -46,6 +43,11 @@ set(SOURCES_DRIVERS_CC23X0
     # Default Simplelink configurations
     ti_drivers_config_cc23xx.c
     power/PowerCC23X0.c
+
+    # Drivers
+    dma/UDMALPF3.c
+    RNG.c
+    rng/RNGLPF3RF.c
 
     # Crypto drivers
     AESCCM.c
@@ -68,8 +70,15 @@ set(SOURCES_DRIVERS_CC23X0
     ecdh/ECDHLPF3SW.c
 )
 
+set(SOURCES_DRIVERS_CC27XX
+    # Default Simplelink configurations
+    ti_drivers_config_cc27xx.c
+    power/PowerCC27XX.c
+)
+
 list(TRANSFORM SOURCES_DRIVERS_LPF3 PREPEND source/ti/drivers/)
 list(TRANSFORM SOURCES_DRIVERS_CC23X0 PREPEND source/ti/drivers/)
+list(TRANSFORM SOURCES_DRIVERS_CC27XX PREPEND source/ti/drivers/)
 
 set(SOURCES_KERNEL
     # DPL

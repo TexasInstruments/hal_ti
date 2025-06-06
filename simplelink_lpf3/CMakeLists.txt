@@ -97,3 +97,24 @@ if(CONFIG_HAS_CC23X0_SDK)
   endif()
 
 endif()
+
+if(CONFIG_HAS_CC27XX_SDK)
+
+  if(CONFIG_SOC_CC2745R10_Q1)
+    zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
+  endif()
+
+  zephyr_include_directories(
+    .
+    source
+    )
+
+  zephyr_library()
+  zephyr_library_compile_definitions(${COMPILER})
+  zephyr_library_sources(
+    ${SOURCES_DRIVERS_LPF3}
+    ${SOURCES_DRIVERS_CC27XX}
+    ${SOURCES_KERNEL}
+    )
+
+endif()

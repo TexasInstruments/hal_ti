@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Texas Instruments Incorporated
+ * Copyright (c) 2024-2025, Texas Instruments Incorporated
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,11 +7,26 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/__assert.h>
 #include <ti/drivers/dpl/HwiP.h>
+#include <ti/devices/DeviceFamily.h>
 
 #include <inc/hw_types.h>
 #include <inc/hw_ints.h>
 
 #include <driverlib/interrupt.h>
+
+#if DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX
+    /* On Cortex M33 Zephyr will reserve the highest interrupt for the kernel,
+     * and shift the available range of interrupts. The lowest available value is
+     * INT_PRI_LEVEL14 instead of INT_PRI_LEVEL15
+     */
+    #define INT_PRI_LEVEL_LOWEST INT_PRI_LEVEL14
+    #define SWIP_INT_NUM INT_SW0
+#elif DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0
+    #define INT_PRI_LEVEL_LOWEST INT_PRI_LEVEL3
+    #define SWIP_INT_NUM INT_CPUIRQ1
+#endif
+
+
 
 /*
  * IRQ_CONNECT requires we know the ISR signature and argument
@@ -44,10 +59,11 @@ typedef struct _HwiP_Obj
 } HwiP_Obj;
 
 /* interrupt reserved for SwiP */
-int HwiP_swiPIntNum = INT_CPUIRQ1;
+int HwiP_swiPIntNum = SWIP_INT_NUM;
 
 static struct sl_isr_args sl_IRQ00_cb = {NULL, 0};
 static struct sl_isr_args sl_IRQ01_cb = {NULL, 0};
+static struct sl_isr_args sl_IRQ02_cb = {NULL, 0};
 static struct sl_isr_args sl_IRQ03_cb = {NULL, 0};
 static struct sl_isr_args s1_IRQ04_cb = {NULL, 0};
 static struct sl_isr_args sl_IRQ16_cb = {NULL, 0};
@@ -61,7 +77,7 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
 {
     HwiP_Obj *obj = (HwiP_Obj *)handle;
     uintptr_t arg = 0;
-    uint8_t priority = INT_PRI_LEVEL3; /* default to lowest priority */
+    uint8_t priority = INT_PRI_LEVEL_LOWEST; /* default to lowest priority */
 
     if (handle == NULL)
     {
@@ -86,23 +102,24 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
              interruptNum);
 
     /*
-     * Priority expected is either:
-     *    INT_PRI_LEVEL0 to INT_PRI_LEVEL3,
-     *    or ~0 or 255 (meaning lowest priority)
-     *    ~0 and 255 are meant to be the same as INT_PRI_LEVEL3.
+     * Verify that the priority level is valid:
+     *   priority is any value within INT_PRIORITY_MASK
+     *   or priority is ~0 or 255
      */
-    __ASSERT((INT_PRI_LEVEL0 == priority) || (INT_PRI_LEVEL3 == priority) || (INT_PRI_LEVEL2 == priority) ||
-                 (INT_PRI_LEVEL1 == priority) || (0xFF == priority),
+    __ASSERT((priority == INT_PRI_LEVEL0) || (priority == 0xFF) ||
+            ((priority & INT_PRIORITY_MASK) && !(priority & ~INT_PRIORITY_MASK)),
              "Unexpected priority level, got: 0x%x\r\n",
              (unsigned int)priority);
 
+
     if (0xFF == priority)
     {
-        priority = INT_PRI_LEVEL3;
+        priority = INT_PRI_LEVEL_LOWEST;
     }
 
-    /* The priority for IRQ_CONNECT is encoded in the top 2 bits */
-    priority = (priority >> 6);
+    /* The priority for IRQ_CONNECT is encoded in NUM_PRIORITY_BITS bits */
+    priority = (priority >> (8 - NUM_PRIORITY_BITS));
+
 
     switch (interruptNum)
     {
@@ -117,6 +134,12 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
         sl_IRQ01_cb.arg = arg;
         obj->cb = &sl_IRQ01_cb;
         irq_connect_dynamic(INT_CPUIRQ1 - 16, priority, sl_isr, &sl_IRQ01_cb, 0);
+        break;
+    case INT_CPUIRQ2:
+        sl_IRQ02_cb.cb  = hwiFxn;
+        sl_IRQ02_cb.arg = arg;
+        obj->cb         = &sl_IRQ02_cb;
+        irq_connect_dynamic(INT_CPUIRQ2 - 16, priority, sl_isr, &sl_IRQ02_cb, 0);
         break;
     case INT_CPUIRQ3:
         sl_IRQ03_cb.cb = hwiFxn;
