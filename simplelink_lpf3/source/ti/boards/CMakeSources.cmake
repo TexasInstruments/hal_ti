@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Texas Instruments Incorporated
+# Copyright (c) 2024-2025, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,18 @@
 
 if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
 
-  include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
-
-  zephyr_include_directories(
-    .
-    )
-
-  zephyr_library()
-
   zephyr_library_sources(
-    ${SOURCES_RCL_SETTINGS}
+        generated/${CONFIG_BOARD}/ti_radio_config.c
     )
 
-  # [Workaround]: Include the radio settings for ble by default
-  # TODO: radio settings should be selectable, see ZEPHYR-24
-  zephyr_library_sources_ifdef(CONFIG_SIMPLELINK_F3_RF_SETTING_PREGEN ${SOURCES_RCL_SETTINGS_PREGEN})
 endif()
+
+zephyr_include_directories(
+    generated/${CONFIG_BOARD}
+)
+
+zephyr_library_sources(
+    generated/${CONFIG_BOARD}/ti_drivers_config.c
+)
+
+zephyr_linker_sources(RAM_SECTIONS generated/${CONFIG_BOARD}/ti_utils_build_linker.cmd.genmap)

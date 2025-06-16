@@ -42,7 +42,6 @@ set(SOURCES_DRIVERS_LPF3
 
 set(SOURCES_DRIVERS_CC23X0
     # Default Simplelink configurations
-    ti_drivers_config_cc23xx.c
     power/PowerCC23X0.c
 
     # Drivers
@@ -73,7 +72,6 @@ set(SOURCES_DRIVERS_CC23X0
 
 set(SOURCES_DRIVERS_CC27XX
     # Default Simplelink configurations
-    ti_drivers_config_cc27xx.c
     power/PowerCC27XX.c
 
     # Crypto drivers

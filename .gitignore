@@ -10,3 +10,8 @@ Identity.txt
 KconfigBasic.txt
 KconfigBasicNoModules.txt
 **/__pycache__/
+
+**/generated/*.xs
+**/generated/*.opt
+**/generated/*.genlibs
+**/excluded

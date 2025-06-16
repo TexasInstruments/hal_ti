@@ -1,4 +1,4 @@
-# Copyright (c) 2024, Texas Instruments Incorporated
+# Copyright (c) 2025, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,4 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_subdirectory_ifdef(CONFIG_HAS_CC23X0_SDK cc23x0r5)
-add_subdirectory_ifdef(CONFIG_HAS_CC27XX_SDK cc27xx)
-if(CONFIG_HAS_CC23X0_SDK OR CONFIG_HAS_CC27XX_SDK)
-  include(CMakeSources.cmake)
-endif()
+include(CMakeSources.cmake)
