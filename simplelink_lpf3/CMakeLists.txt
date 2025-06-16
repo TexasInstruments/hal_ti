@@ -59,7 +59,7 @@ if(CONFIG_HAS_CC23X0_SDK)
   zephyr_library()
   zephyr_library_compile_definitions(${COMPILER})
   zephyr_library_sources(
-    ${SOURCES_DRIVERS_LF3}
+    ${SOURCES_DRIVERS_LPF3}
     ${SOURCES_DRIVERS_CC23X0}
     ${SOURCES_KERNEL}
     )
