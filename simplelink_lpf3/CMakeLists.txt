@@ -75,7 +75,6 @@ if(CONFIG_HAS_CC23X0_SDK)
     zephyr_library_sources(
         ${SOURCES_RCL}
         ${SOURCES_RCL_LPF3}
-        ${SOURCES_RCL_CC23X0}
       )
   endif()
 
@@ -116,5 +115,13 @@ if(CONFIG_HAS_CC27XX_SDK)
     ${SOURCES_DRIVERS_CC27XX}
     ${SOURCES_KERNEL}
     )
+
+  # Radio Control Layer (RCL) driver
+  if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
+    zephyr_library_sources(
+        ${SOURCES_RCL}
+        ${SOURCES_RCL_LPF3}
+      )
+  endif()
 
 endif()

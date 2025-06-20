@@ -41,3 +41,10 @@ zephyr_library()
 zephyr_library_sources(
   ${SOURCES_DRIVERLIB}
   )
+
+# RF patches
+if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
+  zephyr_library_sources(
+    ${SOURCES_RF_PATCHES}
+    )
+endif()

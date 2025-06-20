@@ -10,22 +10,23 @@ set(SOURCES_RCL
 )
 
 set(SOURCES_RCL_LPF3
+    # Command handlers
     handlers/adc_noise.c
     handlers/ble_cs.c
     handlers/ble5.c
     handlers/generic.c
     handlers/ieee.c
-    wrappers/RCL_AdcNoise.c
-)
 
-set(SOURCES_RCL_CC23X0
+    # Wrappers
+    wrappers/RCL_AdcNoise.c
+
+    # HAL
     hal/cc23x0/hal_cc23x0.c
     LRFCC23X0.c
 )
 
 list(TRANSFORM SOURCES_RCL PREPEND source/ti/drivers/rcl/)
 list(TRANSFORM SOURCES_RCL_LPF3 PREPEND source/ti/drivers/rcl/)
-list(TRANSFORM SOURCES_RCL_CC23X0 PREPEND source/ti/drivers/rcl/)
 
 set(SOURCES_DRIVERS_LPF3
     # Utils

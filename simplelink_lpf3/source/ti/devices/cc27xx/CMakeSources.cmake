@@ -44,3 +44,32 @@ set(SOURCES_DRIVERLIB
 )
 
 list(TRANSFORM SOURCES_DRIVERLIB PREPEND driverlib/)
+
+set(SOURCES_RF_PATCHES
+  lrf_mce_binary_ble5_cc27xx.c
+  lrf_mce_binary_ble5_phac_cc27xx.c
+  lrf_mce_binary_ble_cs_cc27xx.c
+  lrf_mce_binary_common_cc27xx.c
+  lrf_mce_binary_genfsk_cc27xx.c
+  lrf_mce_binary_ieee_cc27xx.c
+  lrf_mce_binary_ieee_cohr_cc27xx.c
+  lrf_pbe_binary_ble5_cc27xx.c
+  lrf_pbe_binary_ble_cs_cc27xx.c
+  lrf_pbe_binary_common_cc27xx.c
+  lrf_pbe_binary_generic_cc27xx.c
+  lrf_pbe_binary_ieee_cc27xx.c
+  lrf_rfe_binary_ble5_cc27xx.c
+  lrf_rfe_binary_ble5_nopll_cc27xx.c
+  lrf_rfe_binary_ble_cs_cc27xx.c
+  lrf_rfe_binary_ble_cs_nopll_cc27xx.c
+  lrf_rfe_binary_coherent_pll_cc27xx.c
+  lrf_rfe_binary_coherent_pll_nopll_cc27xx.c
+  lrf_rfe_binary_common_cc27xx.c
+  lrf_rfe_binary_common_nopll_cc27xx.c
+  lrf_rfe_binary_genfsk_cc27xx.c
+  lrf_rfe_binary_genfsk_nopll_cc27xx.c
+  lrf_rfe_binary_ieee_cc27xx.c
+  lrf_rfe_binary_ieee_nopll_cc27xx.c
+)
+
+list(TRANSFORM SOURCES_RF_PATCHES PREPEND rf_patches/)
