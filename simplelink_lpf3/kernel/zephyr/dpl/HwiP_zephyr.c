@@ -6,27 +6,21 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/sys/__assert.h>
+#include <zephyr/arch/exception.h>
 #include <ti/drivers/dpl/HwiP.h>
 #include <ti/devices/DeviceFamily.h>
-
 #include <inc/hw_types.h>
 #include <inc/hw_ints.h>
 
 #include <driverlib/interrupt.h>
 
 #if DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX
-    /* On Cortex M33 Zephyr will reserve the highest interrupt for the kernel,
-     * and shift the available range of interrupts. The lowest available value is
-     * INT_PRI_LEVEL14 instead of INT_PRI_LEVEL15
-     */
-    #define INT_PRI_LEVEL_LOWEST INT_PRI_LEVEL14
     #define SWIP_INT_NUM INT_SW0
 #elif DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0
-    #define INT_PRI_LEVEL_LOWEST INT_PRI_LEVEL3
     #define SWIP_INT_NUM INT_CPUIRQ1
 #endif
 
-
+#define INT_PRI_LEVEL_LOWEST (IRQ_PRIO_LOWEST<<4)
 
 /*
  * IRQ_CONNECT requires we know the ISR signature and argument
