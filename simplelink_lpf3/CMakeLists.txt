@@ -30,12 +30,12 @@
 
 # All targets in this file are for Cortex-M0P
 
-option(USE_BLE_LIB "Use BLE libraries" ON)
-
 add_subdirectory(source/ti/devices)
 add_subdirectory(source/ti/boards)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
+
+add_subdirectory_ifdef(CONFIG_BT source/ti/ble)
 
 if(CONFIG_HAS_CC23X0_SDK)
 
@@ -51,10 +51,6 @@ if(CONFIG_HAS_CC23X0_SDK)
     .
     source
     )
-
-  if(USE_BLE_LIB STREQUAL "ON")
-    zephyr_include_directories(source/ti/ble5stack_flash/inc)
-  endif()
 
   zephyr_library()
   zephyr_library_compile_definitions(${COMPILER})
@@ -76,23 +72,6 @@ if(CONFIG_HAS_CC23X0_SDK)
         ${SOURCES_RCL}
         ${SOURCES_RCL_LPF3}
       )
-  endif()
-
-  function(add_prebuilt_library lib_name prebuilt_path)
-    add_library(${lib_name} STATIC IMPORTED GLOBAL)
-     set_target_properties(${lib_name} PROPERTIES
-       IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/${prebuilt_path}
-     )
-    zephyr_link_libraries(${lib_name})
-  endfunction()
-
-  if(USE_BLE_LIB STREQUAL "ON")
-  # prebuilt libs
-    if (CONFIG_BT_PERIPHERAL AND (NOT (CONFIG_BT_MESH STREQUAL "y")))
-      add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller_peripheral.a)
-    else()
-      add_prebuilt_library(blecontroller      source/ti/ble5stack_flash/ble_controller.a)
-    endif()
   endif()
 
 endif()
