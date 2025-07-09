@@ -20,7 +20,7 @@
     #define SWIP_INT_NUM INT_CPUIRQ1
 #endif
 
-#define INT_PRI_LEVEL_LOWEST (IRQ_PRIO_LOWEST<<4)
+#define INT_PRI_LEVEL_LOWEST (IRQ_PRIO_LOWEST << (8 - NUM_PRIORITY_BITS))
 
 /*
  * IRQ_CONNECT requires we know the ISR signature and argument
@@ -36,7 +36,7 @@ struct sl_isr_args
 
 static void sl_isr(const void *isr_arg)
 {
-    HwiP_Fxn cb = ((struct sl_isr_args *)isr_arg)->cb;
+    HwiP_Fxn cb   = ((struct sl_isr_args *)isr_arg)->cb;
     uintptr_t arg = ((struct sl_isr_args *)isr_arg)->arg;
 
     /* Call the SimpleLink ISR Handler: */
@@ -55,12 +55,12 @@ typedef struct _HwiP_Obj
 /* interrupt reserved for SwiP */
 int HwiP_swiPIntNum = SWIP_INT_NUM;
 
-static struct sl_isr_args sl_IRQ00_cb = {NULL, 0};
-static struct sl_isr_args sl_IRQ01_cb = {NULL, 0};
-static struct sl_isr_args sl_IRQ02_cb = {NULL, 0};
-static struct sl_isr_args sl_IRQ03_cb = {NULL, 0};
-static struct sl_isr_args s1_IRQ04_cb = {NULL, 0};
-static struct sl_isr_args sl_IRQ16_cb = {NULL, 0};
+static struct sl_isr_args sl_IRQ00_cb     = {NULL, 0};
+static struct sl_isr_args sl_IRQ01_cb     = {NULL, 0};
+static struct sl_isr_args sl_IRQ02_cb     = {NULL, 0};
+static struct sl_isr_args sl_IRQ03_cb     = {NULL, 0};
+static struct sl_isr_args s1_IRQ04_cb     = {NULL, 0};
+static struct sl_isr_args sl_IRQ16_cb     = {NULL, 0};
 static struct sl_isr_args s1_LRFD_IRQ0_cb = {NULL, 0};
 static struct sl_isr_args s1_LRFD_IRQ1_cb = {NULL, 0};
 
@@ -69,8 +69,8 @@ static struct sl_isr_args s1_LRFD_IRQ1_cb = {NULL, 0};
  */
 HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFxn, HwiP_Params *params)
 {
-    HwiP_Obj *obj = (HwiP_Obj *)handle;
-    uintptr_t arg = 0;
+    HwiP_Obj *obj    = (HwiP_Obj *)handle;
+    uintptr_t arg    = 0;
     uint8_t priority = INT_PRI_LEVEL_LOWEST; /* default to lowest priority */
 
     if (handle == NULL)
@@ -81,7 +81,7 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
     if (params)
     {
         priority = params->priority & 0xFF;
-        arg = params->arg;
+        arg      = params->arg;
     }
 
     /*
@@ -101,10 +101,9 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
      *   or priority is ~0 or 255
      */
     __ASSERT((priority == INT_PRI_LEVEL0) || (priority == 0xFF) ||
-            ((priority & INT_PRIORITY_MASK) && !(priority & ~INT_PRIORITY_MASK)),
+                 ((priority & INT_PRIORITY_MASK) && !(priority & ~INT_PRIORITY_MASK)),
              "Unexpected priority level, got: 0x%x\r\n",
              (unsigned int)priority);
-
 
     if (0xFF == priority)
     {
@@ -114,59 +113,58 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
     /* The priority for IRQ_CONNECT is encoded in NUM_PRIORITY_BITS bits */
     priority = (priority >> (8 - NUM_PRIORITY_BITS));
 
-
     switch (interruptNum)
     {
-    case INT_CPUIRQ0:
-        sl_IRQ00_cb.cb = hwiFxn;
-        sl_IRQ00_cb.arg = arg;
-        obj->cb = &sl_IRQ00_cb;
-        irq_connect_dynamic(INT_CPUIRQ0 - 16, priority, sl_isr, &sl_IRQ00_cb, 0);
-        break;
-    case INT_CPUIRQ1:
-        sl_IRQ01_cb.cb = hwiFxn;
-        sl_IRQ01_cb.arg = arg;
-        obj->cb = &sl_IRQ01_cb;
-        irq_connect_dynamic(INT_CPUIRQ1 - 16, priority, sl_isr, &sl_IRQ01_cb, 0);
-        break;
-    case INT_CPUIRQ2:
-        sl_IRQ02_cb.cb  = hwiFxn;
-        sl_IRQ02_cb.arg = arg;
-        obj->cb         = &sl_IRQ02_cb;
-        irq_connect_dynamic(INT_CPUIRQ2 - 16, priority, sl_isr, &sl_IRQ02_cb, 0);
-        break;
-    case INT_CPUIRQ3:
-        sl_IRQ03_cb.cb = hwiFxn;
-        sl_IRQ03_cb.arg = arg;
-        obj->cb = &sl_IRQ03_cb;
-        irq_connect_dynamic(INT_CPUIRQ3 - 16, priority, sl_isr, &sl_IRQ03_cb, 0);
-        break;
-    case INT_CPUIRQ4:
-        s1_IRQ04_cb.cb = hwiFxn;
-        s1_IRQ04_cb.arg = arg;
-        obj->cb = &s1_IRQ04_cb;
-        irq_connect_dynamic(INT_CPUIRQ4 - 16, priority, sl_isr, &s1_IRQ04_cb, 0);
-        break;
-    case INT_CPUIRQ16:
-        sl_IRQ16_cb.cb = hwiFxn;
-        sl_IRQ16_cb.arg = arg;
-        obj->cb = &sl_IRQ16_cb;
-        irq_connect_dynamic(INT_CPUIRQ16 - 16, priority, sl_isr, &sl_IRQ16_cb, 0);
-        break;
-    case INT_LRFD_IRQ0:
-        s1_LRFD_IRQ0_cb.cb = hwiFxn;
-        s1_LRFD_IRQ0_cb.arg = arg;
-        obj->cb = &s1_LRFD_IRQ0_cb;
-        irq_connect_dynamic(INT_LRFD_IRQ0 - 16, priority, sl_isr, &s1_LRFD_IRQ0_cb, 0);
-        break;
-    case INT_LRFD_IRQ1:
-        s1_LRFD_IRQ1_cb.cb = hwiFxn;
-        s1_LRFD_IRQ1_cb.arg = arg;
-        obj->cb = &s1_LRFD_IRQ1_cb;
-        irq_connect_dynamic(INT_LRFD_IRQ1 - 16, priority, sl_isr, &s1_LRFD_IRQ1_cb, 0);
-        break;
-    default:
-        return (NULL);
+        case INT_CPUIRQ0:
+            sl_IRQ00_cb.cb  = hwiFxn;
+            sl_IRQ00_cb.arg = arg;
+            obj->cb         = &sl_IRQ00_cb;
+            irq_connect_dynamic(INT_CPUIRQ0 - 16, priority, sl_isr, &sl_IRQ00_cb, 0);
+            break;
+        case INT_CPUIRQ1:
+            sl_IRQ01_cb.cb  = hwiFxn;
+            sl_IRQ01_cb.arg = arg;
+            obj->cb         = &sl_IRQ01_cb;
+            irq_connect_dynamic(INT_CPUIRQ1 - 16, priority, sl_isr, &sl_IRQ01_cb, 0);
+            break;
+        case INT_CPUIRQ2:
+            sl_IRQ02_cb.cb  = hwiFxn;
+            sl_IRQ02_cb.arg = arg;
+            obj->cb         = &sl_IRQ02_cb;
+            irq_connect_dynamic(INT_CPUIRQ2 - 16, priority, sl_isr, &sl_IRQ02_cb, 0);
+            break;
+        case INT_CPUIRQ3:
+            sl_IRQ03_cb.cb  = hwiFxn;
+            sl_IRQ03_cb.arg = arg;
+            obj->cb         = &sl_IRQ03_cb;
+            irq_connect_dynamic(INT_CPUIRQ3 - 16, priority, sl_isr, &sl_IRQ03_cb, 0);
+            break;
+        case INT_CPUIRQ4:
+            s1_IRQ04_cb.cb  = hwiFxn;
+            s1_IRQ04_cb.arg = arg;
+            obj->cb         = &s1_IRQ04_cb;
+            irq_connect_dynamic(INT_CPUIRQ4 - 16, priority, sl_isr, &s1_IRQ04_cb, 0);
+            break;
+        case INT_CPUIRQ16:
+            sl_IRQ16_cb.cb  = hwiFxn;
+            sl_IRQ16_cb.arg = arg;
+            obj->cb         = &sl_IRQ16_cb;
+            irq_connect_dynamic(INT_CPUIRQ16 - 16, priority, sl_isr, &sl_IRQ16_cb, 0);
+            break;
+        case INT_LRFD_IRQ0:
+            s1_LRFD_IRQ0_cb.cb  = hwiFxn;
+            s1_LRFD_IRQ0_cb.arg = arg;
+            obj->cb             = &s1_LRFD_IRQ0_cb;
+            irq_connect_dynamic(INT_LRFD_IRQ0 - 16, priority, sl_isr, &s1_LRFD_IRQ0_cb, 0);
+            break;
+        case INT_LRFD_IRQ1:
+            s1_LRFD_IRQ1_cb.cb  = hwiFxn;
+            s1_LRFD_IRQ1_cb.arg = arg;
+            obj->cb             = &s1_LRFD_IRQ1_cb;
+            irq_connect_dynamic(INT_LRFD_IRQ1 - 16, priority, sl_isr, &s1_LRFD_IRQ1_cb, 0);
+            break;
+        default:
+            return (NULL);
     }
     irq_enable(interruptNum - 16);
 
@@ -177,7 +175,7 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
 
 void HwiP_Params_init(HwiP_Params *params)
 {
-    params->arg = 0;
+    params->arg      = 0;
     params->priority = ~0;
 }
 
@@ -227,7 +225,7 @@ void HwiP_setFunc(HwiP_Handle hwiP, HwiP_Fxn fxn, uintptr_t arg)
 
     uintptr_t key = HwiP_disable();
 
-    obj->cb->cb = fxn;
+    obj->cb->cb  = fxn;
     obj->cb->arg = arg;
 
     HwiP_restore(key);
@@ -241,9 +239,9 @@ void HwiP_destruct(HwiP_Struct *hwiP)
 
     irq_disable(interruptNum - 16);
 
-    obj->cb->cb = NULL;
+    obj->cb->cb  = NULL;
     obj->cb->arg = (uintptr_t)NULL;
-    obj->cb = NULL;
+    obj->cb      = NULL;
 }
 
 void HwiP_setPriority(int interruptNum, uint32_t priority)
