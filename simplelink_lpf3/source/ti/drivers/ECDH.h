@@ -595,7 +595,9 @@ typedef enum
                                  */
 } ECDH_KeyMaterialEndianness;
 
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#if (((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)) && \
+    !defined(CONFIG_ZEPHYR))
 /*!
  *  @brief  Enum for the curve types supported by the driver.
  */
@@ -631,7 +633,9 @@ typedef enum
  */
 typedef struct
 {
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#if (((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)) && \
+    !defined(CONFIG_ZEPHYR))
     ECDH_CurveType curveType; /*!< An ECDSA_CurveType value indicating which EC curve to use for the operation*/
 #endif
     const ECCParams_CurveParams *curve; /*!< A pointer to the elliptic curve parameters for myPrivateKey */
@@ -653,7 +657,9 @@ typedef struct
  */
 typedef struct
 {
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#if (((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)) && \
+    !defined(CONFIG_ZEPHYR))
     ECDH_CurveType curveType; /*!< An ECDSA_CurveType value indicating which EC curve to use for the operation*/
 #endif
     const ECCParams_CurveParams *curve;               /*!< A pointer to the elliptic curve parameters for myPrivateKey.

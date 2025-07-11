@@ -75,6 +75,15 @@ set(SOURCES_DRIVERS_CC27XX
     # Default Simplelink configurations
     ti_drivers_config_cc27xx.c
     power/PowerCC27XX.c
+
+    # Crypto drivers
+    cryptoutils/cryptokey/CryptoKeyPlaintext.c
+    cryptoutils/ecc/ECCInitLPF3SW.c
+    cryptoutils/ecc/ECCParamsLPF3SW.c
+    cryptoutils/sharedresources/CryptoResourceLPF3.c
+    cryptoutils/utils/CryptoUtils.c
+    ECDH.c
+    ecdh/ECDHLPF3SW.c
 )
 
 list(TRANSFORM SOURCES_DRIVERS_LPF3 PREPEND source/ti/drivers/)

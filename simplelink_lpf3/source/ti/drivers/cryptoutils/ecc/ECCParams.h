@@ -46,7 +46,9 @@
 #include <ti/drivers/cryptoutils/cryptokey/CryptoKey.h>
 #include <ti/devices/DeviceFamily.h>
 
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#if (((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)) && \
+    !defined(CONFIG_ZEPHYR))
     #include <ti/drivers/cryptoutils/ecc/ECCParamsLPF3HSM.h>
 #endif
 
