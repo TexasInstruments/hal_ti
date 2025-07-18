@@ -103,6 +103,10 @@ if(CONFIG_HAS_CC27XX_SDK)
     zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
   endif()
 
+  if(CONFIG_SOC_CC2755R10)
+    zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
+  endif()
+
   zephyr_include_directories(
     .
     source
