@@ -44,8 +44,15 @@ set(CTRL_CONFIG       0)
 if (CONFIG_BT_HCI_RAW)
   math(EXPR CTRL_CONFIG "${CTRL_CONFIG} | ${ADV_NCONN_CFG} | ${ADV_CONN_CFG} | ${SCAN_CFG} | ${INIT_CFG}")
   zephyr_compile_definitions(
-    -DUSE_PERIODIC_ADV
     -DUSE_AE
+    -DPOWER_CONTROL
+    -DUSE_PERIODIC_ADV
+    -DUSE_PERIODIC_SCAN
+    -DVENDOR_SPECIFIC_CMD
+    -DEXT_VENDOR_SPECIFIC_CMD
+    -DUSE_PAST_RECEIVER
+    -DUSE_PAST_SENDER
+    -DUSE_PAWR_SCAN
   )
 endif()
 if (CONFIG_BT_BROADCASTER)
@@ -60,6 +67,16 @@ endif()
 if (CONFIG_BT_CENTRAL)
   math(EXPR CTRL_CONFIG "${CTRL_CONFIG} | ${SCAN_CFG} | ${INIT_CFG}")
 endif()
+if (CONFIG_BT_CTLR_LE_POWER_CONTROL)
+  zephyr_compile_definitions(
+    -DPOWER_CONTROL
+  )
+endif()
+if (CONFIG_BT_HCI_VS)
+  zephyr_compile_definitions(
+    -DVENDOR_SPECIFIC_CMD
+  )
+endif()
 if (CONFIG_BT_EXT_ADV)
   zephyr_compile_definitions(
     -DUSE_AE
@@ -73,6 +90,26 @@ endif()
 if (CONFIG_BT_PER_ADV_SYNC)
   zephyr_compile_definitions(
     -DUSE_PERIODIC_SCAN
+  )
+endif()
+if (CONFIG_BT_PER_ADV_RSP)
+  zephyr_compile_definitions(
+    -DUSE_PAWR_ADV
+  )
+endif()
+if (CONFIG_BT_PER_ADV_SYNC_RSP)
+  zephyr_compile_definitions(
+    -DUSE_PAWR_SCAN
+  )
+endif()
+if (CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER)
+  zephyr_compile_definitions(
+    -DUSE_PAST_SENDER
+  )
+endif()
+if (CONFIG_BT_PER_ADV_SYNC_TRANSFER_RECEIVER)
+  zephyr_compile_definitions(
+    -DUSE_PAST_RECEIVER
   )
 endif()
 
@@ -102,6 +139,8 @@ zephyr_library_sources(
   stack_util/lib_opt/src/ctrl_opt_adv_nconn.c
   stack_util/lib_opt/src/ctrl_opt_ae.c
   stack_util/lib_opt/src/ctrl_opt_adaptivity.c
+  stack_util/lib_opt/src/ctrl_opt_vendor_specific_cmd.c
+  stack_util/lib_opt/src/ctrl_opt_ext_vendor_specific_cmd.c
   #stack_util/lib_opt/src/ctrl_opt_ble_health.c
   app_util/config/src/ble_config_zephyr.c
   app_util/config/src/hci_supported_cmd.c
