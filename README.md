@@ -12,7 +12,7 @@ module will be imported as necessary when setting up a Zephyr workspace using
 West - please refer to the
 [README](https://github.com/texasInstruments/simplelink-zephyr/README.md) for
 getting started. The structure of this module is divided between Simplelink F2
-(CC13XX/CC26XX/CC32XX) and Simplelink F3 (CC23X0), and the content is taken from
+(CC13XX/CC26XX/CC32XX) and Simplelink F3 (CC23X0, CC27XX), and the content is taken from
 the respective Simplelink SDKs. See each sub-folder for further details.
 
 ### Updating to new SDK version (lpf3 only)

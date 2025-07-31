@@ -13,8 +13,8 @@ and maintained in this repository.
 ### Version
 
 The current version of simplelink_lpf3 is based on
-[Simplelink LPF3 8.20.00](https://www.ti.com/tool/download/SIMPLELINK-LOWPOWER-F3-SDK/).
+[Simplelink LPF3 9.10.00](https://www.ti.com/tool/download/SIMPLELINK-LOWPOWER-F3-SDK/).
 Specifically, the following components have been used:
 
-- Core SDK 8.10.01.04
-- RCL 8.20.01.04
+- Core SDK 9.10.00.11
+- RCL 9.10.00.36
