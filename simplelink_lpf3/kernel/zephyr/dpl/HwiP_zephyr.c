@@ -89,7 +89,7 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
      * INT_CPUIRQ16 (Batmon ISR), INT_CPUIRQ4 (RCL Scheduler ISR), INT_LRFD_IRQ0
      * (RCL Command Handler ISR) and INT_LRFD_IRQ1 (RCL Dispatcher ISR)
      */
-    __ASSERT((INT_CPUIRQ0 == interruptNum) || (INT_CPUIRQ1 == interruptNum) || (INT_CPUIRQ3 == interruptNum) ||
+    __ASSERT((INT_CPUIRQ0 == interruptNum) || (INT_CPUIRQ1 == interruptNum) || (INT_CPUIRQ2 == interruptNum) || (INT_CPUIRQ3 == interruptNum) ||
                  (INT_CPUIRQ4 == interruptNum) || (INT_CPUIRQ16 == interruptNum) || (INT_LRFD_IRQ0 == interruptNum) ||
                  (INT_LRFD_IRQ1 == interruptNum),
              "Unexpected interruptNum: %d\r\n",
