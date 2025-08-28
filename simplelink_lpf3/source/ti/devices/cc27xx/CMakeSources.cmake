@@ -41,6 +41,7 @@ set(SOURCES_DRIVERLIB
   pmctl.c
   setup.c
   uart.c
+  i2c.c
 )
 
 list(TRANSFORM SOURCES_DRIVERLIB PREPEND driverlib/)
