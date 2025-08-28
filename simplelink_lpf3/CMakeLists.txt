@@ -101,6 +101,9 @@ if(CONFIG_HAS_CC27XX_SDK)
   zephyr_link_libraries(
     ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m33f/ecc.a
     )
+  zephyr_linker_sources(RAM_SECTIONS
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/ti/drivers/dma/dma.ld
+  )
 
   # Radio Control Layer (RCL) driver
   if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
