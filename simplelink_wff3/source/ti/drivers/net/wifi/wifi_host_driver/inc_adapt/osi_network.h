@@ -40,6 +40,11 @@
 #define INC_ADAPT_OSI_NETWORK_H_
 
 
+#if defined(__ZEPHYR__)
+#ifndef IN_ADDR
+#define IN_ADDR
+#endif
+#else
 #ifndef IN_ADDR
 #define IN_ADDR
 struct in_addr {
@@ -62,6 +67,7 @@ struct sockaddr_in {
 #define SIN_ZERO_LEN 8
   char            sin_zero[SIN_ZERO_LEN];
 };
+#endif /* defined(__ZEPHYR__) */
 
 
 

@@ -46,7 +46,7 @@ static void dpl_task_pool_free(struct k_thread *task)
     return;
 }
 
-#endif /* CONFIG_DYNAMIC_DPL_OBJECTS */
+#endif /* DYNAMIC_THREADS */
 
 /*
  *  ======== Array for conversion of Zephyr thread state to DPL task state ========

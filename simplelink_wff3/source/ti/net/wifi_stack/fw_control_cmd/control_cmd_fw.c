@@ -1679,7 +1679,10 @@ void eventEntryThread(void *params)
                     eventId = (EventMBoxId_e)((EventMailBox_t*)event->message)->eventsVector;
                     if (eventId & BLE_EVENT_ID)
                     {
+                        /* TODO: Disable BLE for now. */
+#if !defined(__ZEPHYR__)
                         BleTransport_BleEventHandler(event->message);
+#endif /* !defined(__ZEPHYR__) */
                     }
                     if (eventId & ~BLE_EVENT_ID)
                     {

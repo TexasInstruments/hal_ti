@@ -1,22 +1,42 @@
 add_subdirectory(source/ti/devices)
+if(CONFIG_WIFI_TI_CC35XX)
+  add_subdirectory(source/ti/drivers/net/wifi/wifi_host_driver)
+  add_subdirectory(source/ti/drivers/net/wifi/wifi_platform/cc35xx)
+  add_subdirectory(third_party/hostap)
+  add_subdirectory(third_party/mbedTLS)
+  add_subdirectory(source/ti/net/wifi_stack)
+endif()
 
 if(CONFIG_HAS_CC35XX_SDK)
   if(CONFIG_SOC_SERIES_CC35XXE)
     zephyr_compile_definitions(DeviceFamily_CC35XX ${COMPILER})
+    zephyr_compile_definitions(CONFIG_DYNAMIC_DPL_OBJECTS)
     zephyr_include_directories(
       .
       source
       source/ti/drivers
       third_party/hsmddk/include/Kit/Log/incl/
     )
+    if(CONFIG_WIFI_TI_CC35XX)
+      zephyr_include_directories(
+        firmware
+	# shared between host driver and hostap
+        source/ti/drivers/net/wifi/wifi_host_driver
+        source/ti/drivers/net/wifi/wifi_host_driver/inc_common
+        source/ti/drivers/net/wifi/wifi_host_driver/inc_adapt
+        source/ti/drivers/net/wifi/wifi_host_driver/trnspt_layer
+      )
+    endif()
 
     zephyr_library()
     zephyr_library_compile_definitions(${COMPILER})
     zephyr_library_sources(
       kernel/zephyr/dpl/ClockP_zephyr.c
       kernel/zephyr/dpl/HwiP_zephyr.c
+      kernel/zephyr/dpl/MessageQueueP_zephyr.c
       kernel/zephyr/dpl/SwiP_zephyr.c
       kernel/zephyr/dpl/SemaphoreP_zephyr.c
+      kernel/zephyr/dpl/TaskP_zephyr.c
       kernel/zephyr/dpl/QueueP_zephyr.c
 
       source/ti/drivers/UART2.c
@@ -61,6 +81,13 @@ if(CONFIG_HAS_CC35XX_SDK)
         source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
         source/ti/drivers/TRNG.c
         source/ti/drivers/trng/TRNGLPF3HSM.c
+      )
+    endif()
+    if(CONFIG_WIFI_TI_CC35XX)
+      zephyr_library_sources(
+        kernel/zephyr/dpl/osi_dpl.c
+        kernel/zephyr/dpl/osi_filesystem.c
+        kernel/zephyr/dpl/osi_term.c
       )
     endif()
   endif()

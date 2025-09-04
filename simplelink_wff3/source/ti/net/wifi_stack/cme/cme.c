@@ -65,7 +65,10 @@
 
 
 #include "wlan_if.h"
+/* TODO: Disable BLE for now. */
+#if !defined(__ZEPHYR__)
 #include "ble_if.h"
+#endif /* !defined(__ZEPHYR__) */
 
 #include "errors.h"
 #include "drv_ti_internal.h"
@@ -3516,7 +3519,10 @@ void cme_Thread(void* apParam)
                 }   
                 break;
                 case CME_MESSAGE_ID_BLE_ENABLED:
+                    /* TODO: Disable BLE for now. */
+#if !defined(__ZEPHYR__)
                     BleIf_EnableBLE();
+#endif /* !defined(__ZEPHYR__) */
                     break;
 
                 case CME_MESSAGE_ID_P2P_CMD:

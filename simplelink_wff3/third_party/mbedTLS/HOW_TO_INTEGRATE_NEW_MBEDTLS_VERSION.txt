@@ -1,0 +1,7 @@
+1. pip3 install jsonschema
+2. pour all content of mbedTLS to mbedTLS folder
+3. got to scripts folder in the mbedTLS folder
+4. run python3 generate_driver_wrappers.py 
+5. run python3 generate_psa_constants.py
+
+

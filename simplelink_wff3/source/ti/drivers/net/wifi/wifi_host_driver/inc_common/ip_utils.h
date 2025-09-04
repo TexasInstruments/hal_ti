@@ -85,9 +85,11 @@ int inet_pton(int af,const char *src,void *dst);
 int inet_pton4(const char *src, unsigned char *dst);
 int inet_pton6(const char *src, unsigned char *dst);
 #endif
+#if !defined(__ZEPHYR__)
 int inet_ntop(int af, const void *src, void *dst, size_t size);
 int inet_ntop4(const unsigned char *src, char *dst, size_t size);
 int inet_ntop6(const unsigned char *src, char *dst, size_t size);
+#endif /* !defined(__ZEPHYR__) */
 
 void ipUtils_StringReverse (char* s);
 

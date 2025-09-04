@@ -118,8 +118,7 @@ MessageQueueP_Status MessageQueueP_pend(MessageQueueP_Handle handle, void *messa
     else
     {
         /* If necessary, convert ClockP ticks to Zephyr ticks */
-        /* Should really be ClockP_getSystemTickPeriod() but this causes issues with ielftool post build step */
-        tickPeriod = ClockP_TICK_PERIOD;
+        tickPeriod = ClockP_getSystemTickPeriod();
         msgTimeout = K_TICKS(timeout);
     }
     int status = k_msgq_get((struct k_msgq*) handle, message, msgTimeout);
@@ -166,8 +165,7 @@ MessageQueueP_Status MessageQueueP_post(MessageQueueP_Handle handle, const void 
     else
     {
         /* if necessary, convert ClockP ticks to Zephyr ticks */
-        /* Should really be ClockP_getSystemTickPeriod() but this causes issues with ielftool post build step */
-        tickPeriod = ClockP_TICK_PERIOD;
+        tickPeriod = ClockP_getSystemTickPeriod();
         if (tickPeriod != CONFIG_SYS_CLOCK_TICKS_PER_SEC)
         {
             timeUS  = timeout * (uint64_t)tickPeriod;

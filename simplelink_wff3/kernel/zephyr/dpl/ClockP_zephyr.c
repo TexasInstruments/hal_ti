@@ -95,7 +95,7 @@ static void expiry_fxn(struct k_timer *timer_id)
 #ifdef CONFIG_DYNAMIC_DPL_OBJECTS
 
 /* We can't easily dynamically allocate kernel objects so we use memory slabs */
-#define DPL_MAX_CLOCKS 5
+#define DPL_MAX_CLOCKS 24
 K_MEM_SLAB_DEFINE(clock_slab, sizeof(ClockP_Obj), DPL_MAX_CLOCKS,\
           MEM_ALIGN);
 

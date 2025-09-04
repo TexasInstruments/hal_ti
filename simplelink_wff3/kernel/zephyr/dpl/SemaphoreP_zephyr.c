@@ -19,7 +19,7 @@
  * It leverages the Zephyr memory slab, enabling us to define a semaphore
  * object pool for use by the SimpleLink host driver.
  */
-#define DPL_MAX_SEMAPHORES 14 /* (user.h:MAX_CONCURRENT_ACTIONS+4) = 14 */
+#define DPL_MAX_SEMAPHORES 28
 K_MEM_SLAB_DEFINE(sem_slab, sizeof(struct k_sem), DPL_MAX_SEMAPHORES, MEM_ALIGN);
 
 static struct k_sem *dpl_sem_pool_alloc()
@@ -40,7 +40,7 @@ static struct k_sem *dpl_sem_pool_alloc()
 
 static SemaphoreP_Status dpl_sem_pool_free(struct k_sem *sem)
 {
-    k_mem_slab_free(&sem_slab, (void **)&sem);
+    k_mem_slab_free(&sem_slab, sem);
 
     return SemaphoreP_OK;
 }

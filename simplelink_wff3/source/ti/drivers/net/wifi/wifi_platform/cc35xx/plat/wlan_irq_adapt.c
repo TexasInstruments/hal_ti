@@ -42,7 +42,11 @@
 #include "ti/devices/cc35xx/inc/hw_soc_aon.h"
 #include "ti/devices/cc35xx/inc/hw_hostmcu_aon.h"
 
+#if defined(__ZEPHYR__)
+#define IRQ_OFFSET 16
+#else
 #define IRQ_OFFSET 0
+#endif /* defined(__ZEPHYR__) */
 
 #define NUM_OF_SYS_INTER  (16)
 /****************************************************************************
@@ -66,9 +70,13 @@ void wlan_IRQInit(void *cb)
     uint32_t regVal = 0;
     osi_EnterCriticalSection();
 
+#if defined(__ZEPHYR__)
+    irq_connect_dynamic(INT_NAB_HOST_IRQ - IRQ_OFFSET, INT_PRI_LEVEL1 >> 6, cb, 0, 0);
+#else
     // Set callback func to host IRQ
     IntRegister(INT_NAB_HOST_IRQ - IRQ_OFFSET,cb);
     IntSetPriority(INT_NAB_HOST_IRQ - IRQ_OFFSET,INT_PRI_LEVEL1);//OSPREY_MX-30 must be below configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY
+#endif /* defined(__ZEPHYR__) */
     //Set HIF as Wakeup Source
     regVal = HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_CFGWICSNS); //HOSTMCU_AON__HOST_ELP_CFG_WICSENSE
     regVal |= 0x800; // Set  Bit 11 : nab_host_irq
@@ -95,11 +103,15 @@ void wlan_IRQDeinit()
 {
     osi_EnterCriticalSection();
 
+#if defined(__ZEPHYR__)
+    irq_disable(INT_NAB_HOST_IRQ - IRQ_OFFSET);
+#else
     // Clear callback func to host IRQ
     IntUnregister(INT_NAB_HOST_IRQ - IRQ_OFFSET);
 
     // Disable IRQ
     IntDisable(INT_NAB_HOST_IRQ - IRQ_OFFSET);
+#endif /* defined(__ZEPHYR__) */
 
     osi_ExitCriticalSection(0);
 }
@@ -114,8 +126,12 @@ void wlan_IRQEnableInt()
 {
     osi_EnterCriticalSection();
 
+#if defined(__ZEPHYR__)
+    irq_enable(INT_NAB_HOST_IRQ - IRQ_OFFSET);
+#else
     // Enable NVIC IRQ
     IntEnable(INT_NAB_HOST_IRQ - IRQ_OFFSET);
+#endif /* defined(__ZEPHYR__) */
 
     osi_ExitCriticalSection(0);
 }
@@ -130,8 +146,12 @@ void wlan_IRQDisableInt()
 {
     osi_EnterCriticalSection();
 
+#if defined(__ZEPHYR__)
+    irq_disable(INT_NAB_HOST_IRQ - IRQ_OFFSET);
+#else
     // Enable IRQ
     IntDisable(INT_NAB_HOST_IRQ - IRQ_OFFSET);
+#endif /* defined(__ZEPHYR__) */
 
     osi_ExitCriticalSection(0);
 }
@@ -146,12 +166,14 @@ void wlan_IRQDisableInt()
 */
 void wlan_IRQClearInt()
 {
+#if !defined(__ZEPHYR__)
     osi_EnterCriticalSection();
 
     //this is edge triggered so no need to mask the interrupt
     IntClearPend(INT_NAB_HOST_IRQ - IRQ_OFFSET);
 
     osi_ExitCriticalSection(0);
+#endif
 }
 
 

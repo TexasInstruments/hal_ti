@@ -39,6 +39,16 @@
 #ifndef __OSI_H__
 #define __OSI_H__
 
+#if defined(__ZEPHYR__)
+#include <zephyr/kernel.h>
+#include <sys/types.h>
+#include <stdarg.h>
+#include <unistd.h>
+#if defined(CONFIG_POSIX_API)
+#include <zephyr/posix/unistd.h>
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1362,6 +1372,7 @@ char * os_strchr(const char *s, int c);
  */
 char *os_strtok_r(char *s, const char *delim, char **last);
 
+#if !defined(__ZEPHYR__)
 //TODO move from kernel
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN  22
@@ -1378,6 +1389,7 @@ char *os_strtok_r(char *s, const char *delim, char **last);
 #ifndef inet_ntop
 extern int inet_ntop(int af, const void *src, void *dst, size_t size);
 #endif
+#endif /* !defined(__ZEPHYR__) */
 
 
 
