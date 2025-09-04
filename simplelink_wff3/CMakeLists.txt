@@ -21,6 +21,7 @@ if(CONFIG_HAS_CC35XX_SDK)
 
       source/ti/drivers/UART2.c
       source/ti/drivers/uart2/UART2WFF3.c
+      source/ti/devices/cc35xx/driverlib/adc.c
       source/ti/devices/cc35xx/driverlib/uart.c
       source/ti/devices/cc35xx/driverlib/spi.c
       source/ti/drivers/GPIO.c
@@ -33,6 +34,7 @@ if(CONFIG_HAS_CC35XX_SDK)
       source/ti/drivers/xmem/flash/FlashWFF3.c
       source/ti/devices/cc35xx/driverlib/xip.c
       source/ti/devices/cc35xx/driverlib/ospi.c
+      source/ti/devices/cc35xx/driverlib/i2c.c
       source/ti/drivers/utils/RingBuf.c
       source/ti/drivers/utils/List.c
     )
