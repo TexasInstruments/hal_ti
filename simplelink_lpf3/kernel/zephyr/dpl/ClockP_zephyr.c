@@ -273,7 +273,7 @@ bool ClockP_isActive(ClockP_Handle handle)
  */
 void ClockP_getCpuFreq(ClockP_FreqHz *freq)
 {
-    freq->lo = (uint32_t)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC;
+    freq->lo = (uint32_t)CONFIG_CPU_FREQUENCY;
     freq->hi = 0;
 }
 
