@@ -39,7 +39,7 @@ static struct k_event *dpl_event_pool_alloc()
 
 static void dpl_event_pool_free(struct k_event *event)
 {
-    k_mem_slab_free(&event_slab, (void *)event);
+    k_mem_slab_free(&event_slab, event);
 
     return;
 }

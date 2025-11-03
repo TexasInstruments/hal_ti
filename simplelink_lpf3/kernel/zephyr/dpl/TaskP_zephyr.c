@@ -52,7 +52,7 @@ static struct k_thread *dpl_task_pool_alloc()
 
 static void dpl_task_pool_free(struct k_thread *task)
 {
-    k_mem_slab_free(&task_slab, (void *)task);
+    k_mem_slab_free(&task_slab, task);
     return;
 }
 

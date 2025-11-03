@@ -38,7 +38,7 @@ static struct k_msgq *dpl_msgq_pool_alloc()
 static void dpl_msgq_pool_free(struct k_msgq *msgq)
 {
 
-    k_mem_slab_free(&msgq_slab, (void *)msgq);
+    k_mem_slab_free(&msgq_slab, msgq);
 
     return;
 }

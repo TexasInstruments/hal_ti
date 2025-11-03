@@ -93,7 +93,7 @@ static ClockP_Obj *dpl_clock_pool_alloc()
 
 static void dpl_clock_pool_free(ClockP_Obj *clock)
 {
-    k_mem_slab_free(&clock_slab, (void *)&clock);
+    k_mem_slab_free(&clock_slab, clock);
 
     return;
 }
