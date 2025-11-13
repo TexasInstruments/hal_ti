@@ -62,6 +62,7 @@ static struct sl_isr_args sl_UART0_IRQ_cb = {NULL, 0};
 static struct sl_isr_args sl_UART1_IRQ_cb = {NULL, 0};
 static struct sl_isr_args s1_LRFD_IRQ0_cb = {NULL, 0};
 static struct sl_isr_args s1_LRFD_IRQ1_cb = {NULL, 0};
+static struct sl_isr_args sl_HSM_HOST_0_SEC_cb = {NULL, 0};
 
 /*
  *  ======== HwiP_construct ========
@@ -90,7 +91,8 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
      */
     __ASSERT((INT_CPUIRQ1 == interruptNum) || (INT_CPUIRQ3 == interruptNum) || (INT_CPUIRQ4 == interruptNum) ||
                  (INT_CPUIRQ16 == interruptNum) || (INT_LRFD_IRQ0 == interruptNum) || (INT_LRFD_IRQ1 == interruptNum) ||
-                 (INT_SP_UART_0_INT_REQ == interruptNum) || (INT_SP_UART_1_INT_REQ == interruptNum),
+                 (INT_SP_UART_0_INT_REQ == interruptNum) || (INT_SP_UART_1_INT_REQ == interruptNum) ||
+                 (INT_OSPR_HSM_HOST_0_SEC_IRQ == interruptNum),
              "Unexpected interruptNum: %d\r\n",
              interruptNum);
 
@@ -162,6 +164,12 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
             sl_UART1_IRQ_cb.arg = arg;
             obj->cb             = &sl_UART1_IRQ_cb;
             irq_connect_dynamic(INT_SP_UART_1_INT_REQ - 16, priority, sl_isr, &sl_UART1_IRQ_cb, 0);
+            break;
+        case INT_OSPR_HSM_HOST_0_SEC_IRQ:
+            sl_HSM_HOST_0_SEC_cb.cb  = hwiFxn;
+            sl_HSM_HOST_0_SEC_cb.arg = arg;
+            obj->cb             = &sl_HSM_HOST_0_SEC_cb;
+            irq_connect_dynamic(INT_OSPR_HSM_HOST_0_SEC_IRQ - 16, priority, sl_isr, &sl_HSM_HOST_0_SEC_cb, 0);
             break;
         default:
             return (handle);
