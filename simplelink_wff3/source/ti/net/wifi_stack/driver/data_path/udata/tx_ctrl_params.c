@@ -47,8 +47,6 @@
 #include "tx_ctrl_api.h"
 #include "tx_ctrl.h"
 
-#define USEC_PER_SEC  1000000
-
 
 extern txCtrl_t *gTxCtrlCB;
 
