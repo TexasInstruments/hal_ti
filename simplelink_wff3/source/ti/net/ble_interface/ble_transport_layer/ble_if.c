@@ -12,8 +12,12 @@
 
  *****************************************************************************/
 #include "ble_if.h"
+#if defined(CONFIG_TI_BLE_TRANSPORT_SHARED)
 #include "ble_transport.h"
+#endif
+#if defined(CONFIG_TI_BLE_TRANSPORT_SERIAL)
 #include "hci_transport.h"
+#endif
 #include "uart_hci.h"
 #include "osi_type.h"
 #include "osi_kernel.h"
@@ -31,6 +35,7 @@ ble_if_cb_t bleIfCb;
 /*****************************************************************************/
 int BleIf_OpenTransport(ble_if_transport_e transport)
 {
+#if defined(CONFIG_TI_BLE_TRANSPORT_SERIAL)
     if (transport == BLE_IF_TRANSPORT_SERIAL)
     {
         if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_BLE) == FALSE)
@@ -47,8 +52,12 @@ int BleIf_OpenTransport(ble_if_transport_e transport)
         bleIfCb.event_cb_reg = HciTransport_HciRxCallbackbRegister;
 
         Report("\n\rBLE Serial transport opened\r\n");
+
+	return 0;
     }
-    else
+#endif
+#if defined(CONFIG_TI_BLE_TRANSPORT_SHARED)
+    if (transport == BLE_IF_TRANSPORT_SHARED)
     {
         //Note: shared transport was previously opened when WLAN started
         //It will not be opened here
@@ -58,13 +67,18 @@ int BleIf_OpenTransport(ble_if_transport_e transport)
         bleIfCb.event_cb_reg = BleTransport_EventCallbackbRegister;
 
         Report("\n\rBLE Shared transport opened\r\n");
-    }
 
-    return 0;
+	return 0;
+    }
+#endif
+
+    Report("\n\rUnsupported BLE transport method\r\n");
+    return -1;
 }
 
 int BleIf_CloseTransport()
 {
+#if defined(CONFIG_TI_BLE_TRANSPORT_SERIAL)
     if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_BLE) == TRUE)
     {
         //Close the UART for HCI
@@ -73,6 +87,7 @@ int BleIf_CloseTransport()
         //Release the HCI transport
         HciTransport_Release(HCI_TRANSPORT_UART_BLE);
     }
+#endif
     //Note: shared transport was previously opened when WLAN started
     //It will not be closed here
 

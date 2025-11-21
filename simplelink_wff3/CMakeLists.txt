@@ -5,6 +5,7 @@ if(CONFIG_WIFI_TI_CC35XX)
   add_subdirectory(third_party/hostap)
   add_subdirectory(third_party/mbedTLS)
   add_subdirectory(source/ti/net/wifi_stack)
+  add_subdirectory(source/ti/net/ble_interface)
 endif()
 
 if(CONFIG_HAS_CC35XX_SDK)
