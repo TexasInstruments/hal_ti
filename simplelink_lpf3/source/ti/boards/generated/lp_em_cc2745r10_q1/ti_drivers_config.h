@@ -72,39 +72,6 @@ extern const uint_least8_t GPIO_pinUpperBound;
 #define CONFIG_LED_ON  (CONFIG_GPIO_LED_ON)
 #define CONFIG_LED_OFF (CONFIG_GPIO_LED_OFF)
 
-
-/*
- *  ======== RNG ========
- */
-
-#define CONFIG_TI_DRIVERS_RNG_COUNT     0
-
-#define RNG_POOL_BYTE_SIZE 
-
-
-
-/*
- *  ======== Board_init ========
- *  Perform all required TI-Drivers initialization
- *
- *  This function should be called once at a point before any use of
- *  TI-Drivers.
- */
-extern void Board_init(void);
-
-/*
- *  ======== Board_initGeneral ========
- *  (deprecated)
- *
- *  Board_initGeneral() is defined purely for backward compatibility.
- *
- *  All new code should use Board_init() to do any required TI-Drivers
- *  initialization _and_ use <Driver>_init() for only where specific drivers
- *  are explicitly referenced by the application.  <Driver>_init() functions
- *  are idempotent.
- */
-#define Board_initGeneral Board_init
-
 #ifdef __cplusplus
 }
 #endif
