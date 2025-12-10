@@ -44,6 +44,7 @@ set(SOURCES_DRIVERLIB
   uart.c
   i2c.c
   udma.c
+  adc.c
 )
 
 list(TRANSFORM SOURCES_DRIVERLIB PREPEND driverlib/)
