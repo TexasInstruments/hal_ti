@@ -87,9 +87,9 @@
 #error "One or more dependencies are missing! Please add them."
 #endif
 
-void OPT_llProcessPeripheralConnectionCreated(void)
+void OPT_llProcessPeripheralConnectionCreated(llConnState_t* connPtr, uint8_t ownAddType, uint16_t pAdvSyncHandle)
 {
-    llProcessPeripheralConnectionCreated();
+    llProcessPeripheralConnectionCreated(connPtr, ownAddType, pAdvSyncHandle);
 }
 
 void OPT_llProcessPeripheralControlPacket(llConnState_t* connPtr, uint8_t* pPkt)
@@ -120,6 +120,11 @@ uint8_t OPT_llLastCmdDoneEventHandleConnectRequest(void)
 void OPT_llPeripheral_TaskEnd(void)
 {
     llPeripheral_TaskEnd();
+}
+
+uint8_t OPT_llProcessPeripheralControlProcedures(llConnState_t* connPtr)
+{
+    return llProcessPeripheralControlProcedures(connPtr);
 }
 
 void OPT_llBuildCtrlPktPeri(llConnState_t* connPtr, uint8_t* pData, uint8_t ctrlPkt)

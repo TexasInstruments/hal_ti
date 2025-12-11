@@ -58,25 +58,42 @@
 #define CS_CHM_SIZE                            10U // octets
 #define CS_FAE_TBL_LEN                         72  // octets
 
+/** @defgroup CS_Subevent_Done_Status Channel Sounding Subevent Done Status
+ * @{
+ */
+// Subevent done status
+#define    CS_SUBEVENT_DONE     0x0            //!< All results complete for the CS subevent
+#define    CS_SUBEVENT_ACTIVE   0x1            //!< Partial results with more to follow for the CS subevent
+#define    CS_SUBEVENT_ABORTED  0xF            //!< Current CS subevent aborted
+/** @} */
+
 /** @defgroup CS_Procedure_Done_Status Channel Sounding Procedure Done Status
  * @{
  */
 // Procedure done status
 #define    CS_PROCEDURE_DONE     0x0            //!< Procedure completed successfully
 #define    CS_PROCEDURE_ACTIVE   0x1            //!< Procedure is currently active
-#define    CS_PROCEDURE_INACTIVE 0x2            //!< Procedure is inactive
 #define    CS_PROCEDURE_ABORTED  0xF            //!< Procedure was aborted
 /** @} */
 
 /** @defgroup CS_Abort_Reason Channel Sounding Abort Reason
  * @{
  */
-// Abort reason
-#define    CS_NO_ABORT              0x0         //!< No abort
-#define    CS_ABORT_REQUEST         0x1         //!< Abort requested
-#define    CS_ABORT_CHM             0x2         //!< Abort due to channel map
-#define    CS_ABORT_INSTANT_PASSED  0x3         //!< Abort due to instant passed
-#define    CS_ABORT_UNSPECIFIED     0xF         //!< Unspecified abort reason
+// Abort reason bits 0 to 3, Indicates the abort reason when Procedure_Done_Status is set to 0xF
+#define    CS_NO_ABORT              0x0         //!< Report with no abort
+#define    CS_ABORT_REQUEST         0x1         //!< Abort because of local Host or remote request
+#define    CS_ABORT_CHM             0x2         //!< Abort because filtered channel map has less than 15 channels
+#define    CS_ABORT_INSTANT_PASSED  0x3         //!< Abort because the channel map update instant has passed
+#define    CS_ABORT_UNSPECIFIED     0xF         //!< Abort because of unspecified reasons
+
+// Abort reason bits 4 to 7, Indicates the abort reason when Subevent_Done_Status is set to 0xF
+#define    CS_SE_NO_ABORT              (0x0 << 4)         //!< Report with no abort
+#define    CS_SE_ABORT_REQUEST         (0x1 << 4)         //!< Abort because of local Host or remote request
+#define    CS_SE_ABORT_NO_SYNC         (0x2 << 4)         //!< Abort because no CS_SYNC (mode-0) received
+#define    CS_SE_ABORT_SCHED_CONFLITS  (0x3 << 4)         //!< Abort because of scheduling conflicts or limited resources
+#define    CS_SE_ABORT_UNSPECIFIED     (0xF << 4)         //!< Abort because of unspecified reasons
+
+
 /** @} */
 
 /** @defgroup CS_Sync_Phy_Supported Channel Sounding Sync PHY Support
@@ -86,6 +103,16 @@
 #define    CS_LE_1M_SYNC_PHY     0x01     //!< LE 1M PHY for synchronization
 #define    CS_LE_2M_SYNC_PHY     0x02     //!< LE 2M PHY for synchronization
 #define    CS_LE_2M2BT_SYNC_PHY  0x03     //!< LE 2M2BT PHY for synchronization
+/** @} */
+
+/** @defgroup CS_PHY
+ * @{
+ */
+// CS Connection PHY
+#define CS_LE_1M_PHY           0x01      //!< LE 1M PHY
+#define CS_LE_2M_PHY           0x02      //!< LE 2M PHY
+#define CS_LE_PHY_CODED_S8     0x03      //!< LE Coded PHY with S=8 data coding
+#define CS_LE_PHY_CODED_S2     0x04      //!< LE Coded PHY with S=2 data coding
 /** @} */
 
 /** @defgroup CS_RTT_Type Channel Sounding RTT Type
@@ -116,7 +143,7 @@
 #define    CS_MODE_2        2          //!< Mode 2
 #define    CS_MODE_3        3          //!< Mode 3
 #define    CS_NON_MODE_0    4          //!< internal usage
-#define    CS_MODE_UNUSED   0xFFU       //!< used only in submode
+#define    CS_MODE_UNUSED   0xFFU      //!< used only in submode
 /** @} */
 
 /** @defgroup CS_Chan_Sel_Alg Channel Selection Algorithm
@@ -134,17 +161,6 @@
 #define    CS_LE_2M2BT_PHY_SUPPORTED  0x02      //!< LE 2M2BT PHY supported
 /** @} */
 
-/** @defgroup CS_Mode_Role Channel Sounding Results Mode
- * @{
- */
-#define    MODE_UNKOWN         0x00
-#define    MODE_0_INITIATOR    0x01
-#define    MODE_0_REFLECTOR    0x02
-#define    MODE_1_INIT_REFL    0x03
-#define    MODE_2_INIT_REFL    0x04
-#define    MODE_3_INIT_REFL    0x05
-/** @} */
-
 /** @defgroup CS_Enable Channel Sounding Procedure Enable/Disable
  * @{
  */
@@ -152,6 +168,13 @@
 #define    CS_ENABLE    1
 /** @} */
 
+/** @defgroup TX power and RSSI values. Relevant for CS Set Default Settings command and CS Procedure Enable Complete event
+ * @{
+ */
+#define CS_INVALID_TX_POWER           0x7F    // 127 - Invalid value
+#define CS_MIN_TX_POWER_VALUE         -127    // Minimum Tx Power in dBm
+#define CS_MAX_TX_POWER_VALUE         20      // Maximum Tx Power in dBm
+/** @} */
 
 /**
  * Extracts I and Q branches based on pct value (24 bits)
@@ -165,7 +188,12 @@
 #define CS_MAX_PERMUTATION_INDEX_4_ANT        0x17U     // Max antenna permutation index for 4 antennas
 #define CS_RANGING_MAX_PERMUTATION_INDEX      CS_MAX_PERMUTATION_INDEX_4_ANT
 
-#define CS_MAX_NUM_CONFIG_IDS                  4
+#define CS_MIN_NUM_CONFIG_IDS                  1U       // Min number of configuration IDs
+#define CS_MAX_NUM_CONFIG_IDS                  4U       // Max number of configuration IDs
+
+#define CS_MIN_ANT_PATHS                  1             // Min antenna paths
+#define CS_MAX_ANT_PATHS                  4             // Max antenna paths
+#define CS_MAX_MODE_ZERO_PER_PROCEDURE    96            // Max mode-0 steps for a single procedure that runs maximum number of subevents
 
 /*******************************************************************************
  * ENUMS
@@ -174,22 +202,28 @@
 // Error Codes
 typedef enum csStatus_e {
     CS_STATUS_SUCCESS,
-    CS_STATUS_INACTIVE_CONNECTION   = 0x02, /* SPEC defined error code, Inactive connection */
-    CS_STATUS_INSUFFICIENT_MEMORY   = 0x07, /* SPEC defined error code, Insufficient memory */
-    CS_STATUS_COMMAND_DISALLOWED    = 0x0C, /* SPEC defined error code, command disallowed */
-    CS_STATUS_LIMITED_RESOURCES     = 0x0D, /* SPEC defined error code, limited resources */
-    CS_STATUS_UNEXPECTED_PARAMETER  = 0x12, /* SPEC defined error code, unexpected parameter */
-    CS_STATUS_FEATURE_NOT_SUPPORTED = 0x11, /* SPEC defined error code, feature not supproted */
-    CS_STATUS_INVALID_LL_PARAM      = 0x1E, /* SPEC defined error code, invalid LL parameter */
-    CS_STATUS_UNSPECIFIED_ERROR     = 0x1F, /* SPEC defined error code, unspecified */
-    CS_STATUS_INSUFFICIENT_SECURITY = 0x2F, /* SPEC defined error code, insufficient security */
-    CS_STATUS_INVALID_CONN_PTR      = 0xA0, /* Custom CS error codes */
+    CS_STATUS_INACTIVE_CONNECTION         = 0x02,       /* SPEC defined error code, Inactive connection */
+    CS_STATUS_INSUFFICIENT_MEMORY         = 0x07,       /* SPEC defined error code, Insufficient memory */
+    CS_STATUS_COMMAND_DISALLOWED          = 0x0C,       /* SPEC defined error code, command disallowed */
+    CS_STATUS_LIMITED_RESOURCES           = 0x0D,       /* SPEC defined error code, limited resources */
+    CS_STATUS_FEATURE_NOT_SUPPORTED       = 0x11,       /* SPEC defined error code, feature not supproted */
+    CS_STATUS_UNEXPECTED_PARAMETER        = 0x12,       /* SPEC defined error code, unexpected parameter */
+    CS_STATUS_PEER_TERM                   = 0x13,       /* SPEC defined error code, feature not supproted */
+    CS_STATUS_HOST_TERM                   = 0x16,       /* SPEC defined error code, host terminated the procedure */
+    CS_STATUS_UNSUPPORTED_REMOTE_FEATURE  = 0x1A,       /* SPEC defined error code, feature not supproted */
+    CS_STATUS_INVALID_LL_PARAM            = 0x1E,       /* SPEC defined error code, invalid LL parameter */
+    CS_STATUS_UNSPECIFIED_ERROR           = 0x1F,       /* SPEC defined error code, unspecified */
+    CS_STATUS_UNSUPPORTED_PARAM_VAL       = 0x20,       /* SPEC defined error code, unsupported parameter value */
+    CS_STATUS_ERROR_TRANSACTION_COLLISION = 0x23,       /* SPEC defined error code, collision */
+    CS_STATUS_INSTANT_PASSED              = 0x28,       /* SPEC defined error code, instant passed */
+    CS_STATUS_INSUFFICIENT_SECURITY       = 0x2F,       /* SPEC defined error code, insufficient security */
+    CS_STATUS_PROCEDURE_IN_PROGRESS       = 0x3A,       /* SPEC defined error code, Controller Busy */
+    CS_STATUS_INVALID_CHM                 = 0x48,       /* SPEC defined error code, insufficient channels*/
+    CS_STATUS_INVALID_CONN_PTR            = 0xA0,       /* Custom CS error codes */
     CS_STATUS_INVALID_BUFFER,
     CS_STATUS_CONNECTION_TERMINATED,
     CS_STATUS_INVALID_PKT_LEN,
-    CS_STATUS_INVALID_CHM,
     CS_STATUS_INVALID_CONFIG_ID,
-    CS_STATUS_PROCEDURE_IN_PROGRESS,
     CS_STATUS_UNKNOWN_CTRL_PKT,
     CS_STATUS_UNSUPPORTED_FEATURE,
     CS_STATUS_DISABLED_CONFIG_ID,
@@ -205,7 +239,8 @@ typedef enum csStatus_e {
     CS_STATUS_CONFIG_ENABLED,
     CS_STATUS_INVALID_CHAN_IDX,
     CS_STATUS_INVALID_STEP_MODE,
-    CS_STATUS_INVOKE_FUNC_FAIL
+    CS_STATUS_INVOKE_FUNC_FAIL,
+    CS_STATUS_NO_SYNC
 } csStatus_e;
 
 typedef enum
@@ -276,7 +311,6 @@ typedef struct
   uint8_t  preferredPeerAntenna;       //!< Preferred peer Antenna
   uint8_t  snrCtrlI;                   //!< SNR Control Initiator
   uint8_t  snrCtrlR;                   //!< SNR Control Reflector
-  uint8_t  enable;                     //!< is Procedure Enabled
 } csProcedureParams_t;
 
 typedef struct

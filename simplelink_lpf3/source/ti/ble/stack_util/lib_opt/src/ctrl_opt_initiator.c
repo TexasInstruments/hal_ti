@@ -122,6 +122,11 @@ void OPT_llCentral_TaskEnd(void)
     llCentral_TaskEnd();
 }
 
+uint8_t OPT_llProcessCentralControlProcedures(llConnState_t* connPtr)
+{
+    return llProcessCentralControlProcedures(connPtr);
+}
+
 void OPT_llExtInit_PostProcess(void)
 {
     llExtInit_PostProcess();
@@ -180,11 +185,6 @@ void OPT_llExtInit_ResolveConnRsp(void)
 void OPT_llBuildCtrlPktCent(llConnState_t* connPtr, uint8_t* pData, uint8_t ctrlPkt)
 {
     llBuildCtrlPktCent(connPtr, pData, ctrlPkt);
-}
-
-void OPT_llCmdScanStartedEventHandle(void)
-{
-    llCmdScanStartedEventHandle();
 }
 
 uint8_t OPT_llIsInitPriorityValid(uint16_t taskID, uint8_t priority, uint8_t connPriority)

@@ -69,6 +69,8 @@
  
  
  *****************************************************************************/
+#ifndef LL_CS_RCL_INTERNAL_H
+#define LL_CS_RCL_INTERNAL_H
 
 /*******************************************************************************
  * INCLUDES
@@ -112,10 +114,7 @@
  * input parameters
  *
  * @param       connId - Connection Id
- * @param       configId - Configuration Id
- * @param       role - CS Role, initiator or reflector
- * @param       subeventCount - CS subevent counter
- * @param       rclCmd - CS RCL command
+ * @param       configId - configuration Id
  *
  * output parameters
  *
@@ -123,7 +122,7 @@
  *
  * @return      Status - Success or Failure
  */
-csStatus_e llCsSetupCmdStartTime( uint16 connId, uint8_t configId, uint8 role, uint8 subEventCount, RCL_CmdBleCs rclCmd );
+csStatus_e llCsSetupCmdStartTime(uint16 connId, uint8_t configId);
 
 /*******************************************************************************
  * @fn          llCsSetupNextStepBuffer
@@ -170,7 +169,7 @@ void llCsRclScheduleNextSubevent(void);
  *
  * input parameters
  *
- * @param       None
+ * @param       txPower - Tx Power value to be converted
  *
  * output parameters
  *
@@ -178,7 +177,7 @@ void llCsRclScheduleNextSubevent(void);
  *
  * @return      txPower
  */
-RCL_Command_TxPower llCsRclGetTxPower(int8 maxTxPower);
+RCL_Command_TxPower llCsRclGetTxPower(int8 txPower);
 
 /*******************************************************************************
  * @fn          llCsRClBufferSetup
@@ -217,46 +216,29 @@ void llCsRClBufferSetup(void);
 void llCsSetupPrecalCmd(RCL_Handle rclHandle);
 
 /*******************************************************************************
- * @fn          llCsSetFinalAntennaGpioValues
+ * @fn          llCsSendSubEventResults
  *
- * @brief       Sets the final antennas GPIO values to be used by the RCL for
- *              antenna switching, based on a preferred antenna parameter and
- *              a given mux values per antenna.
- *              In addtion, returns a mapping for each antenna index to its final
- *              index as set in the output array.
+ * @brief       Send the result to the Host
  *
  * input parameters
  *
- * @param       prefAnt - preffered antenna bits (only 4 lsb matters).
- *                        If all bits are on, this parameter doesn't matter.
- *
- * @param       antMuxVals - Mux values to be set per antenna.
- *                           2 bits per antenna, starting from LSB.
- *
+ * @param       pBuffer - Procedure results
  * output parameters
  *
- * @param       outputGpioVals - Final output buffer. assumed length of 4.
+ * @param       None
  *
- * @return      Mapping of the antenna indices as set in the output array.
- *              Each index represented by 2 bits.
- *              The first antenna index mapping represented by the two LSB.
- *              The fourth antenna index mapping represented by the two MSB.
+ * @return      None
  */
-uint8_t llCsSetFinalAntennaGpioValues(uint8_t prefAnt, uint8_t antMuxVals,
-                                      uint8_t outputGpioVals[CS_ANTENNAS_GPIOS_ARRAY_SIZE]);
+void llCsSendSubEventResults(RCL_MultiBuffer* pBuffer);
 
 /*******************************************************************************
- * @fn          llCs_finishAndResetProcedure
+ * @fn          llCsSendSubEventContResults
  *
- * @brief       Finishes and resets the completed procedure
- * Disables the procedure params, sets the next procedure flag to FALSE,
- * resets the procedure counter, clears the RCL buffers, and frees the RCL task.
- * Also, ends the test mode if it was enabled.
+ * @brief       Send the result continue to the Host
  *
  * input parameters
  *
- * @param       connId  - Connection ID
- * @param       configId - Configuration ID
+ * @param       pBuffer - Procedure results
  *
  * output parameters
  *
@@ -264,4 +246,174 @@ uint8_t llCsSetFinalAntennaGpioValues(uint8_t prefAnt, uint8_t antMuxVals,
  *
  * @return      None
  */
-void llCs_finishAndResetProcedure(uint16_t connId, uint8_t configId);
+void llCsSendSubEventContResults(RCL_MultiBuffer* pBuffer);
+
+/*******************************************************************************
+ * @fn          llCsProcessResultsIsModeZeroValid
+ *
+ * @brief       Verify that the Mode-0 steps are valid for a given subEvent.
+ *
+ * input parameters
+ *
+ * @param       connId - Connection Id
+ * @param       pBuffer - Buffer with subEvent step results
+ *
+ * output parameters
+ *
+ * @param       None
+ *
+ * @return      true in case at least one of the mode-0 steps is valid. false otherwise.
+ */
+bool llCsProcessResultsIsModeZeroValid(uint16 connId, const RCL_CmdBleCs_SubeventResults *pBuffer);
+
+/*******************************************************************************
+ * @fn          llCsRetrieveProcedureCompletionStatus
+ *
+ * @brief       Determine the completion status of a Channel Sounding procedure
+ *
+ * @details     Evaluates whether the current CS procedure has completed based on buffer
+ *              state, procedure flags, and synchronization status. A procedure can be
+ *              marked as complete when either normal completion occurs or when a
+ *              synchronization error is detected in the final subevent.
+ *
+ * input parameters
+ *
+ * @param       connId - Connection Id
+ * @param       configId - configuration Id
+ * @param       pBuffer - Buffer with subEvent step results
+ *
+ * output parameters
+ *
+ * @param       None
+ *
+ * @return      CS_PROCEDURE_DONE if procedure is complete, CS_PROCEDURE_ACTIVE otherwise
+ */
+uint8_t llCsRetrieveProcedureCompletionStatus(uint16 connId, uint8 configId, RCL_MultiBuffer* pBuffer);
+
+/*******************************************************************************
+ * @fn          llCsSetupRclRelativeOffset
+ *
+ * @brief       Calculate the relative offset for RCL command timing
+ *
+ * @details     Determines the appropriate time offset from the connection anchor point
+ *              for scheduling CS procedures based on current configuration.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ * @param       configId - configuration Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      Calculated relative offset in microseconds
+ */
+uint32_t llCsSetupRclRelativeOffset(uint16 connId, uint8_t configId);
+
+/*******************************************************************************
+ * @fn          llCsSetupRclAnchorPoint
+ *
+ * @brief       Set up the anchor point for RCL timing
+ *
+ * @details     Calculates and prepares the base anchor point timing for CS procedures,
+ *              including necessary adjustments based on PHY and other connection parameters.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ * @param       configId - configuration Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      Anchor point timestamp in microseconds
+ */
+uint32_t llCsSetupRclAnchorPoint(uint16 connId, uint8_t configId);
+
+/*******************************************************************************
+ * @fn          llCsSetupRclTimerDrift
+ *
+ * @brief       Calculate timer drift compensation for CS procedures
+ *
+ * @details     Determines the expected timer drift based on connection parameters
+ *              and sleep clock accuracy to ensure proper synchronization during CS.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ * @param       configId - configuration Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      Calculated timer drift in microseconds
+ */
+uint32_t llCsSetupRclTimerDrift(uint16 connId, uint8_t configId);
+
+/*******************************************************************************
+ * @fn          llCsSetupRclRxWidening
+ *
+ * @brief       Calculate receive window widening for CS operations
+ *
+ * @details     Computes the appropriate receive window widening based on timer drift
+ *              to compensate for clock inaccuracies between devices.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ * @param       timerDrift - calculated timer drift in microseconds
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      Receive window widening value in microseconds
+ */
+uint16_t llCsSetupRclRxWidening(uint16 connId, uint32_t timerDrift);
+
+/*******************************************************************************
+ * @fn          llCsSetupRclAllowDelay
+ *
+ * @brief       Determine if delayed CS procedure execution is allowed
+ *
+ * @details     Checks system conditions to determine if a CS procedure can be
+ *              safely delayed without compromising synchronization.
+ *
+ * input parameters
+ *
+ * @param       None.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      TRUE if delay is allowed, FALSE otherwise
+ */
+bool llCsSetupRclAllowDelay(void);
+
+/*******************************************************************************
+ * @fn          llCsGetScaFactor
+ *
+ * @brief       Get the Sleep Clock Accuracy factor for CS timing calculations
+ *
+ * @details     Retrieves the SCA factor associated with the specified connection.
+ *              This factor is used to adjust timing calculations to compensate
+ *              for clock drift between devices.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      SCA factor value used in timing calculations
+ */
+uint16_t llCsGetScaFactor(uint16 connId);
+
+#endif //LL_CS_RCL_INTERNAL_H
+

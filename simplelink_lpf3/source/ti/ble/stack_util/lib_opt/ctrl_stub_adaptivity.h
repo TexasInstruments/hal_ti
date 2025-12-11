@@ -95,6 +95,7 @@ extern void LL_SDAA_FreeDynamicMemory(void);
 extern void LL_SDAA_PostProcess(void);
 extern void setSddaBleUserConfig(void);
 
+
 // Wrapper functions for the feature implementations
 uint8 OPT_LL_SDAA_ControlTxAndGetStartType(taskInfo_t* nextConnTask, taskInfo_t* secTask, uint8 startTaskType);
 taskInfo_t* OPT_LL_SDAA_GetChnlAssessmentTask(void);

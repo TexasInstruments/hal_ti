@@ -84,6 +84,7 @@
 // Function prototypes for the actual implementations
 extern hciStatus_t hciCmdParserVendorSpecific(uint8* pData, uint16 cmdOpCode);
 
+
 // Wrapper functions for the feature implementations
 hciStatus_t OPT_hciCmdParserVendorSpecific(uint8* pData, uint16 cmdOpCode);
 

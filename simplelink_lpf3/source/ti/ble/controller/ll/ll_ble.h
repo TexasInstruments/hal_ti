@@ -201,11 +201,13 @@
 #define RAT_TICKS_IN_90US              360       // Agama CC13X2P AP timing adjustment due to pilot tone
 #define RAT_TICKS_IN_100US             400       // 1M / 2500 RAT ticks (SCA PPM)
 #define RAT_TICKS_IN_120US             480       // Total time to close and open the RCL
+#define RAT_TICKS_IN_125US             500       // Response Slot delay (PAwR) units
 #define RAT_TICKS_IN_140US             560       // Rx Back-end Time
 #define RAT_TICKS_IN_150US             600       // T_IFS
 #define RAT_TICKS_IN_166US             664       // Frequency synthesizer delay for RX window
 #define RAT_TICKS_IN_180US             720       // AUX_CONNECT_REQ in 2M
 #define RAT_TICKS_IN_200US             800       // LL Topology margin
+#define RAT_TICKS_IN_220US             880       // Processing time of setup command
 #define RAT_TICKS_IN_700US             2800      // LL_TEST_MODE JIRA-2756
 #define RAT_TICKS_IN_256US             1024      // Radio Overhead + FS Calibration
 #define RAT_TICKS_IN_280US             1120      // Radio Overhead + FS Calibration
@@ -213,7 +215,7 @@
 #define RAT_TICKS_IN_300US             1200      // T_MAFS (AE)
 #define RAT_TICKS_IN_352US             1408      // CONNECT_IND is 44 bytes
 #define RAT_TICKS_IN_500US             2000      // Periodic Adv addition process command
-#define RAT_TICKS_IN_625US             2500U      // Fundamental BLE Time Slot
+#define RAT_TICKS_IN_625US             2500U     // Fundamental BLE Time Slot
 #define RAT_TICKS_IN_900US             3600      // Additional Rx Synch overhead for Coded S8
 #define RAT_TICKS_IN_1MS               4000      // Multiple of Adv Random Delay
 #define RAT_TICKS_IN_1_006MS           4024      // AUX_CONNECT_REQ in Coded S2
@@ -232,6 +234,7 @@
 #define RAT_TICKS_IN_20MS              80000
 #define RAT_TICKS_IN_100MS             400000    // Refers to the minimum observation period
 #define RAT_TICKS_IN_1S                4000000
+#define RAT_TICKS_IN_5S                20000000
 #define RAT_TICKS_IN_1_28S             5120000   // Directed Advertising Timeout
 #define RAT_TICKS_IN_32S               128000000 // Max LSTO
 //

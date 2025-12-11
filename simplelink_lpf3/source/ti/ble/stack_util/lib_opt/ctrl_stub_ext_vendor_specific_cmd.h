@@ -85,6 +85,7 @@
 extern hciStatus_t hciCmdParserExtVendorSpecificCommon(uint8* pData, uint16 cmdOpCode);
 extern hciStatus_t hciCmdParserExtendedVendorSpecific(uint8* pData, uint16 cmdOpCode);
 
+
 // Wrapper functions for the feature implementations
 hciStatus_t OPT_hciCmdParserExtVendorSpecificCommon(uint8* pData, uint16 cmdOpCode);
 hciStatus_t OPT_hciCmdParserExtendedVendorSpecific(uint8* pData, uint16 cmdOpCode);

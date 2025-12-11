@@ -51,7 +51,18 @@
 #include <zephyr/kernel.h>
 
 /*******************************************************************************
+ * MACROS
+ */
+#define QOS_HIGH_PRIORITY_ADV_PARAM 2
+/*******************************************************************************
  * GLOBAL VARIABLES
  */
 // Define the heap instance here
 K_HEAP_DEFINE(ll_heap, CONFIG_BT_LL_HEAP_SIZE);
+
+#ifdef CONFIG_BT_MESH
+// Set high priority for advertising
+uint8_t qosDefaultPriorityAdvParameter = QOS_HIGH_PRIORITY_ADV_PARAM;
+// Enable preemption feature
+bool llUsePreemption = true;
+#endif // CONFIG_BT_MESH

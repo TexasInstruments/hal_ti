@@ -104,8 +104,15 @@ extern "C"
 #define UFALSE 0U
 #endif
 
-#ifndef NULL
-#define NULL 0L
+// Fix to stdint.h definitions
+#ifdef UINT8_MAX
+#undef UINT8_MAX
+#define UINT8_MAX 255U
+#endif
+
+#ifdef UINT16_MAX
+#undef UINT16_MAX
+#define UINT16_MAX 65535U
 #endif
 
 /// @endcond // NODOC
@@ -252,6 +259,13 @@ typedef uint32_t        halDataAlign_t;
  */
 #define st(x)      do { x } while (__LINE__ == -1)
 
+/*
+ * The offsetof macro is a standard macro defined in the C standard library header <stddef.h>
+ * It is used to determine the byte offset of a member within a structure type.
+ */
+#ifndef offsetof
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
 /*********************************************************************
  * MEMORY ATTRIBUTES
  */
@@ -307,6 +321,8 @@ typedef uint32_t        halDataAlign_t;
 #define ASM_NOP    asm("NOP")
 #define NO_INIT    __no_init
 #define WEAK_FUNC __weak
+#define WEAK_VAR_PRE __weak
+#define WEAK_VAR_POST
 
 /* ----------- KEIL Compiler ----------- */
 #elif defined __KEIL__
@@ -321,6 +337,8 @@ typedef uint32_t        halDataAlign_t;
 #elif defined __GNUC__
 #define ASM_NOP __asm__ __volatile__ ("nop")
 #define WEAK_FUNC __attribute__((__weak__))
+#define WEAK_VAR_PRE
+#define WEAK_VAR_POST __attribute__((__weak__))
 
 /* ---------- MSVC compiler ---------- */
 #elif _MSC_VER

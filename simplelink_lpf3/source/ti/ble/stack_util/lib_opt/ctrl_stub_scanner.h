@@ -82,6 +82,7 @@
 #include "ti/ble/controller/ll/ll_common.h"
 #include "ti/ble/controller/ll/ll_scheduler.h"
 #include "ti/ble/controller/ll/ll_ae.h"
+#include "ti/ble/controller/ll/ll_padv_scan.h"
 #include "ti/ble/controller/hci/hci.h"
 
 // Function prototypes for the actual implementations
@@ -106,6 +107,8 @@ extern llStatus_t HCI_TL_set_ext_scan_param(uint16_t opcode, uint8_t* pHciParams
 extern llStatus_t HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 extern llStatus_t HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 extern void llStopCurrentScan(void);
+extern void llCmdScanStartedEventHandle(void);
+
 
 // Wrapper functions for the feature implementations
 void OPT_llProcessScanTimeout(void);
@@ -129,5 +132,6 @@ llStatus_t OPT_HCI_TL_set_ext_scan_param(uint16_t opcode, uint8_t* pHciParams, a
 llStatus_t OPT_HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 llStatus_t OPT_HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 void OPT_llStopCurrentScan(void);
+void OPT_llCmdScanStartedEventHandle(void);
 
 #endif /* CTRL_SCANNER_H_ */

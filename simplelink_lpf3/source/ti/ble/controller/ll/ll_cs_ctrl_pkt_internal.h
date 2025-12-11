@@ -70,6 +70,8 @@
  
  
  *****************************************************************************/
+#ifndef LL_CS_CTRL_PKT_INTERNAL_H
+#define LL_CS_CTRL_PKT_INTERNAL_H
 /*******************************************************************************
  * INCLUDES
  */
@@ -340,29 +342,6 @@ void llCsRsp2Data(uint8* data, csProcedureEnable_t* csRsp);
 void llCsInd2Data(uint8* data, csProcedureEnable_t* csInd);
 
 /*******************************************************************************
- * @fn          llCsGetSubeventLen
- *
- * @brief       This function calculates the best possible subevent len
- * The calculation is based on MaxSubeventLen, procedure Len, offset and
- * connection interval
- *
- * input parameters
- *
- * @param       maxSubeventLen - max subevent length
- * @param       offsetMin - minimum offset
- * @param       procLen = procedure length
- * @param       connInterval - connection interval
- *
- * output parameters
- *
- * @param       None.
- *
- * @return      subevent len
- */
-uint32 llCsGetSubeventLen(uint32 maxSubeventLen, uint32 offsetMin, uint16 procLen,
-                      uint16 connInterval);
-
-/*******************************************************************************
  * @fn          llCsSelectACI
  *
  * @brief       This function gets a suggested ACI value and re-suggests
@@ -474,33 +453,14 @@ void llCsParseCsReqData(csProcedureEnable_t* csReq, uint8* pBuf);
 csStatus_e llCsSetupCtrlPkt(llConnState_t* connPtr, uint8 ctrlType, uint8 ctrlLen);
 
 /*******************************************************************************
- * @fn          llCsSetupCapabilities
- *
- * @brief       Build the CS Capabilities packet data
- *
- * input parameters
- *
- * @param       data - data pointer
- *
- * @design      BLE_LOKI-506
- * output parameters
- *
- * @param       data - updated with the CS capabilities
- *
- * @return      None
- */
-void llCsSetupCapabilities(uint8* data);
-
-/*******************************************************************************
  * @fn          llCsSetupConfigData
  *
  * @brief       Build the CS Config packet data
  *
  * input parameters
  *
- * @param       data - data pointer
  * @param       connId - connection identifier
- * @param       configId - cs config Id
+ * @param       data - data pointer
  *
  * @design      BLE_LOKI-506
  *
@@ -510,7 +470,7 @@ void llCsSetupCapabilities(uint8* data);
  *
  * @return      status
  */
-uint8 llCsSetupConfigData(uint8* data, uint16 connId, uint8 configId);
+csStatus_e llCsSetupConfigData(uint16 connId, uint8* data);
 
 /*******************************************************************************
  * @fn          llCsParseSecurityData
@@ -640,71 +600,11 @@ csStatus_e llCsSetupTerminateReqOrRsp(uint16 connId, uint8* data);
  *
  * input parameters
  *
- * @param       data - data pointer
- * @param       connId - connection identifier
- *
- * @design      BLE_LOKI-506
- *
- * output parameters
- *
- * @param       data
+ * @param       connId         - connection identifier
+ * @param       pChanMapIndPkt - updated with the channel map indication data
  *
  * @return      None
  */
-void llCsSetupChmInd(uint8* data, uint16 connId);
+void llCsSetupChmInd(uint16_t connId, uint8_t *pChanMapIndPkt);
 
-/*******************************************************************************
- * @fn          llCsSubeventsPerEvent
- *
- * @brief       Calculate How many subevent will fit into 1 event
- *
- * input parameters
- *
- * @param       procedureLen - CS Procedure Length
- * @param       connInterval - connection interval
- * @param       subeventInterval - CS subevent Interval
- *
- * output parameters
- *
- * @param       None
- *
- * @return      num subevents per event
- */
-uint8 llCsSubeventsPerEvent(uint16 procedureLen, uint16 connInterval,
-                            uint16 subEventInterval);
-
-/*******************************************************************************
- * @fn          llCsCtrlProcessTerminateReq
- *
- * @brief       Process received LL_CTRL_CS_TERMINATE_REQ
- *
- * input parameters
- *
- * @param       connId - Connection Identifier
- * @param       pBuf   - Pointer to data buffer
- *
- * output parameters
- *
- * @param       None
- *
- * @return      Status
- */
-csStatus_e llCsCtrlProcessTerminateReq(uint16 connId, const uint8* pBuf);
-
-/*******************************************************************************
- * @fn          llCsCtrlProcessTerminateRsp
- *
- * @brief       Process received LL_CTRL_CS_TERMINATE_RSP
- *
- * input parameters
- *
- * @param       connId - Connection Id
- * @param       pBuf   - Pointer to data buffer
- *
- * output parameters
- *
- * @param       None
- *
- * @return      Status
- */
-csStatus_e llCsCtrlProcessTerminateRsp(uint16 connId, const uint8* pBuf);
+#endif //LL_CS_CTRL_PKT_INTERNAL_H
