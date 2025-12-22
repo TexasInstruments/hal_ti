@@ -31,26 +31,5 @@
 
 system.getScript("common.js")
 
-const AESCCM         = scripting.addModule("/ti/drivers/AESCCM", {}, false);
-const AESCCM1        = AESCCM.addInstance();
-const AESCMAC        = scripting.addModule("/ti/drivers/AESCMAC", {}, false);
-const AESCMAC1       = AESCMAC.addInstance();
-const AESCTR         = scripting.addModule("/ti/drivers/AESCTR", {}, false);
-const AESCTR1        = AESCTR.addInstance();
-const AESCTRDRBG     = scripting.addModule("/ti/drivers/AESCTRDRBG", {}, false);
-const AESCTRDRBG1    = AESCTRDRBG.addInstance();
-const AESECB         = scripting.addModule("/ti/drivers/AESECB", {}, false);
-const AESECB1        = AESECB.addInstance();
-
-AESCCM1.$name = "CONFIG_AESCCM_0";
-
-AESCMAC1.$name = "CONFIG_AESCMAC_0";
-
-AESCTR1.$name = "CONFIG_AESCTR_0";
-
-AESCTRDRBG1.$name = "CONFIG_AESCTRDRBG_0";
-
-AESECB1.$name = "CONFIG_AESECB_0";
-
 const CCFG              = scripting.addModule("/ti/devices/CCFG", {}, false);
 CCFG.ccfgTemplate.$name = "ti_devices_CCFG_CCFGCC23X0Template0";

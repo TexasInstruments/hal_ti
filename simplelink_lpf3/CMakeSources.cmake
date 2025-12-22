@@ -31,7 +31,6 @@ list(TRANSFORM SOURCES_RCL_LPF3 PREPEND source/ti/drivers/rcl/)
 set(SOURCES_DRIVERS_LPF3
     # Utils
     utils/List.c
-    utils/Random.c
 
     # Drivers
     batterymonitor/BatMonSupportLPF3.c
@@ -44,23 +43,7 @@ set(SOURCES_DRIVERS_CC23X0
     # Default Simplelink configurations
     power/PowerCC23X0.c
 
-    # Drivers
-    dma/UDMALPF3.c
-    RNG.c
-    rng/RNGLPF3RF.c
-
     # Crypto drivers
-    AESCCM.c
-    aesccm/AESCCMLPF3.c
-    AESCMAC.c
-    aescmac/AESCMACLPF3.c
-    AESCTR.c
-    aesctr/AESCTRLPF3.c
-    AESCTRDRBG.c
-    aesctrdrbg/AESCTRDRBGXX.c
-    AESECB.c
-    aesecb/AESECBLPF3.c
-    cryptoutils/aes/AESCommonLPF3.c
     cryptoutils/cryptokey/CryptoKeyPlaintext.c
     cryptoutils/ecc/ECCInitLPF3SW.c
     cryptoutils/ecc/ECCParamsLPF3SW.c

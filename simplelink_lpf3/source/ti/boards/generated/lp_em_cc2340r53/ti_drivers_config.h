@@ -34,51 +34,6 @@ extern "C" {
 
 
 /*
- *  ======== AESCCM ========
- */
-
-extern const uint_least8_t                  CONFIG_AESCCM_0_CONST;
-#define CONFIG_AESCCM_0                     0
-#define CONFIG_TI_DRIVERS_AESCCM_COUNT      1
-
-
-/*
- *  ======== AESCMAC ========
- */
-
-extern const uint_least8_t                  CONFIG_AESCMAC_0_CONST;
-#define CONFIG_AESCMAC_0                    0
-#define CONFIG_TI_DRIVERS_AESCMAC_COUNT     1
-
-
-/*
- *  ======== AESCTR ========
- */
-
-extern const uint_least8_t                  CONFIG_AESCTR_0_CONST;
-#define CONFIG_AESCTR_0                     0
-#define CONFIG_TI_DRIVERS_AESCTR_COUNT      1
-
-
-/*
- *  ======== AESCTRDRBG ========
- */
-
-extern const uint_least8_t                      CONFIG_AESCTRDRBG_0_CONST;
-#define CONFIG_AESCTRDRBG_0                     0
-#define CONFIG_TI_DRIVERS_AESCTRDRBG_COUNT      1
-
-
-/*
- *  ======== AESECB ========
- */
-
-extern const uint_least8_t                  CONFIG_AESECB_0_CONST;
-#define CONFIG_AESECB_0                     0
-#define CONFIG_TI_DRIVERS_AESECB_COUNT      1
-
-
-/*
  *  ======== ECDH ========
  */
 
