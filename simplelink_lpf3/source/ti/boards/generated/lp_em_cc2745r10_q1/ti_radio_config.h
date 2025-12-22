@@ -6,7 +6,7 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        8.40.00.01_eng
+ *  Tool Version:        9.11.00.02_ga
  *  RF Settings Version: 
  */
 #ifndef _TI_RADIO_CONFIG_H_
@@ -25,6 +25,7 @@
 //  PHY abbreviation/ID: adc_noise
 //  PHY definition file: adc_noise_bt5_cc27xx.json
 // ****************************************************************
+
 
 
 
@@ -50,6 +51,7 @@ extern const LRF_Config LRF_configAdcNoise;
 // 0x30BC     LRFDRFE           PA0                  [12]       PA20DBMESDCTL      0x0               
 // 0x30BC     LRFDRFE           PA0                  [11:9]     VCADJSCND          0x4               
 // 0x30BC     LRFDRFE           PA0                  [8:6]      VCADJFRST          0x5               
+// 0x30BC     LRFDRFE           PA0                  [5:4]      RC                 0x0               
 // 0x30C4     LRFDRFE           IFADC0               [14:12]    DITHERTRIM         0x0               
 // 0x30C4     LRFDRFE           IFADC0               [11:10]    DITHEREN           0x0               
 // 0x30C4     LRFDRFE           IFADC0               [7:4]      INT2ADJ            0x0               
@@ -142,54 +144,54 @@ extern const LRF_Config LRF_configAdcNoise;
 // 0x681A     RFE_COMMON_RAM    K5                   [15:0]     VAL                0x916F            
 // 0x6820     RFE_COMMON_RAM    RTRIMOFF             [3:0]      VAL                0x0               
 // 0x6822     RFE_COMMON_RAM    RTRIMMIN             [3:0]      VAL                0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [15]       PDET               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [14:12]    NMIREFTRIM         0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [11:9]     PMIREFTRIM         0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [8]        TXBOOST            0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [7]        S1GFRC             0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [6:5]      BUFGAIN            0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [4]        BIAS               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [3]        OUT                0x1               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [2:0]      RATIO              0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [15]       PDET               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [14:12]    NMIREFTRIM         0x4               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [11:9]     PMIREFTRIM         0x4               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [8]        TXBOOST            0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [7]        S1GFRC             0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [6:5]      BUFGAIN            0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [4]        BIAS               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [3]        OUT                0x1               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [2:0]      RATIO              0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [15]       ITESTCTL           0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [14:8]     VOUTTRIM           0x00              
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [7]        SPARE7             0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [6:4]      TMUX               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [3]        PDSEL              0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [2]        MODE               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [1]        BYPASS             0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [0]        CTL                0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [15]       ITESTCTL           0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [14:8]     VOUTTRIM           0x00              
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [7]        SPARE7             0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [6:4]      TMUX               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [3]        PDSEL              0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [2]        MODE               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [1]        BYPASS             0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [0]        CTL                0x0               
-// 0x682C     RFE_COMMON_RAM    DIVLDOIOFF           [6:0]      VAL                0x14              
-// 0x682E     RFE_COMMON_RAM    LDOSETTLE            [9:0]      VAL                0x047             
-// 0x6830     RFE_COMMON_RAM    CHRGSETTLE           [9:0]      VAL                0x02E             
-// 0x6832     RFE_COMMON_RAM    DCOSETTLE            [9:0]      VAL                0x005             
-// 0x6834     RFE_COMMON_RAM    IFAMPRFLDOTX         [15:9]     TRIM               0x7F              
-// 0x6836     RFE_COMMON_RAM    IFAMPRFLDODEFAULT    [15:9]     TRIM               0x00              
-// 0x683C     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              
-// 0x683E     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x0022            
-// 0x6840     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            
-// 0x6842     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               
-// 0x6846     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              
-// 0x6846     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              
-// 0x6848     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              
-// 0x6848     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              
+// 0x6828     RFE_COMMON_RAM    DIVI                 [15]       PDET               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [14:12]    NMIREFTRIM         0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [11:9]     PMIREFTRIM         0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [8]        TXBOOST            0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [7]        S1GFRC             0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [6:5]      BUFGAIN            0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [4]        BIAS               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [3]        OUT                0x1               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [2:0]      RATIO              0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [15]       PDET               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [14:12]    NMIREFTRIM         0x4               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [11:9]     PMIREFTRIM         0x4               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [8]        TXBOOST            0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [7]        S1GFRC             0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [6:5]      BUFGAIN            0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [4]        BIAS               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [3]        OUT                0x1               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [2:0]      RATIO              0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [15]       ITESTCTL           0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [14:8]     VOUTTRIM           0x00              
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [7]        SPARE7             0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [6:4]      TMUX               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [3]        PDSEL              0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [2]        MODE               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [1]        BYPASS             0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [0]        CTL                0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [15]       ITESTCTL           0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [14:8]     VOUTTRIM           0x00              
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [7]        SPARE7             0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [6:4]      TMUX               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [3]        PDSEL              0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [2]        MODE               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [1]        BYPASS             0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [0]        CTL                0x0               
+// 0x6830     RFE_COMMON_RAM    DIVLDOIOFF           [6:0]      VAL                0x14              
+// 0x6832     RFE_COMMON_RAM    LDOSETTLE            [9:0]      VAL                0x047             
+// 0x6834     RFE_COMMON_RAM    CHRGSETTLE           [9:0]      VAL                0x02E             
+// 0x6836     RFE_COMMON_RAM    DCOSETTLE            [9:0]      VAL                0x005             
+// 0x6838     RFE_COMMON_RAM    IFAMPRFLDOTX         [15:9]     TRIM               0x7F              
+// 0x683A     RFE_COMMON_RAM    IFAMPRFLDODEFAULT    [15:9]     TRIM               0x00              
+// 0x6840     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              
+// 0x6842     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x0022            
+// 0x6844     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            
+// 0x6846     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               
+// 0x684A     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              
+// 0x684A     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              
+// 0x684C     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              
+// 0x684C     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              
 
 // ****************************************************************
 //  PHY name:            1 Mbps / 2 Mbps / Coded
@@ -205,6 +207,11 @@ extern const LRF_Config LRF_configAdcNoise;
 #define RCL_PHY_FEATURE_CODED_TX_RATE_S2              0x0004
 
 
+// Regulatory domains (for channel specific TX output power limitation)
+#define RCL_REGULATORY_DOMAIN_ETSI                    0x01
+#define RCL_REGULATORY_DOMAIN_FCC                     0x02
+#define RCL_REGULATORY_DOMAIN_MIIT                    0x04
+
 
 // LRF data structures
 extern const LRF_TxShape LRF_shapeBaseGfsk067;
@@ -212,6 +219,8 @@ extern const LRF_TxShape LRF_shapeBaseGfsk05;
 extern const LRF_SwConfig LRF_swConfig1Mbps;
 extern const LRF_SwConfig LRF_swConfig2Mbps;
 extern const LRF_TxPowerTable LRF_txPowerTable;
+extern const LRF_TxPowerLimitTable LRF_txPowerLimitTable1Mbps;
+extern const LRF_TxPowerLimitTable LRF_txPowerLimitTable2Mbps;
 extern const LRF_Config LRF_config;
 
 
@@ -309,6 +318,7 @@ extern const LRF_Config LRF_config;
 // 0x2134     LRFDMDM           DEMSWQU0             [7]        SYNCMODE           -                 -                 0x0               
 // 0x2134     LRFDMDM           DEMSWQU0             [6]        AUTOMAFC           0x1               0x1               0x0               
 // 0x2134     LRFDMDM           DEMSWQU0             [4:0]      REFLEN             0x1F              0x1F              0x1F              
+// 0x2148     LRFDMDM           MODCTRL              [1]        TONEINSERT         0x0               0x0               0x0               
 // 0x21A8     LRFDMDM           DEMDSXB0             [5]        OUT2PASSTHROUGH    -                 -                 0x1               
 // 0x21A8     LRFDMDM           DEMDSXB0             [3]        OUTSRCSEL2         0x0               0x0               0x0               
 // 0x21A8     LRFDMDM           DEMDSXB0             [2]        OUTSRCSEL1         0x1               0x1               0x1               
@@ -362,6 +372,7 @@ extern const LRF_Config LRF_config;
 // 0x30BC     LRFDRFE           PA0                  [12]       PA20DBMESDCTL      0x0               0x0               0x0               
 // 0x30BC     LRFDRFE           PA0                  [11:9]     VCADJSCND          0x4               0x4               0x4               
 // 0x30BC     LRFDRFE           PA0                  [8:6]      VCADJFRST          0x5               0x5               0x5               
+// 0x30BC     LRFDRFE           PA0                  [5:4]      RC                 0x0               0x0               0x0               
 // 0x30C4     LRFDRFE           IFADC0               [14:12]    DITHERTRIM         0x0               0x0               0x0               
 // 0x30C4     LRFDRFE           IFADC0               [11:10]    DITHEREN           0x0               0x0               0x0               
 // 0x30C4     LRFDRFE           IFADC0               [7:4]      INT2ADJ            0x0               0x0               0x0               
@@ -472,54 +483,54 @@ extern const LRF_Config LRF_config;
 // 0x681A     RFE_COMMON_RAM    K5                   [15:0]     VAL                0x916F            0x916F            0x916F            
 // 0x6820     RFE_COMMON_RAM    RTRIMOFF             [3:0]      VAL                0x0               0x0               0x0               
 // 0x6822     RFE_COMMON_RAM    RTRIMMIN             [3:0]      VAL                0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [15]       PDET               0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [14:12]    NMIREFTRIM         0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [11:9]     PMIREFTRIM         0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [8]        TXBOOST            0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [7]        S1GFRC             0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [6:5]      BUFGAIN            0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [4]        BIAS               0x0               0x0               0x0               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [3]        OUT                0x1               0x1               0x1               
-// 0x6824     RFE_COMMON_RAM    DIVI                 [2:0]      RATIO              0x0               0x0               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [15]       PDET               0x0               0x0               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [14:12]    NMIREFTRIM         0x4               0x4               0x4               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [11:9]     PMIREFTRIM         0x4               0x4               0x4               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [8]        TXBOOST            0x0               0x0               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [7]        S1GFRC             0x0               0x0               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [6:5]      BUFGAIN            0x0               0x0               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [4]        BIAS               0x0               0x0               0x0               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [3]        OUT                0x1               0x1               0x1               
-// 0x6826     RFE_COMMON_RAM    DIVF                 [2:0]      RATIO              0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [15]       ITESTCTL           0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [14:8]     VOUTTRIM           0x00              0x00              0x00              
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [7]        SPARE7             0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [6:4]      TMUX               0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [3]        PDSEL              0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [2]        MODE               0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [1]        BYPASS             0x0               0x0               0x0               
-// 0x6828     RFE_COMMON_RAM    DIVLDOI              [0]        CTL                0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [15]       ITESTCTL           0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [14:8]     VOUTTRIM           0x00              0x00              0x00              
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [7]        SPARE7             0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [6:4]      TMUX               0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [3]        PDSEL              0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [2]        MODE               0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [1]        BYPASS             0x0               0x0               0x0               
-// 0x682A     RFE_COMMON_RAM    DIVLDOF              [0]        CTL                0x0               0x0               0x0               
-// 0x682C     RFE_COMMON_RAM    DIVLDOIOFF           [6:0]      VAL                0x14              0x14              0x14              
-// 0x682E     RFE_COMMON_RAM    LDOSETTLE            [9:0]      VAL                0x047             0x047             0x047             
-// 0x6830     RFE_COMMON_RAM    CHRGSETTLE           [9:0]      VAL                0x02E             0x02E             0x02E             
-// 0x6832     RFE_COMMON_RAM    DCOSETTLE            [9:0]      VAL                0x005             0x005             0x005             
-// 0x6834     RFE_COMMON_RAM    IFAMPRFLDOTX         [15:9]     TRIM               0x7F              0x7F              0x7F              
-// 0x6836     RFE_COMMON_RAM    IFAMPRFLDODEFAULT    [15:9]     TRIM               0x00              0x00              0x00              
-// 0x683C     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              0x4C              0x51              
-// 0x683E     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x75F8            0x55FA            -                 
-// 0x6840     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            0x0045            0x0027            
-// 0x6842     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               0x0               0x1               
-// 0x6846     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              0x00              0x00              
-// 0x6846     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              0x00              0x00              
-// 0x6848     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              0x00              0x00              
-// 0x6848     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              0x00              0x00              
+// 0x6828     RFE_COMMON_RAM    DIVI                 [15]       PDET               0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [14:12]    NMIREFTRIM         0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [11:9]     PMIREFTRIM         0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [8]        TXBOOST            0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [7]        S1GFRC             0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [6:5]      BUFGAIN            0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [4]        BIAS               0x0               0x0               0x0               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [3]        OUT                0x1               0x1               0x1               
+// 0x6828     RFE_COMMON_RAM    DIVI                 [2:0]      RATIO              0x0               0x0               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [15]       PDET               0x0               0x0               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [14:12]    NMIREFTRIM         0x4               0x4               0x4               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [11:9]     PMIREFTRIM         0x4               0x4               0x4               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [8]        TXBOOST            0x0               0x0               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [7]        S1GFRC             0x0               0x0               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [6:5]      BUFGAIN            0x0               0x0               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [4]        BIAS               0x0               0x0               0x0               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [3]        OUT                0x1               0x1               0x1               
+// 0x682A     RFE_COMMON_RAM    DIVF                 [2:0]      RATIO              0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [15]       ITESTCTL           0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [14:8]     VOUTTRIM           0x00              0x00              0x00              
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [7]        SPARE7             0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [6:4]      TMUX               0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [3]        PDSEL              0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [2]        MODE               0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [1]        BYPASS             0x0               0x0               0x0               
+// 0x682C     RFE_COMMON_RAM    DIVLDOI              [0]        CTL                0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [15]       ITESTCTL           0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [14:8]     VOUTTRIM           0x00              0x00              0x00              
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [7]        SPARE7             0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [6:4]      TMUX               0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [3]        PDSEL              0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [2]        MODE               0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [1]        BYPASS             0x0               0x0               0x0               
+// 0x682E     RFE_COMMON_RAM    DIVLDOF              [0]        CTL                0x0               0x0               0x0               
+// 0x6830     RFE_COMMON_RAM    DIVLDOIOFF           [6:0]      VAL                0x14              0x14              0x14              
+// 0x6832     RFE_COMMON_RAM    LDOSETTLE            [9:0]      VAL                0x047             0x047             0x047             
+// 0x6834     RFE_COMMON_RAM    CHRGSETTLE           [9:0]      VAL                0x02E             0x02E             0x02E             
+// 0x6836     RFE_COMMON_RAM    DCOSETTLE            [9:0]      VAL                0x005             0x005             0x005             
+// 0x6838     RFE_COMMON_RAM    IFAMPRFLDOTX         [15:9]     TRIM               0x7F              0x7F              0x7F              
+// 0x683A     RFE_COMMON_RAM    IFAMPRFLDODEFAULT    [15:9]     TRIM               0x00              0x00              0x00              
+// 0x6840     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              0x4C              0x51              
+// 0x6842     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x75F8            0x55FA            -                 
+// 0x6844     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            0x0045            0x0027            
+// 0x6846     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               0x0               0x1               
+// 0x684A     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              0x00              0x00              
+// 0x684A     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              0x00              0x00              
+// 0x684C     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              0x00              0x00              
+// 0x684C     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              0x00              0x00              
 // Address    Module            Register             Bit(s)     Field              Value (s8)        Value (s2)        
 // -----------------------------------------------------------------------------------------------------------------
 // 0x2128     LRFDMDM           SPARE1               [15:0]     VAL                0x0000            0x0001            

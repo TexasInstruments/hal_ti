@@ -401,7 +401,7 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
             /* Program frequency word */
             LRF_programFrequency(ieeeCmd->rfFrequency, startTx);
 
-            if (LRF_programTxPower(ieeeCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(ieeeCmd->txPower, ieeeCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -1000,6 +1000,7 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
                 }
                 else
                 {
+                    /* Re-enable radio to force a restart of the PBE */
                     LRF_enable();
                     startTx = true;
                     ieeeHandlerState.rxTx.txState = txStateWaitForTx;
@@ -1353,6 +1354,12 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
 
         if ((lrfEvents.rxOk != 0 || lrfEvents.rxNok != 0 || lrfEvents.rxIgnored != 0) && ieeeCmd->rxAction != NULL)
         {
+#ifdef DeviceFamily_CC27XX
+            if (rclFeatureControl.enablePaEsdProtection)
+            {
+                LRF_updatePaEsdProtection();
+            }
+#endif
             /* Copy received packet from PBE FIFO to buffer */
             /* First, check that there is actually a buffer available */
             uint32_t rxFifoReadable = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFREADABLE);
@@ -1482,7 +1489,6 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
             {
                 if (ieeeHandlerState.rxTx.rxState == rxStateNoRx)
                 {
-                    LRF_enable();
                     /* Restart RX */
                     restartRx = true;
                     Log_printf(LogModule_RCL, Log_VERBOSE, "RCL_Handler_Ieee_RxTx: Restarting RX as command should continue");
@@ -1513,6 +1519,8 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
     }
     if (restartRx)
     {
+        /* Re-enable radio to force a restart of the PBE */
+        LRF_enable();
         /* Check if a parameter update is due */
         if (ieeeHandlerState.rxTx.rxActionUpdate)
         {
@@ -1659,7 +1667,7 @@ RCL_Events RCL_Handler_Ieee_TxTest(RCL_Command *cmd, LRF_Events lrfEvents, RCL_E
             /* End status not determined */
             ieeeHandlerState.common.endStatus = RCL_CommandStatus_Active;
 
-            if (LRF_programTxPower(txCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(txCmd->txPower, txCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -2128,7 +2136,7 @@ RCL_IEEE_UpdateResult RCL_IEEE_updateTxPower(RCL_CmdIeeeRxTx *cmd, RCL_Command_T
     if (cmd->common.status == RCL_CommandStatus_Active)
     {
         /* Update current TX power value */
-        if (LRF_programTxPower(newTxPower) != TxPowerResult_Ok)
+        if (LRF_programTxPower(newTxPower, cmd->rfFrequency) != TxPowerResult_Ok)
         {
             /* Update failed */
             result = RCL_IEEE_UpdateParamError;

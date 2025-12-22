@@ -26,3 +26,6 @@ ti_utils_build_GenMap_CCFG_BASE = 0x4e020000;
 ti_utils_build_GenMap_CCFG_SIZE = 0x800;
 ti_utils_build_GenMap_FLASH0_BASE = 0x0;
 ti_utils_build_GenMap_RAM0_BASE = 0x20000000;
+
+/* definitions provided by /ti/drivers/CryptoBoard */
+ti_utils_build_GenMap_KEYSTORE_BASE = 0x;

@@ -6,7 +6,7 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        8.40.00.01_eng
+ *  Tool Version:        9.11.00.02_ga
  *  RF Settings Version: 
  */
 
@@ -27,9 +27,10 @@
 // Configuration: Common
 static const uint32_t LRF_commonRegConfigAdcNoise[] =
 {
-    0x0000002C,                     // Segment length = 44
-    0x0000A002,                     //   Data structure 32-bit region (start byte position = 0, count = 3)
+    0x0000002D,                     // Segment length = 45
+    0x0000A003,                     //   Data structure 32-bit region (start byte position = 0, count = 4)
     (uint32_t) &LRF_swConfigAdcNoise,//     LRF_swParam : swConfig
+    0x00000000,                     //     LRF_swParam : txPowerLimitTable
     0x00000000,                     //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
     0x00003003,                     //   HW sparse region (address/value pairs, count = 4)
@@ -119,8 +120,9 @@ const LRF_Config LRF_configAdcNoise = {
 // Configuration: Common
 static const uint32_t LRF_commonRegConfig[] =
 {
-    0x0000003C,                     // Segment length = 60
-    0x0004A001,                     //   Data structure 32-bit region (start byte position = 4, count = 2)
+    0x0000003D,                     // Segment length = 61
+    0x0004A002,                     //   Data structure 32-bit region (start byte position = 4, count = 3)
+    0x00000000,                     //     LRF_swParam : txPowerLimitTable
     (uint32_t) &LRF_txPowerTable,   //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
     0x14502001,                     //   HW 32-bit region (start address = 0x1450, count = 2)

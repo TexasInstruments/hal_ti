@@ -6,7 +6,7 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        8.40.00.01_eng
+ *  Tool Version:        9.11.00.02_ga
  *  RF Settings Version: 
  */
 
@@ -27,9 +27,10 @@
 // Configuration: Common
 static const uint32_t LRF_commonRegConfigAdcNoise[] =
 {
-    0x0000002D,                     // Segment length = 45
-    0x0000A002,                     //   Data structure 32-bit region (start byte position = 0, count = 3)
+    0x0000002E,                     // Segment length = 46
+    0x0000A003,                     //   Data structure 32-bit region (start byte position = 0, count = 4)
     (uint32_t) &LRF_swConfigAdcNoise,//     LRF_swParam : swConfig
+    0x00000000,                     //     LRF_swParam : txPowerLimitTable
     0x00000000,                     //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
     0x00003003,                     //   HW sparse region (address/value pairs, count = 4)
@@ -62,17 +63,17 @@ static const uint32_t LRF_commonRegConfigAdcNoise[] =
     0x012D010A,                     //     RFE_COMMON_RAM.K2BL           RFE_COMMON_RAM.K1MSB
     0x132C0034,                     //     RFE_COMMON_RAM.K3BL           RFE_COMMON_RAM.K2AL
     0x916F07AB,                     //     RFE_COMMON_RAM.K5             RFE_COMMON_RAM.K3AL
-    0x68206005,                     //   RAM 32-bit region (start address = 0x6820, count = 6)
-    0x00000000,                     //     RFE_COMMON_RAM.RTRIMMIN       RFE_COMMON_RAM.RTRIMOFF
+    0x68204001,                     //   RAM zero region (start address = 0x16820, count = 2)
+    0x68286004,                     //   RAM 32-bit region (start address = 0x6828, count = 5)
     0x48080008,                     //     RFE_COMMON_RAM.DIVF           RFE_COMMON_RAM.DIVI
     0x00000000,                     //     RFE_COMMON_RAM.DIVLDOF        RFE_COMMON_RAM.DIVLDOI
     0x00470014,                     //     RFE_COMMON_RAM.LDOSETTLE      RFE_COMMON_RAM.DIVLDOIOFF
     0x0005002E,                     //     RFE_COMMON_RAM.DCOSETTLE      RFE_COMMON_RAM.CHRGSETTLE
     0x0000FE00,                     //     RFE_COMMON_RAM.IFAMPRFLDODEFAULT RFE_COMMON_RAM.IFAMPRFLDOTX
-    0x683C6001,                     //   RAM 32-bit region (start address = 0x683C, count = 2)
+    0x68406001,                     //   RAM 32-bit region (start address = 0x6840, count = 2)
     0x00220051,                     //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
     0x00000045,                     //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
-    0x68464001                      //   RAM zero region (start address = 0x16846, count = 2)
+    0x684A4001                      //   RAM zero region (start address = 0x1684A, count = 2)
 };
 
 
@@ -120,8 +121,8 @@ const LRF_Config LRF_configAdcNoise = {
 // Configuration: Common
 static const uint32_t LRF_commonRegConfig[] =
 {
-    0x0000003C,                     // Segment length = 60
-    0x0004A001,                     //   Data structure 32-bit region (start byte position = 4, count = 2)
+    0x0000003D,                     // Segment length = 61
+    0x0008A001,                     //   Data structure 32-bit region (start byte position = 8, count = 2)
     (uint32_t) &LRF_txPowerTable,   //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
     0x14502001,                     //   HW 32-bit region (start address = 0x1450, count = 2)
@@ -135,12 +136,13 @@ static const uint32_t LRF_commonRegConfig[] =
     0x00020004,                     //     LRFDPBE.TXFWBTHRS             LRFDPBE.RXFRBTHRS
     0x10DC1001,                     //   HW 16-bit region (start address = 0x10DC, count = 2)
     0x0B0B0202,                     //     LRFDPBE.TIMPRE                LRFDPBE.TIMCTL
-    0x00003009,                     //   HW sparse region (address/value pairs, count = 10)
+    0x0000300A,                     //   HW sparse region (address/value pairs, count = 11)
     0x20C00003,                     //     LRFDMDM.ADCDIGCONF
     0x20C8001F,                     //     LRFDMDM.MODSYMMAP0
     0x20F00000,                     //     LRFDMDM.DEMIQMC0
     0x20F80080,                     //     LRFDMDM.DEMDSBU2
     0x21000000,                     //     LRFDMDM.DEMFIDC0
+    0x21480000,                     //     LRFDMDM.MODCTRL
     0x30840000,                     //     LRFDRFE.MAGNTHRCFG
     0x308C0000,                     //     LRFDRFE.RSSIOFFSET
     0x30AC0000,                     //     LRFDRFE.SPARE4
@@ -173,14 +175,14 @@ static const uint32_t LRF_commonRegConfig[] =
     0x012D010A,                     //     RFE_COMMON_RAM.K2BL           RFE_COMMON_RAM.K1MSB
     0x132C0034,                     //     RFE_COMMON_RAM.K3BL           RFE_COMMON_RAM.K2AL
     0x916F07AB,                     //     RFE_COMMON_RAM.K5             RFE_COMMON_RAM.K3AL
-    0x68206005,                     //   RAM 32-bit region (start address = 0x6820, count = 6)
-    0x00000000,                     //     RFE_COMMON_RAM.RTRIMMIN       RFE_COMMON_RAM.RTRIMOFF
+    0x68204001,                     //   RAM zero region (start address = 0x16820, count = 2)
+    0x68286004,                     //   RAM 32-bit region (start address = 0x6828, count = 5)
     0x48080008,                     //     RFE_COMMON_RAM.DIVF           RFE_COMMON_RAM.DIVI
     0x00000000,                     //     RFE_COMMON_RAM.DIVLDOF        RFE_COMMON_RAM.DIVLDOI
     0x00470014,                     //     RFE_COMMON_RAM.LDOSETTLE      RFE_COMMON_RAM.DIVLDOIOFF
     0x0005002E,                     //     RFE_COMMON_RAM.DCOSETTLE      RFE_COMMON_RAM.CHRGSETTLE
     0x0000FE00,                     //     RFE_COMMON_RAM.IFAMPRFLDODEFAULT RFE_COMMON_RAM.IFAMPRFLDOTX
-    0x68464001                      //   RAM zero region (start address = 0x16846, count = 2)
+    0x684A4001                      //   RAM zero region (start address = 0x1684A, count = 2)
 };
 
 // Configuration: Sub-PHY = 1 Mbps, 2 Mbps
@@ -206,22 +208,23 @@ static const uint32_t LRF_subPhy1Mbps2MbpsRegConfig[] =
     0x0000017F,                     //     -                             LRFDMDM.DEMC1BE2
     0x24D42000,                     //   HW 32-bit region (start address = 0x24D4, count = 1)
     0x00540004,                     //     LRFDMDM.DEMD2XB0              LRFDMDM.DEMDSXB0
-    0x68406000,                     //   RAM 32-bit region (start address = 0x6840, count = 1)
+    0x68446000,                     //   RAM 32-bit region (start address = 0x6844, count = 1)
     0x00000045                      //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
 };
 
 // Configuration: Sub-PHY = 1 Mbps, Coded
 static const uint32_t LRF_subPhy1MbpsCodedRegConfig[] =
 {
-    0x00014008,                     // Segment length = 8
-    0x0000A000,                     //   Data structure 32-bit region (start byte position = 0, count = 1)
+    0x00014009,                     // Segment length = 9
+    0x0000A001,                     //   Data structure 32-bit region (start byte position = 0, count = 2)
     (uint32_t) &LRF_swConfig1Mbps,  //     LRF_swParam : swConfig
+    (uint32_t) &LRF_txPowerLimitTable1Mbps,//     LRF_swParam : txPowerLimitTable
     0x00003002,                     //   HW sparse region (address/value pairs, count = 3)
     0x20D44000,                     //     LRFDMDM.BAUD
     0x20E00387,                     //     LRFDMDM.DEMMISC0
     0x21240A18,                     //     LRFDMDM.SPARE0
     0x00007000,                     //   RAM sparse region (address/value pairs, count = 1)
-    0x683C0051                      //     RFE_COMMON_RAM.PHYRSSIOFFSET
+    0x68400051                      //     RFE_COMMON_RAM.PHYRSSIOFFSET
 };
 
 // Configuration: Sub-PHY = 2 Mbps, Coded
@@ -246,7 +249,7 @@ static const uint32_t LRF_subPhy1MbpsRegConfig[] =
     0x30A4A246,                     //     LRFDRFE.SPARE2
     0x00007001,                     //   RAM sparse region (address/value pairs, count = 2)
     0x20200000,                     //     PBE_BLE5_RAM.PHY
-    0x683E75F8,                     //     RFE_COMMON_RAM.SPARE0SHADOW
+    0x684275F8,                     //     RFE_COMMON_RAM.SPARE0SHADOW
     0x20265002,                     //   RAM 16-bit region (start address = 0x2026, count = 3)
     0x0186018E,                     //     PBE_BLE5_RAM.PRERXIFS         PBE_BLE5_RAM.PRETXIFS
     0x00000226                      //     -                             PBE_BLE5_RAM.RXTIMEOUT
@@ -255,9 +258,10 @@ static const uint32_t LRF_subPhy1MbpsRegConfig[] =
 // Configuration: Sub-PHY = 2 Mbps
 static const uint32_t LRF_subPhy2MbpsRegConfig[] =
 {
-    0x00010012,                     // Segment length = 18
-    0x0000A000,                     //   Data structure 32-bit region (start byte position = 0, count = 1)
+    0x00010013,                     // Segment length = 19
+    0x0000A001,                     //   Data structure 32-bit region (start byte position = 0, count = 2)
     (uint32_t) &LRF_swConfig2Mbps,  //     LRF_swParam : swConfig
+    (uint32_t) &LRF_txPowerLimitTable2Mbps,//     LRF_swParam : txPowerLimitTable
     0x00003007,                     //   HW sparse region (address/value pairs, count = 8)
     0x1090800F,                     //     LRFDPBE.MDMCMDPAR0
     0x20C40017,                     //     LRFDMDM.MODPRECTRL
@@ -272,7 +276,7 @@ static const uint32_t LRF_subPhy2MbpsRegConfig[] =
     0x20265002,                     //   RAM 16-bit region (start address = 0x2026, count = 3)
     0x018C01B2,                     //     PBE_BLE5_RAM.PRERXIFS         PBE_BLE5_RAM.PRETXIFS
     0x000001C2,                     //     -                             PBE_BLE5_RAM.RXTIMEOUT
-    0x683C6000,                     //   RAM 32-bit region (start address = 0x683C, count = 1)
+    0x68406000,                     //   RAM 32-bit region (start address = 0x6840, count = 1)
     0x55FA004C                      //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
 };
 
@@ -315,7 +319,7 @@ static const uint32_t LRF_subPhyCodedRegConfig[] =
     0x01B10002,                     //     PBE_BLE5_RAM.PRETXIFS500K     PBE_BLE5_RAM.PHY
     0x01980044,                     //     PBE_BLE5_RAM.PRETXIFS         PBE_BLE5_RAM.TXIFS500KADJ
     0x0884012C,                     //     PBE_BLE5_RAM.RXTIMEOUT        PBE_BLE5_RAM.PRERXIFS
-    0x68406000,                     //   RAM 32-bit region (start address = 0x6840, count = 1)
+    0x68446000,                     //   RAM 32-bit region (start address = 0x6844, count = 1)
     0x00010027                      //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
 };
 
@@ -392,30 +396,54 @@ const LRF_SwConfig LRF_swConfig2Mbps = {
 const LRF_TxPowerTable LRF_txPowerTable = {
     .numEntries = 0x00000018,
     .powerTable = {
-        { .power = { .fraction = 0, .dBm = -20 }, .tempCoeff = 0, .value = { .ibBoost = 0, .ib = 18, .gain = 0, .mode = 0, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = -16 }, .tempCoeff = 4, .value = { .ibBoost = 0, .ib = 21, .gain = 1, .mode = 0, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = -12 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 25, .gain = 2, .mode = 0, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = -8 }, .tempCoeff = 12, .value = { .ibBoost = 0, .ib = 29, .gain = 3, .mode = 0, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = -4 }, .tempCoeff = 28, .value = { .ibBoost = 0, .ib = 37, .gain = 4, .mode = 0, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 0 }, .tempCoeff = 27, .value = { .ibBoost = 0, .ib = 28, .gain = 5, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 0 }, .tempCoeff = 30, .value = { .ibBoost = 0, .ib = 31, .gain = 5, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 1 }, .tempCoeff = 35, .value = { .ibBoost = 0, .ib = 34, .gain = 5, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 1 }, .tempCoeff = 40, .value = { .ibBoost = 0, .ib = 38, .gain = 5, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 2 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 42, .gain = 5, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 2 }, .tempCoeff = 40, .value = { .ibBoost = 0, .ib = 28, .gain = 6, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 3 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 33, .gain = 6, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 3 }, .tempCoeff = 60, .value = { .ibBoost = 0, .ib = 39, .gain = 6, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 4 }, .tempCoeff = 80, .value = { .ibBoost = 0, .ib = 49, .gain = 6, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 4 }, .tempCoeff = 95, .value = { .ibBoost = 0, .ib = 34, .gain = 7, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 5 }, .tempCoeff = 150, .value = { .ibBoost = 0, .ib = 63, .gain = 7, .mode = 1, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 5 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 46, .gain = 3, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 6 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 49, .gain = 3, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 6 }, .tempCoeff = 12, .value = { .ibBoost = 0, .ib = 34, .gain = 4, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 7 }, .tempCoeff = 15, .value = { .ibBoost = 0, .ib = 37, .gain = 4, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 7 }, .tempCoeff = 17, .value = { .ibBoost = 0, .ib = 40, .gain = 4, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 8 }, .tempCoeff = 17, .value = { .ibBoost = 0, .ib = 44, .gain = 4, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 9 }, .tempCoeff = 25, .value = { .ibBoost = 0, .ib = 36, .gain = 5, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 10 }, .tempCoeff = 30, .value = { .ibBoost = 0, .ib = 49, .gain = 5, .mode = 2, .reserved = 0, .noIfampRfLdoBypass = 0 } }
+        { .power = { .fraction = 0, .dBm = -20 }, .tempCoeff = 0, .value = { .ibBoost = 0, .ib = 18, .gain = 0, .mode = 0, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = -16 }, .tempCoeff = 4, .value = { .ibBoost = 0, .ib = 21, .gain = 1, .mode = 0, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = -12 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 25, .gain = 2, .mode = 0, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = -8 }, .tempCoeff = 12, .value = { .ibBoost = 0, .ib = 29, .gain = 3, .mode = 0, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = -4 }, .tempCoeff = 28, .value = { .ibBoost = 0, .ib = 37, .gain = 4, .mode = 0, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 0 }, .tempCoeff = 27, .value = { .ibBoost = 0, .ib = 28, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 0 }, .tempCoeff = 30, .value = { .ibBoost = 0, .ib = 31, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 1 }, .tempCoeff = 35, .value = { .ibBoost = 0, .ib = 34, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 1 }, .tempCoeff = 40, .value = { .ibBoost = 0, .ib = 38, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 2 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 42, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 2 }, .tempCoeff = 40, .value = { .ibBoost = 0, .ib = 28, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 3 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 33, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 3 }, .tempCoeff = 60, .value = { .ibBoost = 0, .ib = 39, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 4 }, .tempCoeff = 80, .value = { .ibBoost = 0, .ib = 49, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 4 }, .tempCoeff = 95, .value = { .ibBoost = 0, .ib = 34, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 5 }, .tempCoeff = 150, .value = { .ibBoost = 0, .ib = 63, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 5 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 46, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 6 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 49, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 6 }, .tempCoeff = 12, .value = { .ibBoost = 0, .ib = 34, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 7 }, .tempCoeff = 15, .value = { .ibBoost = 0, .ib = 37, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 7 }, .tempCoeff = 17, .value = { .ibBoost = 0, .ib = 40, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 8 }, .tempCoeff = 17, .value = { .ibBoost = 0, .ib = 44, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 9 }, .tempCoeff = 25, .value = { .ibBoost = 0, .ib = 36, .gain = 5, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 10 }, .tempCoeff = 30, .value = { .ibBoost = 0, .ib = 49, .gain = 5, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } }
+    }
+};
+
+// LRF_TxPowerLimitTable data structure
+const LRF_TxPowerLimitTable LRF_txPowerLimitTable1Mbps = {
+    .numEntries = 0x00000005,
+    .freqDiv = 0x000F4240,
+    .limitTable = {
+        { .minFreq = 2401, .maxFreq = 2403, .regulatoryMask = 0x01, .maxTxPower = { .fraction = 0, .dBm = 15 } },
+        { .minFreq = 2401, .maxFreq = 2403, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 16 } },
+        { .minFreq = 2475, .maxFreq = 2477, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 15 } },
+        { .minFreq = 2477, .maxFreq = 2479, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 14 } },
+        { .minFreq = 2479, .maxFreq = 2481, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 10 } }
+    }
+};
+
+// LRF_TxPowerLimitTable data structure
+const LRF_TxPowerLimitTable LRF_txPowerLimitTable2Mbps = {
+    .numEntries = 0x00000003,
+    .freqDiv = 0x000F4240,
+    .limitTable = {
+        { .minFreq = 2473, .maxFreq = 2475, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 17 } },
+        { .minFreq = 2475, .maxFreq = 2477, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 16 } },
+        { .minFreq = 2477, .maxFreq = 2479, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 13 } }
     }
 };
 

@@ -6,7 +6,7 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        8.40.00.01_eng
+ *  Tool Version:        9.11.00.02_ga
  *  RF Settings Version: 
  */
 #ifndef _TI_RADIO_CONFIG_H_
@@ -25,6 +25,7 @@
 //  PHY abbreviation/ID: adc_noise
 //  PHY definition file: adc_noise_bt5_cc23xx.json
 // ****************************************************************
+
 
 
 
@@ -190,6 +191,7 @@ extern const LRF_Config LRF_configAdcNoise;
 #define RCL_PHY_FEATURE_SUB_PHY_CODED                 0x0002
 #define RCL_PHY_FEATURE_CODED_TX_RATE_S8              0x0000
 #define RCL_PHY_FEATURE_CODED_TX_RATE_S2              0x0004
+
 
 
 

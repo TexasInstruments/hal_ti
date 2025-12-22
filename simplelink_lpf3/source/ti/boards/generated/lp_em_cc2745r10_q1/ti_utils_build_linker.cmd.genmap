@@ -31,3 +31,7 @@ ti_utils_build_GenMap_SCFG_SIZE = 0x400;
 ti_utils_build_GenMap_HSM_FW_BASE = 0xe8000;
 ti_utils_build_GenMap_FLASH0_BASE = 0x0;
 ti_utils_build_GenMap_RAM0_BASE = 0x20000000;
+
+/* definitions provided by /ti/drivers/CryptoBoard */
+ti_utils_build_GenMap_KEYSTORE_BASE = 0xe6000;
+ti_utils_build_GenMap_KEYSTORE_SIZE = 0x2000;

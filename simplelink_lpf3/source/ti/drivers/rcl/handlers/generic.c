@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Texas Instruments Incorporated
+ * Copyright (c) 2021-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <ti/drivers/rcl/RCL_Buffer.h>
 #include <ti/drivers/rcl/RCL_Scheduler.h>
 #include <ti/drivers/rcl/RCL_Profiling.h>
+#include <ti/drivers/rcl/RCL_Feature.h>
 
 #include <ti/drivers/rcl/hal/hal.h>
 #include <ti/drivers/rcl/commands/generic.h>
@@ -349,7 +350,7 @@ RCL_Events RCL_Handler_Generic_Tx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
             {
                 LRF_programFrequency(txCmd->rfFrequency, true);
             }
-            if (LRF_programTxPower(txCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(txCmd->txPower, txCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -502,7 +503,7 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
             {
                 LRF_programFrequency(txCmd->rfFrequency, true);
             }
-            if (LRF_programTxPower(txCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(txCmd->txPower, txCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -749,7 +750,7 @@ RCL_Events RCL_Handler_Generic_TxTest(RCL_Command *cmd, LRF_Events lrfEvents, RC
             /* Default end status */
             genericHandlerState.common.endStatus = RCL_CommandStatus_Finished;
 
-            if (LRF_programTxPower(txCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(txCmd->txPower, txCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -1272,7 +1273,7 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
             {
                 LRF_programFrequency(txCmd->rfFrequency, true);
             }
-            if (LRF_programTxPower(txCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(txCmd->txPower, txCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -1633,7 +1634,7 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             {
                 LRF_programFrequency(rxCmd->rfFrequency, false);
             }
-            if (LRF_programTxPower(rxCmd->txPower) != TxPowerResult_Ok)
+            if (LRF_programTxPower(rxCmd->txPower, rxCmd->rfFrequency) != TxPowerResult_Ok)
             {
                 cmd->status = RCL_CommandStatus_Error_Param;
                 rclEvents.lastCmdDone = 1;
@@ -1693,6 +1694,12 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
     {
         if (lrfEvents.rxOk != 0 || lrfEvents.rxNok != 0 || lrfEvents.rxIgnored != 0 || lrfEvents.rxBufFull != 0)
         {
+#ifdef DeviceFamily_CC27XX
+            if (rclFeatureControl.enablePaEsdProtection)
+            {
+                LRF_updatePaEsdProtection();
+            }
+#endif
             /* Copy received packet from PBE FIFO to buffer */
             /* First, check that there is actually a buffer available */
             while (HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFREADABLE) >= 4)
