@@ -53,6 +53,7 @@ if (CONFIG_BT_HCI_RAW)
     -DUSE_PAST_RECEIVER
     -DUSE_PAST_SENDER
     -DUSE_PAWR_SCAN
+    -DUSE_PAWR_ADV
   )
 endif()
 if (CONFIG_BT_BROADCASTER)
@@ -124,6 +125,9 @@ zephyr_compile_definitions(
 
 # BLE files that are used for library optimizations and should be part of the application
 zephyr_library_sources(
+  stack_util/lib_opt/src/ctrl_opt_past_receiver.c
+  stack_util/lib_opt/src/ctrl_opt_past_sender.c
+  stack_util/lib_opt/src/ctrl_opt_pawr_scan.c
   stack_util/lib_opt/src/ctrl_opt_padv.c
   stack_util/lib_opt/src/ctrl_opt_pscan.c
   stack_util/lib_opt/src/ctrl_opt_cs.c
@@ -133,7 +137,6 @@ zephyr_library_sources(
   stack_util/lib_opt/src/ctrl_opt_scanner.c
   stack_util/lib_opt/src/ctrl_opt_power_control.c
   stack_util/lib_opt/src/ctrl_opt_rssi_monitor.c
-  #stack_util/lib_opt/src/ctrl_opt_legacy_cmd.c
   stack_util/lib_opt/src/ctrl_opt_health_check.c
   stack_util/lib_opt/src/ctrl_opt_adv_conn.c
   stack_util/lib_opt/src/ctrl_opt_adv_nconn.c
@@ -142,6 +145,8 @@ zephyr_library_sources(
   stack_util/lib_opt/src/ctrl_opt_vendor_specific_cmd.c
   stack_util/lib_opt/src/ctrl_opt_ext_vendor_specific_cmd.c
   #stack_util/lib_opt/src/ctrl_opt_ble_health.c
+  #stack_util/lib_opt/src/ctrl_opt_adaptivity.c
+  #stack_util/lib_opt/src/ctrl_opt_legacy_cmd.c
   app_util/config/src/ble_config_zephyr.c
   app_util/config/src/hci_supported_cmd.c
 )
