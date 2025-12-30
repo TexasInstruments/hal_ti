@@ -169,7 +169,7 @@ uint32_t ClockP_getSystemTickPeriod()
 
 uint32_t ClockP_getSystemTicks()
 {
-    return k_uptime_get_32();
+    return (uint32_t)(k_uptime_ticks() & UINT32_MAX);
 }
 
 /*
