@@ -17,7 +17,7 @@
 
  ******************************************************************************
  
- Copyright (c) 2025, Texas Instruments Incorporated
+ Copyright (c) 2025-2026, Texas Instruments Incorporated
 
  All rights reserved not granted herein.
  Limited License.
@@ -115,6 +115,11 @@ llStatus_t OPT_LL_PAwRS_Terminate(uint8_t** pPAwRParams)
 uint8_t OPT_LL_PAwRS_GetSubeventNum(uint8_t* pPAwRParams)
 {
     return LL_PAwRS_GetSubeventNum(pPAwRParams);
+}
+
+bool OPT_LL_PAwRS_IsSubeventInList(uint8_t* pPAwRParams, uint8_t subevent)
+{
+    return LL_PAwRS_IsSubeventInList(pPAwRParams, subevent);
 }
 
 bool OPT_LL_PAwRS_IsEnable(void)

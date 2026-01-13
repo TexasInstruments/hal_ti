@@ -11,7 +11,7 @@
 
  ******************************************************************************
  
- Copyright (c) 2009-2025, Texas Instruments Incorporated
+ Copyright (c) 2009-2026, Texas Instruments Incorporated
 
  All rights reserved not granted herein.
  Limited License.
@@ -100,7 +100,6 @@ extern "C"
 #include <stdint.h>
 #include <ti/drivers/rcl/RCL.h>
 #include <ti/drivers/rcl/commands/ble5.h>
-#include <ti/drivers/RNG.h>
 #include "ti/drivers/utils/List.h"
 
 #include "ti/ble/controller/ll/ll.h"
@@ -199,6 +198,7 @@ extern "C"
 
 #define CONVERT_1US_TO_0_625MS( us )         ( (us) / 625 )     //!< Convert US to 0.625 ms
 #define CONVERT_1_25MS_TO_0_625MS( ms )      ( ms << 1 )      //!< Convert 1.25 ms to 0.625 ms
+#define CONVERT_0_125MS_TO_US(ms)            ( ms * 125)      //!< Convert 0.125ms to us
 
 /*******************************************************************************
  * CONSTANTS
@@ -1815,7 +1815,6 @@ uint16               llBleToRfChannel(uint8);
 // Control Procedure Setup
 
 uint8_t              llSetupCtrlPkt( llConnState_t *connPtr, uint8_t ctrlPkt );
-uint8_t              llTrySendCtrlPktImmed(llConnState_t *connPtr, uint8_t ctrlPkt);
 void                 llBuildCtrlPktPeri( llConnState_t *connPtr, uint8 *pData, uint8_t ctrlPkt );
 void                 llBuildCtrlPktCent( llConnState_t *connPtr,uint8_t *pData, uint8_t ctrlPkt );
 void                 llPostSetupCtrlPktPeri( llConnState_t *connPtr, uint8_t ctrlPkt );

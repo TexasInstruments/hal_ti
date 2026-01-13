@@ -11,7 +11,7 @@
 
  ******************************************************************************
  
- Copyright (c) 2025, Texas Instruments Incorporated
+ Copyright (c) 2025-2026, Texas Instruments Incorporated
 
  All rights reserved not granted herein.
  Limited License.
@@ -139,7 +139,7 @@ typedef struct
     uint16_t syncHandle;        // Identify the periodic advertising train.
     uint16_t interval;          // Periodic advertising interval.
     uint8_t  sca;               // Sleep clock accuracy of the advertiser.
-    uint8_t  numMissed;         // Number of periodic advertising events that missed in a row.
+    uint16_t numMissed;         // Number of periodic advertising events that missed in a row.
     uint16_t skip;              // Number of periodic advertising events to skip before the next event.
     uint32_t lastAbsStartTime;  // Absolute start time of the last periodic advertising subevent.
     uint32_t eventCounter;      // Event counter of the last periodic advertising event received.
@@ -167,9 +167,10 @@ typedef struct
 {
   uint32_t                            rspAA;                 // access address for the response
   uint8_t                             numOfSubevents;        // Number of subevents.
-  uint8_t                             subeventInterval;      // Interval between subevents.
-  uint8_t                             rspSlotDelay;          // Time between the advertising packet in a subevent and the first response slot.
-  uint8_t                             rspSlotSpacing;        // Time between response slots.
+  uint8_t                             subeventInterval;      // Interval between subevents (1.25ms units).
+  uint8_t                             rspSlotDelay;          // Time between the periodic advertising subevent
+                                                             // and the first response slot (1.25ms units).
+  uint8_t                             rspSlotSpacing;        // Time between response slots (0.125ms units).
 } llPAwRSyncInfo_t;
 
 /************************************
@@ -359,6 +360,23 @@ void LL_PAwRS_Activate(uint8_t* pPAwRParams);
  * @return      The subevent number, or 0xFF if PAWR is not supported.
  */
 uint8 LL_PAwRS_GetSubeventNum(uint8_t *pPAwRParams);
+
+/*******************************************************************************
+ * @fn          LL_PAwRS_IsSubeventInList
+ *
+ * @brief       This function checks if a given subevent is present in the
+ *              subevent list of the PAwR parameters.
+ *
+ * input parameters
+ *
+ * @param       pPAwRParams - Pointer to the llPAwRParamsSet_t struct containing PAwR parameters.
+ * @param       subevent    - The subevent to check for in the list.
+ *
+ * output parameters
+ *
+ * @return      true if the subevent is found in the list, false otherwise.
+ */
+bool LL_PAwRS_IsSubeventInList(uint8_t* pPAwRParams, uint8_t subevent);
 
 /*******************************************************************************
  * @fn          LL_PAwRS_IsACADPAwR

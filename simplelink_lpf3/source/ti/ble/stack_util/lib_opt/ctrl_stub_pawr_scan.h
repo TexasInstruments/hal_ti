@@ -15,7 +15,7 @@
 
  ******************************************************************************
  
- Copyright (c) 2025, Texas Instruments Incorporated
+ Copyright (c) 2025-2026, Texas Instruments Incorporated
 
  All rights reserved not granted herein.
  Limited License.
@@ -94,6 +94,7 @@ extern void LL_PAwRS_SetFeatureBit(void);
 extern void LL_PAwR_PostProcessRspData(void* chanMapCurrent, uint32_t accessAddress, uint32_t absStartTime, uint16_t eventInterval, uint16_t eventCounter, uint8_t* pPAwRParams);
 extern llStatus_t LL_PAwRS_Terminate(uint8_t** pPAwRParams);
 extern uint8_t LL_PAwRS_GetSubeventNum(uint8_t* pPAwRParams);
+extern bool LL_PAwRS_IsSubeventInList(uint8_t* pPAwRParams, uint8_t subevent);
 extern bool LL_PAwRS_IsEnable(void);
 extern bool LL_PAwRS_IsPAwR(uint8_t* paramsSet);
 extern uint8_t LL_PAwRS_InitSet(uint8_t** pPAwRParams, uint8_t* pPAwRSyncInfoData, uint8_t* crcInit, RCL_CtxPeriodicScanner* rfParam, uint8_t advAddrType, uint8_t* advAddr, uint8_t phy);
@@ -116,6 +117,7 @@ void OPT_LL_PAwRS_SetFeatureBit(void);
 void OPT_LL_PAwR_PostProcessRspData(void* chanMapCurrent, uint32_t accessAddress, uint32_t absStartTime, uint16_t eventInterval, uint16_t eventCounter, uint8_t* pPAwRParams);
 llStatus_t OPT_LL_PAwRS_Terminate(uint8_t** pPAwRParams);
 uint8_t OPT_LL_PAwRS_GetSubeventNum(uint8_t* pPAwRParams);
+bool OPT_LL_PAwRS_IsSubeventInList(uint8_t* pPAwRParams, uint8_t subevent);
 bool OPT_LL_PAwRS_IsEnable(void);
 bool OPT_LL_PAwRS_IsPAwR(uint8_t* paramsSet);
 uint8_t OPT_LL_PAwRS_InitSet(uint8_t** pPAwRParams, uint8_t* pPAwRSyncInfoData, uint8_t* crcInit, RCL_CtxPeriodicScanner* rfParam, uint8_t advAddrType, uint8_t* advAddr, uint8_t phy);

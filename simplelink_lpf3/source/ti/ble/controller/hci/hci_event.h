@@ -10,7 +10,7 @@
 
  ******************************************************************************
  
- Copyright (c) 2009-2025, Texas Instruments Incorporated
+ Copyright (c) 2009-2026, Texas Instruments Incorporated
 
  All rights reserved not granted herein.
  Limited License.
@@ -361,12 +361,12 @@ extern "C"
 #define LE_EVT_READ_LOCAL_P256_PUBLIC_KEY_COMPLETE_BIT               7
 //
 #define LE_EVT_GENERATE_DHKEY_COMPLETE_BIT                           8
-#define LE_EVT_ENH_CONN_COMPLETE_BIT                                 9
+#define LE_EVT_ENH_CONN_COMPLETE_BIT_V1                              9
 #define LE_EVT_DIRECT_ADVERTISING_REPORT_BIT                         10
 #define LE_EVT_PHY_UPDATE_COMPLETE_BIT                               11
 #define LE_EVT_EXTENDED_ADV_REPORT_BIT                               12
-#define LE_EVT_PERIODIC_ADV_SYNC_ESTABLISHED_BIT                     13
-#define LE_EVT_PERIODIC_ADV_REPORT_BIT                               14
+#define LE_EVT_PERIODIC_ADV_SYNC_ESTABLISHED_BIT_V1                  13
+#define LE_EVT_PERIODIC_ADV_REPORT_BIT_V1                            14
 #define LE_EVT_PERIODIC_ADV_SYNC_LOST_BIT                            15
 //
 #define LE_EVT_EXTENDED_SCAN_TIMEOUT_BIT                             16
@@ -379,7 +379,10 @@ extern "C"
 #define LE_EVT_PADV_SYNC_TRANSFER_RECEIVED_BIT_V1                    23
 //
 #define LE_EVT_TRANS_POWER_REPORT_BIT                                32
+#define LE_EVT_PERIODIC_ADV_SYNC_ESTABLISHED_BIT_V2                  35
+#define LE_EVT_PERIODIC_ADV_REPORT_BIT_V2                            36
 #define LE_EVT_PADV_SYNC_TRANSFER_RECEIVED_BIT_V2                    37
+#define LE_EVT_ENH_CONN_COMPLETE_BIT_V2                              40
 
 // Bluetooth LE Event Mask Default Values
 #define LE_EVT_MASK_BYTE0   (LE_EVT_MASK_CONN_COMPLETE             |     \
