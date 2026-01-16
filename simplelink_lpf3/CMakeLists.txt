@@ -60,6 +60,7 @@ if(CONFIG_HAS_CC23X0_SDK)
     ${SOURCES_DRIVERS_LPF3}
     ${SOURCES_DRIVERS_CC23X0}
     ${SOURCES_KERNEL}
+    ${SOURCES_OVERLOADS}
     )
   zephyr_link_libraries(
     ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m0p/ecc.a
@@ -99,6 +100,7 @@ if(CONFIG_HAS_CC27XX_SDK)
     ${SOURCES_DRIVERS_LPF3}
     ${SOURCES_DRIVERS_CC27XX}
     ${SOURCES_KERNEL}
+    ${SOURCES_OVERLOADS}
     )
   zephyr_link_libraries(
     ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m33f/ecc.a

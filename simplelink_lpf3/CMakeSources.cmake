@@ -109,3 +109,7 @@ if(CONFIG_EVENTS)
 endif()
 
 list(TRANSFORM SOURCES_KERNEL PREPEND kernel/zephyr/dpl/)
+
+set(SOURCES_OVERLOADS
+    overloads/overloads.c
+)
