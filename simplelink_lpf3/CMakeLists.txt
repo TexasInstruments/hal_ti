@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025, Texas Instruments Incorporated
+# Copyright (c) 2024-2026, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,10 @@ if(CONFIG_HAS_CC27XX_SDK)
   endif()
 
   if(CONFIG_SOC_CC2755R10)
+    zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
+  endif()
+
+  if(CONFIG_SOC_CC2755P10)
     zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
   endif()
 
