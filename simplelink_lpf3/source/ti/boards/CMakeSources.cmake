@@ -30,9 +30,7 @@
 
 if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
 
-  zephyr_library_sources(
-        generated/${CONFIG_BOARD}/ti_radio_config.c
-    )
+    zephyr_library_sources_ifdef(CONFIG_SIMPLELINK_F3_RF_SETTING_PREGEN generated/${CONFIG_BOARD}/ti_radio_config.c)
 
 endif()
 
