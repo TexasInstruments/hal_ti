@@ -155,7 +155,7 @@ void llCsDbClearCsConnData(uint16 connId);
 void llCsDbClearProcedureData(uint16 connId);
 
 /*******************************************************************************
- * @fn          llCsDbClearProcedureData
+ * @fn          llCsDbClearFilteredChanIdxData
  *
  * @brief       Clear CS channel indexes data
  * Used when CS procedure ends and is not to be repeated.
@@ -2433,16 +2433,6 @@ void llCsDbSetProcedureRepetitionsPreviousProcedureStatus(uint16 connId, bool st
 */
 bool llCsDbGetProcedureRepetitionsPreviousProcedureStatus(uint16 connId);
 
-
-uint16_t llCsDbGetProcedureRepetitionsCount(uint16_t connId);
-uint16_t llCsDbIncrementProcedureRepetitionsCount(uint16_t connId);
-void llCsDbSetProcedureRepetitionsPreviousProcedureStatus(uint16_t connId, bool status);
-bool llCsDbGetProcedureRepetitionsPreviousProcedureStatus(uint16_t connId);
-uint8_t llCsDbGetProcedureRepetitionsDoneStatus(uint16_t connId);
-void llCsDbSetProcedureRepetitionsDoneStatus(uint16_t connId, uint8_t procErrorCode);
-void llCsProcedureRepetitionsCleanup(uint16_t connId);
-void llCsProcedureAntennaSelectionCleanup(uint16_t connId);
-
 /*******************************************************************************
  * @fn          llCsDbInitDRBGCache
  *
@@ -3766,5 +3756,91 @@ uint8_t llCsDbGetMModeRepetitionsChannelArray(uint16 connId, uint8_t index);
  *
  */
 void llCsDbClearMModeRepetitions(uint16 connId);
+
+/*******************************************************************************
+ * @fn          llCsDbGetProcedureRepetitionsDoneStatus
+ *
+ * @brief       Get the completion status of CS procedure repetitions
+ *
+ * @details     Returns the current status code that indicates whether the
+ *              procedure repetitions sequence is complete and if any errors
+ *              were encountered during execution.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      Procedure repetitions completion status code
+ */
+uint8 llCsDbGetProcedureRepetitionsDoneStatus(uint16 connId);
+
+/*******************************************************************************
+ * @fn          llCsDbSetProcedureRepetitionsDoneStatus
+ *
+ * @brief       Set the completion status of CS procedure repetitions
+ *
+ * @details     Updates the status code that tracks completion of the procedure
+ *              repetitions sequence, including any error conditions that may
+ *              have occurred.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ * @param       procErrorCode - procedure completion status or error code
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None
+ */
+void llCsDbSetProcedureRepetitionsDoneStatus(uint16 connId, uint8 procErrorCode);
+
+/*******************************************************************************
+ * @fn          llCsProcedureRepetitionsCleanup
+ *
+ * @brief       Reset procedure repetitions information
+ *
+ * @details     Clears all data related to procedure repetitions, including
+ *              counters, status flags, and timing information. This function
+ *              prepares the system for a new sequence of procedure repetitions.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None
+ */
+void llCsProcedureRepetitionsCleanup(uint16 connId);
+
+/*******************************************************************************
+ * @fn          llCsProcedureAntennaSelectionCleanup
+ *
+ * @brief       Reset antenna selection information
+ *
+ * @details     Clears all antenna selection data used during CS procedures,
+ *              including patterns, configurations, and tracking information.
+ *              This prepares the system for new antenna selection in future
+ *              procedures.
+ *
+ * input parameters
+ *
+ * @param       connId - connection Id
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None
+ */
+void llCsProcedureAntennaSelectionCleanup(uint16 connId);
 
 #endif //LL_CS_DB_H

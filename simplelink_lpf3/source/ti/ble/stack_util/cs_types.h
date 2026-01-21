@@ -90,7 +90,7 @@
 #define    CS_SE_NO_ABORT              (0x0 << 4)         //!< Report with no abort
 #define    CS_SE_ABORT_REQUEST         (0x1 << 4)         //!< Abort because of local Host or remote request
 #define    CS_SE_ABORT_NO_SYNC         (0x2 << 4)         //!< Abort because no CS_SYNC (mode-0) received
-#define    CS_SE_ABORT_SCHED_CONFLITS  (0x3 << 4)         //!< Abort because of scheduling conflicts or limited resources
+#define    CS_SE_ABORT_SCHED_CONFLICTS (0x3 << 4)         //!< Abort because of scheduling conflicts or limited resources
 #define    CS_SE_ABORT_UNSPECIFIED     (0xF << 4)         //!< Abort because of unspecified reasons
 
 
@@ -240,7 +240,8 @@ typedef enum csStatus_e {
     CS_STATUS_INVALID_CHAN_IDX,
     CS_STATUS_INVALID_STEP_MODE,
     CS_STATUS_INVOKE_FUNC_FAIL,
-    CS_STATUS_NO_SYNC
+    CS_STATUS_NO_SYNC,
+    CS_STATUS_SE_ABORT_SCHED_CONFLICTS
 } csStatus_e;
 
 typedef enum

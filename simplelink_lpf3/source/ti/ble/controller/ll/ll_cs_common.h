@@ -590,8 +590,9 @@ typedef struct csDoneInfo
 
 typedef struct
 {
-    uint8_t previousProcedureStatus:1;     /* true if a previous procedure was invalid - all subevents in previous procedure were unsynced */
-    uint8_t reserved:7;                     /* Reserved for future use */
+    uint8_t previousProcedureStatus:1;      /* true if a previous procedure was invalid - all subevents in previous procedure were unsynced */
+    uint8_t csReqIntiatedByPeer:1;          /* Marks if the peer initiated CS a request */
+    uint8_t reserved:6;                     /* Reserved for future use */
 } csRepetitionsFlags_t;
 
 typedef struct
@@ -606,9 +607,7 @@ typedef struct
 typedef struct
 {
     uint8_t validProcedure:1;          /* Marks if a procedure was valid - at least one subevent was good */
-    uint8_t csReqIntiatedByPeer:1;     /* Marks if the peer initiated CS a request */
-    uint8_t channelMapInstantPassed:1; /* Marks if the channel map instant passed during an ongoing procedure */
-    uint8_t reserved:5;                /* Reserved for future use */
+    uint8_t reserved:7;                /* Reserved for future use */
 } csFlags_t;
 
 typedef struct
