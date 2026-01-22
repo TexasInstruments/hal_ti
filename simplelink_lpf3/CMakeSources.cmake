@@ -23,6 +23,9 @@ set(SOURCES_RCL_LPF3
     # HAL
     hal/cc23x0/hal_cc23x0.c
     LRFCC23X0.c
+
+    # RCL feature configuration file
+    zephyr/rcl_driver_config.c
 )
 
 list(TRANSFORM SOURCES_RCL PREPEND source/ti/drivers/rcl/)

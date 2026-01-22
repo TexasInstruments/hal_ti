@@ -208,9 +208,15 @@ extern const LRF_Config LRF_configAdcNoise;
 
 
 // Regulatory domains (for channel specific TX output power limitation)
-#define RCL_REGULATORY_DOMAIN_ETSI                    0x01
-#define RCL_REGULATORY_DOMAIN_FCC                     0x02
-#define RCL_REGULATORY_DOMAIN_MIIT                    0x04
+#ifndef RCL_REGULATORY_DOMAIN_ETSI
+#define RCL_REGULATORY_DOMAIN_ETSI                    0x01U
+#endif
+#ifndef RCL_REGULATORY_DOMAIN_FCC
+#define RCL_REGULATORY_DOMAIN_FCC                     0x02U
+#endif
+#ifndef RCL_REGULATORY_DOMAIN_MIIT
+#define RCL_REGULATORY_DOMAIN_MIIT                    0x04U
+#endif
 
 
 // LRF data structures

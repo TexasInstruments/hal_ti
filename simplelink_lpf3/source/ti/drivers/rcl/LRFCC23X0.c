@@ -189,7 +189,7 @@ const LRF_CoexConfiguration lrfCoexConfiguration __attribute__((weak)) =
 
 /* Regulatory mask to use if no other configuration is provided through SysConfig or other file.
  * This default configuration disables the use of power limitation tables. */
-const uint8_t rclRegulatoryMask __attribute__((weak)) = 0x00;
+uint8_t rclRegulatoryMask __attribute__((weak)) = 0x00;
 
 /* Bit mask indicating which bits in LRFDPBE_GPOCTRL register are written
  * This is the configuration supposed to not change during runtime and allowed
