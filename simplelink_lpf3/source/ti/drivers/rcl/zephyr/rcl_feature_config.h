@@ -30,8 +30,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ti_drivers_rcl_zephyr_rcl_driver_config__include
-#define ti_drivers_rcl_zephyr_rcl_driver_config__include
+#ifndef ti_drivers_rcl_zephyr_rcl_feature_config__include
+#define ti_drivers_rcl_zephyr_rcl_feature_config__include
 
 #include <stdint.h>
 
@@ -49,4 +49,4 @@
 extern uint8_t rclRegulatoryMask;
 #endif
 
-#endif /* ti_drivers_rcl_zephyr_rcl_driver_config__include */
+#endif /* ti_drivers_rcl_zephyr_rcl_feature_config__include */

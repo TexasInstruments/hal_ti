@@ -30,23 +30,25 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if defined(CONFIG_SOC_CC2755P10)
+#if defined(CONFIG_SOC_CC2755P10) || defined(CONFIG_SOC_CC2755R10) || defined(CONFIG_SOC_CC2745R10_Q1)
 
 #include <zephyr/kernel.h>
 #include <ti/drivers/rcl/RCL_Feature.h>
-#include <ti/drivers/rcl/zephyr/rcl_driver_config.h>
+#include <ti/drivers/rcl/zephyr/rcl_feature_config.h>
 
 #define RCL_REGULATORY_MASK \
     ((IS_ENABLED(CONFIG_RCL_REGULATORY_DOMAIN_ETSI) ? (RCL_REGULATORY_DOMAIN_ETSI) : 0U) | \
      (IS_ENABLED(CONFIG_RCL_REGULATORY_DOMAIN_FCC)  ? (RCL_REGULATORY_DOMAIN_FCC) : 0U)  | \
      (IS_ENABLED(CONFIG_RCL_REGULATORY_DOMAIN_MIIT) ? (RCL_REGULATORY_DOMAIN_MIIT) : 0U))
 
+#if defined(CONFIG_SOC_CC2755P10)
 const RCL_FeatureControl rclFeatureControl =
 {
     .enableTemperatureMonitoring = true,
     .enablePaEsdProtection = false,
     .enableTxOutputPowerCompensation = true
 };
+#endif /* CONFIG_SOC_CC2755P10 */
 
 #if defined(CONFIG_RCL_REGULATORY_DOMAIN_RUNTIME_MODIFIABLE)
 uint8_t rclRegulatoryMask = RCL_REGULATORY_MASK;
@@ -54,4 +56,4 @@ uint8_t rclRegulatoryMask = RCL_REGULATORY_MASK;
 const uint8_t rclRegulatoryMask = RCL_REGULATORY_MASK;
 #endif
 
-#endif /* CONFIG_SOC_CC2755P10 */
+#endif /* CONFIG_SOC_CC2755P10 || CONFIG_SOC_CC2755R10 || CONFIG_SOC_CC2745R10_Q1 */

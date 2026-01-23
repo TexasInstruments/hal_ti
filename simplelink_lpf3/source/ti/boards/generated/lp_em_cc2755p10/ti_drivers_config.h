@@ -25,6 +25,9 @@
 
 #include <ti/devices/DeviceFamily.h>
 
+/* RCL feature configuration file */
+#include <ti/drivers/rcl/zephyr/rcl_feature_config.h>
+
 #include <stdint.h>
 
 /* support C++ sources */
