@@ -44,6 +44,7 @@ if(CONFIG_HAS_CC35XX_SDK)
       source/ti/devices/cc35xx/driverlib/adc.c
       source/ti/devices/cc35xx/driverlib/uart.c
       source/ti/devices/cc35xx/driverlib/spi.c
+      source/ti/devices/cc35xx/driverlib/watchdog.c
       source/ti/drivers/GPIO.c
       source/ti/drivers/gpio/GPIOWFF3.c
       source/ti/drivers/dma/DMAWFF3.c
