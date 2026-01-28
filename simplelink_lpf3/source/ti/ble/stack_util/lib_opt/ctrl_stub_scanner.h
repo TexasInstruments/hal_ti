@@ -108,6 +108,7 @@ extern llStatus_t HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParam
 extern llStatus_t HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 extern void llStopCurrentScan(void);
 extern void llCmdScanStartedEventHandle(void);
+extern void hci_tl_initScanCallbacks(void);
 
 
 // Wrapper functions for the feature implementations
@@ -133,5 +134,6 @@ llStatus_t OPT_HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParams, 
 llStatus_t OPT_HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 void OPT_llStopCurrentScan(void);
 void OPT_llCmdScanStartedEventHandle(void);
+void OPT_hci_tl_initScanCallbacks(void);
 
 #endif /* CTRL_SCANNER_H_ */

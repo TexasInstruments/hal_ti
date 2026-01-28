@@ -195,4 +195,9 @@ void OPT_llCmdScanStartedEventHandle(void)
     llCmdScanStartedEventHandle();
 }
 
+void OPT_hci_tl_initScanCallbacks(void)
+{
+    hci_tl_initScanCallbacks();
+}
+
 #endif /* defined(CTRL_SCANNER_CFG) */
