@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the SOC_AAON peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -114,11 +114,11 @@ This section defines the register offsets of the SOC_AAON component
                         Mask Event.
                         '0' - CLR - Clear Interrupt Mask
                         '1' - SET - Set Interrupt Mask
-    Default Value:       0x00000FFF
+    Default Value:       0x00000000
 
         Field:           IMASK
         From..to bits:   0...11
-        DefaultValue:    0xFFF
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     '0' - CLR - Clear Interrupt Mask
                          '1' - SET - Set Interrupt Mask
@@ -211,7 +211,7 @@ This section defines the register offsets of the SOC_AAON component
                         Write 1 - CLR - Clear interrupt mask
     Default Value:       0x00000000
 
-        Field:           IMSET
+        Field:           IMCLR
         From..to bits:   0...11
         DefaultValue:    0x0
         Access type:     write-only
@@ -220,9 +220,9 @@ This section defines the register offsets of the SOC_AAON component
                          Type: Write-Clear.
 
 */
-#define SOC_AAON_DMASIMCLR_IMSET_W                                   12U
-#define SOC_AAON_DMASIMCLR_IMSET_M                                   0x00000FFFU
-#define SOC_AAON_DMASIMCLR_IMSET_S                                   0U
+#define SOC_AAON_DMASIMCLR_IMCLR_W                                   12U
+#define SOC_AAON_DMASIMCLR_IMCLR_M                                   0x00000FFFU
+#define SOC_AAON_DMASIMCLR_IMCLR_S                                   0U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -280,11 +280,11 @@ This section defines the register offsets of the SOC_AAON component
                         Mask Event.
                         '0' - CLR - Clear Interrupt Mask
                         '1' - SET - Set Interrupt Mask
-    Default Value:       0x00000FFF
+    Default Value:       0x00000000
 
         Field:           IMASK
         From..to bits:   0...11
-        DefaultValue:    0xFFF
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     '0' - CLR - Clear Interrupt Mask
                          '1' - SET - Set Interrupt Mask
@@ -446,11 +446,11 @@ This section defines the register offsets of the SOC_AAON component
                         Mask Event.
                         '0' - CLR - Clear Interrupt Mask
                         '1' - SET - Set Interrupt Mask
-    Default Value:       0x00000FFF
+    Default Value:       0x00000000
 
         Field:           IMASK
         From..to bits:   0...11
-        DefaultValue:    0xFFF
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     '0' - CLR - Clear Interrupt Mask
                          '1' - SET - Set Interrupt Mask

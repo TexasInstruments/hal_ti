@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the SOC_DEBUGSS peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -339,6 +339,21 @@ This section defines the register offsets of the SOC_DEBUGSS component
         DefaultValue:    0x0
         Access type:     read-only
         Description:     This register provides feedback on the boot process
+                         [3:0]     PG_Version
+                         [5:3]     Metal_Version
+                         [8:6]     Memory Stacking
+                         [11:9]   Package type
+                         [13:12] Temperature
+                         [17:14] Device PartNumber
+                         [18]      Disable 5GHz
+                         [19]      Disable 6GHz
+                         [20]      Disable BLE
+                         [21]      Disable BLE M0+
+                         [22]      Disable CAN FD
+                         [25:23] Boot ROM Version (FMU)
+                         [26]       Launch pad Mode
+                         [28:27]  SDIO Product ID
+                         [31:29]  TI Fuse ROM Structure Version
 
 */
 #define SOC_DEBUGSS_CFGAPBOOT_DIAGVAL_W                              32U
@@ -360,6 +375,22 @@ This section defines the register offsets of the SOC_DEBUGSS component
         DefaultValue:    0x0
         Access type:     read-only
         Description:     Life cycle state
+
+                         [3:0]     PG_Version
+                         [5:3]     Metal_Version
+                         [8:6]     Memory Stacking
+                         [11:9]   Package type
+                         [13:12] Temperature
+                         [17:14] Device PartNumber
+                         [18]      Disable 5GHz
+                         [19]      Disable 6GHz
+                         [20]      Disable BLE
+                         [21]      Disable BLE M0+
+                         [22]      Disable CAN FD
+                         [25:23] Boot ROM Version (FMU)
+                         [26]       Launch pad Mode
+                         [28:27]  SDIO Product ID
+                         [31:29]  TI Fuse ROM Structure Version
 
 */
 #define SOC_DEBUGSS_CFGAPLCST_LCSVAL_W                               32U

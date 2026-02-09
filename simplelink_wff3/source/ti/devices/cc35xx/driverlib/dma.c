@@ -3,7 +3,7 @@
  *
  *  Description:    Driver for the peripheral DMA controller
  *
- *  Copyright (c) 2022-2024 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -64,16 +64,16 @@ void DMAInitChannel(uint32_t channel, DMAPeripheral peripheral)
     shiftValue = (channel % DMA_CHCTRL_NUMBER_OF_FIELDS) * DMA_CHCTL_FIELD_WIDTH;
 
     // Read register containing channel configuration
-    configReg = HWREG(SOC_AON_BASE + SOC_AON_O_CHCTL0 + regOffset);
+    configReg = HWREG(HOST_DMA_TGT_BASE + HOST_DMA_O_CHCTL0 + regOffset);
 
     // Clear channel configuration
-    configReg &= ~(SOC_AON_CHCTL0_CH0_M << shiftValue);
+    configReg &= ~(HOST_DMA_CHCTL0_CH0_M << shiftValue);
 
     // Set new channel configuration
     configReg |= (peripheral << shiftValue);
 
     // Write back, to register, this links channel to peripheral
-    HWREG(SOC_AON_BASE + SOC_AON_O_CHCTL0 + regOffset) = configReg;
+    HWREG(HOST_DMA_TGT_BASE + HOST_DMA_O_CHCTL0 + regOffset) = configReg;
 }
 
 //*****************************************************************************

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Texas Instruments Incorporated
+ * Copyright (c) 2024-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -391,7 +391,7 @@
  *
  *  @code
  *  // From ti_drivers_config.c // Use the sysconfig settings to make sure both
- *  pins are set to HIGH when not in use GPIO_PinConfig gpioPinConfigs[31] = {
+ *  pins are set to HIGH when not in use GPIO_PinConfig gpioPinConfigs[GPIO_NUMBER_OF_CONFIGS] = {
  *      ...
  *      GPIO_CFG_OUT_STD | GPIO_CFG_OUT_HIGH, // CONFIG_CSN_0
  *      ...

@@ -148,7 +148,7 @@ typedef struct
     uint8_t internalChannel;
     /*! Reference source for the ADC to use. */
     ADCWFF3_ReferenceSource refSource;
-    /*! Time the ADC spends sampling, in divided sampling clock cycles. */
+    /*! Time the ADC spends sampling, in divided sampling clock cycles. Allowed range: 0 - 16383. */
     uint16_t samplingDuration;
     /*! ADC sample clock divider value. */
     ADCWFF3_ClockDivider adcClkDivider;

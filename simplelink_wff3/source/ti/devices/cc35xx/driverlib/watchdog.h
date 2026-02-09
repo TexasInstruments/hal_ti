@@ -51,7 +51,6 @@
 #include "../inc/hw_types.h"
 #include "../inc/hw_memmap.h"
 #include "../inc/hw_hostmcu_aon.h"
-#include "../inc/hw_prcm_aon.h"
 #include "../inc/hw_ints.h"
 
 //*****************************************************************************
@@ -70,8 +69,8 @@ extern "C" {
 // bitfield.
 //
 //*****************************************************************************
-#define HOSTMCU_AON_CFGWICSNS_ELP_TMR_EN (HOSTMCU_AON_CFGWICSNS_VAL_EN << 0)
-#define HOSTMCU_AON_CFGWUTP_ELP_TMR_FAST (HOSTMCU_AON_CFGWUTP_VAL_FAST << 0)
+#define HOSTMCU_AON_CFGWICSNS_ELP_TMR_EN (HOSTMCU_AON_CFGWICSNS_VAL_TMRREQ_EN << 0)
+#define HOSTMCU_AON_CFGWUTP_ELP_TMR_FAST (HOSTMCU_AON_CFGWUTP_VAL_TMRREQ << 0)
 
 //*****************************************************************************
 //
@@ -192,23 +191,6 @@ __STATIC_INLINE void WatchdogWaitUntilEnabled(void)
 __STATIC_INLINE void WatchdogWaitUntilDisabled(void)
 {
     while (WatchdogStatus() != HOSTMCU_AON_ELPTMREN_VAL_DIS) {}
-}
-
-//*****************************************************************************
-//
-//! \brief Overrides the fuse bit value of the timer.
-//!
-//! A fuse bit value determines whether the timer is enabled or disabled at
-//! boot. This function sets the fuse enable override field to override the fuse
-//! bit after boot and allow the timer to be controlled by software. By default,
-//! the timer will be disabled after this override.
-//!
-//! \return None
-//
-//*****************************************************************************
-__STATIC_INLINE void WatchdogOverrideFuseBit(void)
-{
-    HWREG(PRCM_AON_BASE + PRCM_AON_O_HWDT) |= PRCM_AON_HWDT_FSENOV_M;
 }
 
 //*****************************************************************************

@@ -1,5 +1,6 @@
 zephyr_include_directories(
   .
+  driverlib
   )
 
 zephyr_library()
@@ -16,5 +17,4 @@ zephyr_library_sources(
   # driverlib/adc.c
   driverlib/cpu.c
   # driverlib/i2c.c
-  driverlib/hif.c
   )

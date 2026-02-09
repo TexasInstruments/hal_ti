@@ -345,6 +345,11 @@ uint32_t  FIND_NEXT_BIT_IN_BITMAP (   uint32_t   data_snapshot   ,
 
 #define FIND_LOWEST_BIT_SET_IDX(x)     	( (0 == x) ? NUM_BITS_IN_WORD : FIND_LOWEST_BIT_SET(x) )
 
+/* Return number of bits set in a 32-bit unsigned integer */
+static inline int popcount32(uint32_t x) {
+    return __builtin_popcount(x);
+}
+
 //----------------------------------------------------------------------------//
 // GET_CONTAINER_FROM_FIELD(_typedef,_member,_member_address)                 //
 // Returns the address of the containing structure, whose type is _typedef,   //

@@ -94,7 +94,7 @@ int tmr_Init ()
 
     if (!gTimerModule)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__HIGH, WLAN_ERROR_MODULE__TIMER, WLAN_ERROR_TYPE__MALLOC);
     }
 
@@ -232,7 +232,7 @@ int tmr_DestroyTimer (void * hTimerInfo)
     }
     else
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return -1;
     }
 

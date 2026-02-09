@@ -41,6 +41,7 @@
 #include "osi_kernel.h"
 #include "osi_type.h"
 #include "ip_utils.h"
+#include "osi_network.h"
 
 
 /**************************************************************************/

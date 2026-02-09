@@ -4,7 +4,7 @@
  *  Description:    Instruction wrappers for special CPU instructions needed by
  *                  the drivers.
  *
- *  Copyright (c) 2022-2023 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -46,25 +46,19 @@ void CPUDelay(uint32_t count)
 {
     // This function is written in assembly. See cpu.c for compiler specific implementation.
 }
-#elif defined(__IAR_SYSTEMS_ICC__)
-void CPUDelay(uint32_t count)
-{
-    // Loop the specified number of times
-    __asm("CPUDelay:\n"
-          "    subs    r0, #1\n"
-          "    bne.n   CPUDelay\n"
-          "    bx      lr");
-    #pragma diag_suppress = Pe940
-}
-    #pragma diag_default  = Pe940
 #elif defined(__clang__)
-void __attribute__((naked)) CPUDelay(uint32_t count)
+void __attribute__((naked, noinline, no_profile_instrument_function, section(".TI.ramfunc"))) CPUDelay(uint32_t count)
 {
     // Loop the specified number of times.
     // The naked attribute tells the compiler that the function is effectively
     // hand-coded assembly implemented using inlined assembly without operands.
     // As such, it assumes that the C calling conventions are obeyed, and we can
     // assume count is in R0.
+    // no_profile_instrument_function disables code coverage instrumentation of
+    // this function.
+    // The function is placed in RAM for more consistent execution-time.
+    // noinline is also added to prevent it from being inlined in flash.
+    // Loop the specified number of times.
     __asm volatile("CPUdel%=:\n"
                    "    subs r0, #1\n"
                    "    bne   CPUdel%=\n"
@@ -75,7 +69,7 @@ void __attribute__((naked)) CPUDelay(uint32_t count)
     );
 }
 #elif defined(__GNUC__)
-void __attribute__((naked)) CPUDelay(uint32_t count)
+void __attribute__((naked, noinline, no_profile_instrument_function, section(".TI.ramfunc"))) CPUDelay(uint32_t count)
 {
     // Loop the specified number of times
     __asm volatile("CPUdel%=:\n"

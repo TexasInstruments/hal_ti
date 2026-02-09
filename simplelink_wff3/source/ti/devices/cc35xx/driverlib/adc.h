@@ -91,10 +91,10 @@ extern "C" {
 #define ADC_CLOCK_DIVIDER_48 ADC_CTL0_SCLKDIV_DIV_BY_48
 
 //! \brief Set ADC mode to single ended
-#define ADC_MODE_SINGLE 0
+#define ADC_MODE_SINGLE (0 << ADC_MEMCTL_0_MOD_S)
 
 //! \brief Set ADC mode to differential
-#define ADC_MODE_DIFFERENTIAL 1
+#define ADC_MODE_DIFFERENTIAL (1 << ADC_MEMCTL_0_MOD_S)
 
 //! \brief Set ADC reference to internal, which is fixed to 1.4 V
 #define ADC_INTERNAL_REFERENCE 0
@@ -245,6 +245,14 @@ extern "C" {
 //! \brief Conversion overflow
 #define ADC_INT_OVIFG ADC_INTEVT0BM_OVIFG
 
+//! \brief All interrupts
+#define ADC_INT_ALL                                                                                        \
+    (ADC_INT_OVIFG | ADC_INT_TOVIFG | ADC_INT_HIGHIFG | ADC_INT_LOWIFG | ADC_INT_INIFG | ADC_INT_DMADONE | \
+     ADC_INT_UVIFG | ADC_INT_MEMRES_00 | ADC_INT_MEMRES_01 | ADC_INT_MEMRES_02 | ADC_INT_MEMRES_03 |       \
+     ADC_INT_MEMRES_04 | ADC_INT_MEMRES_05 | ADC_INT_MEMRES_06 | ADC_INT_MEMRES_07 | ADC_INT_MEMRES_08 |   \
+     ADC_INT_MEMRES_09 | ADC_INT_MEMRES_10 | ADC_INT_MEMRES_11 | ADC_INT_MEMRES_12 | ADC_INT_MEMRES_13 |   \
+     ADC_INT_MEMRES_14 | ADC_INT_MEMRES_15)
+
 //*****************************************************************************
 //
 //! \name ADC sample clock sources
@@ -286,7 +294,7 @@ extern "C" {
 //! - \ref ADC_CLOCK_DIVIDER_48
 //!
 //! \param clkCycles is the duration of a sample, in ADC-clock cycles.
-//! Valid range of input is [0, 1023]
+//! Valid range of input is [0, 16383]
 //!
 //! \note
 //! The numerical value of clkDiv is not the actual divider value.

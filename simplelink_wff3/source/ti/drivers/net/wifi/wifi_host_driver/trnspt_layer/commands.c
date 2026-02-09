@@ -41,6 +41,12 @@
 #include "wlan_if.h"
 #include "host_event_if.h"
 #include "errors.h"
+
+
+#define CMD_SEND_TIMEOUT_MS (120000) //2 minutes
+
+extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t * args, uint16_t argsLen);
+
 /* internal commands return value from FW that will convert to a command status above
  * This should never change and it is copied from the cc3xxx_public_commands.h
  */
@@ -165,7 +171,7 @@ int Transfer(char *in, uint32_t len)
     if(len > cmdCB->maxCMDSize)
     {
         Report("\n\rTransfer: error exceeded maxCMDSize:%d len:%d",cmdCB->maxCMDSize,len);
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__CMD_REACHED_MAX_SIZE);
     }
 
@@ -191,7 +197,7 @@ int Transfer(char *in, uint32_t len)
     ret = twIf_Transact(pCmdTxn);
     if(ret != TXN_STATUS_COMPLETE)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__TRANSACTION);
     }
 
@@ -242,9 +248,10 @@ void cmd_ReadCompleteExternal(uint8_t *inBuf)
             cmdCB->currentCommand->cmdStatus = CMD_OK;
         }
         else
-        {		     
-           cmdCB->currentCommand->cmdStatus = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__CMD_GENERAL);
-           //cmdCB->currentCommand->cmdStatus = CMD_MAX_COMMAND_ERROR - commandStatus;//rivit to open issue, we need to have the FW status
+        {
+            COMMAND_PRINT_ERROR("\r\n commandStatus: 0x%x change to WLAN_RET_COMMAND_GENERAL :0x%x", commandStatus,WLAN_RET_COMMAND_GENERAL);
+           cmdCB->currentCommand->cmdStatus = WLAN_RET_COMMAND_GENERAL;
+           //cmdCB->currentCommand->cmdStatus = CMD_MAX_COMMAND_ERROR - commandStatus;// to open issue, we need to have the FW status
         }
 
         payload = (inBuf + 4);
@@ -285,7 +292,7 @@ void cmd_SM(void* hCbHndl)
         {
             //set the status of this command is general error, will be changed to OK
             //upon command complete
-            cmdCB->currentCommand->cmdStatus = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__CMD_GENERAL);
+            cmdCB->currentCommand->cmdStatus = WLAN_RET_COMMAND_GENERAL;
 
             twIf_Awake();
             COMMAND_PRINT("\n\rCommandSM: transfer command\n\r");
@@ -296,7 +303,7 @@ void cmd_SM(void* hCbHndl)
             if (OSI_OK != retVal)
             {
                 COMMAND_PRINT_ERROR("\n\rrCommandSM: Failed to stop timer. error number: %d",retVal);
-                error_event.error_num = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__TIMER_STOP);
+                error_event.error_num = WLAN_RET_COMMAND_ERROR_MID_TYPE__TIMER_STOP;
                 error_event.module = WLAN_MODULE_TMR;
                 error_event.severity = WLAN_SEVERITY_MID;
                 Wlan_HostSendEvent(WLAN_EVENT_ERROR, (uint8_t*)&error_event, sizeof(WlanEventError_t));
@@ -318,29 +325,28 @@ void cmd_SM(void* hCbHndl)
     //hCbHndl != NULL means that it was called from the event system as a response
     else if ((cmdState ==CMD_SM_TRANSFERED)&&
             ((hCbHndl != NULL)|| 
-			    (WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__TIMEOUT) ==
-				     cmdCB->currentCommand->cmdStatus)))
+			    (WLAN_RET_TIMEOUT == cmdCB->currentCommand->cmdStatus)))
     {
         cmdState = CMD_SM_COMPLETE;
         retVal = osi_TimerStop(&(cmdCB->timer));
         if (OSI_OK != retVal)
         {
              COMMAND_PRINT_ERROR("\n\rrCommandSM: Failed to stop timer. error number: %d",retVal);
-             error_event.error_num = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__TIMER_STOP);
+             error_event.error_num = WLAN_RET_COMMAND_ERROR_MID_TYPE__TIMER_STOP;
              error_event.module = WLAN_MODULE_TMR;
              error_event.severity = WLAN_SEVERITY_MID;
              Wlan_HostSendEvent(WLAN_EVENT_ERROR, (uint8_t*)&error_event, sizeof(WlanEventError_t));
         }
         //general error means no error was returned from the send module and timeout
         //now we go and read the status, we assume device is awake because this is called from the FwEvents
-        if (WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__TIMEOUT) == cmdCB->currentCommand->cmdStatus)
+        if (WLAN_RET_TIMEOUT == cmdCB->currentCommand->cmdStatus)
         {
-
             COMMAND_PRINT_ERROR("\n\rCommandSM: cmdStatus: CMD_ERR_TIMEOUT \n\r");
+            wlanDispatcherSendEvent(WLAN_EVENT_COMMAND_TIMEOUT, NULL, 0);
         }
-        else if (CMD_ERR_GENERAL == cmdCB->currentCommand->cmdStatus)
+        else if (WLAN_RET_COMMAND_GENERAL == cmdCB->currentCommand->cmdStatus)
         {
-            COMMAND_PRINT("\n\rCommandSM: cmdStatus: CMD_ERR_GENERAL was unsuccessful, reading complete\n\r");
+            COMMAND_PRINT("\n\rCommandSM: cmdStatus: WLAN_RET_COMMAND_GENERAL was unsuccessful, reading complete\n\r");
         }
         else
         {
@@ -383,12 +389,12 @@ void Timeout(void *params)
     if (NULL != cmdCB->currentCommand)
     {
         COMMAND_PRINT("timer interrupt function :timeout :%d !\n\r",cmdCB->clientID);
-        cmdCB->currentCommand->cmdStatus = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__TIMEOUT);
+        cmdCB->currentCommand->cmdStatus = WLAN_RET_TIMEOUT;
         trnspt_RequestSchedule(cmdCB->clientID, 0);
     }
     else
     {
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 }
 
@@ -557,7 +563,7 @@ int cmd_Send(char *in, uint32_t inLen, char *out, uint32_t outLen)
 
     if (NULL == cmdCB)
     {
-        retVal = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__CMD_NOT_INITIALIZED);
+        retVal = WLAN_RET_COMMAND_CMD_NOT_INITIALIZED;
         goto free;
     }
 
@@ -565,7 +571,7 @@ int cmd_Send(char *in, uint32_t inLen, char *out, uint32_t outLen)
     if (NULL == cmdNode)
     {
         COMMAND_PRINT_ERROR("\n\rERROR cmd_Send allocation failed");
-        retVal = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__MALLOC);
+        retVal = WLAN_RET_COMMAND_ERROR_TYPE__MALLOC;
         goto free;
     }
 
@@ -573,14 +579,14 @@ int cmd_Send(char *in, uint32_t inLen, char *out, uint32_t outLen)
     if (NULL == cmdSyncObjComplete)
     {
         COMMAND_PRINT_ERROR("\n\rERROR CMD_ERR_OUT_OF_MEMORY");
-        retVal = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__MALLOC);
+        retVal = WLAN_RET_COMMAND_ERROR_TYPE__MALLOC;
         goto free;
     }
 
     if (osi_SyncObjCreate(cmdSyncObjComplete) != OSI_OK)
     {
         COMMAND_PRINT_ERROR("\n\rERROR CMD_ERR_SYNC_OBJ");
-        retVal = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__SYNC_OBJ_CREATE);
+        retVal = WLAN_RET_COMMAND_ERROR_MID_TYPE__SYNC_OBJ_CREATE;
         goto free;
     }
 
@@ -596,7 +602,7 @@ int cmd_Send(char *in, uint32_t inLen, char *out, uint32_t outLen)
     cmd_lock();
     if (que_Enqueue(cmdCB->pMsgQ, cmdNode) < 0)
     {
-        retVal = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__MSG_QUEUE_CREATE);
+        retVal = WLAN_RET_COMMAND_ERROR_MID_TYPE__MSG_QUEUE_CREATE;
         cmd_unlock();
         COMMAND_PRINT_ERROR("\n\rERROR cmd_SendInTransport***No room in queue pMsgQ*** line:%d\n", __LINE__);
         goto free;
@@ -612,18 +618,17 @@ int cmd_Send(char *in, uint32_t inLen, char *out, uint32_t outLen)
 
 
     COMMAND_PRINT("\n\rcmd_Send Command: new command, waiting...\n\r");
-    if (osi_SyncObjWait(cmdNode->pSyncObjComplete, OSI_WAIT_FOREVER) != OSI_OK)
+    if (osi_SyncObjWait(cmdNode->pSyncObjComplete, CMD_SEND_TIMEOUT_MS) != OSI_OK)
     {
         COMMAND_PRINT_ERROR("\n\rcmd_Send Command: new command, failed waiting !!!!\n\r");
-        retVal = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__SYNC_OBJ_CREATE);
+        retVal = WLAN_RET_COMMAND_ERROR_MID_TYPE__SYNC_OBJ_CREATE;
     }
     else
     {
         COMMAND_PRINT("\n\r cmd_Send: command done! cmdStatus:%d\n\r",cmdNode->cmdStatus);
-        if((cmdNode->cmdStatus != CMD_OK)&&(cmdNode->cmdStatus != -17769)&&(cmdNode->cmdStatus != -21854))
+        if((cmdNode->cmdStatus != CMD_OK))
         {
-            //-17769 / 21854 returns during FW dndl and ini parama dnld, it is not error
-            COMMAND_PRINT_ERROR("\n\r cmd_Send: command done with error! cmdStatus:%d\n\r",cmdNode->cmdStatus);
+            COMMAND_PRINT_ERROR("\n\r cmd_Send: command done with error! cmdStatus:0x%x\n\r",cmdNode->cmdStatus);
         }
         retVal = cmdNode->cmdStatus;
     }
@@ -638,7 +643,6 @@ int cmd_Send(char *in, uint32_t inLen, char *out, uint32_t outLen)
     {
         os_free(cmdNode);
     }
-
     if (NULL != cmdSyncObjComplete)
     {
         osi_SyncObjDelete(cmdSyncObjComplete);

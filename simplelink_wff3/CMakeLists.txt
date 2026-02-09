@@ -11,16 +11,18 @@ endif()
 if(CONFIG_HAS_CC35XX_SDK)
   if(CONFIG_SOC_SERIES_CC35XXE)
     zephyr_compile_definitions(DeviceFamily_CC35XX ${COMPILER})
+    zephyr_compile_definitions(CC35XX)
     zephyr_compile_definitions(CONFIG_DYNAMIC_DPL_OBJECTS)
     zephyr_include_directories(
       .
       source
       source/ti/drivers
+      source/ti/drivers/xmem/flash
+      source/ti/drivers/cryptoutils/cryptokey
       third_party/hsmddk/include/Kit/Log/incl/
     )
     if(CONFIG_WIFI_TI_CC35XX)
       zephyr_include_directories(
-        firmware
 	# shared between host driver and hostap
         source/ti/drivers/net/wifi/wifi_host_driver
         source/ti/drivers/net/wifi/wifi_host_driver/inc_common
@@ -51,9 +53,12 @@ if(CONFIG_HAS_CC35XX_SDK)
       source/ti/drivers/dma/DMAWFF3.c
       source/ti/devices/cc35xx/driverlib/dma.c
       source/ti/drivers/power/PowerWFF3.c
-      source/ti/drivers/cryptoutils/hsm/HSMLPF3.c
+      source/ti/drivers/cryptoutils/hsm/HSMXXF3.c
+      source/ti/drivers/cryptoutils/sharedresources/HSMResourceXXF3.c
+      source/ti/drivers/cryptoutils/sharedresources/CommonResourceXXF3.c
 
       source/ti/drivers/xmem/flash/FlashWFF3.c
+      source/ti/drivers/xmem/XMEMWFF3.c
       source/ti/devices/cc35xx/driverlib/xip.c
       source/ti/devices/cc35xx/driverlib/ospi.c
       source/ti/devices/cc35xx/driverlib/i2c.c
@@ -77,12 +82,12 @@ if(CONFIG_HAS_CC35XX_SDK)
         third_party/hsmddk/include/Kit/EIP130/TokenHelper/src/eip130_token_common.c
         third_party/hsmddk/include/Kit/EIP201/src/eip201.c
         third_party/hsmddk/include/Kit/Log/src/log.c
-        source/ti/drivers/aesecb/AESECBLPF3.c
-        source/ti/drivers/aesccm/AESCCMLPF3.c
-        source/ti/drivers/aesctr/AESCTRLPF3.c
+        source/ti/drivers/aesecb/AESECBXXF3.c
+        source/ti/drivers/aesccm/AESCCMXXF3.c
+        source/ti/drivers/aesctr/AESCTRXXF3.c
         source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
         source/ti/drivers/TRNG.c
-        source/ti/drivers/trng/TRNGLPF3HSM.c
+        source/ti/drivers/trng/TRNGXXF3HSM.c
       )
     endif()
     if(CONFIG_WIFI_TI_CC35XX)

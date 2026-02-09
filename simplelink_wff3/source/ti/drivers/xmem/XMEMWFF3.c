@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Texas Instruments Incorporated
+ * Copyright (c) 2024-2026, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@
 #include <stdlib.h>
 
 #include <ti/drivers/dpl/HwiP.h>
-#include <ti/drivers/dpl/SemaphoreP.h>
+#include <ti/drivers/dpl/MutexP.h>
 #include <ti/drivers/dpl/ClockP.h>
 
 #include <ti/drivers/xmem/XMEMWFF3.h>
@@ -53,61 +53,67 @@
 #define PHYSICAL_ADDR          0
 #define LOGIC_ADDR             1
 #define VERIFBUF_SIZE_IN_BYTES 256
+#define WRITE_SIZE_IN_BYTES    256
+#define READ_SIZE_IN_BYTES     256
+#define PAGE_SIZE              0x100
 
 static int_fast16_t checkEraseRange(XMEM_Handle handle, size_t offset, size_t size);
 static int_fast16_t doErase(XMEM_Handle handle, size_t offset, size_t size);
 static uint32_t ConvertOffsetToAddr(XMEM_Handle handle, size_t offset, size_t AddrType);
+static void flashTypeSelection(void);
 
-static XMEMWFF3_Object object[XMEM_NUM_DEVICE] = {{.opened = false}};
-
-static const XMEMWFF3_HWAttrs hwAttrs[XMEM_NUM_DEVICE] = {
-
-    {
-
-        .sectorSize         = 0x1000,
-        .regionBase         = 0x21A000,
-        .regionStartAddr    = 0xA0050000,
-        .regionOffset       = 0x1CA,
-        .regionSize         = 0x1E5000,
-        .sectorEraseOpcode  = 0x20,
-        .sectorEraseTimeOut = 200,
-        .verifyBufSize      = VERIFBUF_SIZE_IN_BYTES
-
-    }
-
-};
-
-XMEM_Config XMEM_config[XMEM_NUM_DEVICE] = {
-
-    {
-
-        .object  = &(object[XMEM_FLASH]),
-        .hwAttrs = &(hwAttrs[XMEM_FLASH])
-
-    }
-
-};
-
-const uint8_t XMEM_count = XMEM_NUM_DEVICE;
+const uint8_t XMEM_count = XMEM_NUM_HANDLER;
+static uint8_t xmem_num  = 0; /* number of open handlers */
 
 /*
- *  Semaphore to synchronize access to flash region.
+ *  Mutex to synchronize access to flash region.
  */
-static SemaphoreP_Handle writeSem = NULL;
+static MutexP_Handle writeMutex = NULL;
+static MutexP_Struct writeMutexStruct;
 
 static size_t sectorBaseMask; /* for efficient argument checking */
 static void *verifyBuf;       /*!< Write Pre/Post verify buffer */
 static uint8_t verifyBuffer[VERIFBUF_SIZE_IN_BYTES];
+static void *xmemDataToWriteBuf;                               /*!< Write  buffer */
+static uint8_t xmemDataToWriteBuffer[WRITE_SIZE_IN_BYTES + 4]; /*!< handling unaligned write */
+static void *xmemDataToReadBuf;                                /*!< Read  buffer */
+static uint8_t xmemDataToReadBuffer[READ_SIZE_IN_BYTES + 4];   /*!< handling unaligned read */
+
+extern uint32_t _Boot_report_address;
+#define BOOT_REPORT_ADDR ((uint32_t)(&_Boot_report_address))
+
+static bool isInitialized = false;
+
+XMEMWFF3_HWAttrs XMEMWFF3_hwAttrs;
+
+XMEMWFF3_Object XMEMWFF3_objects[XMEM_NUM_HANDLER];
+
+XMEM_Config XMEM_config[CONFIG_XMEM_COUNT] = {{.object = &(XMEMWFF3_objects), .hwAttrs = &(XMEMWFF3_hwAttrs)}};
 
 /*
  *  ======== XMEMWFF3_close ========
  */
-void XMEMWFF3_close(XMEM_Handle handle)
+int_fast16_t XMEMWFF3_close(XMEM_Handle handle)
 {
+    if (handle == NULL)
+    {
+        return XMEM_STATUS_INVALID_PARAMS;
+    }
+
     XMEMWFF3_Object *object;
 
-    object         = handle->object;
-    object->opened = false;
+    uintptr_t key = MutexP_lock(writeMutex);
+
+    object = handle->object;
+    memset(object, 0, sizeof(XMEMWFF3_Object));
+
+    free(handle);
+
+    xmem_num--;
+
+    MutexP_unlock(writeMutex, key);
+
+    return XMEM_STATUS_SUCCESS;
 }
 
 /*
@@ -117,11 +123,26 @@ int_fast16_t XMEMWFF3_erase(XMEM_Handle handle, size_t offset, size_t size)
 {
     int_fast16_t status;
 
-    SemaphoreP_pend(writeSem, SemaphoreP_WAIT_FOREVER);
+    if (handle == NULL)
+    {
+        return (XMEM_STATUS_ERROR);
+    }
+
+    XMEMWFF3_Object const *object;
+
+    object = handle->object;
+
+    /* STIG operation are not supported for PSRAM */
+    if (object->deviceNum == XMEM_PSRAM)
+    {
+        return XMEM_STATUS_ERROR;
+    }
+
+    uintptr_t key = MutexP_lock(writeMutex);
 
     status = doErase(handle, offset, size);
 
-    SemaphoreP_post(writeSem);
+    MutexP_unlock(writeMutex, key);
 
     return (status);
 }
@@ -131,13 +152,41 @@ int_fast16_t XMEMWFF3_erase(XMEM_Handle handle, size_t offset, size_t size)
  */
 void XMEMWFF3_getAttrs(XMEM_Handle handle, XMEM_Attrs *attrs)
 {
+    if (handle == NULL || attrs == NULL)
+    {
+        return;
+    }
+
     XMEMWFF3_HWAttrs const *hwAttrs;
 
     hwAttrs = handle->hwAttrs;
 
-    attrs->regionBase = (void *)&hwAttrs->regionBase;
-    attrs->regionSize = hwAttrs->regionSize;
-    attrs->sectorSize = hwAttrs->sectorSize;
+    attrs->flashType = hwAttrs->flashType;
+}
+
+/*
+ *  ======== XMEMWFF3_getObject ========
+ */
+void XMEMWFF3_getObject(XMEM_Handle handle, XMEMWFF3_Object *object)
+{
+    if (handle == NULL || object == NULL)
+    {
+        return;
+    }
+
+    XMEMWFF3_Object const *obj;
+
+    obj = handle->object;
+
+    memcpy(object, obj, sizeof(XMEMWFF3_Object));
+}
+
+/*
+ *  ======== XMEMWFF3_getActiveHandlers ========
+ */
+uint8_t XMEMWFF3_getActiveHandlers(void)
+{
+    return xmem_num;
 }
 
 /*
@@ -145,23 +194,29 @@ void XMEMWFF3_getAttrs(XMEM_Handle handle, XMEM_Attrs *attrs)
  */
 void XMEMWFF3_init(void)
 {
-
-    unsigned int key;
-
-    /* Initialize variables */
-    verifyBuf = (void *)&verifyBuffer;
+    uintptr_t key;
+    MutexP_Params mutexParams;
 
     key = HwiP_disable();
 
-    if (writeSem == NULL)
+    if (!isInitialized)
     {
-        /* Create a binary semaphore for thread safety */
-        writeSem = SemaphoreP_createBinary(1);
+        isInitialized = true;
         HwiP_restore(key);
+
+        /* Initialize variables */
+        verifyBuf = (void *)&verifyBuffer;
+
+        /* Select flash type */
+        flashTypeSelection();
+
+        /* Create a mutex for thread safety */
+        MutexP_Params_init(&mutexParams);
+        writeMutex = MutexP_construct(&writeMutexStruct, &mutexParams);
     }
     else
     {
-        /* Init already called */
+        /* Already initialized */
         HwiP_restore(key);
     }
 }
@@ -171,69 +226,130 @@ void XMEMWFF3_init(void)
  */
 int_fast16_t XMEMWFF3_lock(XMEM_Handle handle, uint32_t timeout)
 {
-    if (SemaphoreP_pend(writeSem, timeout) != SemaphoreP_OK)
+    if (handle == NULL)
+    {
+        return (XMEM_STATUS_ERROR);
+    }
+
+    XMEMWFF3_Object *object = handle->object;
+    object->mutexKey        = MutexP_lock(writeMutex);
+    if (object->mutexKey == 0)
     {
         return (XMEM_STATUS_TIMEOUT);
     }
+
     return (XMEM_STATUS_SUCCESS);
 }
 
 /*
  *  ======== XMEMWFF3_open =======
  */
-XMEM_Handle XMEMWFF3_open(uint_least8_t index)
+XMEM_Handle XMEMWFF3_open(XMEM_Params *params)
 {
     XMEMWFF3_Object *object;
-    XMEMWFF3_HWAttrs const *hwAttrs;
-    XMEM_Handle handle;
+    const XMEMWFF3_HWAttrs *hwAttrs;
+    XMEM_Handle handle = NULL;
+    int i;
 
-    /* Confirm that 'init' has successfully completed */
-    if (writeSem == NULL)
+    if (params == NULL)
     {
-        XMEMWFF3_init();
-        if (writeSem == NULL)
+        return (NULL);
+    }
+
+    XMEMWFF3_init();
+    /* Confirm that 'init' has successfully completed */
+    if (writeMutex == NULL)
+    {
+        return (NULL);
+    }
+
+    /* Verify max number of handlers */
+    if (xmem_num >= XMEM_count)
+    {
+        return (NULL);
+    }
+
+    uintptr_t key = MutexP_lock(writeMutex);
+
+    /* Allocate XMEM handle */
+    handle = malloc(sizeof(XMEM_Config));
+    if (handle == NULL)
+    {
+        MutexP_unlock(writeMutex, key);
+        return (NULL);
+    }
+
+    /* Pointing to hwAttrs*/
+    handle->hwAttrs = XMEM_config[0].hwAttrs;
+
+    /* Pointing to the beginning of array of objects */
+    object = (XMEMWFF3_Object *)(XMEM_config[0].object);
+
+    /* Check for available slot */
+    for (i = 0; i < XMEM_count; i++)
+    {
+        /* Check if current object slot is available (not opened) */
+        if (false == object->opened)
         {
+            break;
+        }
+
+        /* Ther is not available slot */
+        if (i == XMEM_count - 1)
+        {
+            free(handle);
+            MutexP_unlock(writeMutex, key);
             return (NULL);
         }
+
+        /* Current object is opened, move to the next object in the array */
+        object = object + 1;
     }
 
-    /* Verify XMEM region index */
-    if (index >= XMEM_count)
-    {
-        return (NULL);
-    }
+    hwAttrs = handle->hwAttrs;
 
-    handle  = &XMEM_config[index];
-    object  = XMEM_config[index].object;
-    hwAttrs = XMEM_config[index].hwAttrs;
+    object->deviceNum       = params->deviceNum;
+    object->regionBase      = params->regionBase;
+    object->regionStartAddr = params->regionStartAddr;
+    object->regionSize      = params->regionSize;
 
-    sectorBaseMask = ~(hwAttrs->sectorSize - 1);
-
-    SemaphoreP_pend(writeSem, SemaphoreP_WAIT_FOREVER);
-
-    if (object->opened == true)
-    {
-        SemaphoreP_post(writeSem);
-        return (NULL);
-    }
+    sectorBaseMask = ~(hwAttrs->flashType.sectorSize - 1);
 
     /* The region cannot be smaller than a sector size */
-    if (hwAttrs->regionSize < hwAttrs->sectorSize)
+    if (object->regionSize < hwAttrs->flashType.sectorSize)
     {
-        SemaphoreP_post(writeSem);
+        memset(object, 0, sizeof(XMEMWFF3_Object));
+        free(handle);
+        MutexP_unlock(writeMutex, key);
         return (NULL);
     }
 
     /* The region size must be a multiple of sector size */
-    if (hwAttrs->regionSize != (hwAttrs->regionSize & sectorBaseMask))
+    if (object->regionSize != (object->regionSize & sectorBaseMask))
     {
-        SemaphoreP_post(writeSem);
+        memset(object, 0, sizeof(XMEMWFF3_Object));
+        free(handle);
+        MutexP_unlock(writeMutex, key);
+        return (NULL);
+    }
+
+    /* Validate target device */
+    if (object->deviceNum != XMEM_FLASH && object->deviceNum != XMEM_PSRAM)
+    {
+        memset(object, 0, sizeof(XMEMWFF3_Object));
+        free(handle);
+        MutexP_unlock(writeMutex, key);
         return (NULL);
     }
 
     object->opened = true;
 
-    SemaphoreP_post(writeSem);
+    /* object is ready, handle points to a found object */
+    handle->object = object;
+
+    xmem_num++;
+
+    MutexP_unlock(writeMutex, key);
 
     return (handle);
 }
@@ -241,29 +357,187 @@ XMEM_Handle XMEMWFF3_open(uint_least8_t index)
 /*
  *  ======== XMEMWFF3_read =======
  */
-int_fast16_t XMEMWFF3_read(XMEM_Handle handle, size_t offset, void *buffer, size_t bufferSize)
+int_fast16_t XMEMWFF3_read(XMEM_Handle handle, size_t offset, void *buffer, size_t bufferSize, uint_fast16_t flags)
 {
-    XMEMWFF3_HWAttrs const *hwAttrs;
-
-    hwAttrs = handle->hwAttrs;
-
+    uint32_t clockPTick;
+    uint32_t clockPTickPeriod;
     unsigned int key;
-    uint32_t flashlogicAddr = ConvertOffsetToAddr(handle, offset, LOGIC_ADDR);
 
-    if (offset + bufferSize > hwAttrs->regionSize)
+    if (handle == NULL || buffer == NULL || bufferSize == 0)
     {
-        return (XMEM_STATUS_INV_OFFSET);
+        return (XMEM_STATUS_ERROR);
     }
 
-    /*
-     *  Get exclusive access to the region.  We don't want someone
-     *  else to erase the region while we are reading it.
-     */
-    SemaphoreP_pend(writeSem, SemaphoreP_WAIT_FOREVER);
+    /* Validate that flags only contain allowed bits */
+    if (flags & ~(XMEM_READ_STIG))
+    {
+        return (XMEM_STATUS_INVALID_PARAMS);
+    }
 
-    FlashRead((uint32_t *)flashlogicAddr, (uint32_t *)buffer, bufferSize);
+    XMEMWFF3_Object const *object;
 
-    SemaphoreP_post(writeSem);
+    object = handle->object;
+
+    /* Prepare Read buffer */
+    xmemDataToReadBuf = (void *)&xmemDataToReadBuffer;
+
+    if (flags & XMEM_READ_STIG)
+    {
+        /* STIG operation are not supported for PSRAM */
+        if (object->deviceNum == XMEM_PSRAM)
+        {
+            return XMEM_STATUS_ERROR;
+        }
+
+        /*  Check if offset + word size exceeds page boundary */
+        if (((offset & 0xFF) + XMEM_WORD_SIZE) > PAGE_SIZE)
+        {
+            return XMEM_STATUS_ERROR;
+        }
+
+        uint32_t status = 0;
+
+        uint32_t startAddrPhy = ConvertOffsetToAddr(handle, offset, PHYSICAL_ADDR);
+
+        if (bufferSize < XMEM_WORD_SIZE)
+        {
+            return XMEM_STATUS_ERROR;
+        }
+        else
+        {
+            bufferSize = XMEM_WORD_SIZE; /* length of reading from STIG is always 1 word which is 4 Bytes */
+        }
+
+        if (offset + bufferSize > object->regionSize)
+        {
+            return (XMEM_STATUS_INV_OFFSET);
+        }
+
+        /*
+         *  Get exclusive access to the region.  We don't want someone
+         *  else to erase the region while we are reading it.
+         */
+        uintptr_t mutexKey = MutexP_lock(writeMutex);
+
+        key = HwiP_disable();
+
+        /*
+         * Ensure SysTimer is enabled, to be able to read the SysTimer counter
+         * value.
+         */
+        clockPTick       = ClockP_getSystemTicks();
+        clockPTickPeriod = ClockP_getSystemTickPeriod();
+        FlashSetTickPeriod(clockPTickPeriod);
+
+        status = FlashReadSTIG(startAddrPhy, xmemDataToReadBuf, object->deviceNum);
+
+        /* Copy data to buffer */
+        memcpy(buffer, xmemDataToReadBuf, XMEM_WORD_SIZE);
+
+        HwiP_restore(key);
+
+        if (status != 0)
+        {
+            MutexP_unlock(writeMutex, mutexKey);
+            return XMEM_STATUS_ERROR;
+        }
+
+        MutexP_unlock(writeMutex, mutexKey);
+    }
+    else
+    {
+        int remainingBytes = bufferSize;
+        uint32_t flashlogicAddr;
+        uint32_t alignment;
+
+        if (offset + bufferSize > object->regionSize)
+        {
+            return (XMEM_STATUS_INV_OFFSET);
+        }
+
+        /*
+         *  Get exclusive access to the region.  We don't want someone
+         *  else to erase the region while we are reading it.
+         */
+        uintptr_t mutexKey = MutexP_lock(writeMutex);
+
+        /* Handling the constraint of reading from 4 Bytes aligned address */
+        alignment = offset % 4;
+
+        /* Handle the constraint of reading multiples of 256 Bytes at a time. */
+        while (remainingBytes >= READ_SIZE_IN_BYTES)
+        {
+            /* Set address to read from
+             * If offset is not align, set the address to be align*/
+            flashlogicAddr = ConvertOffsetToAddr(handle, offset, LOGIC_ADDR) - alignment;
+
+            /* Read from flash
+             * flashlogicAddr is align, read 256 bytes*/
+            FlashRead((uint32_t *)flashlogicAddr, (uint32_t *)xmemDataToReadBuf, READ_SIZE_IN_BYTES);
+
+            /* Copy data to buffer.
+             * If offset is not aligned, we need to align the src address and read size*/
+            memcpy(buffer, xmemDataToReadBuf + alignment, READ_SIZE_IN_BYTES - alignment);
+
+            /* Advance buffer, subtract remain size, Advance offset */
+            buffer += READ_SIZE_IN_BYTES - alignment;
+            remainingBytes -= (READ_SIZE_IN_BYTES - alignment);
+            offset += READ_SIZE_IN_BYTES - alignment;
+
+            /* Now the offset is aligned, alignment should be 0 for the rest of the read loop*/
+            alignment = 0;
+        }
+
+        /* Less than 256-bytes to read:
+         * - Either after the loop for remaining bytes
+         * - Or for first time read with less than 256-bytes length
+         */
+        if (remainingBytes > 0)
+        {
+            /* Handling the constraint of reading from addresses that exceed region size  */
+            if (offset + READ_SIZE_IN_BYTES > object->regionSize)
+            {
+                alignment = offset & 0xFF;
+            }
+
+            /* Set address to read from
+             * If offset is not align, set the address to be align*/
+            flashlogicAddr = ConvertOffsetToAddr(handle, offset, LOGIC_ADDR) - alignment;
+
+            /* Check if the true alignment + remainingBytes exceeds buffer size */
+            if ((alignment + remainingBytes) > READ_SIZE_IN_BYTES)
+            {
+                /* Calculate how much we can read in first operation */
+                size_t firstReadSize = READ_SIZE_IN_BYTES - alignment;
+
+                /* First read operation */
+                FlashRead((uint32_t *)flashlogicAddr, (uint32_t *)xmemDataToReadBuf, READ_SIZE_IN_BYTES);
+                memcpy(buffer, xmemDataToReadBuf + alignment, firstReadSize);
+
+                /* Second read operation for remaining bytes */
+                uint8_t *nextBuffer = (uint8_t *)buffer + firstReadSize;
+                size_t nextSize     = remainingBytes - firstReadSize;
+                uint32_t nextAddr   = (uint32_t)flashlogicAddr + READ_SIZE_IN_BYTES;
+
+                FlashRead((uint32_t *)nextAddr, (uint32_t *)xmemDataToReadBuf, READ_SIZE_IN_BYTES);
+                memcpy((uint8_t *)nextBuffer, xmemDataToReadBuf, nextSize);
+            }
+            else
+            {
+                /* Read from flash
+                 * flashlogicAddr is aligned, read 256 bytes.
+                 */
+                FlashRead((uint32_t *)flashlogicAddr, (uint32_t *)xmemDataToReadBuf, READ_SIZE_IN_BYTES);
+
+                /* Copy data to buffer.
+                 * If offset is not aligned, we need to align the src address and read size
+                 */
+                memcpy(buffer, xmemDataToReadBuf + alignment, remainingBytes);
+            }
+        }
+
+        MutexP_unlock(writeMutex, mutexKey);
+    }
 
     return (XMEM_STATUS_SUCCESS);
 }
@@ -273,7 +547,13 @@ int_fast16_t XMEMWFF3_read(XMEM_Handle handle, size_t offset, void *buffer, size
  */
 void XMEMWFF3_unlock(XMEM_Handle handle)
 {
-    SemaphoreP_post(writeSem);
+    if (handle == NULL)
+    {
+        return;
+    }
+
+    XMEMWFF3_Object *object = handle->object;
+    MutexP_unlock(writeMutex, object->mutexKey);
 }
 
 /*
@@ -281,28 +561,75 @@ void XMEMWFF3_unlock(XMEM_Handle handle)
  */
 int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, size_t bufferSize, uint_fast16_t flags)
 {
+    if (handle == NULL || buffer == NULL || bufferSize == 0)
+    {
+        return (XMEM_STATUS_ERROR);
+    }
+
+    /* Validate that flags only contain allowed bits */
+    if (flags & ~(XMEM_WRITE_ERASE | XMEM_WRITE_PRE_VERIFY | XMEM_WRITE_POST_VERIFY | XMEM_WRITE_STIG))
+    {
+        return (XMEM_STATUS_INVALID_PARAMS);
+    }
+
     XMEMWFF3_HWAttrs const *hwAttrs;
+    XMEMWFF3_Object const *object;
 
     hwAttrs = handle->hwAttrs;
+    object  = handle->object;
 
     unsigned int key;
     unsigned int size;
     uint32_t status              = 0;
     uint32_t flashlogicStartAddr = ConvertOffsetToAddr(handle, offset, LOGIC_ADDR);
     uint32_t flashlogicAddr      = flashlogicStartAddr;
+    uint32_t startAddrPhy        = ConvertOffsetToAddr(handle, offset, PHYSICAL_ADDR);
     uint32_t *srcBuf, *dstBuf;
+    uint8_t *_srcBuf, *_dstBuf;
     uint32_t totalSize;
+    uint32_t clockPTick;
+    uint32_t clockPTickPeriod;
+    size_t originalOffset = offset;
+    void *originalBuffer  = buffer;
     int i, j;
     int retval = XMEM_STATUS_SUCCESS;
 
     /* Validate offset and bufferSize */
-    if (offset + bufferSize > hwAttrs->regionSize)
+    if (offset + bufferSize > object->regionSize)
     {
         return (XMEM_STATUS_INV_OFFSET);
     }
 
+    /* Validate buffer size for STIG write */
+    if (flags & XMEM_WRITE_STIG)
+    {
+        /* STIG operation are not supported for PSRAM */
+        if (object->deviceNum == XMEM_PSRAM)
+        {
+            return XMEM_STATUS_ERROR;
+        }
+
+        /*  Check if offset + word size exceeds page boundary */
+        if (((offset & 0xFF) + XMEM_WORD_SIZE) > PAGE_SIZE)
+        {
+            return XMEM_STATUS_ERROR;
+        }
+
+        if (bufferSize < XMEM_WORD_SIZE)
+        {
+            return XMEM_STATUS_ERROR;
+        }
+        else
+        {
+            bufferSize = XMEM_WORD_SIZE;
+        }
+    }
+
     /* Get exclusive access to the Flash region */
-    SemaphoreP_pend(writeSem, SemaphoreP_WAIT_FOREVER);
+    uintptr_t mutexKey = MutexP_lock(writeMutex);
+
+    /* Prepare Write buffer */
+    xmemDataToWriteBuf = (void *)&xmemDataToWriteBuffer;
 
     /* If erase is set, erase destination sector(s) first */
     if (flags & XMEM_WRITE_ERASE)
@@ -310,20 +637,20 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
         size = bufferSize & sectorBaseMask;
         if (bufferSize & (~sectorBaseMask))
         {
-            size += hwAttrs->sectorSize;
+            size += hwAttrs->flashType.sectorSize;
         }
 
         /* Validate offset is not aligned on a sector boundary */
         if (offset != (offset & sectorBaseMask))
         {
-            SemaphoreP_post(writeSem);
+            MutexP_unlock(writeMutex, mutexKey);
             return (XMEM_STATUS_INV_ALIGNMENT);
         }
 
         retval = doErase(handle, offset, size);
         if (retval != XMEM_STATUS_SUCCESS)
         {
-            SemaphoreP_post(writeSem);
+            MutexP_unlock(writeMutex, mutexKey);
             return (retval);
         }
     }
@@ -337,14 +664,14 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
          */
 
         /* Validate that the verification buffer has been configured */
-        if ((verifyBuf == NULL) || (hwAttrs->verifyBufSize == 0))
+        if ((verifyBuf == NULL) || (hwAttrs->flashType.verifyBufSize == 0))
         {
-            SemaphoreP_post(writeSem);
+            MutexP_unlock(writeMutex, mutexKey);
             return (XMEM_STATUS_VERIFYBUFFER);
         }
 
         /* Start reading from the requested start address */
-        flashlogicAddr = flashlogicStartAddr;
+        flashlogicAddr = offset;
 
         /* Set the number of bytes to read */
         totalSize = bufferSize;
@@ -353,9 +680,9 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
 
         while (totalSize > 0)
         {
-            if (totalSize > hwAttrs->verifyBufSize)
+            if (totalSize > hwAttrs->flashType.verifyBufSize)
             {
-                size = hwAttrs->verifyBufSize;
+                size = hwAttrs->flashType.verifyBufSize;
             }
             else
             {
@@ -363,19 +690,17 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
             }
 
             /* Read destination before the change for pre-verify expected change */
-            dstBuf = (uint32_t *)verifyBuf;
+            _dstBuf = (uint8_t *)verifyBuf;
 
-            key = HwiP_disable();
-            FlashRead((uint32_t *)flashlogicAddr, (uint32_t *)dstBuf, (uint32_t)size);
-            HwiP_restore(key);
+            XMEMWFF3_read(handle, flashlogicAddr, _dstBuf, size, 0);
 
-            srcBuf = (uint32_t *)buffer;
+            _srcBuf = (uint8_t *)buffer;
 
-            for (i = 0; i < size / 4; i++, j++)
+            for (i = 0; i < size; i++, j++)
             {
-                if (srcBuf[j] != (srcBuf[j] & dstBuf[i]))
+                if (_srcBuf[j] != (_srcBuf[j] & _dstBuf[i]))
                 {
-                    SemaphoreP_post(writeSem);
+                    MutexP_unlock(writeMutex, mutexKey);
                     return (XMEM_STATUS_INV_WRITE);
                 }
             }
@@ -385,16 +710,121 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
         }
     }
 
-    srcBuf = (uint32_t *)buffer;
-    size   = bufferSize;
-    dstBuf = (uint32_t *)flashlogicStartAddr;
+    if (flags & XMEM_WRITE_STIG)
+    {
+        /* Copy to Write buffer */
+        memcpy(xmemDataToWriteBuffer, buffer, bufferSize);
 
-    key = HwiP_disable();
-    FlashWrite((uint32_t *)srcBuf, (uint32_t *)dstBuf, size);
-    HwiP_restore(key);
+        srcBuf = (uint32_t *)xmemDataToWriteBuf;
+        dstBuf = (uint32_t *)startAddrPhy;
+
+        key = HwiP_disable();
+
+        /*
+         * Ensure SysTimer is enabled, to be able to read the SysTimer counter
+         * value.
+         */
+        clockPTick       = ClockP_getSystemTicks();
+        clockPTickPeriod = ClockP_getSystemTickPeriod();
+        FlashSetTickPeriod(clockPTickPeriod);
+
+        status = FlashWriteSTIG(srcBuf, dstBuf, object->deviceNum);
+        HwiP_restore(key);
+    }
+    else
+    {
+        srcBuf             = (uint32_t *)xmemDataToWriteBuf;
+        size               = bufferSize;
+        dstBuf             = (uint32_t *)flashlogicStartAddr;
+        int remainingBytes = size;
+        uint32_t alignment;
+
+        /* Handling the constraint of writing from 4 Bytes aligned address */
+        alignment = offset % 4;
+
+        /* Handle the constraint of writing multiples of 256 Bytes at a time. */
+        while (remainingBytes >= WRITE_SIZE_IN_BYTES)
+        {
+            /* Set address to write
+             * If offset is not align, set the address to be align*/
+            dstBuf = (uint32_t *)(ConvertOffsetToAddr(handle, offset, LOGIC_ADDR) - alignment);
+
+            /* Read from flash
+             * dstBuf is align, read 256 bytes*/
+            FlashRead((uint32_t *)dstBuf, (uint32_t *)srcBuf, READ_SIZE_IN_BYTES);
+
+            /* Copy data to from read buffer to write buffer.
+             * If offset is not aligned, copy data to correct place in write buffer*/
+            memcpy((uint8_t *)srcBuf + alignment, buffer, READ_SIZE_IN_BYTES - alignment);
+
+            /* Write to flash */
+            FlashWrite((uint32_t *)srcBuf, (uint32_t *)dstBuf, WRITE_SIZE_IN_BYTES);
+
+            /* Advance buffer, subtract remain size, Advance offset */
+            buffer += READ_SIZE_IN_BYTES - alignment;
+            remainingBytes -= (READ_SIZE_IN_BYTES - alignment);
+            offset += READ_SIZE_IN_BYTES - alignment;
+
+            /* Now the offset is aligned, alignment should be 0 for the rest of the read loop*/
+            alignment = 0;
+        }
+
+        /* Less than 256-bytes to write:
+         * - Either after the loop for remaining bytes
+         * - Or for first time write with less than 256-bytes length
+         */
+        if (remainingBytes > 0)
+        {
+            /* Handling the constraint of writing to addresses that exceed region size  */
+            if (offset + WRITE_SIZE_IN_BYTES > object->regionSize)
+            {
+                alignment = offset & 0xFF;
+            }
+
+            /* Set address to read from
+             * If offset is not align, set the address to be align*/
+            dstBuf = (uint32_t *)(ConvertOffsetToAddr(handle, offset, LOGIC_ADDR) - alignment);
+
+            /* Check if the true alignment + remainingBytes exceeds buffer size */
+            if (alignment + remainingBytes > WRITE_SIZE_IN_BYTES)
+            {
+                /* Calculate how much we can write in first operation */
+                size_t firstWriteSize = WRITE_SIZE_IN_BYTES - alignment;
+
+                /* First write operation */
+                FlashRead((uint32_t *)dstBuf, (uint32_t *)srcBuf, READ_SIZE_IN_BYTES);
+                memcpy((uint8_t *)srcBuf + alignment, buffer, firstWriteSize);
+                FlashWrite((uint32_t *)srcBuf, (uint32_t *)dstBuf, WRITE_SIZE_IN_BYTES);
+
+                /* Second write operation for remaining bytes */
+                uint8_t *nextBuffer = (uint8_t *)buffer + firstWriteSize;
+                size_t nextSize     = remainingBytes - firstWriteSize;
+                uint32_t nextAddr   = (uint32_t)dstBuf + WRITE_SIZE_IN_BYTES;
+
+                FlashRead((uint32_t *)nextAddr, (uint32_t *)srcBuf, READ_SIZE_IN_BYTES);
+                memcpy((uint8_t *)srcBuf, nextBuffer, nextSize);
+                FlashWrite((uint32_t *)srcBuf, (uint32_t *)nextAddr, WRITE_SIZE_IN_BYTES);
+            }
+            else
+            {
+                /* Read from flash
+                 * dstBuf is aligned, read 256 bytes.
+                 */
+                FlashRead((uint32_t *)dstBuf, (uint32_t *)srcBuf, READ_SIZE_IN_BYTES);
+
+                /* Copy data from read buffer to write buffer.
+                 * If offset is not aligned, copy data to correct place in write buffer */
+                memcpy((uint8_t *)srcBuf + alignment, buffer, remainingBytes);
+
+                /* Write to flash */
+                FlashWrite((uint32_t *)srcBuf, (uint32_t *)dstBuf, WRITE_SIZE_IN_BYTES);
+            }
+        }
+    }
 
     if (status != 0)
     {
+        MutexP_unlock(writeMutex, mutexKey);
         retval = XMEM_STATUS_ERROR;
     }
     else if (flags & XMEM_WRITE_POST_VERIFY)
@@ -404,14 +834,14 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
          */
 
         /* Validate that the verification buffer has been configured */
-        if ((verifyBuf == NULL) || (hwAttrs->verifyBufSize == 0))
+        if ((verifyBuf == NULL) || (hwAttrs->flashType.verifyBufSize == 0))
         {
-            SemaphoreP_post(writeSem);
+            MutexP_unlock(writeMutex, mutexKey);
             return (XMEM_STATUS_VERIFYBUFFER);
         }
 
         /* Start reading from the requested start address */
-        flashlogicAddr = flashlogicStartAddr;
+        flashlogicAddr = originalOffset;
 
         /* Set the number of bytes to read */
         totalSize = bufferSize;
@@ -420,27 +850,25 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
 
         while (totalSize > 0)
         {
-            if (totalSize > hwAttrs->verifyBufSize)
+            if (totalSize > hwAttrs->flashType.verifyBufSize)
             {
-                size = hwAttrs->verifyBufSize;
+                size = hwAttrs->flashType.verifyBufSize;
             }
             else
             {
                 size = totalSize;
             }
 
-            srcBuf = buffer;
-            dstBuf = (uint32_t *)verifyBuf;
+            _srcBuf = (uint8_t *)originalBuffer;
+            _dstBuf = (uint8_t *)verifyBuf;
 
-            key = HwiP_disable();
-            FlashRead((uint32_t *)flashlogicAddr, (uint32_t *)dstBuf, (uint32_t)size);
-            HwiP_restore(key);
+            XMEMWFF3_read(handle, flashlogicAddr, _dstBuf, size, 0);
 
-            for (i = 0; i < size / 4; i++, j++) /* compare 32bits */
+            for (i = 0; i < size; i++, j++)
             {
-                if (srcBuf[j] != dstBuf[i])
+                if (_srcBuf[j] != _dstBuf[i])
                 {
-                    SemaphoreP_post(writeSem);
+                    MutexP_unlock(writeMutex, mutexKey);
                     return (XMEM_STATUS_ERROR);
                 }
             }
@@ -450,7 +878,7 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
         }
     }
 
-    SemaphoreP_post(writeSem);
+    MutexP_unlock(writeMutex, mutexKey);
 
     return (retval);
 }
@@ -460,9 +888,14 @@ int_fast16_t XMEMWFF3_write(XMEM_Handle handle, size_t offset, void *buffer, siz
  */
 static int_fast16_t checkEraseRange(XMEM_Handle handle, size_t offset, size_t size)
 {
-    XMEMWFF3_HWAttrs const *hwAttrs;
+    if (handle == NULL)
+    {
+        return (XMEM_STATUS_ERROR);
+    }
 
-    hwAttrs = handle->hwAttrs;
+    XMEMWFF3_Object const *object;
+
+    object = handle->object;
 
     if (offset != (offset & sectorBaseMask))
     {
@@ -474,12 +907,12 @@ static int_fast16_t checkEraseRange(XMEM_Handle handle, size_t offset, size_t si
         return (XMEM_STATUS_INV_SIZE); /* Size is not a multiple of sector size */
     }
 
-    if (offset >= hwAttrs->regionSize)
+    if (offset >= object->regionSize)
     {
         return (XMEM_STATUS_INV_OFFSET); /* Offset is past end of region */
     }
 
-    if (offset + size > hwAttrs->regionSize)
+    if (offset + size > object->regionSize)
     {
         return (XMEM_STATUS_INV_SIZE); /* Size is too big */
     }
@@ -489,27 +922,27 @@ static int_fast16_t checkEraseRange(XMEM_Handle handle, size_t offset, size_t si
 
 uint32_t ConvertOffsetToAddr(XMEM_Handle handle, size_t offset, size_t AddrType)
 {
-    XMEMWFF3_HWAttrs const *hwAttrs;
+    if (handle == NULL)
+    {
+        return 0;
+    }
 
-    hwAttrs = handle->hwAttrs;
+    XMEMWFF3_Object const *object;
+
+    object = handle->object;
 
     uint32_t calcAddr;
-    uint32_t controlbits = 0xFFFFFFFF;
-    uint32_t blockbits;
 
+    /* Calculate logical address */
     if (AddrType == LOGIC_ADDR)
     {
-        /* Calculate logic address */
-        uint32_t regionoffsetAlign = (uint32_t)hwAttrs->regionOffset << PHY_OFFSET;
-        controlbits                = (hwAttrs->regionStartAddr & BITMASK_x_y(31, 26));
-        blockbits = ((uint32_t)abs((int)hwAttrs->regionBase - (int)regionoffsetAlign) & BITMASK_x_y(25, 12));
-        calcAddr  = controlbits + blockbits + offset;
+        calcAddr = object->regionStartAddr + offset;
         return (calcAddr);
     }
     else
     {
         /* Calculate physical address */
-        calcAddr = hwAttrs->regionBase + offset;
+        calcAddr = object->regionBase + offset;
         return (calcAddr);
     }
 }
@@ -519,16 +952,19 @@ uint32_t ConvertOffsetToAddr(XMEM_Handle handle, size_t offset, size_t AddrType)
  */
 static int_fast16_t doErase(XMEM_Handle handle, size_t offset, size_t size)
 {
+    if (handle == NULL)
+    {
+        return (XMEM_STATUS_ERROR);
+    }
+
     XMEMWFF3_HWAttrs const *hwAttrs;
+    XMEMWFF3_Object const *object;
 
     hwAttrs = handle->hwAttrs;
+    object  = handle->object;
 
     unsigned int key;
     uint32_t status = 0;
-    uint32_t sectorBase;
-    uint32_t sectorEraseSize       = hwAttrs->sectorSize;
-    uint32_t eraseOpcode           = hwAttrs->sectorEraseOpcode;
-    uint32_t sectorEraseTimeoutVal = hwAttrs->sectorEraseTimeOut; /*!< Flash_max_operation_time_limit */
     uint32_t clockPTick;
     uint32_t clockPTickPeriod;
     int_fast16_t rangeStatus;
@@ -554,7 +990,7 @@ static int_fast16_t doErase(XMEM_Handle handle, size_t offset, size_t size)
         clockPTick       = ClockP_getSystemTicks();
         clockPTickPeriod = ClockP_getSystemTickPeriod();
         FlashSetTickPeriod(clockPTickPeriod);
-        status = (uint32_t)FlashSectorErase(startAddrPhy, eraseOpcode, sectorEraseTimeoutVal);
+        status = (uint32_t)FlashSectorErase(startAddrPhy, object->deviceNum);
 
         HwiP_restore(key);
 
@@ -563,8 +999,8 @@ static int_fast16_t doErase(XMEM_Handle handle, size_t offset, size_t size)
             break;
         }
 
-        startAddrPhy += hwAttrs->sectorSize;
-        size -= hwAttrs->sectorSize;
+        startAddrPhy += hwAttrs->flashType.sectorSize;
+        size -= hwAttrs->flashType.sectorSize;
     }
 
     if (status != FLASH_STATUS_SUCCESS)
@@ -573,4 +1009,804 @@ static int_fast16_t doErase(XMEM_Handle handle, size_t offset, size_t size)
     }
 
     return (XMEM_STATUS_SUCCESS);
+}
+
+/*
+ *  ======== flashTypeSelection ========
+ */
+static void flashTypeSelection(void)
+{
+    const FlashType IS25WJ032F = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0402220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0402220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0200,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType IS25WJ064F = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0402220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0402220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0200,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType W25Q32JW = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0802220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0802220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0400,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType W25Q64JW = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0802220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0802220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0400,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType W25Q12PW = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0802220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0802220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0300,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType GD25LF32ETJGY = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0402220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0402220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0200,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType GD25LF64ETJGY = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0402220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0402220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0200,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType PY25Q32LB = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0a02220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0a02220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0500,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType PY25Q64LB = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0a02220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0a02220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0500,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType PY25Q128LA = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0a02220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0a02220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0500,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType PY25Q256LC = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0c02220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0c02220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bbb0600,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020bb000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200b0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType MX25U3235F = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0402220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0402220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0200,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType MX25U6435F = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0402220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0402220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0200,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    const FlashType IS25WJ128F = {
+
+        /* Operations */
+        .writeStigCfg.preStigCfg  = 1,
+        .writeStigCfg.postStigCfg = 0,
+        .readStigCfg.preStigCfg   = 0,
+        .readStigCfg.postStigCfg  = 0,
+        .eraseStigCfg.preStigCfg  = 1,
+        .eraseStigCfg.postStigCfg = 0,
+        .eraseStigCfg.StigCfg     = 1,
+
+        /* Enter STIG mode */
+        .enterStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .enterStigCfg[0].data    = 0x82080089,
+        .enterStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .enterStigCfg[1].data    = 0x0602220b,
+        .enterStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .enterStigCfg[2].data    = 0x00022002,
+
+        /* EXIT STIG mode */
+        .exitStigCfg[0].address = OSPI_REGS_BASE + OSPI_O_CONFIG,
+        .exitStigCfg[0].data    = 0x82080089,
+        .exitStigCfg[1].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_RD_CONFIG,
+        .exitStigCfg[1].data    = 0x0602220b,
+        .exitStigCfg[2].address = OSPI_REGS_BASE + OSPI_O_DEV_INSTR_WR_CONFIG,
+        .exitStigCfg[2].data    = 0x00022002,
+
+        /* Pre STIG configuration */
+        .writeStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.preStigOperation[0].data    = 0x06000001,
+        .eraseStigCfg.preStigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.preStigOperation[0].data    = 0x06000001,
+
+        /* Execute STIG operation */
+        .readStigCfg.stigOperation[0].address  = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .readStigCfg.stigOperation[0].data     = 0x0bba0300,
+        .writeStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .writeStigCfg.stigOperation[0].data    = 0x020ab000,
+        .eraseStigCfg.stigOperation[0].address = OSPI_REGS_BASE + OSPI_O_FLASH_CMD_CTRL,
+        .eraseStigCfg.stigOperation[0].data    = 0x200a0000,
+
+        /* Polling operation */
+        .pollingCfg.command        = 0x05900000,
+        .pollingCfg.timeOut        = 200,
+        .pollingCfg.NumOfIteration = 4,
+
+        /* General */
+        .sectorSize    = 0x1000,
+        .verifyBufSize = 256};
+
+    /* Read data from shared memory */
+    if (BOOT_REPORT_ADDR != 0 && BOOT_REPORT_ADDR >= 0x28000000)
+    {
+        uint8_t *pSharedReport      = (uint8_t *)(BOOT_REPORT_ADDR);
+        uint16_t flashTypeBitMap    = *((uint16_t *)(pSharedReport + 9)); /* Flash type offset is 9 bytes */
+        XMEM_Flash_Idx flashTypeIdx = (XMEM_Flash_Idx)(flashTypeBitMap & 0xff);
+
+        switch (flashTypeIdx)
+        {
+            case IS25WJ032F_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = IS25WJ032F;
+                }
+                break;
+
+            case IS25WJ064F_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = IS25WJ064F;
+                }
+                break;
+
+            case W25Q32JW_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = W25Q32JW;
+                }
+                break;
+
+            case W25Q64JW_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = W25Q64JW;
+                }
+                break;
+
+            case GD25LF32ETJGY_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = GD25LF32ETJGY;
+                }
+                break;
+
+            case GD25LF64ETJGY_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = GD25LF64ETJGY;
+                }
+                break;
+
+            case PY25Q32LB_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = PY25Q32LB;
+                }
+                break;
+
+            case PY25Q64LB_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = PY25Q64LB;
+                }
+                break;
+            case PY25Q128LA_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = PY25Q128LA;
+                }
+                break;
+            case PY25Q256LC_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = PY25Q256LC;
+                }
+                break;
+            case MX25U3235F_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = MX25U3235F;
+                }
+                break;
+            case MX25U6435F_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = MX25U6435F;
+                }
+                break;
+            case IS25WJ128F_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = IS25WJ128F;
+                }
+                break;
+            case W25Q12PW_IDX:
+                {
+                    XMEMWFF3_hwAttrs.flashType = W25Q12PW;
+                }
+                break;
+
+            default:
+                /* Default to a safe configuration */
+                XMEMWFF3_hwAttrs.flashType = IS25WJ032F;
+                break;
+        }
+    }
 }

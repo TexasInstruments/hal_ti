@@ -143,7 +143,7 @@ int trnspt_Destroy(uint32_t uDestroyClientId)
         if( OSI_OK != ret)
         {
             TRANSPORT_PRINT_ERROR("trnspt_Destroy: FAILED osi_SyncObjWait,trnsptThrdRunStopSyncObject \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return WlanError(WLAN_ERROR_SEVERITY__HIGH, WLAN_ERROR_MODULE__TRANSPORT, WLAN_ERROR_TYPE__SYNC_OBJ_WAIT);
         }
 
@@ -252,7 +252,7 @@ int trnspt_Destroy(uint32_t uDestroyClientId)
  * \return void
  * \sa     trnspt_RequestSchedule
  */
-void trnspt_Task()
+void trnspt_Task(void* pParam)
 {
     TTransport       *pTransport;
     TTransportCbFunc  fCbFunc;

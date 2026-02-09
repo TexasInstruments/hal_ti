@@ -748,7 +748,7 @@ This section defines the register offsets of the WSOC_OCLA component
                          //	  3: ocla_dout[31:0] <= #1 ocla_iq_save_in[127:96];
                          //  15: IQ inject
                          // 16: ocla debug write to the RAM {14'h3333, ocla_addr[17:0], 14'h2222, ocla_addr[17:0],
-                         				      14'h1111, ocla_addr[17:0], 14'h0000, ocla_addr[17:0]}
+							      14'h1111, ocla_addr[17:0], 14'h0000, ocla_addr[17:0]}
 
 */
 #define WSOC_OCLA_MODE_IQMOD_W                                       5U

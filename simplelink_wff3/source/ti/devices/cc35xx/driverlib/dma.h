@@ -3,7 +3,7 @@
  *
  *  Description:    Defines and prototypes for the DMA peripheral.
  *
- *  Copyright (c) 2022-2024 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -67,7 +67,7 @@ extern "C" {
 //! DMA channel memory map offset, in bytes
 #define DMA_CH_OFFSET               0x1000
 //! DMA channel control field width, in number of bits (CHCTL register)
-#define DMA_CHCTL_FIELD_WIDTH       SOC_AON_CHCTL0_CH0_W
+#define DMA_CHCTL_FIELD_WIDTH       HOST_DMA_CHCTL0_CH0_W
 //! Number of fields in CHCTL register
 #define DMA_CHCTRL_NUMBER_OF_FIELDS (32 / DMA_CHCTL_FIELD_WIDTH)
 
@@ -134,7 +134,8 @@ typedef enum
     DMA_PERIPH_ADC       = 9,  //!< ADC
     DMA_PERIPH_PDM       = 10, //!< PDM
     DMA_PERIPH_HIF       = 11, //!< HIF
-    DMA_NUM_PERIPHS      = 12  //!< Number of different DMA peripherals supported
+    DMA_PERIPH_UARTLIN_2 = 12, //!< UARTLIN2
+    DMA_NUM_PERIPHS      = 13  //!< Number of different DMA peripherals supported
 } DMAPeripheral;
 
 // TODO: Update to use DOC release defines when available (LPRFXXWARE-747)
@@ -368,7 +369,7 @@ __STATIC_INLINE uint32_t DMAIntStatus(bool masked)
 
 //*****************************************************************************
 //
-//! \brief Clear all flags and set the specified channel flags
+//! \brief Clear all flags and set the specified channel flags.
 //!
 //! This function can be called after \ref DMAConfigureChannel() when need to set
 //! specific flags.
@@ -421,6 +422,49 @@ __STATIC_INLINE void DMAConfigureChannelFlags(uint32_t channel, uint32_t config)
 
 //*****************************************************************************
 //
+//! \brief Enable FIFO mode behavior for the destination pointer.
+//!
+//! When FIFO mode is enabled, the destination pointer is not incremented.
+//!
+//! This function can be called after \ref DMAInitChannel().
+//!
+//! \param channel is the DMA channel to configure.
+//
+//*****************************************************************************
+__STATIC_INLINE void DMAEnableDestinationFifoMode(uint32_t channel)
+{
+    // Check arguments
+    ASSERT(channel < DMA_NUM_CHANNELS);
+
+    uint32_t regOffset = channel * DMA_CH_OFFSET;
+
+    HWREG(HOST_DMA_TGT_BASE + HOST_DMA_O_CH0JCTL + regOffset) |= HOST_DMA_CH0JCTL_FIFOMODD;
+}
+
+//*****************************************************************************
+//
+//! \brief Disable FIFO mode behavior for the destination pointer.
+//!
+//! When FIFO mode is disabled, the destination pointer will be incremented
+//! after every transfer according to the word size.
+//!
+//! This function can be called after \ref DMAInitChannel().
+//!
+//! \param channel is the DMA channel to configure.
+//
+//*****************************************************************************
+__STATIC_INLINE void DMADisableDestinationFifoMode(uint32_t channel)
+{
+    // Check arguments
+    ASSERT(channel < DMA_NUM_CHANNELS);
+
+    uint32_t regOffset = channel * DMA_CH_OFFSET;
+
+    HWREG(HOST_DMA_TGT_BASE + HOST_DMA_O_CH0JCTL + regOffset) &= ~HOST_DMA_CH0JCTL_FIFOMODD;
+}
+
+//*****************************************************************************
+//
 //! \brief Get channel linked peripheral
 //!
 //! This function can be called after \ref DMAInitChannel() when need to get
@@ -442,13 +486,13 @@ __STATIC_INLINE uint32_t DMAGetChannelPeripheral(uint32_t channel)
     regOffset = (channel / DMA_CHCTRL_NUMBER_OF_FIELDS) * sizeof(uint32_t);
 
     // Read register containing channel configuration
-    channelReg = HWREG(SOC_AON_BASE + SOC_AON_O_CHCTL0 + regOffset);
+    channelReg = HWREG(HOST_DMA_TGT_BASE + HOST_DMA_O_CHCTL0 + regOffset);
 
     // Calculate bitfield position based on the channel number
     shiftValue = (channel % DMA_CHCTRL_NUMBER_OF_FIELDS) * DMA_CHCTL_FIELD_WIDTH;
 
     // Extract the peripheral
-    peripheral = (channelReg & (SOC_AON_CHCTL0_CH0_M << shiftValue)) >> shiftValue;
+    peripheral = (channelReg & (HOST_DMA_CHCTL0_CH0_M << shiftValue)) >> shiftValue;
 
     return peripheral;
 }

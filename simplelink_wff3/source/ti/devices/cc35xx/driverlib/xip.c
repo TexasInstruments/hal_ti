@@ -3,7 +3,7 @@
  *
  *  Description:    Driver for the XIP peripheral
  *
- *  Copyright (c) 2024 Texas Instruments Incorporated
+ *  Copyright (c) 2024-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -141,8 +141,8 @@ uint32_t XIPGetUDMAChannelWordsLeft(uint32_t channelSelect)
         chOffset = XIP_UDMA_NONSEC_CH_OFFSET;
     }
 
-    chWordLeft = (HWREG(HOST_XIP_REGS_BASE + chOffset + HOST_XIP_O_UDSSTA) & HOST_XIP_UDSSTA_JWORDSLFT_M) >>
-                  HOST_XIP_UDSSTA_JWORDSLFT_S;
+    chWordLeft = (HWREG(HOST_XIP_REGS_BASE + chOffset + HOST_XIP_O_UDSSTA) & HOST_XIP_UDSSTA_RDWRDSLFT_M) >>
+                  HOST_XIP_UDSSTA_RDWRDSLFT_S;
 
     return chWordLeft;
 }

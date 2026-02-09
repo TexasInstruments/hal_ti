@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the I2S peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -1300,6 +1300,9 @@ This section defines the register offsets of the I2S component
     Offset name:         I2S_O_CLKCFG
     Relative address:    0x1000
     Description:         Audio clock source selection and **I2S** enable register
+                        Note: Disable the [CLKCFG.MEM_CLK_EN] and [CLKCFG.ADFS_EN] to change [CLK_CFG.MEM_CLK_SEL]
+                        After changing [CLK_CFG.MEM_CLK_SEL],  enable [CLKCFG.ADFS_EN] followed by [CLKCFG.MEM_CLK_EN]
+
     Default Value:       0x00000000
 
         Field:           EN

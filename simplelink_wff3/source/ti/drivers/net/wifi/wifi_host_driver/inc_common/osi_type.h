@@ -36,9 +36,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#ifdef TI_CLANG
 #include <sys/types.h>
-#endif
 #include <stdint.h>
 
 

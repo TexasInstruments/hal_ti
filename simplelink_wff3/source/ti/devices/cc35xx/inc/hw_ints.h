@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       hw_ints.h
 *
-*  Copyright (c) 2022 Texas Instruments Incorporated
+*  Copyright (c) 2022-2025 Texas Instruments Incorporated
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@
 #define INT_SP_SPI_1_EVT_REQ                         21      //5   SPI    1            interrupt
 #define INT_GPTIMER_0_EVT_CPU_IRQ                    22      //6   GPT    0            interrupt
 #define INT_GPTIMER_1_EVT_CPU_IRQ                    23      //7   GPT    1            interrupt
-#define INT_AFA_EVT_INT_REQ                          24      //8   AFA                 interrupt
+#define INT_SP_UART_2_INT_REQ                        24      //8   UART   2            interrupt
 #define INT_I2S_IRQ_REQ                              25      //9   I2S                 interrupt
 #define INT_EVT_PDM_EVENT_REQ                        26      //10  PDM                 interrupt
 #define INT_EVT_SWINT0_REQ                           27      //11  SWINT  0            interrupt
@@ -108,7 +108,7 @@
 
 
 #define NUM_INTERRUPTS                               69      //Number of interrupts
-#define NUM_PRIORITY                                 3       //Number of priority levels
-#define NUM_PRIORITY_BITS                            2       //Number of priority bits
+#define NUM_PRIORITY                                 16      //Number of priority levels
+#define NUM_PRIORITY_BITS                            4       //Number of priority bits
 
 #endif // __HW_INTS__

@@ -117,11 +117,6 @@ void ADCSetInput(uint32_t reference, uint8_t channel, uint8_t fullScaleRange, ui
         // Set external reference
         tempCtl |= ADC_MEMCTL_0_VRSEL_EXTREF;
     }
-    else
-    {
-        // Neither internal, nor external reference pin selected. Set VDDA as reference
-        tempCtl |= ADC_MEMCTL_0_VRSEL_VDDA;
-    }
 
     // Read current mode control register
     tempModCtl = HWREG(ADC_BASE + ADC_O_MODCTL);
@@ -288,8 +283,14 @@ void ADCSetSamplingClk(uint32_t clkSrc)
 
     // Set sample clock source
     regVal = HWREG(ADC_BASE + ADC_O_CONVCTL);
-    regVal &= ~(ADC_CONVCTL_CONCLKSEL_M);
-    HWREG(ADC_BASE + ADC_O_CONVCTL) = regVal | (clkSrc << ADC_CONVCTL_CONCLKSEL_S);
+    regVal &= ~(ADC_CONVCTL_CONCLKSEL_M | ADC_CONVCTL_CONVCLKEN_M);
+    regVal |= (clkSrc << ADC_CONVCTL_CONCLKSEL_S);
+    HWREG(ADC_BASE + ADC_O_CONVCTL) = regVal;
+
+    // The clock must be enabled after the clock source have been selected.
+    // This is required to avoid a glitch.
+    regVal |= (1 << ADC_CONVCTL_CONVCLKEN_S);
+    HWREG(ADC_BASE + ADC_O_CONVCTL) = regVal;
 }
 
 //*****************************************************************************

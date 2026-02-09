@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the IOMUX peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -64,30 +64,6 @@ This section defines the register offsets of the IOMUX component
 
 //Event control register for IO LFXTAL_N
 #define IOMUX_O_LFXTNECTL                                            0x0000100CU
-
-//CFG register for IO GPIO36
-#define IOMUX_O_GPIO36CFG                                            0x00024000U
-
-//Pull control register of IO GPIO36
-#define IOMUX_O_GPIO36PCTL                                           0x00024004U
-
-//Control register of IO GPIO36
-#define IOMUX_O_GPIO36CTL                                            0x00024008U
-
-//Event control register for IO GPIO36
-#define IOMUX_O_GPIO36ECTL                                           0x0002400CU
-
-//CFG register for IO GPIO37
-#define IOMUX_O_GPIO37CFG                                            0x00025000U
-
-//Pull control register of IO GPIO37
-#define IOMUX_O_GPIO37PCTL                                           0x00025004U
-
-//Control register of IO GPIO37
-#define IOMUX_O_GPIO37CTL                                            0x00025008U
-
-//Event control register for IO GPIO37
-#define IOMUX_O_GPIO37ECTL                                           0x0002500CU
 
 //CFG register for IO GPIO2
 #define IOMUX_O_GPIO2CFG                                             0x00002000U
@@ -305,42 +281,6 @@ This section defines the register offsets of the IOMUX component
 //Event control register for IO GPIO19
 #define IOMUX_O_GPIO19ECTL                                           0x0001300CU
 
-//CFG register for IO GPIO38
-#define IOMUX_O_GPIO38CFG                                            0x00026000U
-
-//Pull control register of IO GPIO38
-#define IOMUX_O_GPIO38PCTL                                           0x00026004U
-
-//Control register of IO GPIO38
-#define IOMUX_O_GPIO38CTL                                            0x00026008U
-
-//Event control register for IO GPIO38
-#define IOMUX_O_GPIO38ECTL                                           0x0002600CU
-
-//CFG register for IO GPIO39
-#define IOMUX_O_GPIO39CFG                                            0x00027000U
-
-//Pull control register of IO GPIO39
-#define IOMUX_O_GPIO39PCTL                                           0x00027004U
-
-//Control register of IO GPIO39
-#define IOMUX_O_GPIO39CTL                                            0x00027008U
-
-//Event control register for IO GPIO39
-#define IOMUX_O_GPIO39ECTL                                           0x0002700CU
-
-//CFG register for IO GPIO40
-#define IOMUX_O_GPIO40CFG                                            0x00028000U
-
-//Pull control register of IO GPIO40
-#define IOMUX_O_GPIO40PCTL                                           0x00028004U
-
-//Control register of IO GPIO40
-#define IOMUX_O_GPIO40CTL                                            0x00028008U
-
-//Event control register for IO GPIO40
-#define IOMUX_O_GPIO40ECTL                                           0x0002800CU
-
 //CFG register for IO GPIO20
 #define IOMUX_O_GPIO20CFG                                            0x00014000U
 
@@ -412,54 +352,6 @@ This section defines the register offsets of the IOMUX component
 
 //Event control register for IO GPIO25
 #define IOMUX_O_GPIO25ECTL                                           0x0001900CU
-
-//CFG register for IO GPIO44
-#define IOMUX_O_GPIO44CFG                                            0x0002C000U
-
-//Pull control register of IO GPIO44
-#define IOMUX_O_GPIO44PCTL                                           0x0002C004U
-
-//Control register of IO GPIO44
-#define IOMUX_O_GPIO44CTL                                            0x0002C008U
-
-//Event control register for IO GPIO44
-#define IOMUX_O_GPIO44ECTL                                           0x0002C00CU
-
-//CFG register for IO GPIO41
-#define IOMUX_O_GPIO41CFG                                            0x00029000U
-
-//Pull control register of IO GPIO41
-#define IOMUX_O_GPIO41PCTL                                           0x00029004U
-
-//Control register of IO GPIO41
-#define IOMUX_O_GPIO41CTL                                            0x00029008U
-
-//Event control register for IO GPIO41
-#define IOMUX_O_GPIO41ECTL                                           0x0002900CU
-
-//CFG register for IO GPIO42
-#define IOMUX_O_GPIO42CFG                                            0x0002A000U
-
-//Pull control register of IO GPIO42
-#define IOMUX_O_GPIO42PCTL                                           0x0002A004U
-
-//Control register of IO GPIO42
-#define IOMUX_O_GPIO42CTL                                            0x0002A008U
-
-//Event control register for IO GPIO42
-#define IOMUX_O_GPIO42ECTL                                           0x0002A00CU
-
-//CFG register for IO GPIO43
-#define IOMUX_O_GPIO43CFG                                            0x0002B000U
-
-//Pull control register of IO GPIO43
-#define IOMUX_O_GPIO43PCTL                                           0x0002B004U
-
-//Control register of IO GPIO43
-#define IOMUX_O_GPIO43CTL                                            0x0002B008U
-
-//Event control register for IO GPIO43
-#define IOMUX_O_GPIO43ECTL                                           0x0002B00CU
 
 //CFG register for IO GPIO26
 #define IOMUX_O_GPIO26CFG                                            0x0001A000U
@@ -581,17 +473,122 @@ This section defines the register offsets of the IOMUX component
 //Event control register for IO GPIO35
 #define IOMUX_O_GPIO35ECTL                                           0x0002300CU
 
+//CFG register for IO GPIO36
+#define IOMUX_O_GPIO36CFG                                            0x00024000U
+
+//Pull control register of IO GPIO36
+#define IOMUX_O_GPIO36PCTL                                           0x00024004U
+
+//Control register of IO GPIO36
+#define IOMUX_O_GPIO36CTL                                            0x00024008U
+
+//Event control register for IO GPIO36
+#define IOMUX_O_GPIO36ECTL                                           0x0002400CU
+
+//CFG register for IO GPIO37
+#define IOMUX_O_GPIO37CFG                                            0x00025000U
+
+//Pull control register of IO GPIO37
+#define IOMUX_O_GPIO37PCTL                                           0x00025004U
+
+//Control register of IO GPIO37
+#define IOMUX_O_GPIO37CTL                                            0x00025008U
+
+//Event control register for IO GPIO37
+#define IOMUX_O_GPIO37ECTL                                           0x0002500CU
+
+//CFG register for IO GPIO38
+#define IOMUX_O_GPIO38CFG                                            0x00026000U
+
+//Pull control register of IO GPIO38
+#define IOMUX_O_GPIO38PCTL                                           0x00026004U
+
+//Control register of IO GPIO38
+#define IOMUX_O_GPIO38CTL                                            0x00026008U
+
+//Event control register for IO GPIO38
+#define IOMUX_O_GPIO38ECTL                                           0x0002600CU
+
+//CFG register for IO GPIO39
+#define IOMUX_O_GPIO39CFG                                            0x00027000U
+
+//Pull control register of IO GPIO39
+#define IOMUX_O_GPIO39PCTL                                           0x00027004U
+
+//Control register of IO GPIO39
+#define IOMUX_O_GPIO39CTL                                            0x00027008U
+
+//Event control register for IO GPIO39
+#define IOMUX_O_GPIO39ECTL                                           0x0002700CU
+
+//CFG register for IO GPIO40
+#define IOMUX_O_GPIO40CFG                                            0x00028000U
+
+//Pull control register of IO GPIO40
+#define IOMUX_O_GPIO40PCTL                                           0x00028004U
+
+//Control register of IO GPIO40
+#define IOMUX_O_GPIO40CTL                                            0x00028008U
+
+//Event control register for IO GPIO40
+#define IOMUX_O_GPIO40ECTL                                           0x0002800CU
+
+//CFG register for IO GPIO41
+#define IOMUX_O_GPIO41CFG                                            0x00029000U
+
+//Pull control register of IO GPIO41
+#define IOMUX_O_GPIO41PCTL                                           0x00029004U
+
+//Control register of IO GPIO41
+#define IOMUX_O_GPIO41CTL                                            0x00029008U
+
+//Event control register for IO GPIO41
+#define IOMUX_O_GPIO41ECTL                                           0x0002900CU
+
+//CFG register for IO GPIO42
+#define IOMUX_O_GPIO42CFG                                            0x0002A000U
+
+//Pull control register of IO GPIO42
+#define IOMUX_O_GPIO42PCTL                                           0x0002A004U
+
+//Control register of IO GPIO42
+#define IOMUX_O_GPIO42CTL                                            0x0002A008U
+
+//Event control register for IO GPIO42
+#define IOMUX_O_GPIO42ECTL                                           0x0002A00CU
+
+//CFG register for IO GPIO43
+#define IOMUX_O_GPIO43CFG                                            0x0002B000U
+
+//Pull control register of IO GPIO43
+#define IOMUX_O_GPIO43PCTL                                           0x0002B004U
+
+//Control register of IO GPIO43
+#define IOMUX_O_GPIO43CTL                                            0x0002B008U
+
+//Event control register for IO GPIO43
+#define IOMUX_O_GPIO43ECTL                                           0x0002B00CU
+
+//CFG register for IO GPIO44
+#define IOMUX_O_GPIO44CFG                                            0x0002C000U
+
+//Pull control register of IO GPIO44
+#define IOMUX_O_GPIO44PCTL                                           0x0002C004U
+
+//Control register of IO GPIO44
+#define IOMUX_O_GPIO44CTL                                            0x0002C008U
+
+//Event control register for IO GPIO44
+#define IOMUX_O_GPIO44ECTL                                           0x0002C00CU
+
+//This register disables the SOP overrides when the device was powered in one of the SoP modes
+#define IOMUX_O_SOPDIS                                               0x0002D000U
+
 //Port configuration register for IO SLOW_CLOCK_IN
 #define IOMUX_O_SCLKIPCFG                                            0x0002D004U
 
 //Port configuration register for IO LFXTAL_N
 #define IOMUX_O_LFXTNPCFG                                            0x0002D008U
-
-//Port configuration register for IO GPIO36
-#define IOMUX_O_GPIO36PCFG                                           0x0002D094U
-
-//Port configuration register for IO GPIO37
-#define IOMUX_O_GPIO37PCFG                                           0x0002D098U
 
 //Port configuration register for IO GPIO2
 #define IOMUX_O_GPIO2PCFG                                            0x0002D00CU
@@ -647,15 +644,6 @@ This section defines the register offsets of the IOMUX component
 //Port configuration register for IO GPIO19
 #define IOMUX_O_GPIO19PCFG                                           0x0002D050U
 
-//Port configuration register for IO GPIO38
-#define IOMUX_O_GPIO38PCFG                                           0x0002D09CU
-
-//Port configuration register for IO GPIO39
-#define IOMUX_O_GPIO39PCFG                                           0x0002D0A0U
-
-//Port configuration register for IO GPIO40
-#define IOMUX_O_GPIO40PCFG                                           0x0002D0A4U
-
 //Port configuration register for IO GPIO20
 #define IOMUX_O_GPIO20PCFG                                           0x0002D054U
 
@@ -673,18 +661,6 @@ This section defines the register offsets of the IOMUX component
 
 //Port configuration register for IO GPIO25
 #define IOMUX_O_GPIO25PCFG                                           0x0002D068U
-
-//Port configuration register for IO GPIO44
-#define IOMUX_O_GPIO44PCFG                                           0x0002D0B4U
-
-//Port configuration register for IO GPIO41
-#define IOMUX_O_GPIO41PCFG                                           0x0002D0A8U
-
-//Port configuration register for IO GPIO42
-#define IOMUX_O_GPIO42PCFG                                           0x0002D0ACU
-
-//Port configuration register for IO GPIO43
-#define IOMUX_O_GPIO43PCFG                                           0x0002D0B0U
 
 //Port configuration register for IO GPIO26
 #define IOMUX_O_GPIO26PCFG                                           0x0002D06CU
@@ -716,11 +692,95 @@ This section defines the register offsets of the IOMUX component
 //Port configuration register for IO GPIO35
 #define IOMUX_O_GPIO35PCFG                                           0x0002D090U
 
+//Port configuration register for IO GPIO36
+#define IOMUX_O_GPIO36PCFG                                           0x0002D094U
+
+//Port configuration register for IO GPIO37
+#define IOMUX_O_GPIO37PCFG                                           0x0002D098U
+
+//Port configuration register for IO GPIO38
+#define IOMUX_O_GPIO38PCFG                                           0x0002D09CU
+
+//Port configuration register for IO GPIO39
+#define IOMUX_O_GPIO39PCFG                                           0x0002D0A0U
+
+//Port configuration register for IO GPIO40
+#define IOMUX_O_GPIO40PCFG                                           0x0002D0A4U
+
+//Port configuration register for IO GPIO41
+#define IOMUX_O_GPIO41PCFG                                           0x0002D0A8U
+
+//Port configuration register for IO GPIO42
+#define IOMUX_O_GPIO42PCFG                                           0x0002D0ACU
+
+//Port configuration register for IO GPIO43
+#define IOMUX_O_GPIO43PCFG                                           0x0002D0B0U
+
+//Port configuration register for IO GPIO44
+#define IOMUX_O_GPIO44PCFG                                           0x0002D0B4U
+
 //The IO Process compensation is used to override the process compensation bits form the eFuse:IO Process: Common for all IOs
 #define IOMUX_O_PROCCOMP                                             0x0002D0BCU
 
-//This register disables the SOP overrides when the device was powered in one of the SoP modes
-#define IOMUX_O_SOPDIS                                               0x0002D000U
+//Port configuration register for IO GPIO45
+#define IOMUX_O_GPIO45PCFG                                           0x0002D0C0U
+
+//Port configuration register for IO GPIO46
+#define IOMUX_O_GPIO46PCFG                                           0x0002D0C4U
+
+//Port configuration register for IO GPIO47
+#define IOMUX_O_GPIO47PCFG                                           0x0002D0C8U
+
+//Port configuration register for IO GPIO48
+#define IOMUX_O_GPIO48PCFG                                           0x0002D0CCU
+
+//CFG register for IO GPIO45
+#define IOMUX_O_GPIO45CFG                                            0x0002E000U
+
+//Pull control register of IO GPIO45
+#define IOMUX_O_GPIO45PCTL                                           0x0002E004U
+
+//Control register of IO GPIO45
+#define IOMUX_O_GPIO45CTL                                            0x0002E008U
+
+//Event control register for IO GPIO45
+#define IOMUX_O_GPIO45ECTL                                           0x0002E00CU
+
+//CFG register for IO GPIO46
+#define IOMUX_O_GPIO46CFG                                            0x0002F000U
+
+//Pull control register of IO GPIO46
+#define IOMUX_O_GPIO46PCTL                                           0x0002F004U
+
+//Control register of IO GPIO46
+#define IOMUX_O_GPIO46CTL                                            0x0002F008U
+
+//Event control register for IO GPIO46
+#define IOMUX_O_GPIO46ECTL                                           0x0002F00CU
+
+//CFG register for IO GPIO47
+#define IOMUX_O_GPIO47CFG                                            0x00030000U
+
+//Pull control register of IO GPIO47
+#define IOMUX_O_GPIO47PCTL                                           0x00030004U
+
+//Control register of IO GPIO47
+#define IOMUX_O_GPIO47CTL                                            0x00030008U
+
+//Event control register for IO GPIO47
+#define IOMUX_O_GPIO47ECTL                                           0x0003000CU
+
+//CFG register for IO GPIO48
+#define IOMUX_O_GPIO48CFG                                            0x00031000U
+
+//Pull control register of IO GPIO48
+#define IOMUX_O_GPIO48PCTL                                           0x00031004U
+
+//Control register of IO GPIO48
+#define IOMUX_O_GPIO48CTL                                            0x00031008U
+
+//Event control register for IO GPIO48
+#define IOMUX_O_GPIO48ECTL                                           0x0003100CU
 
 
 
@@ -772,8 +832,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_SCLKIPCTL_CTL_M                                        0x00000003U
 #define IOMUX_SCLKIPCTL_CTL_S                                        0U
 #define IOMUX_SCLKIPCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_SCLKIPCTL_CTL_RSVD                                     0x00000001U
-#define IOMUX_SCLKIPCTL_CTL_UP                                       0x00000002U
+#define IOMUX_SCLKIPCTL_CTL_RSVD                                     0x00000002U
+#define IOMUX_SCLKIPCTL_CTL_UP                                       0x00000001U
 #define IOMUX_SCLKIPCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -784,14 +844,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_SCLKIPCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_SCLKIPCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_SCLKIPCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_SCLKIPCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_SCLKIPCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_SCLKIPCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_SCLKIPCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -818,7 +878,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_SCLKICTL_PADVALSYNC                                    0x00000002U
@@ -831,7 +891,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_SCLKIECTL
     Relative address:    0xC
     Description:         Event control register for IO SLOW_CLOCK_IN
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -903,14 +963,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_LFXTNCFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_LFXTNCFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_LFXTNCFG_OUTDISVAL_S                                   6U
-#define IOMUX_LFXTNCFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_LFXTNCFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_LFXTNCFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_LFXTNCFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           ANASW
@@ -973,17 +1033,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_LFXTNCFG_OUTDIS                                        0x00001000U
 #define IOMUX_LFXTNCFG_OUTDIS_M                                      0x00001000U
 #define IOMUX_LFXTNCFG_OUTDIS_S                                      12U
-#define IOMUX_LFXTNCFG_OUTDIS_SET                                    0x00001000U
-#define IOMUX_LFXTNCFG_OUTDIS_CLEAR                                  0x00000000U
+#define IOMUX_LFXTNCFG_OUTDIS_DISABLE                                0x00001000U
+#define IOMUX_LFXTNCFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -993,11 +1053,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_LFXTNCFG_ODISOVEN                                      0x00002000U
-#define IOMUX_LFXTNCFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_LFXTNCFG_ODISOVEN_S                                    13U
-#define IOMUX_LFXTNCFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_LFXTNCFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_LFXTNCFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_LFXTNCFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_LFXTNCFG_OUTDISOVREN_S                                 13U
+#define IOMUX_LFXTNCFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_LFXTNCFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -1041,8 +1101,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_LFXTNPCTL_CTL_M                                        0x00000003U
 #define IOMUX_LFXTNPCTL_CTL_S                                        0U
 #define IOMUX_LFXTNPCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_LFXTNPCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_LFXTNPCTL_CTL_UP                                       0x00000002U
+#define IOMUX_LFXTNPCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_LFXTNPCTL_CTL_UP                                       0x00000001U
 #define IOMUX_LFXTNPCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -1053,14 +1113,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_LFXTNPCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_LFXTNPCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_LFXTNPCTL_PULLUPSTA_S                                  8U
-#define IOMUX_LFXTNPCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_LFXTNPCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_LFXTNPCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_LFXTNPCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -1070,14 +1130,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_LFXTNPCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_LFXTNPCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_LFXTNPCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_LFXTNPCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_LFXTNPCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_LFXTNPCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_LFXTNPCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -1104,7 +1164,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_LFXTNCTL_PADVALSYNC                                    0x00000002U
@@ -1133,7 +1193,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -1151,7 +1211,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_LFXTNECTL
     Relative address:    0x100C
     Description:         Event control register for IO LFXTAL_N
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -1210,576 +1270,6 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO36CFG
-    Offset name:         IOMUX_O_GPIO36CFG
-    Relative address:    0x24000
-    Description:         CFG register for IO GPIO36. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO36CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO36CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO36CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO36CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO36CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO36CFG_IE                                           0x00000800U
-#define IOMUX_GPIO36CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO36CFG_IE_S                                         11U
-#define IOMUX_GPIO36CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO36CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO36CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO36CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO36CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO36CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO36CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO36CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO36CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO36CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO36CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO36CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO36CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO36CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO36CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO36CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO36CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO36PCTL
-    Offset name:         IOMUX_O_GPIO36PCTL
-    Relative address:    0x24004
-    Description:         Pull control register of IO GPIO36
-                        This register configures the pull control
-    Default Value:       0x00000002
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x2
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO36PCTL_CTL_W                                       2U
-#define IOMUX_GPIO36PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO36PCTL_CTL_S                                       0U
-#define IOMUX_GPIO36PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO36PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO36PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO36PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO36PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO36PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO36PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO36PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO36PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO36PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO36PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO36PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO36PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO36PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO36CTL
-    Offset name:         IOMUX_O_GPIO36CTL
-    Relative address:    0x24008
-    Description:         Control register of IO GPIO36
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO36CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO36CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO36CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO36CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO36CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO36CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO36CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO36CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO36CTL_OUT_S                                        8U
-#define IOMUX_GPIO36CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO36CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO36CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO36CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO36CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO36CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO36CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO36ECTL
-    Offset name:         IOMUX_O_GPIO36ECTL
-    Relative address:    0x2400C
-    Description:         Event control register for IO GPIO36
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO36ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO36ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO36ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO36ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO36ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO36ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO36ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO36ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO36ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO36ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO36ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO36ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO36ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO36ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO36ECTL_CLR_S                                       3U
-#define IOMUX_GPIO36ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO36ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO37CFG
-    Offset name:         IOMUX_O_GPIO37CFG
-    Relative address:    0x25000
-    Description:         CFG register for IO GPIO37. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO37CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO37CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO37CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO37CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO37CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO37CFG_IE                                           0x00000800U
-#define IOMUX_GPIO37CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO37CFG_IE_S                                         11U
-#define IOMUX_GPIO37CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO37CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO37CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO37CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO37CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO37CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO37CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO37CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO37CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO37CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO37CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO37CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO37CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO37CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO37CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO37CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO37CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO37PCTL
-    Offset name:         IOMUX_O_GPIO37PCTL
-    Relative address:    0x25004
-    Description:         Pull control register of IO GPIO37
-                        This register configures the pull control
-    Default Value:       0x00000002
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x2
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO37PCTL_CTL_W                                       2U
-#define IOMUX_GPIO37PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO37PCTL_CTL_S                                       0U
-#define IOMUX_GPIO37PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO37PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO37PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO37PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO37PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO37PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO37PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO37PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO37PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO37PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO37PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO37PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO37PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO37PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO37CTL
-    Offset name:         IOMUX_O_GPIO37CTL
-    Relative address:    0x25008
-    Description:         Control register of IO GPIO37
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO37CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO37CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO37CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO37CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO37CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO37CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO37CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO37CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO37CTL_OUT_S                                        8U
-#define IOMUX_GPIO37CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO37CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO37CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO37CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO37CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO37CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO37CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO37ECTL
-    Offset name:         IOMUX_O_GPIO37ECTL
-    Relative address:    0x2500C
-    Description:         Event control register for IO GPIO37
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO37ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO37ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO37ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO37ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO37ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO37ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO37ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO37ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO37ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO37ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO37ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO37ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO37ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO37ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO37ECTL_CLR_S                                       3U
-#define IOMUX_GPIO37ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO37ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       GPIO2CFG
     Offset name:         IOMUX_O_GPIO2CFG
     Relative address:    0x2000
@@ -1793,14 +1283,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO2CFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_GPIO2CFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_GPIO2CFG_OUTDISVAL_S                                   6U
-#define IOMUX_GPIO2CFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_GPIO2CFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_GPIO2CFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_GPIO2CFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           ANASW
@@ -1863,17 +1353,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
+            DISABLE:                     Output from the pad is disabled
             ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO2CFG_OUTDIS                                        0x00001000U
 #define IOMUX_GPIO2CFG_OUTDIS_M                                      0x00001000U
 #define IOMUX_GPIO2CFG_OUTDIS_S                                      12U
-#define IOMUX_GPIO2CFG_OUTDIS_SET                                    0x00001000U
+#define IOMUX_GPIO2CFG_OUTDIS_DISABLE                                0x00001000U
 #define IOMUX_GPIO2CFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -1883,11 +1373,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO2CFG_ODISOVEN                                      0x00002000U
-#define IOMUX_GPIO2CFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_GPIO2CFG_ODISOVEN_S                                    13U
-#define IOMUX_GPIO2CFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_GPIO2CFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_GPIO2CFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_GPIO2CFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_GPIO2CFG_OUTDISOVREN_S                                 13U
+#define IOMUX_GPIO2CFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_GPIO2CFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -1931,8 +1421,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO2PCTL_CTL_M                                        0x00000003U
 #define IOMUX_GPIO2PCTL_CTL_S                                        0U
 #define IOMUX_GPIO2PCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_GPIO2PCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_GPIO2PCTL_CTL_UP                                       0x00000002U
+#define IOMUX_GPIO2PCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_GPIO2PCTL_CTL_UP                                       0x00000001U
 #define IOMUX_GPIO2PCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -1943,14 +1433,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO2PCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_GPIO2PCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_GPIO2PCTL_PULLUPSTA_S                                  8U
-#define IOMUX_GPIO2PCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_GPIO2PCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_GPIO2PCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_GPIO2PCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -1960,14 +1450,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO2PCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_GPIO2PCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_GPIO2PCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_GPIO2PCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO2PCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_GPIO2PCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO2PCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -1994,7 +1484,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO2CTL_PADVALSYNC                                    0x00000002U
@@ -2023,7 +1513,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -2041,7 +1531,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO2ECTL
     Relative address:    0x200C
     Description:         Event control register for IO GPIO2
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -2113,14 +1603,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO3CFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_GPIO3CFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_GPIO3CFG_OUTDISVAL_S                                   6U
-#define IOMUX_GPIO3CFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_GPIO3CFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_GPIO3CFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_GPIO3CFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           ANASW
@@ -2183,17 +1673,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO3CFG_OUTDIS                                        0x00001000U
 #define IOMUX_GPIO3CFG_OUTDIS_M                                      0x00001000U
 #define IOMUX_GPIO3CFG_OUTDIS_S                                      12U
-#define IOMUX_GPIO3CFG_OUTDIS_SET                                    0x00001000U
-#define IOMUX_GPIO3CFG_OUTDIS_CLEAR                                  0x00000000U
+#define IOMUX_GPIO3CFG_OUTDIS_DISABLE                                0x00001000U
+#define IOMUX_GPIO3CFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -2203,11 +1693,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO3CFG_ODISOVEN                                      0x00002000U
-#define IOMUX_GPIO3CFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_GPIO3CFG_ODISOVEN_S                                    13U
-#define IOMUX_GPIO3CFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_GPIO3CFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_GPIO3CFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_GPIO3CFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_GPIO3CFG_OUTDISOVREN_S                                 13U
+#define IOMUX_GPIO3CFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_GPIO3CFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -2251,8 +1741,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO3PCTL_CTL_M                                        0x00000003U
 #define IOMUX_GPIO3PCTL_CTL_S                                        0U
 #define IOMUX_GPIO3PCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_GPIO3PCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_GPIO3PCTL_CTL_UP                                       0x00000002U
+#define IOMUX_GPIO3PCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_GPIO3PCTL_CTL_UP                                       0x00000001U
 #define IOMUX_GPIO3PCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -2263,14 +1753,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO3PCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_GPIO3PCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_GPIO3PCTL_PULLUPSTA_S                                  8U
-#define IOMUX_GPIO3PCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_GPIO3PCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_GPIO3PCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_GPIO3PCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -2280,14 +1770,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO3PCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_GPIO3PCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_GPIO3PCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_GPIO3PCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO3PCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_GPIO3PCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO3PCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2314,7 +1804,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO3CTL_PADVALSYNC                                    0x00000002U
@@ -2343,7 +1833,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -2361,7 +1851,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO3ECTL
     Relative address:    0x300C
     Description:         Event control register for IO GPIO3
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -2433,14 +1923,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO4CFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_GPIO4CFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_GPIO4CFG_OUTDISVAL_S                                   6U
-#define IOMUX_GPIO4CFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_GPIO4CFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_GPIO4CFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_GPIO4CFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           ANASW
@@ -2513,7 +2003,7 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO4CFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -2523,11 +2013,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO4CFG_ODISOVEN                                      0x00002000U
-#define IOMUX_GPIO4CFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_GPIO4CFG_ODISOVEN_S                                    13U
-#define IOMUX_GPIO4CFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_GPIO4CFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_GPIO4CFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_GPIO4CFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_GPIO4CFG_OUTDISOVREN_S                                 13U
+#define IOMUX_GPIO4CFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_GPIO4CFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -2571,8 +2061,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO4PCTL_CTL_M                                        0x00000003U
 #define IOMUX_GPIO4PCTL_CTL_S                                        0U
 #define IOMUX_GPIO4PCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_GPIO4PCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_GPIO4PCTL_CTL_UP                                       0x00000002U
+#define IOMUX_GPIO4PCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_GPIO4PCTL_CTL_UP                                       0x00000001U
 #define IOMUX_GPIO4PCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -2583,14 +2073,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO4PCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_GPIO4PCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_GPIO4PCTL_PULLUPSTA_S                                  8U
-#define IOMUX_GPIO4PCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_GPIO4PCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_GPIO4PCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_GPIO4PCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -2600,14 +2090,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO4PCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_GPIO4PCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_GPIO4PCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_GPIO4PCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO4PCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_GPIO4PCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO4PCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2634,7 +2124,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO4CTL_PADVALSYNC                                    0x00000002U
@@ -2663,7 +2153,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -2681,7 +2171,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO4ECTL
     Relative address:    0x400C
     Description:         Event control register for IO GPIO4
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -2753,14 +2243,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO5CFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_GPIO5CFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_GPIO5CFG_OUTDISVAL_S                                   6U
-#define IOMUX_GPIO5CFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_GPIO5CFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_GPIO5CFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_GPIO5CFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           ANASW
@@ -2823,17 +2313,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO5CFG_OUTDIS                                        0x00001000U
 #define IOMUX_GPIO5CFG_OUTDIS_M                                      0x00001000U
 #define IOMUX_GPIO5CFG_OUTDIS_S                                      12U
-#define IOMUX_GPIO5CFG_OUTDIS_SET                                    0x00001000U
-#define IOMUX_GPIO5CFG_OUTDIS_CLEAR                                  0x00000000U
+#define IOMUX_GPIO5CFG_OUTDIS_DISABLE                                0x00001000U
+#define IOMUX_GPIO5CFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -2843,11 +2333,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO5CFG_ODISOVEN                                      0x00002000U
-#define IOMUX_GPIO5CFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_GPIO5CFG_ODISOVEN_S                                    13U
-#define IOMUX_GPIO5CFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_GPIO5CFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_GPIO5CFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_GPIO5CFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_GPIO5CFG_OUTDISOVREN_S                                 13U
+#define IOMUX_GPIO5CFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_GPIO5CFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -2891,8 +2381,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO5PCTL_CTL_M                                        0x00000003U
 #define IOMUX_GPIO5PCTL_CTL_S                                        0U
 #define IOMUX_GPIO5PCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_GPIO5PCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_GPIO5PCTL_CTL_UP                                       0x00000002U
+#define IOMUX_GPIO5PCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_GPIO5PCTL_CTL_UP                                       0x00000001U
 #define IOMUX_GPIO5PCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -2903,14 +2393,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO5PCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_GPIO5PCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_GPIO5PCTL_PULLUPSTA_S                                  8U
-#define IOMUX_GPIO5PCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_GPIO5PCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_GPIO5PCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_GPIO5PCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -2920,14 +2410,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO5PCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_GPIO5PCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_GPIO5PCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_GPIO5PCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO5PCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_GPIO5PCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO5PCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2954,7 +2444,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO5CTL_PADVALSYNC                                    0x00000002U
@@ -2983,7 +2473,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -3001,7 +2491,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO5ECTL
     Relative address:    0x500C
     Description:         Event control register for IO GPIO5
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -3073,14 +2563,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO6CFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_GPIO6CFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_GPIO6CFG_OUTDISVAL_S                                   6U
-#define IOMUX_GPIO6CFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_GPIO6CFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_GPIO6CFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_GPIO6CFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           ANASW
@@ -3143,17 +2633,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO6CFG_OUTDIS                                        0x00001000U
 #define IOMUX_GPIO6CFG_OUTDIS_M                                      0x00001000U
 #define IOMUX_GPIO6CFG_OUTDIS_S                                      12U
-#define IOMUX_GPIO6CFG_OUTDIS_SET                                    0x00001000U
-#define IOMUX_GPIO6CFG_OUTDIS_CLEAR                                  0x00000000U
+#define IOMUX_GPIO6CFG_OUTDIS_DISABLE                                0x00001000U
+#define IOMUX_GPIO6CFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -3163,11 +2653,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO6CFG_ODISOVEN                                      0x00002000U
-#define IOMUX_GPIO6CFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_GPIO6CFG_ODISOVEN_S                                    13U
-#define IOMUX_GPIO6CFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_GPIO6CFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_GPIO6CFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_GPIO6CFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_GPIO6CFG_OUTDISOVREN_S                                 13U
+#define IOMUX_GPIO6CFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_GPIO6CFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -3211,8 +2701,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO6PCTL_CTL_M                                        0x00000003U
 #define IOMUX_GPIO6PCTL_CTL_S                                        0U
 #define IOMUX_GPIO6PCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_GPIO6PCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_GPIO6PCTL_CTL_UP                                       0x00000002U
+#define IOMUX_GPIO6PCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_GPIO6PCTL_CTL_UP                                       0x00000001U
 #define IOMUX_GPIO6PCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -3223,14 +2713,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO6PCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_GPIO6PCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_GPIO6PCTL_PULLUPSTA_S                                  8U
-#define IOMUX_GPIO6PCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_GPIO6PCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_GPIO6PCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_GPIO6PCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -3240,14 +2730,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO6PCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_GPIO6PCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_GPIO6PCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_GPIO6PCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO6PCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_GPIO6PCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO6PCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -3274,7 +2764,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO6CTL_PADVALSYNC                                    0x00000002U
@@ -3303,7 +2793,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -3321,7 +2811,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO6ECTL
     Relative address:    0x600C
     Description:         Event control register for IO GPIO6
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -3393,14 +2883,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_SWDIOCFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_SWDIOCFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_SWDIOCFG_OUTDISVAL_S                                   6U
-#define IOMUX_SWDIOCFG_OUTDISVAL_CLEAR                               0x00000000U
-#define IOMUX_SWDIOCFG_OUTDISVAL_SET                                 0x00000040U
+#define IOMUX_SWDIOCFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_SWDIOCFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           IE
@@ -3428,17 +2918,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_SWDIOCFG_OUTDIS                                        0x00001000U
 #define IOMUX_SWDIOCFG_OUTDIS_M                                      0x00001000U
 #define IOMUX_SWDIOCFG_OUTDIS_S                                      12U
-#define IOMUX_SWDIOCFG_OUTDIS_SET                                    0x00001000U
-#define IOMUX_SWDIOCFG_OUTDIS_CLEAR                                  0x00000000U
+#define IOMUX_SWDIOCFG_OUTDIS_DISABLE                                0x00001000U
+#define IOMUX_SWDIOCFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -3448,11 +2938,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_SWDIOCFG_ODISOVEN                                      0x00002000U
-#define IOMUX_SWDIOCFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_SWDIOCFG_ODISOVEN_S                                    13U
-#define IOMUX_SWDIOCFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_SWDIOCFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_SWDIOCFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_SWDIOCFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_SWDIOCFG_OUTDISOVREN_S                                 13U
+#define IOMUX_SWDIOCFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_SWDIOCFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -3496,8 +2986,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_SWDIOPCTL_CTL_M                                        0x00000003U
 #define IOMUX_SWDIOPCTL_CTL_S                                        0U
 #define IOMUX_SWDIOPCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_SWDIOPCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_SWDIOPCTL_CTL_UP                                       0x00000002U
+#define IOMUX_SWDIOPCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_SWDIOPCTL_CTL_UP                                       0x00000001U
 #define IOMUX_SWDIOPCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -3508,14 +2998,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_SWDIOPCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_SWDIOPCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_SWDIOPCTL_PULLUPSTA_S                                  8U
-#define IOMUX_SWDIOPCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_SWDIOPCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_SWDIOPCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_SWDIOPCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -3525,14 +3015,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_SWDIOPCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_SWDIOPCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_SWDIOPCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_SWDIOPCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_SWDIOPCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_SWDIOPCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_SWDIOPCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -3559,7 +3049,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_SWDIOCTL_PADVALSYNC                                    0x00000002U
@@ -3588,7 +3078,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -3606,7 +3096,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_SWDIOECTL
     Relative address:    0x700C
     Description:         Event control register for IO SWDIO
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -3678,14 +3168,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            SET:                         Output is enabled
-            CLEAR:                       Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_SWCLKCFG_OUTDISVAL                                     0x00000040U
 #define IOMUX_SWCLKCFG_OUTDISVAL_M                                   0x00000040U
 #define IOMUX_SWCLKCFG_OUTDISVAL_S                                   6U
-#define IOMUX_SWCLKCFG_OUTDISVAL_SET                                 0x00000000U
-#define IOMUX_SWCLKCFG_OUTDISVAL_CLEAR                               0x00000040U
+#define IOMUX_SWCLKCFG_OUTDISVAL_ENABLED                             0x00000000U
+#define IOMUX_SWCLKCFG_OUTDISVAL_DISABLED                            0x00000040U
 /*
 
         Field:           IE
@@ -3723,7 +3213,7 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_SWCLKCFG_OUTDIS_ENABLE                                 0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -3733,11 +3223,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_SWCLKCFG_ODISOVEN                                      0x00002000U
-#define IOMUX_SWCLKCFG_ODISOVEN_M                                    0x00002000U
-#define IOMUX_SWCLKCFG_ODISOVEN_S                                    13U
-#define IOMUX_SWCLKCFG_ODISOVEN_DISABLE                              0x00000000U
-#define IOMUX_SWCLKCFG_ODISOVEN_ENABLE                               0x00002000U
+#define IOMUX_SWCLKCFG_OUTDISOVREN                                   0x00002000U
+#define IOMUX_SWCLKCFG_OUTDISOVREN_M                                 0x00002000U
+#define IOMUX_SWCLKCFG_OUTDISOVREN_S                                 13U
+#define IOMUX_SWCLKCFG_OUTDISOVREN_DISABLE                           0x00000000U
+#define IOMUX_SWCLKCFG_OUTDISOVREN_ENABLE                            0x00002000U
 /*
 
         Field:           IOSTR
@@ -3781,8 +3271,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_SWCLKPCTL_CTL_M                                        0x00000003U
 #define IOMUX_SWCLKPCTL_CTL_S                                        0U
 #define IOMUX_SWCLKPCTL_CTL_IPCTRL                                   0x00000000U
-#define IOMUX_SWCLKPCTL_CTL_DOWN                                     0x00000001U
-#define IOMUX_SWCLKPCTL_CTL_UP                                       0x00000002U
+#define IOMUX_SWCLKPCTL_CTL_DOWN                                     0x00000002U
+#define IOMUX_SWCLKPCTL_CTL_UP                                       0x00000001U
 #define IOMUX_SWCLKPCTL_CTL_DISABLE                                  0x00000003U
 /*
 
@@ -3793,14 +3283,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_SWCLKPCTL_PULLUPSTA                                    0x00000100U
 #define IOMUX_SWCLKPCTL_PULLUPSTA_M                                  0x00000100U
 #define IOMUX_SWCLKPCTL_PULLUPSTA_S                                  8U
-#define IOMUX_SWCLKPCTL_PULLUPSTA_CLEAR                              0x00000000U
-#define IOMUX_SWCLKPCTL_PULLUPSTA_SET                                0x00000100U
+#define IOMUX_SWCLKPCTL_PULLUPSTA_DISABLED                           0x00000000U
+#define IOMUX_SWCLKPCTL_PULLUPSTA_ENABLED                            0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -3810,14 +3300,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_SWCLKPCTL_PULLDWNSTA                                   0x00000200U
 #define IOMUX_SWCLKPCTL_PULLDWNSTA_M                                 0x00000200U
 #define IOMUX_SWCLKPCTL_PULLDWNSTA_S                                 9U
-#define IOMUX_SWCLKPCTL_PULLDWNSTA_CLEAR                             0x00000000U
-#define IOMUX_SWCLKPCTL_PULLDWNSTA_SET                               0x00000200U
+#define IOMUX_SWCLKPCTL_PULLDWNSTA_DISABLED                          0x00000000U
+#define IOMUX_SWCLKPCTL_PULLDWNSTA_ENABLED                           0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -3844,7 +3334,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_SWCLKCTL_PADVALSYNC                                    0x00000002U
@@ -3873,7 +3363,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -3891,7 +3381,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_SWCLKECTL
     Relative address:    0x800C
     Description:         Event control register for IO SWCLK
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -3963,14 +3453,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_LOGGERCFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_LOGGERCFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_LOGGERCFG_OUTDISVAL_S                                  6U
-#define IOMUX_LOGGERCFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_LOGGERCFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_LOGGERCFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_LOGGERCFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -3998,17 +3488,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_LOGGERCFG_OUTDIS                                       0x00001000U
 #define IOMUX_LOGGERCFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_LOGGERCFG_OUTDIS_S                                     12U
-#define IOMUX_LOGGERCFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_LOGGERCFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_LOGGERCFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_LOGGERCFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -4018,11 +3508,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_LOGGERCFG_ODISOVEN                                     0x00002000U
-#define IOMUX_LOGGERCFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_LOGGERCFG_ODISOVEN_S                                   13U
-#define IOMUX_LOGGERCFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_LOGGERCFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_LOGGERCFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_LOGGERCFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_LOGGERCFG_OUTDISOVREN_S                                13U
+#define IOMUX_LOGGERCFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_LOGGERCFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -4066,8 +3556,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_LOGGERPCTL_CTL_M                                       0x00000003U
 #define IOMUX_LOGGERPCTL_CTL_S                                       0U
 #define IOMUX_LOGGERPCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_LOGGERPCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_LOGGERPCTL_CTL_UP                                      0x00000002U
+#define IOMUX_LOGGERPCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_LOGGERPCTL_CTL_UP                                      0x00000001U
 #define IOMUX_LOGGERPCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -4078,14 +3568,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_LOGGERPCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_LOGGERPCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_LOGGERPCTL_PULLUPSTA_S                                 8U
-#define IOMUX_LOGGERPCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_LOGGERPCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_LOGGERPCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_LOGGERPCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -4095,14 +3585,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_LOGGERPCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_LOGGERPCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_LOGGERPCTL_PULLDWNSTA_S                                9U
-#define IOMUX_LOGGERPCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_LOGGERPCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_LOGGERPCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_LOGGERPCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -4129,7 +3619,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_LOGGERCTL_PADVALSYNC                                   0x00000002U
@@ -4158,7 +3648,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -4176,7 +3666,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_LOGGERECTL
     Relative address:    0x900C
     Description:         Event control register for IO LOGGER
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -4248,14 +3738,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO10CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO10CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO10CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO10CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO10CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO10CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO10CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           ANASW
@@ -4318,17 +3808,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO10CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO10CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO10CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO10CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO10CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO10CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO10CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -4338,11 +3828,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO10CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO10CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO10CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO10CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO10CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO10CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO10CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO10CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO10CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO10CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -4386,8 +3876,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO10PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO10PCTL_CTL_S                                       0U
 #define IOMUX_GPIO10PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO10PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO10PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO10PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO10PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO10PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -4398,14 +3888,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO10PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO10PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO10PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO10PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO10PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO10PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO10PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -4415,14 +3905,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO10PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO10PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO10PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO10PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO10PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO10PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO10PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -4449,7 +3939,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO10CTL_PADVALSYNC                                   0x00000002U
@@ -4478,7 +3968,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -4496,7 +3986,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO10ECTL
     Relative address:    0xA00C
     Description:         Event control register for IO GPIO10
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -4568,14 +4058,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO11CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO11CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO11CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO11CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO11CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO11CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO11CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           ANASW
@@ -4638,17 +4128,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO11CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO11CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO11CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO11CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO11CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO11CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO11CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -4658,11 +4148,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO11CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO11CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO11CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO11CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO11CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO11CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO11CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO11CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO11CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO11CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -4706,8 +4196,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO11PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO11PCTL_CTL_S                                       0U
 #define IOMUX_GPIO11PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO11PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO11PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO11PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO11PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO11PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -4718,14 +4208,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO11PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO11PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO11PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO11PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO11PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO11PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO11PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -4735,14 +4225,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO11PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO11PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO11PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO11PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO11PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO11PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO11PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -4769,7 +4259,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO11CTL_PADVALSYNC                                   0x00000002U
@@ -4798,7 +4288,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -4816,7 +4306,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO11ECTL
     Relative address:    0xB00C
     Description:         Event control register for IO GPIO11
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -4888,14 +4378,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO12CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO12CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO12CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO12CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO12CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO12CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO12CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -4923,17 +4413,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO12CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO12CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO12CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO12CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO12CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO12CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO12CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -4943,11 +4433,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO12CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO12CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO12CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO12CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO12CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO12CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO12CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO12CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO12CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO12CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -4991,8 +4481,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO12PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO12PCTL_CTL_S                                       0U
 #define IOMUX_GPIO12PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO12PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO12PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO12PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO12PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO12PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -5003,14 +4493,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO12PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO12PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO12PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO12PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO12PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO12PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO12PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -5020,14 +4510,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO12PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO12PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO12PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO12PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO12PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO12PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO12PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -5054,7 +4544,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO12CTL_PADVALSYNC                                   0x00000002U
@@ -5083,7 +4573,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -5101,7 +4591,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO12ECTL
     Relative address:    0xC00C
     Description:         Event control register for IO GPIO12
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -5173,14 +4663,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO13CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO13CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO13CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO13CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO13CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO13CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO13CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -5208,17 +4698,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO13CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO13CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO13CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO13CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO13CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO13CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO13CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -5228,11 +4718,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO13CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO13CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO13CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO13CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO13CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO13CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO13CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO13CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO13CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO13CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -5276,8 +4766,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO13PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO13PCTL_CTL_S                                       0U
 #define IOMUX_GPIO13PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO13PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO13PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO13PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO13PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO13PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -5288,14 +4778,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO13PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO13PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO13PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO13PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO13PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO13PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO13PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -5305,14 +4795,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO13PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO13PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO13PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO13PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO13PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO13PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO13PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -5339,7 +4829,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO13CTL_PADVALSYNC                                   0x00000002U
@@ -5368,7 +4858,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -5386,7 +4876,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO13ECTL
     Relative address:    0xD00C
     Description:         Event control register for IO GPIO13
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -5458,14 +4948,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO14CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO14CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO14CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO14CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO14CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO14CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO14CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -5493,17 +4983,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO14CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO14CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO14CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO14CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO14CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO14CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO14CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -5513,11 +5003,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO14CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO14CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO14CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO14CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO14CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO14CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO14CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO14CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO14CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO14CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -5561,8 +5051,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO14PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO14PCTL_CTL_S                                       0U
 #define IOMUX_GPIO14PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO14PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO14PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO14PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO14PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO14PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -5573,14 +5063,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO14PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO14PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO14PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO14PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO14PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO14PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO14PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -5590,14 +5080,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO14PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO14PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO14PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO14PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO14PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO14PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO14PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -5624,7 +5114,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO14CTL_PADVALSYNC                                   0x00000002U
@@ -5653,7 +5143,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -5671,7 +5161,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO14ECTL
     Relative address:    0xE00C
     Description:         Event control register for IO GPIO14
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -5743,14 +5233,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            SET:                         Output is enabled
-            CLEAR:                       Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO15CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO15CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO15CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO15CFG_OUTDISVAL_SET                                0x00000000U
-#define IOMUX_GPIO15CFG_OUTDISVAL_CLEAR                              0x00000040U
+#define IOMUX_GPIO15CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO15CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -5778,17 +5268,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO15CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO15CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO15CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO15CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO15CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO15CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO15CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -5798,11 +5288,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO15CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO15CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO15CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO15CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO15CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO15CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO15CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO15CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO15CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO15CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -5846,8 +5336,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO15PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO15PCTL_CTL_S                                       0U
 #define IOMUX_GPIO15PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO15PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO15PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO15PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO15PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO15PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -5858,14 +5348,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO15PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO15PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO15PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO15PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO15PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO15PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO15PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -5875,14 +5365,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO15PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO15PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO15PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO15PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO15PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO15PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO15PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -5909,7 +5399,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO15CTL_PADVALSYNC                                   0x00000002U
@@ -5938,7 +5428,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -5956,7 +5446,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO15ECTL
     Relative address:    0xF00C
     Description:         Event control register for IO GPIO15
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -6028,14 +5518,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO16CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO16CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO16CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO16CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO16CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO16CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO16CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -6063,17 +5553,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO16CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO16CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO16CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO16CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO16CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO16CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO16CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -6083,11 +5573,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO16CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO16CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO16CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO16CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO16CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO16CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO16CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO16CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO16CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO16CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -6131,8 +5621,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO16PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO16PCTL_CTL_S                                       0U
 #define IOMUX_GPIO16PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO16PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO16PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO16PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO16PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO16PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -6143,14 +5633,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO16PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO16PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO16PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO16PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO16PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO16PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO16PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -6160,14 +5650,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO16PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO16PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO16PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO16PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO16PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO16PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO16PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -6194,7 +5684,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO16CTL_PADVALSYNC                                   0x00000002U
@@ -6223,7 +5713,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -6241,7 +5731,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO16ECTL
     Relative address:    0x1000C
     Description:         Event control register for IO GPIO16
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -6313,14 +5803,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO17CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO17CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO17CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO17CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO17CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO17CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO17CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -6348,17 +5838,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO17CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO17CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO17CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO17CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO17CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO17CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO17CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -6368,11 +5858,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO17CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO17CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO17CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO17CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO17CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO17CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO17CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO17CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO17CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO17CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -6416,8 +5906,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO17PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO17PCTL_CTL_S                                       0U
 #define IOMUX_GPIO17PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO17PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO17PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO17PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO17PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO17PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -6428,14 +5918,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO17PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO17PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO17PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO17PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO17PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO17PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO17PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -6445,14 +5935,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO17PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO17PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO17PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO17PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO17PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO17PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO17PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -6479,7 +5969,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO17CTL_PADVALSYNC                                   0x00000002U
@@ -6508,7 +5998,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -6526,7 +6016,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO17ECTL
     Relative address:    0x1100C
     Description:         Event control register for IO GPIO17
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -6598,14 +6088,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO18CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO18CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO18CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO18CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO18CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO18CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO18CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -6633,17 +6123,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO18CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO18CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO18CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO18CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO18CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO18CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO18CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -6653,11 +6143,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO18CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO18CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO18CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO18CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO18CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO18CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO18CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO18CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO18CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO18CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -6701,8 +6191,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO18PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO18PCTL_CTL_S                                       0U
 #define IOMUX_GPIO18PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO18PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO18PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO18PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO18PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO18PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -6713,14 +6203,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO18PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO18PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO18PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO18PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO18PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO18PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO18PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -6730,14 +6220,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO18PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO18PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO18PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO18PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO18PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO18PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO18PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -6764,7 +6254,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO18CTL_PADVALSYNC                                   0x00000002U
@@ -6793,7 +6283,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -6811,7 +6301,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO18ECTL
     Relative address:    0x1200C
     Description:         Event control register for IO GPIO18
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -6883,14 +6373,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO19CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO19CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO19CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO19CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO19CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO19CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO19CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -6918,17 +6408,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO19CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO19CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO19CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO19CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO19CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO19CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO19CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -6938,11 +6428,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO19CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO19CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO19CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO19CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO19CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO19CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO19CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO19CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO19CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO19CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -6986,8 +6476,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO19PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO19PCTL_CTL_S                                       0U
 #define IOMUX_GPIO19PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO19PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO19PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO19PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO19PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO19PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -6998,14 +6488,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO19PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO19PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO19PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO19PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO19PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO19PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO19PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -7015,14 +6505,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO19PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO19PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO19PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO19PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO19PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO19PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO19PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -7049,7 +6539,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO19CTL_PADVALSYNC                                   0x00000002U
@@ -7078,7 +6568,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -7096,7 +6586,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO19ECTL
     Relative address:    0x1300C
     Description:         Event control register for IO GPIO19
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -7155,861 +6645,6 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO38CFG
-    Offset name:         IOMUX_O_GPIO38CFG
-    Relative address:    0x26000
-    Description:         CFG register for IO GPIO38. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO38CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO38CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO38CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO38CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO38CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO38CFG_IE                                           0x00000800U
-#define IOMUX_GPIO38CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO38CFG_IE_S                                         11U
-#define IOMUX_GPIO38CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO38CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO38CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO38CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO38CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO38CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO38CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO38CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO38CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO38CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO38CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO38CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO38CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO38CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO38CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO38CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO38CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO38PCTL
-    Offset name:         IOMUX_O_GPIO38PCTL
-    Relative address:    0x26004
-    Description:         Pull control register of IO GPIO38
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO38PCTL_CTL_W                                       2U
-#define IOMUX_GPIO38PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO38PCTL_CTL_S                                       0U
-#define IOMUX_GPIO38PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO38PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO38PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO38PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO38PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO38PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO38PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO38PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO38PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO38PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO38PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO38PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO38PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO38PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO38CTL
-    Offset name:         IOMUX_O_GPIO38CTL
-    Relative address:    0x26008
-    Description:         Control register of IO GPIO38
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO38CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO38CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO38CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO38CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO38CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO38CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO38CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO38CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO38CTL_OUT_S                                        8U
-#define IOMUX_GPIO38CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO38CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO38CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO38CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO38CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO38CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO38CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO38ECTL
-    Offset name:         IOMUX_O_GPIO38ECTL
-    Relative address:    0x2600C
-    Description:         Event control register for IO GPIO38
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO38ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO38ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO38ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO38ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO38ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO38ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO38ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO38ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO38ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO38ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO38ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO38ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO38ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO38ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO38ECTL_CLR_S                                       3U
-#define IOMUX_GPIO38ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO38ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO39CFG
-    Offset name:         IOMUX_O_GPIO39CFG
-    Relative address:    0x27000
-    Description:         CFG register for IO GPIO39. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO39CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO39CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO39CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO39CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO39CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO39CFG_IE                                           0x00000800U
-#define IOMUX_GPIO39CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO39CFG_IE_S                                         11U
-#define IOMUX_GPIO39CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO39CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO39CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO39CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO39CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO39CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO39CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO39CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO39CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO39CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO39CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO39CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO39CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO39CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO39CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO39CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO39CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO39PCTL
-    Offset name:         IOMUX_O_GPIO39PCTL
-    Relative address:    0x27004
-    Description:         Pull control register of IO GPIO39
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO39PCTL_CTL_W                                       2U
-#define IOMUX_GPIO39PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO39PCTL_CTL_S                                       0U
-#define IOMUX_GPIO39PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO39PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO39PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO39PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO39PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO39PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO39PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO39PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO39PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO39PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO39PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO39PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO39PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO39PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO39CTL
-    Offset name:         IOMUX_O_GPIO39CTL
-    Relative address:    0x27008
-    Description:         Control register of IO GPIO39
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO39CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO39CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO39CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO39CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO39CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO39CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO39CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO39CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO39CTL_OUT_S                                        8U
-#define IOMUX_GPIO39CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO39CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO39CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO39CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO39CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO39CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO39CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO39ECTL
-    Offset name:         IOMUX_O_GPIO39ECTL
-    Relative address:    0x2700C
-    Description:         Event control register for IO GPIO39
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO39ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO39ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO39ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO39ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO39ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO39ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO39ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO39ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO39ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO39ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO39ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO39ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO39ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO39ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO39ECTL_CLR_S                                       3U
-#define IOMUX_GPIO39ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO39ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO40CFG
-    Offset name:         IOMUX_O_GPIO40CFG
-    Relative address:    0x28000
-    Description:         CFG register for IO GPIO40. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO40CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO40CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO40CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO40CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO40CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO40CFG_IE                                           0x00000800U
-#define IOMUX_GPIO40CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO40CFG_IE_S                                         11U
-#define IOMUX_GPIO40CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO40CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO40CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO40CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO40CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO40CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO40CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO40CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO40CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO40CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO40CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO40CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO40CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO40CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO40CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO40CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO40CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO40PCTL
-    Offset name:         IOMUX_O_GPIO40PCTL
-    Relative address:    0x28004
-    Description:         Pull control register of IO GPIO40
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO40PCTL_CTL_W                                       2U
-#define IOMUX_GPIO40PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO40PCTL_CTL_S                                       0U
-#define IOMUX_GPIO40PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO40PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO40PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO40PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO40PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO40PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO40PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO40PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO40PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO40PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO40PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO40PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO40PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO40PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO40CTL
-    Offset name:         IOMUX_O_GPIO40CTL
-    Relative address:    0x28008
-    Description:         Control register of IO GPIO40
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO40CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO40CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO40CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO40CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO40CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO40CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO40CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO40CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO40CTL_OUT_S                                        8U
-#define IOMUX_GPIO40CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO40CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO40CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO40CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO40CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO40CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO40CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO40ECTL
-    Offset name:         IOMUX_O_GPIO40ECTL
-    Relative address:    0x2800C
-    Description:         Event control register for IO GPIO40
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO40ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO40ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO40ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO40ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO40ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO40ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO40ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO40ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO40ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO40ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO40ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO40ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO40ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO40ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO40ECTL_CLR_S                                       3U
-#define IOMUX_GPIO40ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO40ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       GPIO20CFG
     Offset name:         IOMUX_O_GPIO20CFG
     Relative address:    0x14000
@@ -8023,14 +6658,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO20CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO20CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO20CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO20CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO20CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO20CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO20CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -8058,17 +6693,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO20CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO20CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO20CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO20CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO20CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO20CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO20CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -8078,11 +6713,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO20CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO20CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO20CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO20CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO20CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO20CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO20CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO20CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO20CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO20CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -8126,8 +6761,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO20PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO20PCTL_CTL_S                                       0U
 #define IOMUX_GPIO20PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO20PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO20PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO20PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO20PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO20PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -8138,14 +6773,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO20PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO20PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO20PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO20PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO20PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO20PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO20PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -8155,14 +6790,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO20PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO20PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO20PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO20PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO20PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO20PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO20PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -8189,7 +6824,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO20CTL_PADVALSYNC                                   0x00000002U
@@ -8218,7 +6853,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -8236,7 +6871,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO20ECTL
     Relative address:    0x1400C
     Description:         Event control register for IO GPIO20
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -8308,14 +6943,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO21CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO21CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO21CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO21CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO21CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO21CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO21CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -8343,17 +6978,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO21CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO21CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO21CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO21CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO21CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO21CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO21CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -8363,11 +6998,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO21CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO21CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO21CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO21CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO21CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO21CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO21CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO21CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO21CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO21CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -8411,8 +7046,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO21PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO21PCTL_CTL_S                                       0U
 #define IOMUX_GPIO21PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO21PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO21PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO21PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO21PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO21PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -8423,14 +7058,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO21PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO21PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO21PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO21PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO21PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO21PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO21PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -8440,14 +7075,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO21PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO21PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO21PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO21PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO21PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO21PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO21PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -8474,7 +7109,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO21CTL_PADVALSYNC                                   0x00000002U
@@ -8503,7 +7138,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -8521,7 +7156,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO21ECTL
     Relative address:    0x1500C
     Description:         Event control register for IO GPIO21
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -8593,14 +7228,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            SET:                         Output is enabled
-            CLEAR:                       Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO22CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO22CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO22CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO22CFG_OUTDISVAL_SET                                0x00000000U
-#define IOMUX_GPIO22CFG_OUTDISVAL_CLEAR                              0x00000040U
+#define IOMUX_GPIO22CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO22CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -8638,7 +7273,7 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO22CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -8648,11 +7283,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO22CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO22CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO22CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO22CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO22CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO22CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO22CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO22CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO22CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO22CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -8696,8 +7331,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO22PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO22PCTL_CTL_S                                       0U
 #define IOMUX_GPIO22PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO22PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO22PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO22PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO22PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO22PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -8708,14 +7343,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO22PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO22PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO22PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO22PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO22PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO22PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO22PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -8725,14 +7360,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO22PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO22PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO22PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO22PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO22PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO22PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO22PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -8759,7 +7394,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO22CTL_PADVALSYNC                                   0x00000002U
@@ -8788,7 +7423,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -8806,7 +7441,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO22ECTL
     Relative address:    0x1600C
     Description:         Event control register for IO GPIO22
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -8878,14 +7513,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO23CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO23CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO23CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO23CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO23CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO23CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO23CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -8913,17 +7548,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO23CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO23CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO23CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO23CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO23CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO23CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO23CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -8933,11 +7568,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO23CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO23CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO23CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO23CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO23CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO23CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO23CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO23CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO23CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO23CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -8981,8 +7616,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO23PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO23PCTL_CTL_S                                       0U
 #define IOMUX_GPIO23PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO23PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO23PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO23PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO23PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO23PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -8993,14 +7628,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO23PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO23PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO23PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO23PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO23PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO23PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO23PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -9010,14 +7645,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO23PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO23PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO23PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO23PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO23PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO23PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO23PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -9044,7 +7679,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO23CTL_PADVALSYNC                                   0x00000002U
@@ -9073,7 +7708,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -9091,7 +7726,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO23ECTL
     Relative address:    0x1700C
     Description:         Event control register for IO GPIO23
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -9163,14 +7798,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO24CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO24CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO24CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO24CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO24CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO24CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO24CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -9198,17 +7833,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO24CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO24CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO24CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO24CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO24CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO24CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO24CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -9218,11 +7853,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO24CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO24CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO24CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO24CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO24CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO24CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO24CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO24CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO24CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO24CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -9266,8 +7901,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO24PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO24PCTL_CTL_S                                       0U
 #define IOMUX_GPIO24PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO24PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO24PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO24PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO24PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO24PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -9278,14 +7913,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO24PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO24PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO24PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO24PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO24PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO24PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO24PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -9295,14 +7930,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO24PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO24PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO24PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO24PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO24PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO24PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO24PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -9329,7 +7964,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO24CTL_PADVALSYNC                                   0x00000002U
@@ -9358,7 +7993,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -9376,7 +8011,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO24ECTL
     Relative address:    0x1800C
     Description:         Event control register for IO GPIO24
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -9448,14 +8083,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO25CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO25CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO25CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO25CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO25CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO25CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO25CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -9483,17 +8118,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO25CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO25CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO25CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO25CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO25CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO25CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO25CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -9503,11 +8138,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO25CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO25CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO25CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO25CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO25CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO25CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO25CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO25CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO25CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO25CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -9551,8 +8186,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO25PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO25PCTL_CTL_S                                       0U
 #define IOMUX_GPIO25PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO25PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO25PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO25PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO25PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO25PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -9563,14 +8198,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO25PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO25PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO25PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO25PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO25PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO25PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO25PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -9580,14 +8215,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO25PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO25PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO25PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO25PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO25PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO25PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO25PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -9614,7 +8249,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO25CTL_PADVALSYNC                                   0x00000002U
@@ -9643,7 +8278,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -9661,7 +8296,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO25ECTL
     Relative address:    0x1900C
     Description:         Event control register for IO GPIO25
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -9720,1146 +8355,6 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO44CFG
-    Offset name:         IOMUX_O_GPIO44CFG
-    Relative address:    0x2C000
-    Description:         CFG register for IO GPIO44. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO44CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO44CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO44CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO44CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO44CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO44CFG_IE                                           0x00000800U
-#define IOMUX_GPIO44CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO44CFG_IE_S                                         11U
-#define IOMUX_GPIO44CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO44CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO44CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO44CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO44CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO44CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO44CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO44CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO44CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO44CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO44CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO44CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO44CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO44CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO44CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO44CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO44CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO44PCTL
-    Offset name:         IOMUX_O_GPIO44PCTL
-    Relative address:    0x2C004
-    Description:         Pull control register of IO GPIO44
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO44PCTL_CTL_W                                       2U
-#define IOMUX_GPIO44PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO44PCTL_CTL_S                                       0U
-#define IOMUX_GPIO44PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO44PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO44PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO44PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO44PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO44PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO44PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO44PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO44PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO44PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO44PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO44PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO44PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO44PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO44CTL
-    Offset name:         IOMUX_O_GPIO44CTL
-    Relative address:    0x2C008
-    Description:         Control register of IO GPIO44
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO44CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO44CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO44CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO44CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO44CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO44CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO44CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO44CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO44CTL_OUT_S                                        8U
-#define IOMUX_GPIO44CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO44CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO44CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO44CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO44CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO44CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO44CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO44ECTL
-    Offset name:         IOMUX_O_GPIO44ECTL
-    Relative address:    0x2C00C
-    Description:         Event control register for IO GPIO44
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO44ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO44ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO44ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO44ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO44ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO44ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO44ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO44ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO44ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO44ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO44ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO44ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO44ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO44ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO44ECTL_CLR_S                                       3U
-#define IOMUX_GPIO44ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO44ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO41CFG
-    Offset name:         IOMUX_O_GPIO41CFG
-    Relative address:    0x29000
-    Description:         CFG register for IO GPIO41. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO41CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO41CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO41CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO41CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO41CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO41CFG_IE                                           0x00000800U
-#define IOMUX_GPIO41CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO41CFG_IE_S                                         11U
-#define IOMUX_GPIO41CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO41CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO41CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO41CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO41CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO41CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO41CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO41CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO41CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO41CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO41CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO41CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO41CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO41CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO41CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO41CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO41CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO41PCTL
-    Offset name:         IOMUX_O_GPIO41PCTL
-    Relative address:    0x29004
-    Description:         Pull control register of IO GPIO41
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO41PCTL_CTL_W                                       2U
-#define IOMUX_GPIO41PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO41PCTL_CTL_S                                       0U
-#define IOMUX_GPIO41PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO41PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO41PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO41PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO41PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO41PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO41PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO41PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO41PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO41PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO41PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO41PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO41PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO41PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO41CTL
-    Offset name:         IOMUX_O_GPIO41CTL
-    Relative address:    0x29008
-    Description:         Control register of IO GPIO41
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO41CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO41CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO41CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO41CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO41CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO41CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO41CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO41CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO41CTL_OUT_S                                        8U
-#define IOMUX_GPIO41CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO41CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO41CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO41CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO41CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO41CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO41CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO41ECTL
-    Offset name:         IOMUX_O_GPIO41ECTL
-    Relative address:    0x2900C
-    Description:         Event control register for IO GPIO41
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO41ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO41ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO41ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO41ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO41ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO41ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO41ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO41ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO41ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO41ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO41ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO41ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO41ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO41ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO41ECTL_CLR_S                                       3U
-#define IOMUX_GPIO41ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO41ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO42CFG
-    Offset name:         IOMUX_O_GPIO42CFG
-    Relative address:    0x2A000
-    Description:         CFG register for IO GPIO42. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO42CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO42CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO42CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO42CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO42CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO42CFG_IE                                           0x00000800U
-#define IOMUX_GPIO42CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO42CFG_IE_S                                         11U
-#define IOMUX_GPIO42CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO42CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO42CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO42CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO42CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO42CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO42CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO42CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO42CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO42CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO42CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO42CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO42CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO42CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO42CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO42CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO42CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO42PCTL
-    Offset name:         IOMUX_O_GPIO42PCTL
-    Relative address:    0x2A004
-    Description:         Pull control register of IO GPIO42
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO42PCTL_CTL_W                                       2U
-#define IOMUX_GPIO42PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO42PCTL_CTL_S                                       0U
-#define IOMUX_GPIO42PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO42PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO42PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO42PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO42PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO42PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO42PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO42PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO42PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO42PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO42PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO42PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO42PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO42PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO42CTL
-    Offset name:         IOMUX_O_GPIO42CTL
-    Relative address:    0x2A008
-    Description:         Control register of IO GPIO42
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO42CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO42CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO42CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO42CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO42CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO42CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO42CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO42CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO42CTL_OUT_S                                        8U
-#define IOMUX_GPIO42CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO42CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO42CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO42CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO42CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO42CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO42CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO42ECTL
-    Offset name:         IOMUX_O_GPIO42ECTL
-    Relative address:    0x2A00C
-    Description:         Event control register for IO GPIO42
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO42ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO42ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO42ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO42ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO42ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO42ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO42ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO42ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO42ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO42ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO42ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO42ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO42ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO42ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO42ECTL_CLR_S                                       3U
-#define IOMUX_GPIO42ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO42ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO43CFG
-    Offset name:         IOMUX_O_GPIO43CFG
-    Relative address:    0x2B000
-    Description:         CFG register for IO GPIO43. This register configures the corresponding pad
-    Default Value:       0x00000000
-
-        Field:           OUTDISVAL
-        From..to bits:   6...6
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     The field gives the status of [OUTDIS]
-
-        ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
-*/
-#define IOMUX_GPIO43CFG_OUTDISVAL                                    0x00000040U
-#define IOMUX_GPIO43CFG_OUTDISVAL_M                                  0x00000040U
-#define IOMUX_GPIO43CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO43CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO43CFG_OUTDISVAL_SET                                0x00000040U
-/*
-
-        Field:           IE
-        From..to bits:   11...11
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field enables the receiver operation from the pad
-
-        ENUMs:
-            DISABLE:                     Disable the receiver operation
-            ENABLE:                      Enable the receiver operation
-*/
-#define IOMUX_GPIO43CFG_IE                                           0x00000800U
-#define IOMUX_GPIO43CFG_IE_M                                         0x00000800U
-#define IOMUX_GPIO43CFG_IE_S                                         11U
-#define IOMUX_GPIO43CFG_IE_DISABLE                                   0x00000000U
-#define IOMUX_GPIO43CFG_IE_ENABLE                                    0x00000800U
-/*
-
-        Field:           OUTDIS
-        From..to bits:   12...12
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field configures the output from the pad
-                         Note:This field is applicable only if [OUTDISOVREN] is enabled
-
-        ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
-*/
-#define IOMUX_GPIO43CFG_OUTDIS                                       0x00001000U
-#define IOMUX_GPIO43CFG_OUTDIS_M                                     0x00001000U
-#define IOMUX_GPIO43CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO43CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO43CFG_OUTDIS_CLEAR                                 0x00000000U
-/*
-
-        Field:           ODISOVEN
-        From..to bits:   13...13
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the [OUTDIS] override
-
-        ENUMs:
-            DISABLE:                     Disable the override
-            ENABLE:                      Enable the override
-*/
-#define IOMUX_GPIO43CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO43CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO43CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO43CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO43CFG_ODISOVEN_ENABLE                              0x00002000U
-/*
-
-        Field:           IOSTR
-        From..to bits:   14...14
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     This field controls the IO drive strength
-
-        ENUMs:
-            LOW:                         IO drives low power
-            HIGH:                        IO drives high power
-*/
-#define IOMUX_GPIO43CFG_IOSTR                                        0x00004000U
-#define IOMUX_GPIO43CFG_IOSTR_M                                      0x00004000U
-#define IOMUX_GPIO43CFG_IOSTR_S                                      14U
-#define IOMUX_GPIO43CFG_IOSTR_LOW                                    0x00000000U
-#define IOMUX_GPIO43CFG_IOSTR_HIGH                                   0x00004000U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO43PCTL
-    Offset name:         IOMUX_O_GPIO43PCTL
-    Relative address:    0x2B004
-    Description:         Pull control register of IO GPIO43
-                        This register configures the pull control
-    Default Value:       0x00000001
-
-        Field:           CTL
-        From..to bits:   0...1
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     The fields defines the pull control
-
-        ENUMs:
-            IPCTRL:                      IP Pull Control
-            DOWN:                        Pull down
-            UP:                          Pull up
-            DISABLE:                     Pull disable
-*/
-#define IOMUX_GPIO43PCTL_CTL_W                                       2U
-#define IOMUX_GPIO43PCTL_CTL_M                                       0x00000003U
-#define IOMUX_GPIO43PCTL_CTL_S                                       0U
-#define IOMUX_GPIO43PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO43PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO43PCTL_CTL_UP                                      0x00000002U
-#define IOMUX_GPIO43PCTL_CTL_DISABLE                                 0x00000003U
-/*
-
-        Field:           PULLUPSTA
-        From..to bits:   8...8
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull up level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
-*/
-#define IOMUX_GPIO43PCTL_PULLUPSTA                                   0x00000100U
-#define IOMUX_GPIO43PCTL_PULLUPSTA_M                                 0x00000100U
-#define IOMUX_GPIO43PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO43PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO43PCTL_PULLUPSTA_SET                               0x00000100U
-/*
-
-        Field:           PULLDWNSTA
-        From..to bits:   9...9
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     This field gives the IO pull down level status
-
-        ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
-*/
-#define IOMUX_GPIO43PCTL_PULLDWNSTA                                  0x00000200U
-#define IOMUX_GPIO43PCTL_PULLDWNSTA_M                                0x00000200U
-#define IOMUX_GPIO43PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO43PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO43PCTL_PULLDWNSTA_SET                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO43CTL
-    Offset name:         IOMUX_O_GPIO43CTL
-    Relative address:    0x2B008
-    Description:         Control register of IO GPIO43
-                        This register controls the IO state
-    Default Value:       NA
-
-        Field:           PADVAL
-        From..to bits:   0...0
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the received value from pad
-
-*/
-#define IOMUX_GPIO43CTL_PADVAL                                       0x00000001U
-#define IOMUX_GPIO43CTL_PADVAL_M                                     0x00000001U
-#define IOMUX_GPIO43CTL_PADVAL_S                                     0U
-/*
-
-        Field:           PADVALSYNC
-        From..to bits:   1...1
-        DefaultValue:    NA
-        Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
-
-*/
-#define IOMUX_GPIO43CTL_PADVALSYNC                                   0x00000002U
-#define IOMUX_GPIO43CTL_PADVALSYNC_M                                 0x00000002U
-#define IOMUX_GPIO43CTL_PADVALSYNC_S                                 1U
-/*
-
-        Field:           OUT
-        From..to bits:   8...8
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
-
-        ENUMs:
-            LOW:                         IO drives 0
-            HIGH:                        IO drives 1
-*/
-#define IOMUX_GPIO43CTL_OUT                                          0x00000100U
-#define IOMUX_GPIO43CTL_OUT_M                                        0x00000100U
-#define IOMUX_GPIO43CTL_OUT_S                                        8U
-#define IOMUX_GPIO43CTL_OUT_LOW                                      0x00000000U
-#define IOMUX_GPIO43CTL_OUT_HIGH                                     0x00000100U
-/*
-
-        Field:           OUTOVREN
-        From..to bits:   9...9
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field controls the override on output
-
-        ENUMs:
-            DISABLE:                     Output controlled by IP
-            ENABLE:                      Enable override on output
-*/
-#define IOMUX_GPIO43CTL_OUTOVREN                                     0x00000200U
-#define IOMUX_GPIO43CTL_OUTOVREN_M                                   0x00000200U
-#define IOMUX_GPIO43CTL_OUTOVREN_S                                   9U
-#define IOMUX_GPIO43CTL_OUTOVREN_DISABLE                             0x00000000U
-#define IOMUX_GPIO43CTL_OUTOVREN_ENABLE                              0x00000200U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO43ECTL
-    Offset name:         IOMUX_O_GPIO43ECTL
-    Relative address:    0x2B00C
-    Description:         Event control register for IO GPIO43
-                        This register controls the Event configuration and behavior
-    Default Value:       NA
-
-        Field:           EVTDETCFG
-        From..to bits:   0...1
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field is to be configured to define the IO detection method
-
-        ENUMs:
-            MASK:                        Masking the event
-            POS_EDGE:                    Rising edge/Positive edge detection
-            NEG_EDGE:                    Falling edge/Negative edge detection
-            LEVEL:                       Level detection
-*/
-#define IOMUX_GPIO43ECTL_EVTDETCFG_W                                 2U
-#define IOMUX_GPIO43ECTL_EVTDETCFG_M                                 0x00000003U
-#define IOMUX_GPIO43ECTL_EVTDETCFG_S                                 0U
-#define IOMUX_GPIO43ECTL_EVTDETCFG_MASK                              0x00000000U
-#define IOMUX_GPIO43ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
-#define IOMUX_GPIO43ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
-#define IOMUX_GPIO43ECTL_EVTDETCFG_LEVEL                             0x00000003U
-/*
-
-        Field:           TRGLVL
-        From..to bits:   2...2
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
-
-        ENUMs:
-            HIGH:                        Non Inverted polarity
-            LOW:                         Inverted polarity
-*/
-#define IOMUX_GPIO43ECTL_TRGLVL                                      0x00000004U
-#define IOMUX_GPIO43ECTL_TRGLVL_M                                    0x00000004U
-#define IOMUX_GPIO43ECTL_TRGLVL_S                                    2U
-#define IOMUX_GPIO43ECTL_TRGLVL_HIGH                                 0x00000000U
-#define IOMUX_GPIO43ECTL_TRGLVL_LOW                                  0x00000004U
-/*
-
-        Field:           CLR
-        From..to bits:   3...3
-        DefaultValue:    NA
-        Access type:     write-only
-        Description:     This bit is to be used to generate CLR pulse for the event
-
-        ENUMs:
-            NOEFF:                       No effect
-            CLEAR:                       Clear the event
-*/
-#define IOMUX_GPIO43ECTL_CLR                                         0x00000008U
-#define IOMUX_GPIO43ECTL_CLR_M                                       0x00000008U
-#define IOMUX_GPIO43ECTL_CLR_S                                       3U
-#define IOMUX_GPIO43ECTL_CLR_NOEFF                                   0x00000000U
-#define IOMUX_GPIO43ECTL_CLR_CLEAR                                   0x00000008U
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       GPIO26CFG
     Offset name:         IOMUX_O_GPIO26CFG
     Relative address:    0x1A000
@@ -10873,14 +8368,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO26CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO26CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO26CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO26CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO26CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO26CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO26CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -10908,17 +8403,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO26CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO26CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO26CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO26CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO26CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO26CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO26CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -10928,11 +8423,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO26CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO26CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO26CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO26CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO26CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO26CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO26CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO26CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO26CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO26CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -10976,8 +8471,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO26PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO26PCTL_CTL_S                                       0U
 #define IOMUX_GPIO26PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO26PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO26PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO26PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO26PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO26PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -10988,14 +8483,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO26PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO26PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO26PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO26PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO26PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO26PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO26PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -11005,14 +8500,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO26PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO26PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO26PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO26PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO26PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO26PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO26PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -11039,7 +8534,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO26CTL_PADVALSYNC                                   0x00000002U
@@ -11068,7 +8563,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -11086,7 +8581,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO26ECTL
     Relative address:    0x1A00C
     Description:         Event control register for IO GPIO26
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -11158,14 +8653,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO27CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO27CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO27CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO27CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO27CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO27CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO27CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -11193,17 +8688,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO27CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO27CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO27CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO27CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO27CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO27CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO27CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -11213,11 +8708,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO27CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO27CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO27CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO27CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO27CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO27CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO27CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO27CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO27CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO27CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -11261,8 +8756,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO27PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO27PCTL_CTL_S                                       0U
 #define IOMUX_GPIO27PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO27PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO27PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO27PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO27PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO27PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -11273,14 +8768,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO27PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO27PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO27PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO27PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO27PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO27PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO27PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -11290,14 +8785,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO27PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO27PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO27PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO27PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO27PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO27PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO27PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -11324,7 +8819,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO27CTL_PADVALSYNC                                   0x00000002U
@@ -11353,7 +8848,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -11371,7 +8866,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO27ECTL
     Relative address:    0x1B00C
     Description:         Event control register for IO GPIO27
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -11443,14 +8938,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO28CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO28CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO28CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO28CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO28CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO28CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO28CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -11478,17 +8973,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO28CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO28CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO28CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO28CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO28CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO28CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO28CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -11498,11 +8993,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO28CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO28CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO28CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO28CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO28CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO28CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO28CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO28CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO28CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO28CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -11546,8 +9041,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO28PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO28PCTL_CTL_S                                       0U
 #define IOMUX_GPIO28PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO28PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO28PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO28PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO28PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO28PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -11558,14 +9053,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO28PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO28PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO28PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO28PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO28PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO28PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO28PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -11575,14 +9070,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO28PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO28PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO28PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO28PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO28PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO28PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO28PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -11609,7 +9104,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO28CTL_PADVALSYNC                                   0x00000002U
@@ -11638,7 +9133,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -11656,7 +9151,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO28ECTL
     Relative address:    0x1C00C
     Description:         Event control register for IO GPIO28
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -11728,14 +9223,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO29CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO29CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO29CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO29CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO29CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO29CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO29CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -11763,17 +9258,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO29CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO29CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO29CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO29CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO29CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO29CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO29CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -11783,11 +9278,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO29CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO29CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO29CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO29CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO29CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO29CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO29CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO29CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO29CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO29CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -11831,8 +9326,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO29PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO29PCTL_CTL_S                                       0U
 #define IOMUX_GPIO29PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO29PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO29PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO29PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO29PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO29PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -11843,14 +9338,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO29PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO29PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO29PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO29PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO29PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO29PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO29PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -11860,14 +9355,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO29PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO29PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO29PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO29PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO29PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO29PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO29PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -11894,7 +9389,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO29CTL_PADVALSYNC                                   0x00000002U
@@ -11923,7 +9418,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -11941,7 +9436,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO29ECTL
     Relative address:    0x1D00C
     Description:         Event control register for IO GPIO29
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -12013,14 +9508,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO30CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO30CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO30CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO30CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO30CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO30CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO30CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -12048,17 +9543,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO30CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO30CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO30CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO30CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO30CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO30CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO30CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -12068,11 +9563,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO30CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO30CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO30CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO30CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO30CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO30CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO30CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO30CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO30CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO30CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -12116,8 +9611,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO30PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO30PCTL_CTL_S                                       0U
 #define IOMUX_GPIO30PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO30PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO30PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO30PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO30PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO30PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -12128,14 +9623,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO30PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO30PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO30PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO30PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO30PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO30PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO30PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -12145,14 +9640,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO30PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO30PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO30PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO30PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO30PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO30PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO30PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -12179,7 +9674,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO30CTL_PADVALSYNC                                   0x00000002U
@@ -12208,7 +9703,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -12226,7 +9721,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO30ECTL
     Relative address:    0x1E00C
     Description:         Event control register for IO GPIO30
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -12298,14 +9793,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO31CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO31CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO31CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO31CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO31CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO31CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO31CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -12333,17 +9828,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO31CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO31CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO31CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO31CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO31CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO31CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO31CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -12353,11 +9848,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO31CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO31CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO31CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO31CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO31CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO31CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO31CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO31CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO31CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO31CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -12401,8 +9896,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO31PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO31PCTL_CTL_S                                       0U
 #define IOMUX_GPIO31PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO31PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO31PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO31PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO31PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO31PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -12413,14 +9908,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO31PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO31PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO31PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO31PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO31PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO31PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO31PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -12430,14 +9925,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO31PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO31PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO31PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO31PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO31PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO31PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO31PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -12464,7 +9959,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO31CTL_PADVALSYNC                                   0x00000002U
@@ -12493,7 +9988,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -12511,7 +10006,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO31ECTL
     Relative address:    0x1F00C
     Description:         Event control register for IO GPIO31
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -12583,14 +10078,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO32CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO32CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO32CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO32CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO32CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO32CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO32CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -12618,17 +10113,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO32CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO32CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO32CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO32CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO32CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO32CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO32CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -12638,11 +10133,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO32CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO32CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO32CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO32CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO32CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO32CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO32CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO32CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO32CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO32CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -12686,8 +10181,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO32PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO32PCTL_CTL_S                                       0U
 #define IOMUX_GPIO32PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO32PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO32PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO32PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO32PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO32PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -12698,14 +10193,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO32PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO32PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO32PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO32PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO32PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO32PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO32PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -12715,14 +10210,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO32PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO32PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO32PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO32PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO32PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO32PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO32PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -12749,7 +10244,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO32CTL_PADVALSYNC                                   0x00000002U
@@ -12778,7 +10273,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -12796,7 +10291,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO32ECTL
     Relative address:    0x2000C
     Description:         Event control register for IO GPIO32
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -12868,14 +10363,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO33CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO33CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO33CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO33CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO33CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO33CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO33CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -12903,17 +10398,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO33CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO33CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO33CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO33CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO33CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO33CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO33CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -12923,11 +10418,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO33CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO33CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO33CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO33CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO33CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO33CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO33CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO33CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO33CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO33CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -12971,8 +10466,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO33PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO33PCTL_CTL_S                                       0U
 #define IOMUX_GPIO33PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO33PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO33PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO33PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO33PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO33PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -12983,14 +10478,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO33PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO33PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO33PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO33PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO33PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO33PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO33PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -13000,14 +10495,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO33PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO33PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO33PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO33PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO33PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO33PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO33PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -13034,7 +10529,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO33CTL_PADVALSYNC                                   0x00000002U
@@ -13063,7 +10558,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -13081,7 +10576,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO33ECTL
     Relative address:    0x2100C
     Description:         Event control register for IO GPIO33
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -13153,14 +10648,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO34CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO34CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO34CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO34CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO34CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO34CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO34CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -13188,17 +10683,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO34CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO34CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO34CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO34CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO34CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO34CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO34CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -13208,11 +10703,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO34CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO34CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO34CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO34CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO34CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO34CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO34CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO34CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO34CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO34CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -13256,8 +10751,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO34PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO34PCTL_CTL_S                                       0U
 #define IOMUX_GPIO34PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO34PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO34PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO34PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO34PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO34PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -13268,14 +10763,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO34PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO34PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO34PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO34PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO34PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO34PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO34PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -13285,14 +10780,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO34PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO34PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO34PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO34PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO34PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO34PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO34PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -13319,7 +10814,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO34CTL_PADVALSYNC                                   0x00000002U
@@ -13348,7 +10843,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -13366,7 +10861,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO34ECTL
     Relative address:    0x2200C
     Description:         Event control register for IO GPIO34
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -13438,14 +10933,14 @@ This section defines the register offsets of the IOMUX component
         Description:     The field gives the status of [OUTDIS]
 
         ENUMs:
-            CLEAR:                       Output is enabled
-            SET:                         Output is disabled
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
 */
 #define IOMUX_GPIO35CFG_OUTDISVAL                                    0x00000040U
 #define IOMUX_GPIO35CFG_OUTDISVAL_M                                  0x00000040U
 #define IOMUX_GPIO35CFG_OUTDISVAL_S                                  6U
-#define IOMUX_GPIO35CFG_OUTDISVAL_CLEAR                              0x00000000U
-#define IOMUX_GPIO35CFG_OUTDISVAL_SET                                0x00000040U
+#define IOMUX_GPIO35CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO35CFG_OUTDISVAL_DISABLED                           0x00000040U
 /*
 
         Field:           IE
@@ -13473,17 +10968,17 @@ This section defines the register offsets of the IOMUX component
                          Note:This field is applicable only if [OUTDISOVREN] is enabled
 
         ENUMs:
-            SET:                         Output from the pad is disabled
-            CLEAR:                       Output from the pad is enabled
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
 */
 #define IOMUX_GPIO35CFG_OUTDIS                                       0x00001000U
 #define IOMUX_GPIO35CFG_OUTDIS_M                                     0x00001000U
 #define IOMUX_GPIO35CFG_OUTDIS_S                                     12U
-#define IOMUX_GPIO35CFG_OUTDIS_SET                                   0x00001000U
-#define IOMUX_GPIO35CFG_OUTDIS_CLEAR                                 0x00000000U
+#define IOMUX_GPIO35CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO35CFG_OUTDIS_ENABLE                                0x00000000U
 /*
 
-        Field:           ODISOVEN
+        Field:           OUTDISOVREN
         From..to bits:   13...13
         DefaultValue:    0x0
         Access type:     read-write
@@ -13493,11 +10988,11 @@ This section defines the register offsets of the IOMUX component
             DISABLE:                     Disable the override
             ENABLE:                      Enable the override
 */
-#define IOMUX_GPIO35CFG_ODISOVEN                                     0x00002000U
-#define IOMUX_GPIO35CFG_ODISOVEN_M                                   0x00002000U
-#define IOMUX_GPIO35CFG_ODISOVEN_S                                   13U
-#define IOMUX_GPIO35CFG_ODISOVEN_DISABLE                             0x00000000U
-#define IOMUX_GPIO35CFG_ODISOVEN_ENABLE                              0x00002000U
+#define IOMUX_GPIO35CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO35CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO35CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO35CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO35CFG_OUTDISOVREN_ENABLE                           0x00002000U
 /*
 
         Field:           IOSTR
@@ -13541,8 +11036,8 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO35PCTL_CTL_M                                       0x00000003U
 #define IOMUX_GPIO35PCTL_CTL_S                                       0U
 #define IOMUX_GPIO35PCTL_CTL_IPCTRL                                  0x00000000U
-#define IOMUX_GPIO35PCTL_CTL_DOWN                                    0x00000001U
-#define IOMUX_GPIO35PCTL_CTL_UP                                      0x00000002U
+#define IOMUX_GPIO35PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO35PCTL_CTL_UP                                      0x00000001U
 #define IOMUX_GPIO35PCTL_CTL_DISABLE                                 0x00000003U
 /*
 
@@ -13553,14 +11048,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull up level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull up
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
 */
 #define IOMUX_GPIO35PCTL_PULLUPSTA                                   0x00000100U
 #define IOMUX_GPIO35PCTL_PULLUPSTA_M                                 0x00000100U
 #define IOMUX_GPIO35PCTL_PULLUPSTA_S                                 8U
-#define IOMUX_GPIO35PCTL_PULLUPSTA_CLEAR                             0x00000000U
-#define IOMUX_GPIO35PCTL_PULLUPSTA_SET                               0x00000100U
+#define IOMUX_GPIO35PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO35PCTL_PULLUPSTA_ENABLED                           0x00000100U
 /*
 
         Field:           PULLDWNSTA
@@ -13570,14 +11065,14 @@ This section defines the register offsets of the IOMUX component
         Description:     This field gives the IO pull down level status
 
         ENUMs:
-            CLEAR:                       Pull disabled
-            SET:                         Pull down
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
 */
 #define IOMUX_GPIO35PCTL_PULLDWNSTA                                  0x00000200U
 #define IOMUX_GPIO35PCTL_PULLDWNSTA_M                                0x00000200U
 #define IOMUX_GPIO35PCTL_PULLDWNSTA_S                                9U
-#define IOMUX_GPIO35PCTL_PULLDWNSTA_CLEAR                            0x00000000U
-#define IOMUX_GPIO35PCTL_PULLDWNSTA_SET                              0x00000200U
+#define IOMUX_GPIO35PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO35PCTL_PULLDWNSTA_ENABLED                          0x00000200U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -13604,7 +11099,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   1...1
         DefaultValue:    NA
         Access type:     read-only
-        Description:     This field captures the synchronized(to SOC clock) received value
+        Description:     This field captures the sychronized(to SOC clock) received value
 
 */
 #define IOMUX_GPIO35CTL_PADVALSYNC                                   0x00000002U
@@ -13633,7 +11128,7 @@ This section defines the register offsets of the IOMUX component
         From..to bits:   9...9
         DefaultValue:    NA
         Access type:     read-write
-        Description:     This field controls the override on output
+        Description:      This field contols the override on output
 
         ENUMs:
             DISABLE:                     Output controlled by IP
@@ -13651,7 +11146,7 @@ This section defines the register offsets of the IOMUX component
     Offset name:         IOMUX_O_GPIO35ECTL
     Relative address:    0x2300C
     Description:         Event control register for IO GPIO35
-                        This register controls the Event configuration and behavior
+                        This register controls the Event configuration and behaviour
     Default Value:       NA
 
         Field:           EVTDETCFG
@@ -13710,6 +11205,2595 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO36CFG
+    Offset name:         IOMUX_O_GPIO36CFG
+    Relative address:    0x24000
+    Description:         CFG register for IO GPIO36. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO36CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO36CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO36CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO36CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO36CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO36CFG_IE                                           0x00000800U
+#define IOMUX_GPIO36CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO36CFG_IE_S                                         11U
+#define IOMUX_GPIO36CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO36CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO36CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO36CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO36CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO36CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO36CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO36CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO36CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO36CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO36CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO36CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO36CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO36CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO36CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO36CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO36CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO36PCTL
+    Offset name:         IOMUX_O_GPIO36PCTL
+    Relative address:    0x24004
+    Description:         Pull control register of IO GPIO36
+                        This register configures the pull control
+    Default Value:       0x00000002
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x2
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO36PCTL_CTL_W                                       2U
+#define IOMUX_GPIO36PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO36PCTL_CTL_S                                       0U
+#define IOMUX_GPIO36PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO36PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO36PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO36PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO36PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO36PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO36PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO36PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO36PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO36PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO36PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO36PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO36PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO36PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO36CTL
+    Offset name:         IOMUX_O_GPIO36CTL
+    Relative address:    0x24008
+    Description:         Control register of IO GPIO36
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO36CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO36CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO36CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO36CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO36CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO36CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO36CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO36CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO36CTL_OUT_S                                        8U
+#define IOMUX_GPIO36CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO36CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO36CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO36CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO36CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO36CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO36CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO36ECTL
+    Offset name:         IOMUX_O_GPIO36ECTL
+    Relative address:    0x2400C
+    Description:         Event control register for IO GPIO36
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO36ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO36ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO36ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO36ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO36ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO36ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO36ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO36ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO36ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO36ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO36ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO36ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO36ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO36ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO36ECTL_CLR_S                                       3U
+#define IOMUX_GPIO36ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO36ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO37CFG
+    Offset name:         IOMUX_O_GPIO37CFG
+    Relative address:    0x25000
+    Description:         CFG register for IO GPIO37. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO37CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO37CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO37CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO37CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO37CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO37CFG_IE                                           0x00000800U
+#define IOMUX_GPIO37CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO37CFG_IE_S                                         11U
+#define IOMUX_GPIO37CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO37CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO37CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO37CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO37CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO37CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO37CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO37CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO37CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO37CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO37CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO37CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO37CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO37CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO37CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO37CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO37CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO37PCTL
+    Offset name:         IOMUX_O_GPIO37PCTL
+    Relative address:    0x25004
+    Description:         Pull control register of IO GPIO37
+                        This register configures the pull control
+    Default Value:       0x00000002
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x2
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO37PCTL_CTL_W                                       2U
+#define IOMUX_GPIO37PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO37PCTL_CTL_S                                       0U
+#define IOMUX_GPIO37PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO37PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO37PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO37PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO37PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO37PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO37PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO37PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO37PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO37PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO37PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO37PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO37PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO37PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO37CTL
+    Offset name:         IOMUX_O_GPIO37CTL
+    Relative address:    0x25008
+    Description:         Control register of IO GPIO37
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO37CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO37CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO37CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO37CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO37CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO37CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO37CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO37CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO37CTL_OUT_S                                        8U
+#define IOMUX_GPIO37CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO37CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO37CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO37CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO37CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO37CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO37CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO37ECTL
+    Offset name:         IOMUX_O_GPIO37ECTL
+    Relative address:    0x2500C
+    Description:         Event control register for IO GPIO37
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO37ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO37ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO37ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO37ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO37ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO37ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO37ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO37ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO37ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO37ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO37ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO37ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO37ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO37ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO37ECTL_CLR_S                                       3U
+#define IOMUX_GPIO37ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO37ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO38CFG
+    Offset name:         IOMUX_O_GPIO38CFG
+    Relative address:    0x26000
+    Description:         CFG register for IO GPIO38. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO38CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO38CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO38CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO38CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO38CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO38CFG_IE                                           0x00000800U
+#define IOMUX_GPIO38CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO38CFG_IE_S                                         11U
+#define IOMUX_GPIO38CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO38CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO38CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO38CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO38CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO38CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO38CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO38CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO38CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO38CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO38CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO38CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO38CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO38CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO38CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO38CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO38CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO38PCTL
+    Offset name:         IOMUX_O_GPIO38PCTL
+    Relative address:    0x26004
+    Description:         Pull control register of IO GPIO38
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO38PCTL_CTL_W                                       2U
+#define IOMUX_GPIO38PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO38PCTL_CTL_S                                       0U
+#define IOMUX_GPIO38PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO38PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO38PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO38PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO38PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO38PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO38PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO38PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO38PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO38PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO38PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO38PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO38PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO38PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO38CTL
+    Offset name:         IOMUX_O_GPIO38CTL
+    Relative address:    0x26008
+    Description:         Control register of IO GPIO38
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO38CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO38CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO38CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO38CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO38CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO38CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO38CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO38CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO38CTL_OUT_S                                        8U
+#define IOMUX_GPIO38CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO38CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO38CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO38CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO38CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO38CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO38CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO38ECTL
+    Offset name:         IOMUX_O_GPIO38ECTL
+    Relative address:    0x2600C
+    Description:         Event control register for IO GPIO38
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO38ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO38ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO38ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO38ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO38ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO38ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO38ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO38ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO38ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO38ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO38ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO38ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO38ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO38ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO38ECTL_CLR_S                                       3U
+#define IOMUX_GPIO38ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO38ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO39CFG
+    Offset name:         IOMUX_O_GPIO39CFG
+    Relative address:    0x27000
+    Description:         CFG register for IO GPIO39. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO39CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO39CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO39CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO39CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO39CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO39CFG_IE                                           0x00000800U
+#define IOMUX_GPIO39CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO39CFG_IE_S                                         11U
+#define IOMUX_GPIO39CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO39CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO39CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO39CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO39CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO39CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO39CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO39CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO39CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO39CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO39CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO39CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO39CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO39CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO39CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO39CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO39CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO39PCTL
+    Offset name:         IOMUX_O_GPIO39PCTL
+    Relative address:    0x27004
+    Description:         Pull control register of IO GPIO39
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO39PCTL_CTL_W                                       2U
+#define IOMUX_GPIO39PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO39PCTL_CTL_S                                       0U
+#define IOMUX_GPIO39PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO39PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO39PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO39PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO39PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO39PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO39PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO39PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO39PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO39PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO39PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO39PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO39PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO39PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO39CTL
+    Offset name:         IOMUX_O_GPIO39CTL
+    Relative address:    0x27008
+    Description:         Control register of IO GPIO39
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO39CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO39CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO39CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO39CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO39CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO39CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO39CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO39CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO39CTL_OUT_S                                        8U
+#define IOMUX_GPIO39CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO39CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO39CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO39CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO39CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO39CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO39CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO39ECTL
+    Offset name:         IOMUX_O_GPIO39ECTL
+    Relative address:    0x2700C
+    Description:         Event control register for IO GPIO39
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO39ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO39ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO39ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO39ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO39ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO39ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO39ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO39ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO39ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO39ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO39ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO39ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO39ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO39ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO39ECTL_CLR_S                                       3U
+#define IOMUX_GPIO39ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO39ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO40CFG
+    Offset name:         IOMUX_O_GPIO40CFG
+    Relative address:    0x28000
+    Description:         CFG register for IO GPIO40. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO40CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO40CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO40CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO40CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO40CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO40CFG_IE                                           0x00000800U
+#define IOMUX_GPIO40CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO40CFG_IE_S                                         11U
+#define IOMUX_GPIO40CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO40CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO40CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO40CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO40CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO40CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO40CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO40CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO40CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO40CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO40CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO40CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO40CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO40CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO40CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO40CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO40CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO40PCTL
+    Offset name:         IOMUX_O_GPIO40PCTL
+    Relative address:    0x28004
+    Description:         Pull control register of IO GPIO40
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO40PCTL_CTL_W                                       2U
+#define IOMUX_GPIO40PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO40PCTL_CTL_S                                       0U
+#define IOMUX_GPIO40PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO40PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO40PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO40PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO40PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO40PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO40PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO40PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO40PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO40PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO40PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO40PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO40PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO40PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO40CTL
+    Offset name:         IOMUX_O_GPIO40CTL
+    Relative address:    0x28008
+    Description:         Control register of IO GPIO40
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO40CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO40CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO40CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO40CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO40CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO40CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO40CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO40CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO40CTL_OUT_S                                        8U
+#define IOMUX_GPIO40CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO40CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO40CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO40CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO40CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO40CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO40CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO40ECTL
+    Offset name:         IOMUX_O_GPIO40ECTL
+    Relative address:    0x2800C
+    Description:         Event control register for IO GPIO40
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO40ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO40ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO40ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO40ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO40ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO40ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO40ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO40ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO40ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO40ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO40ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO40ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO40ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO40ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO40ECTL_CLR_S                                       3U
+#define IOMUX_GPIO40ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO40ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO41CFG
+    Offset name:         IOMUX_O_GPIO41CFG
+    Relative address:    0x29000
+    Description:         CFG register for IO GPIO41. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO41CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO41CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO41CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO41CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO41CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO41CFG_IE                                           0x00000800U
+#define IOMUX_GPIO41CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO41CFG_IE_S                                         11U
+#define IOMUX_GPIO41CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO41CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO41CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO41CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO41CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO41CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO41CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO41CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO41CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO41CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO41CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO41CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO41CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO41CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO41CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO41CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO41CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO41PCTL
+    Offset name:         IOMUX_O_GPIO41PCTL
+    Relative address:    0x29004
+    Description:         Pull control register of IO GPIO41
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO41PCTL_CTL_W                                       2U
+#define IOMUX_GPIO41PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO41PCTL_CTL_S                                       0U
+#define IOMUX_GPIO41PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO41PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO41PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO41PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO41PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO41PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO41PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO41PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO41PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO41PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO41PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO41PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO41PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO41PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO41CTL
+    Offset name:         IOMUX_O_GPIO41CTL
+    Relative address:    0x29008
+    Description:         Control register of IO GPIO41
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO41CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO41CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO41CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO41CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO41CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO41CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO41CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO41CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO41CTL_OUT_S                                        8U
+#define IOMUX_GPIO41CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO41CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO41CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO41CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO41CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO41CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO41CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO41ECTL
+    Offset name:         IOMUX_O_GPIO41ECTL
+    Relative address:    0x2900C
+    Description:         Event control register for IO GPIO41
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO41ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO41ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO41ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO41ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO41ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO41ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO41ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO41ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO41ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO41ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO41ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO41ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO41ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO41ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO41ECTL_CLR_S                                       3U
+#define IOMUX_GPIO41ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO41ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO42CFG
+    Offset name:         IOMUX_O_GPIO42CFG
+    Relative address:    0x2A000
+    Description:         CFG register for IO GPIO42. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO42CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO42CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO42CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO42CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO42CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO42CFG_IE                                           0x00000800U
+#define IOMUX_GPIO42CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO42CFG_IE_S                                         11U
+#define IOMUX_GPIO42CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO42CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO42CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO42CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO42CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO42CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO42CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO42CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO42CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO42CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO42CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO42CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO42CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO42CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO42CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO42CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO42CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO42PCTL
+    Offset name:         IOMUX_O_GPIO42PCTL
+    Relative address:    0x2A004
+    Description:         Pull control register of IO GPIO42
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO42PCTL_CTL_W                                       2U
+#define IOMUX_GPIO42PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO42PCTL_CTL_S                                       0U
+#define IOMUX_GPIO42PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO42PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO42PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO42PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO42PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO42PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO42PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO42PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO42PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO42PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO42PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO42PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO42PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO42PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO42CTL
+    Offset name:         IOMUX_O_GPIO42CTL
+    Relative address:    0x2A008
+    Description:         Control register of IO GPIO42
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO42CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO42CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO42CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO42CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO42CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO42CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO42CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO42CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO42CTL_OUT_S                                        8U
+#define IOMUX_GPIO42CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO42CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO42CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO42CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO42CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO42CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO42CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO42ECTL
+    Offset name:         IOMUX_O_GPIO42ECTL
+    Relative address:    0x2A00C
+    Description:         Event control register for IO GPIO42
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO42ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO42ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO42ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO42ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO42ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO42ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO42ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO42ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO42ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO42ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO42ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO42ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO42ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO42ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO42ECTL_CLR_S                                       3U
+#define IOMUX_GPIO42ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO42ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO43CFG
+    Offset name:         IOMUX_O_GPIO43CFG
+    Relative address:    0x2B000
+    Description:         CFG register for IO GPIO43. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO43CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO43CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO43CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO43CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO43CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO43CFG_IE                                           0x00000800U
+#define IOMUX_GPIO43CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO43CFG_IE_S                                         11U
+#define IOMUX_GPIO43CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO43CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO43CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO43CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO43CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO43CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO43CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO43CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO43CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO43CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO43CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO43CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO43CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO43CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO43CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO43CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO43CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO43PCTL
+    Offset name:         IOMUX_O_GPIO43PCTL
+    Relative address:    0x2B004
+    Description:         Pull control register of IO GPIO43
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO43PCTL_CTL_W                                       2U
+#define IOMUX_GPIO43PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO43PCTL_CTL_S                                       0U
+#define IOMUX_GPIO43PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO43PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO43PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO43PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO43PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO43PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO43PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO43PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO43PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO43PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO43PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO43PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO43PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO43PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO43CTL
+    Offset name:         IOMUX_O_GPIO43CTL
+    Relative address:    0x2B008
+    Description:         Control register of IO GPIO43
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO43CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO43CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO43CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO43CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO43CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO43CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO43CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO43CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO43CTL_OUT_S                                        8U
+#define IOMUX_GPIO43CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO43CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO43CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO43CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO43CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO43CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO43CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO43ECTL
+    Offset name:         IOMUX_O_GPIO43ECTL
+    Relative address:    0x2B00C
+    Description:         Event control register for IO GPIO43
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO43ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO43ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO43ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO43ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO43ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO43ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO43ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO43ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO43ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO43ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO43ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO43ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO43ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO43ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO43ECTL_CLR_S                                       3U
+#define IOMUX_GPIO43ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO43ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO44CFG
+    Offset name:         IOMUX_O_GPIO44CFG
+    Relative address:    0x2C000
+    Description:         CFG register for IO GPIO44. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO44CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO44CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO44CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO44CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO44CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO44CFG_IE                                           0x00000800U
+#define IOMUX_GPIO44CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO44CFG_IE_S                                         11U
+#define IOMUX_GPIO44CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO44CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO44CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO44CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO44CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO44CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO44CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO44CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO44CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO44CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO44CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO44CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO44CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO44CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO44CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO44CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO44CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO44PCTL
+    Offset name:         IOMUX_O_GPIO44PCTL
+    Relative address:    0x2C004
+    Description:         Pull control register of IO GPIO44
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO44PCTL_CTL_W                                       2U
+#define IOMUX_GPIO44PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO44PCTL_CTL_S                                       0U
+#define IOMUX_GPIO44PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO44PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO44PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO44PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO44PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO44PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO44PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO44PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO44PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO44PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO44PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO44PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO44PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO44PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO44CTL
+    Offset name:         IOMUX_O_GPIO44CTL
+    Relative address:    0x2C008
+    Description:         Control register of IO GPIO44
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO44CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO44CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO44CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO44CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO44CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO44CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO44CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO44CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO44CTL_OUT_S                                        8U
+#define IOMUX_GPIO44CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO44CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO44CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO44CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO44CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO44CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO44CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO44ECTL
+    Offset name:         IOMUX_O_GPIO44ECTL
+    Relative address:    0x2C00C
+    Description:         Event control register for IO GPIO44
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO44ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO44ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO44ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO44ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO44ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO44ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO44ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO44ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO44ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO44ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO44ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO44ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO44ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO44ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO44ECTL_CLR_S                                       3U
+#define IOMUX_GPIO44ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO44ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       SOPDIS
+    Offset name:         IOMUX_O_SOPDIS
+    Relative address:    0x2D000
+    Description:         This register disables the SOP overrides when the device was powered in one of the SoP modes.
+    Default Value:       NA
+
+        Field:           MEM_SOP_DISABLE
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     The field is to disable SOP
+
+        ENUMs:
+            DISABLE:                     Disable SOP
+            USE:                         Use SOP
+*/
+#define IOMUX_SOPDIS_MEM_SOP_DISABLE                                 0x00000001U
+#define IOMUX_SOPDIS_MEM_SOP_DISABLE_M                               0x00000001U
+#define IOMUX_SOPDIS_MEM_SOP_DISABLE_S                               0U
+#define IOMUX_SOPDIS_MEM_SOP_DISABLE_DISABLE                         0x00000001U
+#define IOMUX_SOPDIS_MEM_SOP_DISABLE_USE                             0x00000000U
+
+
+/*-----------------------------------REGISTER------------------------------------
     Register name:       SCLKIPCFG
     Offset name:         IOMUX_O_SCLKIPCFG
     Relative address:    0x2D004
@@ -13722,13 +13806,16 @@ This section defines the register offsets of the IOMUX component
         Access type:     read-write
         Description:     Pinmux selection Control
                          Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- slow_clock_in
                          sel 5'd2 -- wifi_gpio_0
                          sel 5'd9 -- gpt1_1
                          sel 5'd10 -- gpt0_1
+                         sel 5'd21 -- coex_req
+
 
         ENUMs:
             SEL_0:                       reserved
-            SEL_1:                       reserved
+            SEL_1:                       slow_clock_in
             SEL_2:                       wifi_gpio_0
             SEL_3:                       reserved
             SEL_4:                       reserved
@@ -13748,7 +13835,7 @@ This section defines the register offsets of the IOMUX component
             SEL_18:                      reserved
             SEL_19:                      reserved
             SEL_20:                      reserved
-            SEL_21:                      reserved
+            SEL_21:                      coex_req
             SEL_22:                      reserved
             SEL_23:                      reserved
             SEL_24:                      reserved
@@ -13819,7 +13906,9 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd11 -- gpt_infrared
                          sel 5'd19 -- sdio_oob_irq
                          sel 5'd20 -- coex_grant
+                         sel 5'd21 -- coex_req
                          sel 5'd23 -- ant_sel_0
+
 
         ENUMs:
             SEL_0:                       lfxt_n
@@ -13843,7 +13932,7 @@ This section defines the register offsets of the IOMUX component
             SEL_18:                      reserved
             SEL_19:                      sdio_oob_irq
             SEL_20:                      coex_grant
-            SEL_21:                      reserved
+            SEL_21:                      coex_req
             SEL_22:                      reserved
             SEL_23:                      ant_sel_0
             SEL_24:                      reserved
@@ -13893,200 +13982,6 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO36PCFG
-    Offset name:         IOMUX_O_GPIO36PCFG
-    Relative address:    0x2D094
-    Description:         Port configuration register for IO GPIO36
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_cs_ram
-                         sel 5'd2 -- wifi_gpio_36
-                         sel 5'd3 -- sdio_mmc_pow2
-                         sel 5'd4 -- sdio_mmc_wp
-                         sel 5'd11 -- wake_observe_bus_13
-                         sel 5'd12 -- debug_bus_1
-                         sel 5'd21 -- fast_clk_req
-                         sel 5'd22 -- ble_rfc_gpo_5
-                         sel 5'd23 -- ant_sel_1
-                         sel 5'd24 -- cca
-                         sel 5'd25 -- ble_rfc_gpi_2
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_cs_ram
-            SEL_2:                       wifi_gpio_36
-            SEL_3:                       sdio_mmc_pow2
-            SEL_4:                       sdio_mmc_wp
-            SEL_5:                       reserved
-            SEL_6:                       reserved
-            SEL_7:                       reserved
-            SEL_8:                       reserved
-            SEL_9:                       reserved
-            SEL_10:                      reserved
-            SEL_11:                      wake_observe_bus_13
-            SEL_12:                      debug_bus_1
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      reserved
-            SEL_19:                      reserved
-            SEL_20:                      reserved
-            SEL_21:                      fast_clk_req
-            SEL_22:                      ble_rfc_gpo_5
-            SEL_23:                      ant_sel_1
-            SEL_24:                      cca
-            SEL_25:                      ble_rfc_gpi_2
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      reserved
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO36PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO36PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO36PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO36PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO37PCFG
-    Offset name:         IOMUX_O_GPIO37PCFG
-    Relative address:    0x2D098
-    Description:         Port configuration register for IO GPIO37
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_cs_ram
-                         sel 5'd2 -- wifi_gpio_37
-                         sel 5'd3 -- sdio_mmc_pow1
-                         sel 5'd4 -- sdio_mmc_wp
-                         sel 5'd11 -- wake_observe_bus_12
-                         sel 5'd12 -- debug_bus_0
-                         sel 5'd19 -- sdio_oob_irq
-                         sel 5'd20 -- coex_grant
-                         sel 5'd21 -- fast_clk_req
-                         sel 5'd22 -- ble_rfc_gpo_4
-                         sel 5'd23 -- ant_sel_0
-                         sel 5'd24 -- cca
-                         sel 5'd25 -- ble_rfc_gpi_1
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_cs_ram
-            SEL_2:                       wifi_gpio_37
-            SEL_3:                       sdio_mmc_pow1
-            SEL_4:                       sdio_mmc_wp
-            SEL_5:                       reserved
-            SEL_6:                       reserved
-            SEL_7:                       reserved
-            SEL_8:                       reserved
-            SEL_9:                       reserved
-            SEL_10:                      reserved
-            SEL_11:                      wake_observe_bus_12
-            SEL_12:                      debug_bus_0
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      reserved
-            SEL_19:                      sdio_oob_irq
-            SEL_20:                      coex_grant
-            SEL_21:                      fast_clk_req
-            SEL_22:                      ble_rfc_gpo_4
-            SEL_23:                      ant_sel_0
-            SEL_24:                      cca
-            SEL_25:                      ble_rfc_gpi_1
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      reserved
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO37PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO37PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO37PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO37PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       GPIO2PCFG
     Offset name:         IOMUX_O_GPIO2PCFG
     Relative address:    0x2D00C
@@ -14116,6 +14011,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_2
                          sel 5'd24 -- cca
                          sel 5'd26 -- trclk
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14224,6 +14120,9 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd24 -- ble_rfc_gpo_7
                          sel 5'd25 -- swo_m3
                          sel 5'd27 -- swo_m33
+                         sel 5'd28 -- i2c1_data
+                         sel 5'd30 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14254,9 +14153,9 @@ This section defines the register offsets of the IOMUX component
             SEL_25:                      swo_m3
             SEL_26:                      reserved
             SEL_27:                      swo_m33
-            SEL_28:                      reserved
+            SEL_28:                      i2c1_data
             SEL_29:                      reserved
-            SEL_30:                      reserved
+            SEL_30:                      uart2_tx
             SEL_31:                      reserved
 */
 #define IOMUX_GPIO3PCFG_IOSEL_W                                      5U
@@ -14328,6 +14227,9 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd20 -- coex_priority
                          sel 5'd21 -- gpt0_1_n
                          sel 5'd24 -- ble_rfc_gpo_6
+                         sel 5'd28 -- i2c1_clk
+                         sel 5'd30 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14358,9 +14260,9 @@ This section defines the register offsets of the IOMUX component
             SEL_25:                      reserved
             SEL_26:                      reserved
             SEL_27:                      reserved
-            SEL_28:                      reserved
+            SEL_28:                      i2c1_clk
             SEL_29:                      reserved
-            SEL_30:                      reserved
+            SEL_30:                      uart2_rx
             SEL_31:                      reserved
 */
 #define IOMUX_GPIO4PCFG_IOSEL_W                                      5U
@@ -14435,6 +14337,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_1
                          sel 5'd25 -- ble_rfc_gpi_2
                          sel 5'd28 -- i2c1_data
+                         sel 5'd30 -- uart2_rts
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14467,7 +14371,7 @@ This section defines the register offsets of the IOMUX component
             SEL_27:                      reserved
             SEL_28:                      i2c1_data
             SEL_29:                      reserved
-            SEL_30:                      reserved
+            SEL_30:                      uart2_rts
             SEL_31:                      reserved
 */
 #define IOMUX_GPIO5PCFG_IOSEL_W                                      5U
@@ -14545,6 +14449,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd26 -- coex_grant
                          sel 5'd28 -- i2c1_clk
                          sel 5'd29 -- sdio_mmc_pow2
+                         sel 5'd30 -- uart2_cts
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14577,7 +14483,7 @@ This section defines the register offsets of the IOMUX component
             SEL_27:                      reserved
             SEL_28:                      i2c1_clk
             SEL_29:                      sdio_mmc_pow2
-            SEL_30:                      reserved
+            SEL_30:                      uart2_cts
             SEL_31:                      reserved
 */
 #define IOMUX_GPIO6PCFG_IOSEL_W                                      5U
@@ -14635,6 +14541,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd3 -- sdio_mmc_pow2
                          sel 5'd4 -- jtag_tms
                          sel 5'd23 -- ant_sel_0
+
 
         ENUMs:
             SEL_0:                       swdio
@@ -14725,6 +14632,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd3 -- sdio_mmc_pow1
                          sel 5'd4 -- jtag_tck
                          sel 5'd23 -- ant_sel_1
+
 
         ENUMs:
             SEL_0:                       swclk
@@ -14818,6 +14726,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_2
                          sel 5'd26 -- swo_m3
                          sel 5'd27 -- swo_m33
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14924,6 +14833,9 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd24 -- cca
                          sel 5'd25 -- ble_rfc_gpi_1
                          sel 5'd26 -- trdata_0
+                         sel 5'd30 -- uart2_rts
+                         sel 5'd31 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -14956,8 +14868,8 @@ This section defines the register offsets of the IOMUX component
             SEL_27:                      reserved
             SEL_28:                      reserved
             SEL_29:                      reserved
-            SEL_30:                      reserved
-            SEL_31:                      reserved
+            SEL_30:                      uart2_rts
+            SEL_31:                      uart2_tx
 */
 #define IOMUX_GPIO10PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO10PCFG_IOSEL_M                                     0x0000001FU
@@ -15030,6 +14942,9 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd24 -- cca
                          sel 5'd25 -- swo_m3
                          sel 5'd26 -- trdata_1
+                         sel 5'd30 -- uart2_cts
+                         sel 5'd31 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15062,8 +14977,8 @@ This section defines the register offsets of the IOMUX component
             SEL_27:                      reserved
             SEL_28:                      reserved
             SEL_29:                      reserved
-            SEL_30:                      reserved
-            SEL_31:                      reserved
+            SEL_30:                      uart2_cts
+            SEL_31:                      uart2_rx
 */
 #define IOMUX_GPIO11PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO11PCFG_IOSEL_M                                     0x0000001FU
@@ -15133,6 +15048,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_1
                          sel 5'd25 -- ble_rfc_gpi_2
                          sel 5'd26 -- trdata_2
+                         sel 5'd31 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15166,7 +15083,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      reserved
-            SEL_31:                      reserved
+            SEL_31:                      uart2_tx
 */
 #define IOMUX_GPIO12PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO12PCFG_IOSEL_M                                     0x0000001FU
@@ -15236,6 +15153,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_0
                          sel 5'd25 -- ble_rfc_gpi_1
                          sel 5'd26 -- trdata_3
+                         sel 5'd31 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15269,7 +15188,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      reserved
-            SEL_31:                      reserved
+            SEL_31:                      uart2_rx
 */
 #define IOMUX_GPIO13PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO13PCFG_IOSEL_M                                     0x0000001FU
@@ -15339,6 +15258,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd25 -- ble_rfc_gpi_1
                          sel 5'd26 -- trclk
                          sel 5'd27 -- digital_fast_clk_in
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15444,6 +15364,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd26 -- swo_m3
                          sel 5'd27 -- swo_m33
 
+
         ENUMs:
             SEL_0:                       reserved
             SEL_1:                       reserved
@@ -15546,6 +15467,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd22 -- gpt_infrared
                          sel 5'd23 -- ant_sel_0
                          sel 5'd26 -- trdata_0
+                         sel 5'd30 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15578,7 +15501,7 @@ This section defines the register offsets of the IOMUX component
             SEL_27:                      reserved
             SEL_28:                      reserved
             SEL_29:                      reserved
-            SEL_30:                      reserved
+            SEL_30:                      uart2_tx
             SEL_31:                      reserved
 */
 #define IOMUX_GPIO16PCFG_IOSEL_W                                     5U
@@ -15650,6 +15573,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd21 -- gpt1_1_n
                          sel 5'd23 -- ant_sel_1
                          sel 5'd26 -- trdata_1
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15753,6 +15677,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd21 -- gpt1_2_n
                          sel 5'd23 -- ant_sel_2
                          sel 5'd26 -- trdata_2
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15858,6 +15783,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd22 -- gpt_infrared
                          sel 5'd23 -- ant_sel_3
                          sel 5'd26 -- trdata_3
+                         sel 5'd30 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -15890,7 +15817,7 @@ This section defines the register offsets of the IOMUX component
             SEL_27:                      reserved
             SEL_28:                      reserved
             SEL_29:                      reserved
-            SEL_30:                      reserved
+            SEL_30:                      uart2_rx
             SEL_31:                      reserved
 */
 #define IOMUX_GPIO19PCFG_IOSEL_W                                     5U
@@ -15931,304 +15858,6 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO38PCFG
-    Offset name:         IOMUX_O_GPIO38PCFG
-    Relative address:    0x2D09C
-    Description:         Port configuration register for IO GPIO38
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_cs_ram
-                         sel 5'd2 -- wifi_gpio_38
-                         sel 5'd3 -- ext_clk
-                         sel 5'd4 -- spi1_clk
-                         sel 5'd5 -- uart0_cts
-                         sel 5'd6 -- i2c1_clk
-                         sel 5'd7 -- i2s_bclk
-                         sel 5'd8 -- pdm_bclk
-                         sel 5'd9 -- gpt1_0
-                         sel 5'd10 -- dcan_tx
-                         sel 5'd18 -- gpt1_1_n
-                         sel 5'd20 -- coex_grant
-                         sel 5'd23 -- ant_sel_0
-                         sel 5'd29 -- coex_req
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_cs_ram
-            SEL_2:                       wifi_gpio_38
-            SEL_3:                       ext_clk
-            SEL_4:                       spi1_clk
-            SEL_5:                       uart0_cts
-            SEL_6:                       i2c1_clk
-            SEL_7:                       i2s_bclk
-            SEL_8:                       pdm_bclk
-            SEL_9:                       gpt1_0
-            SEL_10:                      dcan_tx
-            SEL_11:                      reserved
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      gpt1_1_n
-            SEL_19:                      reserved
-            SEL_20:                      coex_grant
-            SEL_21:                      reserved
-            SEL_22:                      reserved
-            SEL_23:                      ant_sel_0
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      coex_req
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO38PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO38PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO38PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO38PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO39PCFG
-    Offset name:         IOMUX_O_GPIO39PCFG
-    Relative address:    0x2D0A0
-    Description:         Port configuration register for IO GPIO39
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_reset_ram
-                         sel 5'd2 -- wifi_gpio_39
-                         sel 5'd3 -- uart0_rx
-                         sel 5'd4 -- spi1_miso
-                         sel 5'd5 -- uart0_rts
-                         sel 5'd6 -- i2c1_data
-                         sel 5'd7 -- i2s_wclk
-                         sel 5'd8 -- pdm_data0
-                         sel 5'd9 -- gpt1_1
-                         sel 5'd10 -- dcan_rx
-                         sel 5'd11 -- xspi_dqs
-                         sel 5'd18 -- gpt1_0_n
-                         sel 5'd20 -- coex_req
-                         sel 5'd23 -- ant_sel_1
-                         sel 5'd29 -- coex_priority
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_reset_ram
-            SEL_2:                       wifi_gpio_39
-            SEL_3:                       uart0_rx
-            SEL_4:                       spi1_miso
-            SEL_5:                       uart0_rts
-            SEL_6:                       i2c1_data
-            SEL_7:                       i2s_wclk
-            SEL_8:                       pdm_data0
-            SEL_9:                       gpt1_1
-            SEL_10:                      dcan_rx
-            SEL_11:                      xspi_dqs
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      gpt1_0_n
-            SEL_19:                      reserved
-            SEL_20:                      coex_req
-            SEL_21:                      reserved
-            SEL_22:                      reserved
-            SEL_23:                      ant_sel_1
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      coex_priority
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO39PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO39PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO39PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO39PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO40PCFG
-    Offset name:         IOMUX_O_GPIO40PCFG
-    Relative address:    0x2D0A4
-    Description:         Port configuration register for IO GPIO40
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_cs_ram
-                         sel 5'd2 -- wifi_gpio_40
-                         sel 5'd4 -- spi1_mosi
-                         sel 5'd5 -- uart0_tx
-                         sel 5'd7 -- i2s_data0
-                         sel 5'd8 -- pdm_data1
-                         sel 5'd9 -- gpt1_2
-                         sel 5'd16 -- gpt1_pre_event
-                         sel 5'd17 -- gpt0_pre_event
-                         sel 5'd18 -- gpt1_2_n
-                         sel 5'd20 -- coex_priority
-                         sel 5'd22 -- gpt_infrared
-                         sel 5'd23 -- ant_sel_2
-                         sel 5'd29 -- coex_grant
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_cs_ram
-            SEL_2:                       wifi_gpio_40
-            SEL_3:                       reserved
-            SEL_4:                       spi1_mosi
-            SEL_5:                       uart0_tx
-            SEL_6:                       reserved
-            SEL_7:                       i2s_data0
-            SEL_8:                       pdm_data1
-            SEL_9:                       gpt1_2
-            SEL_10:                      reserved
-            SEL_11:                      reserved
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      gpt1_pre_event
-            SEL_17:                      gpt0_pre_event
-            SEL_18:                      gpt1_2_n
-            SEL_19:                      reserved
-            SEL_20:                      coex_priority
-            SEL_21:                      reserved
-            SEL_22:                      gpt_infrared
-            SEL_23:                      ant_sel_2
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      coex_grant
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO40PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO40PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO40PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO40PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       GPIO20PCFG
     Offset name:         IOMUX_O_GPIO20PCFG
     Relative address:    0x2D054
@@ -16243,6 +15872,7 @@ This section defines the register offsets of the IOMUX component
                          Mode can be used to select the IO functionality or drive 0/1/Hi-Z
                          sel 5'd0 -- xspi_cs_flash
                          sel 5'd2 -- wifi_gpio_20
+
 
         ENUMs:
             SEL_0:                       xspi_cs_flash
@@ -16331,6 +15961,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd0 -- xspi_data_1
                          sel 5'd2 -- wifi_gpio_21
 
+
         ENUMs:
             SEL_0:                       xspi_data_1
             SEL_1:                       reserved
@@ -16417,6 +16048,7 @@ This section defines the register offsets of the IOMUX component
                          Mode can be used to select the IO functionality or drive 0/1/Hi-Z
                          sel 5'd0 -- xspi_data_2
                          sel 5'd2 -- wifi_gpio_22
+
 
         ENUMs:
             SEL_0:                       xspi_data_2
@@ -16505,6 +16137,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd0 -- xspi_data_3
                          sel 5'd2 -- wifi_gpio_23
 
+
         ENUMs:
             SEL_0:                       xspi_data_3
             SEL_1:                       reserved
@@ -16591,6 +16224,7 @@ This section defines the register offsets of the IOMUX component
                          Mode can be used to select the IO functionality or drive 0/1/Hi-Z
                          sel 5'd0 -- xspi_clk
                          sel 5'd2 -- wifi_gpio_24
+
 
         ENUMs:
             SEL_0:                       xspi_clk
@@ -16679,6 +16313,7 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd0 -- xspi_data_0
                          sel 5'd2 -- wifi_gpio_25
 
+
         ENUMs:
             SEL_0:                       xspi_data_0
             SEL_1:                       reserved
@@ -16751,386 +16386,6 @@ This section defines the register offsets of the IOMUX component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO44PCFG
-    Offset name:         IOMUX_O_GPIO44PCFG
-    Relative address:    0x2D0B4
-    Description:         Port configuration register for IO GPIO44
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd0 -- xspi_clk_input
-                         sel 5'd2 -- wifi_gpio_44
-
-        ENUMs:
-            SEL_0:                       xspi_clk_input
-            SEL_1:                       reserved
-            SEL_2:                       wifi_gpio_44
-            SEL_3:                       reserved
-            SEL_4:                       reserved
-            SEL_5:                       reserved
-            SEL_6:                       reserved
-            SEL_7:                       reserved
-            SEL_8:                       reserved
-            SEL_9:                       reserved
-            SEL_10:                      reserved
-            SEL_11:                      reserved
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      reserved
-            SEL_19:                      reserved
-            SEL_20:                      reserved
-            SEL_21:                      reserved
-            SEL_22:                      reserved
-            SEL_23:                      reserved
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      reserved
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO44PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO44PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO44PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO44PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO41PCFG
-    Offset name:         IOMUX_O_GPIO41PCFG
-    Relative address:    0x2D0A8
-    Description:         Port configuration register for IO GPIO41
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_cs_ram
-                         sel 5'd2 -- wifi_gpio_41
-                         sel 5'd4 -- spi1_miso
-                         sel 5'd5 -- uart1_cts
-                         sel 5'd7 -- i2s_data0
-                         sel 5'd9 -- gpt0_0
-                         sel 5'd16 -- gpt1_pre_event
-                         sel 5'd17 -- gpt0_pre_event
-                         sel 5'd18 -- gpt0_1_n
-                         sel 5'd22 -- gpt_infrared
-                         sel 5'd23 -- ant_sel_0
-                         sel 5'd29 -- coex_grant
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_cs_ram
-            SEL_2:                       wifi_gpio_41
-            SEL_3:                       reserved
-            SEL_4:                       spi1_miso
-            SEL_5:                       uart1_cts
-            SEL_6:                       reserved
-            SEL_7:                       i2s_data0
-            SEL_8:                       reserved
-            SEL_9:                       gpt0_0
-            SEL_10:                      reserved
-            SEL_11:                      reserved
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      gpt1_pre_event
-            SEL_17:                      gpt0_pre_event
-            SEL_18:                      gpt0_1_n
-            SEL_19:                      reserved
-            SEL_20:                      reserved
-            SEL_21:                      reserved
-            SEL_22:                      gpt_infrared
-            SEL_23:                      ant_sel_0
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      coex_grant
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO41PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO41PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO41PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO41PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO42PCFG
-    Offset name:         IOMUX_O_GPIO42PCFG
-    Relative address:    0x2D0AC
-    Description:         Port configuration register for IO GPIO42
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_reset_ram
-                         sel 5'd2 -- wifi_gpio_42
-                         sel 5'd3 -- uart1_rx
-                         sel 5'd4 -- spi1_mosi
-                         sel 5'd5 -- uart1_rts
-                         sel 5'd6 -- i2c0_data
-                         sel 5'd7 -- i2s_wclk
-                         sel 5'd8 -- pdm_data0
-                         sel 5'd9 -- gpt0_1
-                         sel 5'd10 -- dcan_rx
-                         sel 5'd11 -- xspi_dqs
-                         sel 5'd18 -- gpt0_0_n
-                         sel 5'd23 -- ant_sel_1
-                         sel 5'd29 -- coex_req
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_reset_ram
-            SEL_2:                       wifi_gpio_42
-            SEL_3:                       uart1_rx
-            SEL_4:                       spi1_mosi
-            SEL_5:                       uart1_rts
-            SEL_6:                       i2c0_data
-            SEL_7:                       i2s_wclk
-            SEL_8:                       pdm_data0
-            SEL_9:                       gpt0_1
-            SEL_10:                      dcan_rx
-            SEL_11:                      xspi_dqs
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      gpt0_0_n
-            SEL_19:                      reserved
-            SEL_20:                      reserved
-            SEL_21:                      reserved
-            SEL_22:                      reserved
-            SEL_23:                      ant_sel_1
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      coex_req
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO42PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO42PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO42PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO42PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       GPIO43PCFG
-    Offset name:         IOMUX_O_GPIO43PCFG
-    Relative address:    0x2D0B0
-    Description:         Port configuration register for IO GPIO43
-    Default Value:       NA
-
-        Field:           IOSEL
-        From..to bits:   0...4
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Pinmux selection Control
-                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
-                         sel 5'd1 -- xspi_cs_ram
-                         sel 5'd2 -- wifi_gpio_43
-                         sel 5'd4 -- spi1_clk
-                         sel 5'd5 -- uart1_tx
-                         sel 5'd6 -- i2c0_clk
-                         sel 5'd7 -- i2s_bclk
-                         sel 5'd8 -- pdm_bclk
-                         sel 5'd9 -- gpt0_2
-                         sel 5'd10 -- dcan_tx
-                         sel 5'd18 -- gpt0_2_n
-                         sel 5'd23 -- ant_sel_2
-                         sel 5'd29 -- coex_priority
-
-        ENUMs:
-            SEL_0:                       reserved
-            SEL_1:                       xspi_cs_ram
-            SEL_2:                       wifi_gpio_43
-            SEL_3:                       reserved
-            SEL_4:                       spi1_clk
-            SEL_5:                       uart1_tx
-            SEL_6:                       i2c0_clk
-            SEL_7:                       i2s_bclk
-            SEL_8:                       pdm_bclk
-            SEL_9:                       gpt0_2
-            SEL_10:                      dcan_tx
-            SEL_11:                      reserved
-            SEL_12:                      reserved
-            SEL_13:                      reserved
-            SEL_14:                      reserved
-            SEL_15:                      reserved
-            SEL_16:                      reserved
-            SEL_17:                      reserved
-            SEL_18:                      gpt0_2_n
-            SEL_19:                      reserved
-            SEL_20:                      reserved
-            SEL_21:                      reserved
-            SEL_22:                      reserved
-            SEL_23:                      ant_sel_2
-            SEL_24:                      reserved
-            SEL_25:                      reserved
-            SEL_26:                      reserved
-            SEL_27:                      reserved
-            SEL_28:                      reserved
-            SEL_29:                      coex_priority
-            SEL_30:                      reserved
-            SEL_31:                      reserved
-*/
-#define IOMUX_GPIO43PCFG_IOSEL_W                                     5U
-#define IOMUX_GPIO43PCFG_IOSEL_M                                     0x0000001FU
-#define IOMUX_GPIO43PCFG_IOSEL_S                                     0U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_0                                 0x00000000U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_1                                 0x00000001U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_2                                 0x00000002U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_3                                 0x00000003U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_4                                 0x00000004U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_5                                 0x00000005U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_6                                 0x00000006U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_7                                 0x00000007U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_8                                 0x00000008U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_9                                 0x00000009U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_10                                0x0000000AU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_11                                0x0000000BU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_12                                0x0000000CU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_13                                0x0000000DU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_14                                0x0000000EU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_15                                0x0000000FU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_16                                0x00000010U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_17                                0x00000011U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_18                                0x00000012U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_19                                0x00000013U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_20                                0x00000014U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_21                                0x00000015U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_22                                0x00000016U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_23                                0x00000017U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_24                                0x00000018U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_25                                0x00000019U
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_26                                0x0000001AU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_27                                0x0000001BU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_28                                0x0000001CU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_29                                0x0000001DU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_30                                0x0000001EU
-#define IOMUX_GPIO43PCFG_IOSEL_SEL_31                                0x0000001FU
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       GPIO26PCFG
     Offset name:         IOMUX_O_GPIO26PCFG
     Relative address:    0x2D06C
@@ -17166,6 +16421,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd25 -- ble_rfc_gpi_1
                          sel 5'd26 -- ble_rfc_gpi_3
                          sel 5'd30 -- sdio_oob_irq
+                         sel 5'd31 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17199,7 +16456,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      sdio_oob_irq
-            SEL_31:                      reserved
+            SEL_31:                      uart2_tx
 */
 #define IOMUX_GPIO26PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO26PCFG_IOSEL_M                                     0x0000001FU
@@ -17268,6 +16525,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd22 -- ble_rfc_gpo_5
                          sel 5'd23 -- ant_sel_1
                          sel 5'd25 -- ble_rfc_gpi_2
+                         sel 5'd31 -- uart2_rts
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17301,7 +16560,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      reserved
-            SEL_31:                      reserved
+            SEL_31:                      uart2_rts
 */
 #define IOMUX_GPIO27PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO27PCFG_IOSEL_M                                     0x0000001FU
@@ -17371,6 +16630,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_2
                          sel 5'd24 -- gpt0_pre_event
                          sel 5'd25 -- ble_rfc_gpi_3
+                         sel 5'd31 -- uart2_cts
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17404,7 +16665,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      reserved
-            SEL_31:                      reserved
+            SEL_31:                      uart2_cts
 */
 #define IOMUX_GPIO28PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO28PCFG_IOSEL_M                                     0x0000001FU
@@ -17471,9 +16732,12 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd17 -- ext_clk
                          sel 5'd18 -- gpt0_1_n
                          sel 5'd19 -- gpt1_3_n
+                         sel 5'd20 -- coex_grant
                          sel 5'd22 -- ble_rfc_gpo_7
                          sel 5'd23 -- ant_sel_3
                          sel 5'd30 -- sdio_oob_irq
+                         sel 5'd31 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17496,7 +16760,7 @@ This section defines the register offsets of the IOMUX component
             SEL_17:                      ext_clk
             SEL_18:                      gpt0_1_n
             SEL_19:                      gpt1_3_n
-            SEL_20:                      reserved
+            SEL_20:                      coex_grant
             SEL_21:                      reserved
             SEL_22:                      ble_rfc_gpo_7
             SEL_23:                      ant_sel_3
@@ -17507,7 +16771,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      sdio_oob_irq
-            SEL_31:                      reserved
+            SEL_31:                      uart2_rx
 */
 #define IOMUX_GPIO29PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO29PCFG_IOSEL_M                                     0x0000001FU
@@ -17586,6 +16850,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd28 -- gpt1_pre_event
                          sel 5'd29 -- gpt0_pre_event
                          sel 5'd30 -- sdio_d3
+                         sel 5'd31 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17619,7 +16885,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      gpt1_pre_event
             SEL_29:                      gpt0_pre_event
             SEL_30:                      sdio_d3
-            SEL_31:                      reserved
+            SEL_31:                      uart2_tx
 */
 #define IOMUX_GPIO30PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO30PCFG_IOSEL_M                                     0x0000001FU
@@ -17691,6 +16957,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd24 -- gpt_infrared
                          sel 5'd25 -- ble_rfc_gpi_3
                          sel 5'd30 -- sdio_d2
+                         sel 5'd31 -- uart2_tx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17724,7 +16992,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      sdio_d2
-            SEL_31:                      reserved
+            SEL_31:                      uart2_tx
 */
 #define IOMUX_GPIO31PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO31PCFG_IOSEL_M                                     0x0000001FU
@@ -17793,6 +17061,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd20 -- coex_req
                          sel 5'd23 -- ant_sel_1
                          sel 5'd30 -- sdio_d1
+                         sel 5'd31 -- uart2_rts
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17826,7 +17096,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      sdio_d1
-            SEL_31:                      reserved
+            SEL_31:                      uart2_rts
 */
 #define IOMUX_GPIO32PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO32PCFG_IOSEL_M                                     0x0000001FU
@@ -17894,6 +17164,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd24 -- gpt1_pre_event
                          sel 5'd25 -- ble_rfc_gpi_2
                          sel 5'd30 -- sdio_d0
+                         sel 5'd31 -- uart2_cts
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -17927,7 +17199,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      sdio_d0
-            SEL_31:                      reserved
+            SEL_31:                      uart2_cts
 */
 #define IOMUX_GPIO33PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO33PCFG_IOSEL_M                                     0x0000001FU
@@ -17996,6 +17268,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd23 -- ant_sel_3
                          sel 5'd25 -- ble_rfc_gpi_1
                          sel 5'd30 -- sdio_clk
+                         sel 5'd31 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -18029,7 +17303,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      reserved
             SEL_29:                      reserved
             SEL_30:                      sdio_clk
-            SEL_31:                      reserved
+            SEL_31:                      uart2_rx
 */
 #define IOMUX_GPIO34PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO34PCFG_IOSEL_M                                     0x0000001FU
@@ -18108,6 +17382,8 @@ This section defines the register offsets of the IOMUX component
                          sel 5'd28 -- xspi_dqs
                          sel 5'd29 -- coex_req
                          sel 5'd30 -- sdio_cmd
+                         sel 5'd31 -- uart2_rx
+
 
         ENUMs:
             SEL_0:                       reserved
@@ -18141,7 +17417,7 @@ This section defines the register offsets of the IOMUX component
             SEL_28:                      xspi_dqs
             SEL_29:                      coex_req
             SEL_30:                      sdio_cmd
-            SEL_31:                      reserved
+            SEL_31:                      uart2_rx
 */
 #define IOMUX_GPIO35PCFG_IOSEL_W                                     5U
 #define IOMUX_GPIO35PCFG_IOSEL_M                                     0x0000001FU
@@ -18178,6 +17454,902 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_GPIO35PCFG_IOSEL_SEL_29                                0x0000001DU
 #define IOMUX_GPIO35PCFG_IOSEL_SEL_30                                0x0000001EU
 #define IOMUX_GPIO35PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO36PCFG
+    Offset name:         IOMUX_O_GPIO36PCFG
+    Relative address:    0x2D094
+    Description:         Port configuration register for IO GPIO36
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd0 -- fast_clk_req
+                         sel 5'd1 -- xspi_cs_ram
+                         sel 5'd2 -- wifi_gpio_36
+                         sel 5'd3 -- sdio_mmc_pow2
+                         sel 5'd4 -- sdio_mmc_wp
+                         sel 5'd11 -- wake_observe_bus_13
+                         sel 5'd12 -- debug_bus_1
+                         sel 5'd19 -- coex_req
+                         sel 5'd20 -- coex_grant
+                         sel 5'd21 -- fast_clk_req
+                         sel 5'd22 -- ble_rfc_gpo_5
+                         sel 5'd23 -- ant_sel_1
+                         sel 5'd24 -- cca
+                         sel 5'd25 -- ble_rfc_gpi_2
+
+
+        ENUMs:
+            SEL_0:                       fast_clk_req
+            SEL_1:                       xspi_cs_ram
+            SEL_2:                       wifi_gpio_36
+            SEL_3:                       sdio_mmc_pow2
+            SEL_4:                       sdio_mmc_wp
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      wake_observe_bus_13
+            SEL_12:                      debug_bus_1
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      reserved
+            SEL_19:                      coex_req
+            SEL_20:                      coex_grant
+            SEL_21:                      fast_clk_req
+            SEL_22:                      ble_rfc_gpo_5
+            SEL_23:                      ant_sel_1
+            SEL_24:                      cca
+            SEL_25:                      ble_rfc_gpi_2
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO36PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO36PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO36PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO36PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO37PCFG
+    Offset name:         IOMUX_O_GPIO37PCFG
+    Relative address:    0x2D098
+    Description:         Port configuration register for IO GPIO37
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_cs_ram
+                         sel 5'd2 -- wifi_gpio_37
+                         sel 5'd3 -- sdio_mmc_pow1
+                         sel 5'd4 -- sdio_mmc_wp
+                         sel 5'd11 -- wake_observe_bus_12
+                         sel 5'd12 -- debug_bus_0
+                         sel 5'd18 -- coex_req
+                         sel 5'd19 -- sdio_oob_irq
+                         sel 5'd20 -- coex_grant
+                         sel 5'd21 -- fast_clk_req
+                         sel 5'd22 -- ble_rfc_gpo_4
+                         sel 5'd23 -- ant_sel_0
+                         sel 5'd24 -- cca
+                         sel 5'd25 -- ble_rfc_gpi_1
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_cs_ram
+            SEL_2:                       wifi_gpio_37
+            SEL_3:                       sdio_mmc_pow1
+            SEL_4:                       sdio_mmc_wp
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      wake_observe_bus_12
+            SEL_12:                      debug_bus_0
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      coex_req
+            SEL_19:                      sdio_oob_irq
+            SEL_20:                      coex_grant
+            SEL_21:                      fast_clk_req
+            SEL_22:                      ble_rfc_gpo_4
+            SEL_23:                      ant_sel_0
+            SEL_24:                      cca
+            SEL_25:                      ble_rfc_gpi_1
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO37PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO37PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO37PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO37PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO38PCFG
+    Offset name:         IOMUX_O_GPIO38PCFG
+    Relative address:    0x2D09C
+    Description:         Port configuration register for IO GPIO38
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_cs_ram
+                         sel 5'd2 -- wifi_gpio_38
+                         sel 5'd3 -- ext_clk
+                         sel 5'd4 -- spi1_clk
+                         sel 5'd5 -- uart0_cts
+                         sel 5'd6 -- i2c1_clk
+                         sel 5'd7 -- i2s_bclk
+                         sel 5'd8 -- pdm_bclk
+                         sel 5'd9 -- gpt1_0
+                         sel 5'd10 -- dcan_tx
+                         sel 5'd18 -- gpt1_1_n
+                         sel 5'd20 -- coex_grant
+                         sel 5'd23 -- ant_sel_0
+                         sel 5'd29 -- coex_req
+                         sel 5'd30 -- uart2_rx
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_cs_ram
+            SEL_2:                       wifi_gpio_38
+            SEL_3:                       ext_clk
+            SEL_4:                       spi1_clk
+            SEL_5:                       uart0_cts
+            SEL_6:                       i2c1_clk
+            SEL_7:                       i2s_bclk
+            SEL_8:                       pdm_bclk
+            SEL_9:                       gpt1_0
+            SEL_10:                      dcan_tx
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      gpt1_1_n
+            SEL_19:                      reserved
+            SEL_20:                      coex_grant
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      ant_sel_0
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      coex_req
+            SEL_30:                      uart2_rx
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO38PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO38PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO38PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO38PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO39PCFG
+    Offset name:         IOMUX_O_GPIO39PCFG
+    Relative address:    0x2D0A0
+    Description:         Port configuration register for IO GPIO39
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_reset_ram
+                         sel 5'd2 -- wifi_gpio_39
+                         sel 5'd3 -- uart0_rx
+                         sel 5'd4 -- spi1_miso
+                         sel 5'd5 -- uart0_rts
+                         sel 5'd6 -- i2c1_data
+                         sel 5'd7 -- i2s_wclk
+                         sel 5'd8 -- pdm_data0
+                         sel 5'd9 -- gpt1_1
+                         sel 5'd10 -- dcan_rx
+                         sel 5'd11 -- xspi_dqs
+                         sel 5'd18 -- gpt1_0_n
+                         sel 5'd20 -- coex_req
+                         sel 5'd21 -- coex_grant
+                         sel 5'd23 -- ant_sel_1
+                         sel 5'd29 -- coex_priority
+                         sel 5'd30 -- uart2_tx
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_reset_ram
+            SEL_2:                       wifi_gpio_39
+            SEL_3:                       uart0_rx
+            SEL_4:                       spi1_miso
+            SEL_5:                       uart0_rts
+            SEL_6:                       i2c1_data
+            SEL_7:                       i2s_wclk
+            SEL_8:                       pdm_data0
+            SEL_9:                       gpt1_1
+            SEL_10:                      dcan_rx
+            SEL_11:                      xspi_dqs
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      gpt1_0_n
+            SEL_19:                      reserved
+            SEL_20:                      coex_req
+            SEL_21:                      coex_grant
+            SEL_22:                      reserved
+            SEL_23:                      ant_sel_1
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      coex_priority
+            SEL_30:                      uart2_tx
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO39PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO39PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO39PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO39PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO40PCFG
+    Offset name:         IOMUX_O_GPIO40PCFG
+    Relative address:    0x2D0A4
+    Description:         Port configuration register for IO GPIO40
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_cs_ram
+                         sel 5'd2 -- wifi_gpio_40
+                         sel 5'd4 -- spi1_mosi
+                         sel 5'd5 -- uart0_tx
+                         sel 5'd7 -- i2s_data0
+                         sel 5'd8 -- pdm_data1
+                         sel 5'd9 -- gpt1_2
+                         sel 5'd16 -- gpt1_pre_event
+                         sel 5'd17 -- gpt0_pre_event
+                         sel 5'd18 -- gpt1_2_n
+                         sel 5'd20 -- coex_priority
+                         sel 5'd22 -- gpt_infrared
+                         sel 5'd23 -- ant_sel_2
+                         sel 5'd29 -- coex_grant
+                         sel 5'd30 -- uart2_rts
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_cs_ram
+            SEL_2:                       wifi_gpio_40
+            SEL_3:                       reserved
+            SEL_4:                       spi1_mosi
+            SEL_5:                       uart0_tx
+            SEL_6:                       reserved
+            SEL_7:                       i2s_data0
+            SEL_8:                       pdm_data1
+            SEL_9:                       gpt1_2
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      gpt1_pre_event
+            SEL_17:                      gpt0_pre_event
+            SEL_18:                      gpt1_2_n
+            SEL_19:                      reserved
+            SEL_20:                      coex_priority
+            SEL_21:                      reserved
+            SEL_22:                      gpt_infrared
+            SEL_23:                      ant_sel_2
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      coex_grant
+            SEL_30:                      uart2_rts
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO40PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO40PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO40PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO40PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO41PCFG
+    Offset name:         IOMUX_O_GPIO41PCFG
+    Relative address:    0x2D0A8
+    Description:         Port configuration register for IO GPIO41
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_cs_ram
+                         sel 5'd2 -- wifi_gpio_41
+                         sel 5'd4 -- spi1_miso
+                         sel 5'd5 -- uart1_cts
+                         sel 5'd7 -- i2s_data0
+                         sel 5'd9 -- gpt0_0
+                         sel 5'd16 -- gpt1_pre_event
+                         sel 5'd17 -- gpt0_pre_event
+                         sel 5'd18 -- gpt0_1_n
+                         sel 5'd20 -- coex_grant
+                         sel 5'd22 -- gpt_infrared
+                         sel 5'd23 -- ant_sel_0
+                         sel 5'd29 -- coex_grant
+                         sel 5'd30 -- uart2_rx
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_cs_ram
+            SEL_2:                       wifi_gpio_41
+            SEL_3:                       reserved
+            SEL_4:                       spi1_miso
+            SEL_5:                       uart1_cts
+            SEL_6:                       reserved
+            SEL_7:                       i2s_data0
+            SEL_8:                       reserved
+            SEL_9:                       gpt0_0
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      gpt1_pre_event
+            SEL_17:                      gpt0_pre_event
+            SEL_18:                      gpt0_1_n
+            SEL_19:                      reserved
+            SEL_20:                      coex_grant
+            SEL_21:                      reserved
+            SEL_22:                      gpt_infrared
+            SEL_23:                      ant_sel_0
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      coex_grant
+            SEL_30:                      uart2_rx
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO41PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO41PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO41PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO41PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO42PCFG
+    Offset name:         IOMUX_O_GPIO42PCFG
+    Relative address:    0x2D0AC
+    Description:         Port configuration register for IO GPIO42
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_reset_ram
+                         sel 5'd2 -- wifi_gpio_42
+                         sel 5'd3 -- uart1_rx
+                         sel 5'd4 -- spi1_mosi
+                         sel 5'd5 -- uart1_rts
+                         sel 5'd6 -- i2c0_data
+                         sel 5'd7 -- i2s_wclk
+                         sel 5'd8 -- pdm_data0
+                         sel 5'd9 -- gpt0_1
+                         sel 5'd10 -- dcan_rx
+                         sel 5'd11 -- xspi_dqs
+                         sel 5'd18 -- gpt0_0_n
+                         sel 5'd20 -- coex_req
+                         sel 5'd21 -- coex_grant
+                         sel 5'd23 -- ant_sel_1
+                         sel 5'd29 -- coex_req
+                         sel 5'd30 -- uart2_tx
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_reset_ram
+            SEL_2:                       wifi_gpio_42
+            SEL_3:                       uart1_rx
+            SEL_4:                       spi1_mosi
+            SEL_5:                       uart1_rts
+            SEL_6:                       i2c0_data
+            SEL_7:                       i2s_wclk
+            SEL_8:                       pdm_data0
+            SEL_9:                       gpt0_1
+            SEL_10:                      dcan_rx
+            SEL_11:                      xspi_dqs
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      gpt0_0_n
+            SEL_19:                      reserved
+            SEL_20:                      coex_req
+            SEL_21:                      coex_grant
+            SEL_22:                      reserved
+            SEL_23:                      ant_sel_1
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      coex_req
+            SEL_30:                      uart2_tx
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO42PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO42PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO42PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO42PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO43PCFG
+    Offset name:         IOMUX_O_GPIO43PCFG
+    Relative address:    0x2D0B0
+    Description:         Port configuration register for IO GPIO43
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd1 -- xspi_cs_ram
+                         sel 5'd2 -- wifi_gpio_43
+                         sel 5'd4 -- spi1_clk
+                         sel 5'd5 -- uart1_tx
+                         sel 5'd6 -- i2c0_clk
+                         sel 5'd7 -- i2s_bclk
+                         sel 5'd8 -- pdm_bclk
+                         sel 5'd9 -- gpt0_2
+                         sel 5'd10 -- dcan_tx
+                         sel 5'd18 -- gpt0_2_n
+                         sel 5'd20 -- coex_priority
+                         sel 5'd23 -- ant_sel_2
+                         sel 5'd29 -- coex_priority
+                         sel 5'd30 -- uart2_rts
+
+
+        ENUMs:
+            SEL_0:                       reserved
+            SEL_1:                       xspi_cs_ram
+            SEL_2:                       wifi_gpio_43
+            SEL_3:                       reserved
+            SEL_4:                       spi1_clk
+            SEL_5:                       uart1_tx
+            SEL_6:                       i2c0_clk
+            SEL_7:                       i2s_bclk
+            SEL_8:                       pdm_bclk
+            SEL_9:                       gpt0_2
+            SEL_10:                      dcan_tx
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      gpt0_2_n
+            SEL_19:                      reserved
+            SEL_20:                      coex_priority
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      ant_sel_2
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      coex_priority
+            SEL_30:                      uart2_rts
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO43PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO43PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO43PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO43PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO44PCFG
+    Offset name:         IOMUX_O_GPIO44PCFG
+    Relative address:    0x2D0B4
+    Description:         Port configuration register for IO GPIO44
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd0 -- xspi_clk_input
+                         sel 5'd2 -- wifi_gpio_44
+
+
+        ENUMs:
+            SEL_0:                       xspi_clk_input
+            SEL_1:                       reserved
+            SEL_2:                       wifi_gpio_44
+            SEL_3:                       reserved
+            SEL_4:                       reserved
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      reserved
+            SEL_19:                      reserved
+            SEL_20:                      reserved
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      reserved
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO44PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO44PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO44PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO44PCFG_IOSEL_SEL_31                                0x0000001FU
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -18245,51 +18417,1515 @@ This section defines the register offsets of the IOMUX component
 #define IOMUX_PROCCOMP_PROGIOPOVR_ENABLE                             0x00000080U
 /*
 
-        Field:           FUSEPION
+        Field:           FUSEPROGION
         From..to bits:   8...10
         DefaultValue:    NA
         Access type:     read-only
         Description:     PROG IO N value from fuse ROM
 
 */
-#define IOMUX_PROCCOMP_FUSEPION_W                                    3U
-#define IOMUX_PROCCOMP_FUSEPION_M                                    0x00000700U
-#define IOMUX_PROCCOMP_FUSEPION_S                                    8U
+#define IOMUX_PROCCOMP_FUSEPROGION_W                                 3U
+#define IOMUX_PROCCOMP_FUSEPROGION_M                                 0x00000700U
+#define IOMUX_PROCCOMP_FUSEPROGION_S                                 8U
 /*
 
-        Field:           FUSEPIOP
+        Field:           FUSEPROGIOP
         From..to bits:   12...14
         DefaultValue:    NA
         Access type:     read-only
         Description:     PROG IO P value from fuse ROM
 
 */
-#define IOMUX_PROCCOMP_FUSEPIOP_W                                    3U
-#define IOMUX_PROCCOMP_FUSEPIOP_M                                    0x00007000U
-#define IOMUX_PROCCOMP_FUSEPIOP_S                                    12U
+#define IOMUX_PROCCOMP_FUSEPROGIOP_W                                 3U
+#define IOMUX_PROCCOMP_FUSEPROGIOP_M                                 0x00007000U
+#define IOMUX_PROCCOMP_FUSEPROGIOP_S                                 12U
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       SOPDIS
-    Offset name:         IOMUX_O_SOPDIS
-    Relative address:    0x2D000
-    Description:         This register disables the SOP overrides when the device was powered in one of the SoP modes.
+    Register name:       GPIO45PCFG
+    Offset name:         IOMUX_O_GPIO45PCFG
+    Relative address:    0x2D0C0
+    Description:         Port configuration register for IO GPIO45
     Default Value:       NA
 
-        Field:           SOPDIS
-        From..to bits:   0...0
+        Field:           IOSEL
+        From..to bits:   0...4
         DefaultValue:    NA
         Access type:     read-write
-        Description:     The field is to disable SOP
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd0 -- xspi_data_0_ram
+
 
         ENUMs:
-            DISABLE:                     Disable SOP
-            USE:                         Use SOP
+            SEL_0:                       xspi_data_0_ram
+            SEL_1:                       reserved
+            SEL_2:                       reserved
+            SEL_3:                       reserved
+            SEL_4:                       reserved
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      reserved
+            SEL_19:                      reserved
+            SEL_20:                      reserved
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      reserved
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
 */
-#define IOMUX_SOPDIS_SOPDIS                                          0x00000001U
-#define IOMUX_SOPDIS_SOPDIS_M                                        0x00000001U
-#define IOMUX_SOPDIS_SOPDIS_S                                        0U
-#define IOMUX_SOPDIS_SOPDIS_DISABLE                                  0x00000001U
-#define IOMUX_SOPDIS_SOPDIS_USE                                      0x00000000U
+#define IOMUX_GPIO45PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO45PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO45PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO45PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO46PCFG
+    Offset name:         IOMUX_O_GPIO46PCFG
+    Relative address:    0x2D0C4
+    Description:         Port configuration register for IO GPIO46
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd0 -- xspi_data_1_ram
+
+
+        ENUMs:
+            SEL_0:                       xspi_data_1_ram
+            SEL_1:                       reserved
+            SEL_2:                       reserved
+            SEL_3:                       reserved
+            SEL_4:                       reserved
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      reserved
+            SEL_19:                      reserved
+            SEL_20:                      reserved
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      reserved
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO46PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO46PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO46PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO46PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO47PCFG
+    Offset name:         IOMUX_O_GPIO47PCFG
+    Relative address:    0x2D0C8
+    Description:         Port configuration register for IO GPIO47
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd0 -- xspi_data_2_ram
+
+
+        ENUMs:
+            SEL_0:                       xspi_data_2_ram
+            SEL_1:                       reserved
+            SEL_2:                       reserved
+            SEL_3:                       reserved
+            SEL_4:                       reserved
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      reserved
+            SEL_19:                      reserved
+            SEL_20:                      reserved
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      reserved
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO47PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO47PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO47PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO47PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO48PCFG
+    Offset name:         IOMUX_O_GPIO48PCFG
+    Relative address:    0x2D0CC
+    Description:         Port configuration register for IO GPIO48
+    Default Value:       NA
+
+        Field:           IOSEL
+        From..to bits:   0...4
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     Pinmux selection Control
+                         Mode can be used to select the IO functionality or drive 0/1/Hi-Z
+                         sel 5'd0 -- xspi_data_3_ram
+
+
+        ENUMs:
+            SEL_0:                       xspi_data_3_ram
+            SEL_1:                       reserved
+            SEL_2:                       reserved
+            SEL_3:                       reserved
+            SEL_4:                       reserved
+            SEL_5:                       reserved
+            SEL_6:                       reserved
+            SEL_7:                       reserved
+            SEL_8:                       reserved
+            SEL_9:                       reserved
+            SEL_10:                      reserved
+            SEL_11:                      reserved
+            SEL_12:                      reserved
+            SEL_13:                      reserved
+            SEL_14:                      reserved
+            SEL_15:                      reserved
+            SEL_16:                      reserved
+            SEL_17:                      reserved
+            SEL_18:                      reserved
+            SEL_19:                      reserved
+            SEL_20:                      reserved
+            SEL_21:                      reserved
+            SEL_22:                      reserved
+            SEL_23:                      reserved
+            SEL_24:                      reserved
+            SEL_25:                      reserved
+            SEL_26:                      reserved
+            SEL_27:                      reserved
+            SEL_28:                      reserved
+            SEL_29:                      reserved
+            SEL_30:                      reserved
+            SEL_31:                      reserved
+*/
+#define IOMUX_GPIO48PCFG_IOSEL_W                                     5U
+#define IOMUX_GPIO48PCFG_IOSEL_M                                     0x0000001FU
+#define IOMUX_GPIO48PCFG_IOSEL_S                                     0U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_0                                 0x00000000U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_1                                 0x00000001U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_2                                 0x00000002U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_3                                 0x00000003U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_4                                 0x00000004U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_5                                 0x00000005U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_6                                 0x00000006U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_7                                 0x00000007U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_8                                 0x00000008U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_9                                 0x00000009U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_10                                0x0000000AU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_11                                0x0000000BU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_12                                0x0000000CU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_13                                0x0000000DU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_14                                0x0000000EU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_15                                0x0000000FU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_16                                0x00000010U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_17                                0x00000011U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_18                                0x00000012U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_19                                0x00000013U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_20                                0x00000014U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_21                                0x00000015U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_22                                0x00000016U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_23                                0x00000017U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_24                                0x00000018U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_25                                0x00000019U
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_26                                0x0000001AU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_27                                0x0000001BU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_28                                0x0000001CU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_29                                0x0000001DU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_30                                0x0000001EU
+#define IOMUX_GPIO48PCFG_IOSEL_SEL_31                                0x0000001FU
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO45CFG
+    Offset name:         IOMUX_O_GPIO45CFG
+    Relative address:    0x2E000
+    Description:         CFG register for IO GPIO45. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO45CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO45CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO45CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO45CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO45CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO45CFG_IE                                           0x00000800U
+#define IOMUX_GPIO45CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO45CFG_IE_S                                         11U
+#define IOMUX_GPIO45CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO45CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO45CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO45CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO45CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO45CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO45CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO45CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO45CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO45CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO45CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO45CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO45CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO45CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO45CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO45CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO45CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO45PCTL
+    Offset name:         IOMUX_O_GPIO45PCTL
+    Relative address:    0x2E004
+    Description:         Pull control register of IO GPIO45
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO45PCTL_CTL_W                                       2U
+#define IOMUX_GPIO45PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO45PCTL_CTL_S                                       0U
+#define IOMUX_GPIO45PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO45PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO45PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO45PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO45PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO45PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO45PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO45PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO45PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO45PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO45PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO45PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO45PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO45PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO45CTL
+    Offset name:         IOMUX_O_GPIO45CTL
+    Relative address:    0x2E008
+    Description:         Control register of IO GPIO45
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO45CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO45CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO45CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO45CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO45CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO45CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO45CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO45CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO45CTL_OUT_S                                        8U
+#define IOMUX_GPIO45CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO45CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO45CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO45CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO45CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO45CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO45CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO45ECTL
+    Offset name:         IOMUX_O_GPIO45ECTL
+    Relative address:    0x2E00C
+    Description:         Event control register for IO GPIO45
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO45ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO45ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO45ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO45ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO45ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO45ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO45ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO45ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO45ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO45ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO45ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO45ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO45ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO45ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO45ECTL_CLR_S                                       3U
+#define IOMUX_GPIO45ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO45ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO46CFG
+    Offset name:         IOMUX_O_GPIO46CFG
+    Relative address:    0x2F000
+    Description:         CFG register for IO GPIO46. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO46CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO46CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO46CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO46CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO46CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO46CFG_IE                                           0x00000800U
+#define IOMUX_GPIO46CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO46CFG_IE_S                                         11U
+#define IOMUX_GPIO46CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO46CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO46CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO46CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO46CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO46CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO46CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO46CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO46CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO46CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO46CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO46CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO46CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO46CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO46CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO46CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO46CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO46PCTL
+    Offset name:         IOMUX_O_GPIO46PCTL
+    Relative address:    0x2F004
+    Description:         Pull control register of IO GPIO46
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO46PCTL_CTL_W                                       2U
+#define IOMUX_GPIO46PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO46PCTL_CTL_S                                       0U
+#define IOMUX_GPIO46PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO46PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO46PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO46PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO46PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO46PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO46PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO46PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO46PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO46PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO46PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO46PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO46PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO46PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO46CTL
+    Offset name:         IOMUX_O_GPIO46CTL
+    Relative address:    0x2F008
+    Description:         Control register of IO GPIO46
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO46CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO46CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO46CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO46CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO46CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO46CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO46CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO46CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO46CTL_OUT_S                                        8U
+#define IOMUX_GPIO46CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO46CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO46CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO46CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO46CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO46CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO46CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO46ECTL
+    Offset name:         IOMUX_O_GPIO46ECTL
+    Relative address:    0x2F00C
+    Description:         Event control register for IO GPIO46
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO46ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO46ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO46ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO46ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO46ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO46ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO46ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO46ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO46ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO46ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO46ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO46ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO46ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO46ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO46ECTL_CLR_S                                       3U
+#define IOMUX_GPIO46ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO46ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO47CFG
+    Offset name:         IOMUX_O_GPIO47CFG
+    Relative address:    0x30000
+    Description:         CFG register for IO GPIO47. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO47CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO47CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO47CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO47CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO47CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO47CFG_IE                                           0x00000800U
+#define IOMUX_GPIO47CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO47CFG_IE_S                                         11U
+#define IOMUX_GPIO47CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO47CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO47CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO47CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO47CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO47CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO47CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO47CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO47CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO47CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO47CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO47CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO47CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO47CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO47CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO47CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO47CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO47PCTL
+    Offset name:         IOMUX_O_GPIO47PCTL
+    Relative address:    0x30004
+    Description:         Pull control register of IO GPIO47
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO47PCTL_CTL_W                                       2U
+#define IOMUX_GPIO47PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO47PCTL_CTL_S                                       0U
+#define IOMUX_GPIO47PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO47PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO47PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO47PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO47PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO47PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO47PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO47PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO47PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO47PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO47PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO47PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO47PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO47PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO47CTL
+    Offset name:         IOMUX_O_GPIO47CTL
+    Relative address:    0x30008
+    Description:         Control register of IO GPIO47
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO47CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO47CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO47CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO47CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO47CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO47CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO47CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO47CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO47CTL_OUT_S                                        8U
+#define IOMUX_GPIO47CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO47CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO47CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO47CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO47CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO47CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO47CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO47ECTL
+    Offset name:         IOMUX_O_GPIO47ECTL
+    Relative address:    0x3000C
+    Description:         Event control register for IO GPIO47
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO47ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO47ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO47ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO47ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO47ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO47ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO47ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO47ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO47ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO47ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO47ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO47ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO47ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO47ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO47ECTL_CLR_S                                       3U
+#define IOMUX_GPIO47ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO47ECTL_CLR_CLEAR                                   0x00000008U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO48CFG
+    Offset name:         IOMUX_O_GPIO48CFG
+    Relative address:    0x31000
+    Description:         CFG register for IO GPIO48. This register configures the corresponding pad
+    Default Value:       0x00000000
+
+        Field:           OUTDISVAL
+        From..to bits:   6...6
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The field gives the status of [OUTDIS]
+
+        ENUMs:
+            ENABLED:                     Output is enabled
+            DISABLED:                    Output is disabled
+*/
+#define IOMUX_GPIO48CFG_OUTDISVAL                                    0x00000040U
+#define IOMUX_GPIO48CFG_OUTDISVAL_M                                  0x00000040U
+#define IOMUX_GPIO48CFG_OUTDISVAL_S                                  6U
+#define IOMUX_GPIO48CFG_OUTDISVAL_ENABLED                            0x00000000U
+#define IOMUX_GPIO48CFG_OUTDISVAL_DISABLED                           0x00000040U
+/*
+
+        Field:           IE
+        From..to bits:   11...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field enables the receiver operation from the pad
+
+        ENUMs:
+            DISABLE:                     Disable the receiver operation
+            ENABLE:                      Enable the receiver operation
+*/
+#define IOMUX_GPIO48CFG_IE                                           0x00000800U
+#define IOMUX_GPIO48CFG_IE_M                                         0x00000800U
+#define IOMUX_GPIO48CFG_IE_S                                         11U
+#define IOMUX_GPIO48CFG_IE_DISABLE                                   0x00000000U
+#define IOMUX_GPIO48CFG_IE_ENABLE                                    0x00000800U
+/*
+
+        Field:           OUTDIS
+        From..to bits:   12...12
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field configures the output from the pad
+                         Note:This field is applicable only if [OUTDISOVREN] is enabled
+
+        ENUMs:
+            DISABLE:                     Output from the pad is disabled
+            ENABLE:                      Output from the pad is enabled
+*/
+#define IOMUX_GPIO48CFG_OUTDIS                                       0x00001000U
+#define IOMUX_GPIO48CFG_OUTDIS_M                                     0x00001000U
+#define IOMUX_GPIO48CFG_OUTDIS_S                                     12U
+#define IOMUX_GPIO48CFG_OUTDIS_DISABLE                               0x00001000U
+#define IOMUX_GPIO48CFG_OUTDIS_ENABLE                                0x00000000U
+/*
+
+        Field:           OUTDISOVREN
+        From..to bits:   13...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the [OUTDIS] override
+
+        ENUMs:
+            DISABLE:                     Disable the override
+            ENABLE:                      Enable the override
+*/
+#define IOMUX_GPIO48CFG_OUTDISOVREN                                  0x00002000U
+#define IOMUX_GPIO48CFG_OUTDISOVREN_M                                0x00002000U
+#define IOMUX_GPIO48CFG_OUTDISOVREN_S                                13U
+#define IOMUX_GPIO48CFG_OUTDISOVREN_DISABLE                          0x00000000U
+#define IOMUX_GPIO48CFG_OUTDISOVREN_ENABLE                           0x00002000U
+/*
+
+        Field:           IOSTR
+        From..to bits:   14...14
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     This field controls the IO drive strength
+
+        ENUMs:
+            LOW:                         IO drives low power
+            HIGH:                        IO drives high power
+*/
+#define IOMUX_GPIO48CFG_IOSTR                                        0x00004000U
+#define IOMUX_GPIO48CFG_IOSTR_M                                      0x00004000U
+#define IOMUX_GPIO48CFG_IOSTR_S                                      14U
+#define IOMUX_GPIO48CFG_IOSTR_LOW                                    0x00000000U
+#define IOMUX_GPIO48CFG_IOSTR_HIGH                                   0x00004000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO48PCTL
+    Offset name:         IOMUX_O_GPIO48PCTL
+    Relative address:    0x31004
+    Description:         Pull control register of IO GPIO48
+                        This register configures the pull control
+    Default Value:       0x00000001
+
+        Field:           CTL
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     The fields defines the pull control
+
+        ENUMs:
+            IPCTRL:                      IP Pull Control
+            DOWN:                        Pull down
+            UP:                          Pull up
+            DISABLE:                     Pull disable
+*/
+#define IOMUX_GPIO48PCTL_CTL_W                                       2U
+#define IOMUX_GPIO48PCTL_CTL_M                                       0x00000003U
+#define IOMUX_GPIO48PCTL_CTL_S                                       0U
+#define IOMUX_GPIO48PCTL_CTL_IPCTRL                                  0x00000000U
+#define IOMUX_GPIO48PCTL_CTL_DOWN                                    0x00000002U
+#define IOMUX_GPIO48PCTL_CTL_UP                                      0x00000001U
+#define IOMUX_GPIO48PCTL_CTL_DISABLE                                 0x00000003U
+/*
+
+        Field:           PULLUPSTA
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull up level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull up
+*/
+#define IOMUX_GPIO48PCTL_PULLUPSTA                                   0x00000100U
+#define IOMUX_GPIO48PCTL_PULLUPSTA_M                                 0x00000100U
+#define IOMUX_GPIO48PCTL_PULLUPSTA_S                                 8U
+#define IOMUX_GPIO48PCTL_PULLUPSTA_DISABLED                          0x00000000U
+#define IOMUX_GPIO48PCTL_PULLUPSTA_ENABLED                           0x00000100U
+/*
+
+        Field:           PULLDWNSTA
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     This field gives the IO pull down level status
+
+        ENUMs:
+            DISABLED:                    Pull disabled
+            ENABLED:                     Pull down
+*/
+#define IOMUX_GPIO48PCTL_PULLDWNSTA                                  0x00000200U
+#define IOMUX_GPIO48PCTL_PULLDWNSTA_M                                0x00000200U
+#define IOMUX_GPIO48PCTL_PULLDWNSTA_S                                9U
+#define IOMUX_GPIO48PCTL_PULLDWNSTA_DISABLED                         0x00000000U
+#define IOMUX_GPIO48PCTL_PULLDWNSTA_ENABLED                          0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO48CTL
+    Offset name:         IOMUX_O_GPIO48CTL
+    Relative address:    0x31008
+    Description:         Control register of IO GPIO48
+                        This register controls the IO state
+    Default Value:       NA
+
+        Field:           PADVAL
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the received value from pad
+
+*/
+#define IOMUX_GPIO48CTL_PADVAL                                       0x00000001U
+#define IOMUX_GPIO48CTL_PADVAL_M                                     0x00000001U
+#define IOMUX_GPIO48CTL_PADVAL_S                                     0U
+/*
+
+        Field:           PADVALSYNC
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     This field captures the sychronized(to SOC clock) received value
+
+*/
+#define IOMUX_GPIO48CTL_PADVALSYNC                                   0x00000002U
+#define IOMUX_GPIO48CTL_PADVALSYNC_M                                 0x00000002U
+#define IOMUX_GPIO48CTL_PADVALSYNC_S                                 1U
+/*
+
+        Field:           OUT
+        From..to bits:   8...8
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the IO drive out value. This field is valid only when [OUTOVREN] is configured ENABLE
+
+        ENUMs:
+            LOW:                         IO drives 0
+            HIGH:                        IO drives 1
+*/
+#define IOMUX_GPIO48CTL_OUT                                          0x00000100U
+#define IOMUX_GPIO48CTL_OUT_M                                        0x00000100U
+#define IOMUX_GPIO48CTL_OUT_S                                        8U
+#define IOMUX_GPIO48CTL_OUT_LOW                                      0x00000000U
+#define IOMUX_GPIO48CTL_OUT_HIGH                                     0x00000100U
+/*
+
+        Field:           OUTOVREN
+        From..to bits:   9...9
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:      This field contols the override on output
+
+        ENUMs:
+            DISABLE:                     Output controlled by IP
+            ENABLE:                      Enable override on output
+*/
+#define IOMUX_GPIO48CTL_OUTOVREN                                     0x00000200U
+#define IOMUX_GPIO48CTL_OUTOVREN_M                                   0x00000200U
+#define IOMUX_GPIO48CTL_OUTOVREN_S                                   9U
+#define IOMUX_GPIO48CTL_OUTOVREN_DISABLE                             0x00000000U
+#define IOMUX_GPIO48CTL_OUTOVREN_ENABLE                              0x00000200U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       GPIO48ECTL
+    Offset name:         IOMUX_O_GPIO48ECTL
+    Relative address:    0x3100C
+    Description:         Event control register for IO GPIO48
+                        This register controls the Event configuration and behaviour
+    Default Value:       NA
+
+        Field:           EVTDETCFG
+        From..to bits:   0...1
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field is to be configured to define the IO detection method
+
+        ENUMs:
+            MASK:                        Masking the event
+            POS_EDGE:                    Rising edge/Positive edge detection
+            NEG_EDGE:                    Falling edge/Negative edge detection
+            LEVEL:                       Level detection
+*/
+#define IOMUX_GPIO48ECTL_EVTDETCFG_W                                 2U
+#define IOMUX_GPIO48ECTL_EVTDETCFG_M                                 0x00000003U
+#define IOMUX_GPIO48ECTL_EVTDETCFG_S                                 0U
+#define IOMUX_GPIO48ECTL_EVTDETCFG_MASK                              0x00000000U
+#define IOMUX_GPIO48ECTL_EVTDETCFG_POS_EDGE                          0x00000001U
+#define IOMUX_GPIO48ECTL_EVTDETCFG_NEG_EDGE                          0x00000002U
+#define IOMUX_GPIO48ECTL_EVTDETCFG_LEVEL                             0x00000003U
+/*
+
+        Field:           TRGLVL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     This field configures the io event polarity. This field is applicable only when [EVTDETCFG] is configured LEVEL
+
+        ENUMs:
+            HIGH:                        Non Inverted polarity
+            LOW:                         Inverted polarity
+*/
+#define IOMUX_GPIO48ECTL_TRGLVL                                      0x00000004U
+#define IOMUX_GPIO48ECTL_TRGLVL_M                                    0x00000004U
+#define IOMUX_GPIO48ECTL_TRGLVL_S                                    2U
+#define IOMUX_GPIO48ECTL_TRGLVL_HIGH                                 0x00000000U
+#define IOMUX_GPIO48ECTL_TRGLVL_LOW                                  0x00000004U
+/*
+
+        Field:           CLR
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     write-only
+        Description:     This bit is to be used to generate CLR pulse for the event
+
+        ENUMs:
+            NOEFF:                       No effect
+            CLEAR:                       Clear the event
+*/
+#define IOMUX_GPIO48ECTL_CLR                                         0x00000008U
+#define IOMUX_GPIO48ECTL_CLR_M                                       0x00000008U
+#define IOMUX_GPIO48ECTL_CLR_S                                       3U
+#define IOMUX_GPIO48ECTL_CLR_NOEFF                                   0x00000000U
+#define IOMUX_GPIO48ECTL_CLR_CLEAR                                   0x00000008U
 
 #endif /* __HW_IOMUX_H__*/

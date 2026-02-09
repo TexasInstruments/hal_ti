@@ -173,7 +173,7 @@ void wlan_IRQClearInt()
     IntClearPend(INT_NAB_HOST_IRQ - IRQ_OFFSET);
 
     osi_ExitCriticalSection(0);
-#endif
+#endif /* !defined(__ZEPHYR__) */
 }
 
 
@@ -187,7 +187,7 @@ void wlan_IRQClearInt()
 */
 void wlan_TurnOffWlan()
 {
-    HWREG(SOC_AON_BASE + SOC_AON_O_CONNSTPCTL) = SOC_AON_CONNSTPCTL_SWITCH;
+//    HWREG(SOC_AON_BASE + SOC_AON_O_CONNSTPCTL) = SOC_AON_CONNSTPCTL_SWITCH;
     HWREG(PRCM_AON_BASE + PRCM_AON_O_CONNSTP) = PRCM_AON_CONNSTP_SET;
     osi_uSleep(500);
 #if 0 
@@ -212,7 +212,7 @@ void wlan_TurnOffWlan()
 */
 void wlan_TurnOnWlan()
 {
-    HWREG(SOC_AON_BASE + SOC_AON_O_CONNSTPCTL) = SOC_AON_CONNSTPCTL_SWITCH;
+//    HWREG(SOC_AON_BASE + SOC_AON_O_CONNSTPCTL) = SOC_AON_CONNSTPCTL_SWITCH;
     HWREG(PRCM_AON_BASE + PRCM_AON_O_CONNSTP) = 0;
 
 #if 0 

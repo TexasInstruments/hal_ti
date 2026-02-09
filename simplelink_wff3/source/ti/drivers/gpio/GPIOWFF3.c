@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024, Texas Instruments Incorporated
+ * Copyright (c) 2023-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +56,10 @@ static bool initCalled = false;
 
 /* HW interrupt structure for I/O interrupt handler */
 static HwiP_Struct gpioHwi;
+
+/* Dedicated functions to set GPIO configuration and control registers. */
+static void GPIO_setCfgReg(uint32_t cfgRegAddr, uint32_t tmpCfgReg);
+static void GPIO_setCtlReg(uint32_t ctlRegAddr, uint32_t tmpCtlReg);
 
 /* Link to config values defined by sysconfig */
 extern GPIO_Config GPIO_config;
@@ -400,7 +404,7 @@ void GPIO_getConfig(uint_least8_t index, GPIO_PinConfig *pinConfig)
 void GPIO_toggle(uint_least8_t index)
 {
     uint32_t ctlRegAddr;
-    uint32_t tmpctlReg;
+    uint32_t tmpCtlReg;
     uintptr_t key;
 
     if (index == GPIO_INVALID_INDEX)
@@ -412,9 +416,9 @@ void GPIO_toggle(uint_least8_t index)
 
     /* Protect read-modify-write operation to toggle GPIO. */
     key       = HwiP_disable();
-    tmpctlReg = HWREG(ctlRegAddr);
-    tmpctlReg ^= IOMUX_GPIO2CTL_OUT;
-    HWREG(ctlRegAddr) = tmpctlReg;
+    tmpCtlReg = HWREG(ctlRegAddr);
+    tmpCtlReg ^= IOMUX_GPIO2CTL_OUT;
+    GPIO_setCtlReg(ctlRegAddr, tmpCtlReg);
     HwiP_restore(key);
 }
 
@@ -424,7 +428,7 @@ void GPIO_toggle(uint_least8_t index)
 void GPIO_write(uint_least8_t index, unsigned int value)
 {
     uint32_t ctlRegAddr;
-    uint32_t tmpctlReg;
+    uint32_t tmpCtlReg;
     uintptr_t key;
 
     if (index == GPIO_INVALID_INDEX)
@@ -436,10 +440,10 @@ void GPIO_write(uint_least8_t index, unsigned int value)
 
     /* Protect read-modify-write operation to write to GPIO. */
     key       = HwiP_disable();
-    tmpctlReg = HWREG(ctlRegAddr);
-    tmpctlReg &= ~IOMUX_GPIO2CTL_OUT_M;
-    tmpctlReg |= (value & 0x1) << IOMUX_GPIO2CTL_OUT_S;
-    HWREG(ctlRegAddr) = tmpctlReg;
+    tmpCtlReg = HWREG(ctlRegAddr);
+    tmpCtlReg &= ~IOMUX_GPIO2CTL_OUT_M;
+    tmpCtlReg |= (value & 0x1) << IOMUX_GPIO2CTL_OUT_S;
+    GPIO_setCtlReg(ctlRegAddr, tmpCtlReg);
     HwiP_restore(key);
 }
 
@@ -491,7 +495,7 @@ int_fast16_t GPIO_setConfigAndMux(uint_least8_t index, GPIO_PinConfig pinConfig,
     uint32_t portcfgRegAddr;
     uint32_t tmpCfgReg;
     uint32_t tmpPullctlCfgReg;
-    uint32_t tmpctlReg;
+    uint32_t tmpCtlReg;
     uint32_t tmpEvtctlReg;
     uint32_t tmpPortcfgReg;
 
@@ -515,7 +519,7 @@ int_fast16_t GPIO_setConfigAndMux(uint_least8_t index, GPIO_PinConfig pinConfig,
     /* Extract register-specific values from compressed pinConfig */
     tmpCfgReg        = (pinConfig & GPIOWFF3_CFG_CFG_M) >> GPIOWFF3_CFG_CFG_S;
     tmpPullctlCfgReg = (pinConfig & GPIOWFF3_CFG_PULLCTL_M) >> GPIOWFF3_CFG_PULLCTL_S;
-    tmpctlReg        = (pinConfig & GPIOWFF3_CFG_CTL_M) >> GPIOWFF3_CFG_CTL_S;
+    tmpCtlReg        = (pinConfig & GPIOWFF3_CFG_CTL_M) >> GPIOWFF3_CFG_CTL_S;
     tmpEvtctlReg     = (pinConfig & GPIOWFF3_CFG_EVTCTL_M) >> GPIOWFF3_CFG_EVTCTL_S;
     tmpPortcfgReg    = (mux << IOMUX_GPIO2PCFG_IOSEL_S) & IOMUX_GPIO2PCFG_IOSEL_M;
 
@@ -538,9 +542,10 @@ int_fast16_t GPIO_setConfigAndMux(uint_least8_t index, GPIO_PinConfig pinConfig,
         /* Mux to GPIO functionality.
          * Change muxing after changing configuration to prevent glitching.
          */
-        HWREG(cfgRegAddr)     = tmpCfgReg;
+
+        GPIO_setCfgReg(cfgRegAddr, tmpCfgReg);
         HWREG(pullctlRegAddr) = tmpPullctlCfgReg;
-        HWREG(ctlRegAddr)     = tmpctlReg;
+        GPIO_setCtlReg(ctlRegAddr, tmpCtlReg);
         HWREG(evtctlRegAddr)  = tmpEvtctlReg;
         HWREG(portcfgRegAddr) = tmpPortcfgReg;
     }
@@ -552,10 +557,10 @@ int_fast16_t GPIO_setConfigAndMux(uint_least8_t index, GPIO_PinConfig pinConfig,
          * will be disabled after the muxing has been changed.
          */
         HWREG(portcfgRegAddr) = tmpPortcfgReg;
-        HWREG(cfgRegAddr)     = tmpCfgReg;
+        GPIO_setCfgReg(cfgRegAddr, tmpCfgReg);
         HWREG(pullctlRegAddr) = tmpPullctlCfgReg;
-        HWREG(ctlRegAddr)     = tmpctlReg;
-        HWREG(evtctlRegAddr)  = tmpEvtctlReg;
+        GPIO_setCtlReg(ctlRegAddr, tmpCtlReg);
+        HWREG(evtctlRegAddr) = tmpEvtctlReg;
     }
 
     if (pinConfig & GPIO_CFG_INT_ENABLE)
@@ -568,4 +573,71 @@ int_fast16_t GPIO_setConfigAndMux(uint_least8_t index, GPIO_PinConfig pinConfig,
     }
 
     return GPIO_STATUS_SUCCESS;
+}
+
+/*
+ *  ======== GPIO_setCfgReg ========
+ * The GPIO configuration registers have two fields that are controlled with an
+ * "override enable" bit. These are the "Output from pad disable/enable" and
+ * "Analog switch open/close" fields.
+ * To avoid a glitch when any of these fields are set, the value must be set
+ * before the "override enable" field is set.
+ */
+static void GPIO_setCfgReg(uint32_t cfgRegAddr, uint32_t tmpCfgReg)
+{
+    bool enableOverrideOutputPad = (tmpCfgReg & IOMUX_GPIO2CFG_OUTDISOVREN_M) == IOMUX_GPIO2CFG_OUTDISOVREN_ENABLE;
+    bool enableOverrideAnalogSwitchControl = (tmpCfgReg & IOMUX_GPIO2CFG_ANASWOVREN_M) ==
+                                             IOMUX_GPIO2CFG_ANASWOVREN_ENABLE;
+    uint32_t orMask = 0U;
+
+    /* If the "override enable" is set, change it to disabled for the first write */
+    if (enableOverrideOutputPad)
+    {
+        tmpCfgReg &= ~IOMUX_GPIO2CFG_OUTDISOVREN_M;
+        orMask |= IOMUX_GPIO2CFG_OUTDISOVREN_ENABLE;
+    }
+
+    if (enableOverrideAnalogSwitchControl)
+    {
+        tmpCfgReg &= ~IOMUX_GPIO2CFG_ANASWOVREN_M;
+        orMask |= IOMUX_GPIO2CFG_ANASWOVREN_ENABLE;
+    }
+
+    /* First write of the config register */
+    HWREG(cfgRegAddr) = tmpCfgReg;
+
+    /* If overrides enabled, set enable and do second write */
+    if (enableOverrideOutputPad || enableOverrideAnalogSwitchControl)
+    {
+        tmpCfgReg |= orMask;
+        HWREG(cfgRegAddr) = tmpCfgReg;
+    }
+}
+
+/*
+ *  ======== GPIO_setCtlReg ========
+ * The GPIO control registers have one field that is controlled with an
+ * "override enable" bit. This is the "IO drive out value" field.
+ * To avoid a glitch when this field is set, the value must be set before the
+ * "override enable" field is set.
+ */
+static void GPIO_setCtlReg(uint32_t ctlRegAddr, uint32_t tmpCtlReg)
+{
+    bool enableOverrideOut = tmpCtlReg & IOMUX_GPIO2CTL_OUTOVREN_ENABLE;
+
+    /* If the "override enable" is set, change it to disabled for the first write */
+    if (enableOverrideOut)
+    {
+        tmpCtlReg &= ~IOMUX_GPIO2CTL_OUTOVREN_M;
+    }
+
+    /* Firs write of the control register */
+    HWREG(ctlRegAddr) = tmpCtlReg;
+
+    /* If overrides enabled, set enable and do second write */
+    if (enableOverrideOut)
+    {
+        tmpCtlReg |= IOMUX_GPIO2CTL_OUTOVREN_ENABLE;
+        HWREG(ctlRegAddr) = tmpCtlReg;
+    }
 }

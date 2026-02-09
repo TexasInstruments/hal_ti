@@ -29,6 +29,11 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#define ERRNO_ALREADY_PROVIDED 1 /* errno provided by lwip */
+
+#ifndef ERRNO_ALREADY_PROVIDED
+
 #ifndef _ERRNO /* this is when errno comes from the compiler, do not redfeine the errno again */
 #ifndef _WIRELESS_H
 #define _WIRELESS_H
@@ -79,3 +84,4 @@
 
 #endif  /* _WIRELESS_H */
 #endif /*  _ERRNO */
+#endif

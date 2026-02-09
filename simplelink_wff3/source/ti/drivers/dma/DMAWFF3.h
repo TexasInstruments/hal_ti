@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Texas Instruments Incorporated
+ * Copyright (c) 2023-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,20 @@ typedef enum
 } DMAWFF3_WordSize;
 
 /*!
+ *  @brief  Definitions for the blockSize argument of the #DMAWFF3_configureChannel()
+ *  function.
+ */
+typedef enum
+{
+    /*! Block size is 1 byte */
+    DMAWFF3_BLOCK_SIZE_1B = DMA_WORD_SIZE_1B,
+    /*! Block size is 2 bytes */
+    DMAWFF3_BLOCK_SIZE_2B = DMA_WORD_SIZE_2B,
+    /*! Block size is 4 bytes */
+    DMAWFF3_BLOCK_SIZE_4B = DMA_WORD_SIZE_4B,
+} DMAWFF3_BlockSize;
+
+/*!
  *  @brief  Definitions for the peripheral argument of the #DMAWFF3_connectChannel()
  *  function.
  */
@@ -158,6 +172,7 @@ typedef enum
     DMAWFF3_PERIPH_ADC       = DMA_PERIPH_ADC,
     DMAWFF3_PERIPH_PDM       = DMA_PERIPH_PDM,
     DMAWFF3_PERIPH_HIF       = DMA_PERIPH_HIF,
+    DMAWFF3_PERIPH_UARTLIN_2 = DMA_PERIPH_UARTLIN_2,
 } DMAWFF3_Peripheral;
 
 /*!

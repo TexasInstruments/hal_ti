@@ -3,7 +3,7 @@
 *
 *  Description:    Collection of architecture definitions for CC35xx devices
 *
-*  Copyright (c) 2023-2024 Texas Instruments Incorporated
+*  Copyright (c) 2023-2025 Texas Instruments Incorporated
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions are met:
@@ -55,7 +55,7 @@ typedef enum IRQn
     INT_SP_SPI_1_EVT_REQ_IRQn                     = 5,
     INT_GPTIMER_0_EVT_CPU_IRQn                    = 6,
     INT_GPTIMER_1_EVT_CPU_IRQn                    = 7,
-    INT_AFA_EVT_INT_REQ_IRQn                      = 8,
+    INT_SP_UART_2_INT_REQ_IRQn                    = 8,
     INT_I2S_IRQ_REQ_IRQn                          = 9,
     INT_EVT_PDM_EVENT_REQ_IRQn                    = 10,
     INT_EVT_SWINT0_REQ_IRQn                       = 11,
@@ -111,6 +111,6 @@ typedef enum IRQn
 #define __MPU_PRESENT          0x0001U /* MPU present or not */
 #define __FPU_PRESENT          0x0001U /* FPU present or not */
 #define __VTOR_PRESENT         0x0001U /* VTOR present */
-#define __NVIC_PRIO_BITS       0x0003U /* 3 NVIC priority bits */
+#define __NVIC_PRIO_BITS       0x0004U /* 4 NVIC priority bits */
 
 #endif // __CC35XX_H__

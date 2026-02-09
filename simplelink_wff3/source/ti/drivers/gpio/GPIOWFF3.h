@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024, Texas Instruments Incorporated
+ * Copyright (c) 2021-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -157,8 +157,8 @@ extern "C" {
  * GPIO20 is used for the drive strength bitmask.
  */
 #define GPIOWFF3_CFG_CFG_S (0)
-#define GPIOWFF3_CFG_CFG_M                                                                                 \
-    ((IOMUX_GPIO2CFG_IE_M | IOMUX_GPIO2CFG_OUTDIS_M | IOMUX_GPIO2CFG_ODISOVEN_M | IOMUX_GPIO20CFG_IOSTR_M) \
+#define GPIOWFF3_CFG_CFG_M                                                                                    \
+    ((IOMUX_GPIO2CFG_IE_M | IOMUX_GPIO2CFG_OUTDIS_M | IOMUX_GPIO2CFG_OUTDISOVREN_M | IOMUX_GPIO20CFG_IOSTR_M) \
      << GPIOWFF3_CFG_CFG_S)
 
 #define GPIOWFF3_CFG_PULLCTL_S (0)
@@ -189,22 +189,23 @@ extern "C" {
  * - Disable input
  */
 #define GPIO_CFG_NO_DIR_INTERNAL \
-    ((IOMUX_GPIO2CFG_ODISOVEN_DISABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CFG_IE_DISABLE << GPIOWFF3_CFG_CFG_S))
+    ((IOMUX_GPIO2CFG_OUTDISOVREN_DISABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CFG_IE_DISABLE << GPIOWFF3_CFG_CFG_S))
 
 /* - Disable output disable override (IP can control OUTDIS)
  * - Enable input
  */
 #define GPIO_CFG_INPUT_INTERNAL \
-    ((IOMUX_GPIO2CFG_ODISOVEN_DISABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CFG_IE_ENABLE << GPIOWFF3_CFG_CFG_S))
+    ((IOMUX_GPIO2CFG_OUTDISOVREN_DISABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CFG_IE_ENABLE << GPIOWFF3_CFG_CFG_S))
 
 /* - Enable output disable override (IP cannot control OUTDIS)
  * - Enable output (clear OUTDIS, which ENABLEs the pad)
  * - Enable input (to be able to read the current pin output value)
  * - Enable output override
  */
-#define GPIO_CFG_OUTPUT_INTERNAL                                                                                     \
-    ((IOMUX_GPIO2CFG_ODISOVEN_ENABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CFG_OUTDIS_ENABLE << GPIOWFF3_CFG_CFG_S) | \
-     (IOMUX_GPIO2CFG_IE_ENABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CTL_OUTOVREN_ENABLE << GPIOWFF3_CFG_CTL_S))
+#define GPIO_CFG_OUTPUT_INTERNAL                                                                               \
+    ((IOMUX_GPIO2CFG_OUTDISOVREN_ENABLE << GPIOWFF3_CFG_CFG_S) |                                               \
+     (IOMUX_GPIO2CFG_OUTDIS_ENABLE << GPIOWFF3_CFG_CFG_S) | (IOMUX_GPIO2CFG_IE_ENABLE << GPIOWFF3_CFG_CFG_S) | \
+     (IOMUX_GPIO2CTL_OUTOVREN_ENABLE << GPIOWFF3_CFG_CTL_S))
 
 /* Default output value (only has an affect if output override is enabled) */
 #define GPIO_CFG_OUTPUT_DEFAULT_HIGH_INTERNAL (IOMUX_GPIO2CTL_OUT_HIGH << GPIOWFF3_CFG_CTL_S)
@@ -292,4 +293,4 @@ extern "C" {
 }
 #endif
 
-#endif /* ti_drivers_GPIOCC26XX__include */
+#endif /* ti_drivers_GPIOWFF3__include */

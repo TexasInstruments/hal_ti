@@ -48,7 +48,6 @@
 #include "wlan_if.h"
 #include "host_event_if.h"
 
-
 extern ETxnStatus eventMbox_Handle();
 extern void FwEvent_StateMachine ();
 extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t * args, uint16_t argsLen);
@@ -58,6 +57,7 @@ uint32_t wlan_FW_tsf;
 
 #define RX_BYTE_COUNT_MASK 0xFFFF
 #define RX_NUM_OF_BYTE_TO_READ_MULTIPLIER 4
+#define CC33XX_GENERAL_ERROR_READ_TIMEOUT_MSEC 	(3000)
 
 
 enum control_message_type
@@ -208,7 +208,7 @@ int read_control_message(uint8_t *read_buffer, uint32_t buffer_size)
     if(pCmdTxn == NULL)
     {
         Report ("ERROR !! memory allocation failed");
-        assert(0);
+        ASSERT_GENERAL(0);
         return -1;
     }
 
@@ -220,7 +220,7 @@ int read_control_message(uint8_t *read_buffer, uint32_t buffer_size)
     ret = twIf_Transact(pCmdTxn);
     if(ret != TXN_STATUS_COMPLETE)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return -1;
     }
 
@@ -228,7 +228,7 @@ int read_control_message(uint8_t *read_buffer, uint32_t buffer_size)
 
     if (nab_header->sync_pattern != DEVICE_SYNC_PATTERN)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         os_free(pCmdTxn);
         return -1;
     }
@@ -247,11 +247,62 @@ int read_control_message(uint8_t *read_buffer, uint32_t buffer_size)
     return nab_header->len;
 }
 
+int general_error_event_get_log(TFwEvent *pFwEvent)
+{
+	int ret = 0;
+	const size_t buffer_size = 5000;
+	unsigned long end_time = osi_GetTimeMS() + CC33XX_GENERAL_ERROR_READ_TIMEOUT_MSEC;
+	uint8_t isGeneralError = 0;
+	uint32_t isTimeout = 0;
+
+    Report("\n\rAttempting to Get FW Crash Logs.");
+
+	while((isGeneralError != true) && (isTimeout != true))
+	{
+
+		ret = read_control_message(pFwEvent->rxTxBuffer, buffer_size);
+		if(ret > 0)
+		{
+			 NAB_header_t *nab_header = (NAB_header_t*) pFwEvent->rxTxBuffer;
+			if(nab_header->opcode == NAB_GENERAL_ERROR_FW_LOGS_OPCODE)
+			{
+                Report("\n\rsuccessfully received NAB_GENERAL_ERROR_FW_LOGS_OPCODE");
+				isGeneralError = 1;
+				break;
+			}
+		}
+        else
+        {
+            Report("\n\rUNSUCCESSFULLY received NAB_GENERAL_ERROR_FW_LOGS_OPCODE");
+        }
+		//should sleep here for 100ms if reading is zero
+		if(isGeneralError != true)
+		{
+			os_sleep(0,100000);
+            if ((long)(osi_GetTimeMS() - end_time) >= 0)
+            {
+                // Passed the end time
+                isTimeout = TRUE;
+                ret = 0;
+            }
+        }
+	}
+
+	if(isTimeout)
+	{
+        Report("\n\rTimed Out Attempting to read CRASH FW LOGS");
+	}
+
+	goto out;
+
+out:
+	return ret;
+}
 
 extern OsiMsgQ_t eventMsgQueue;
 int parse_control_message(uint8_t *buffer, size_t buffer_length)
 {
-    uint8_t *end_of_payload = (uint8_t *const) buffer + buffer_length;
+    uint8_t *end_of_payload = (uint8_t *) buffer + buffer_length;
     EventCompleteMboxTLV_t *control_info_descriptor;
     uint8_t *event_data, *cmd_result_data;
     EventMessage_t event;
@@ -266,7 +317,7 @@ int parse_control_message(uint8_t *buffer, size_t buffer_length)
             event_data = os_malloc(control_info_descriptor->length);
             if (NULL == event_data)
             {
-                assert(0);
+                ASSERT_GENERAL(0);
                 return -1;
             }
             os_memcpy(event_data, buffer + sizeof(EventCompleteMboxTLV_t), control_info_descriptor->length);
@@ -280,7 +331,7 @@ int parse_control_message(uint8_t *buffer, size_t buffer_length)
             }
             else
             {
-                assert(0);
+                ASSERT_GENERAL(0);
             }
             //send to event mbox deffer_event(event_data, control_info_descriptor->length);
             break;
@@ -358,7 +409,6 @@ uint32_t process_event_and_cmd_result(TFwEvent *pFwEvent)
        to overrun previously unhandled bits. */
     core_status->host_interrupt_status |= previous_hint;
 
-    ret = new_core_status->host_interrupt_status;
 out:
     os_free(read_buffer);
     return ret;
@@ -385,6 +435,7 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
     uint32_t initEvents;
     uint32_t maxRxBytesToHandleAtOnce = pFwEvent->rxTxBufSize*RX_NUM_OF_BYTE_TO_READ_MULTIPLIER;
     uint32_t numRxBytesHandled = 0;
+    static uint32_t debugLastReadDataLen = 0;
 //    FWEVENT_PRINT("FwEvent_CallHandlers: uEventVector = 0x%x\n\r", pFwEvent->uEventVector);
 
     do
@@ -413,14 +464,27 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
         // HINT_GENERAL_ERROR event is sent in case of FW assert
         if (core_status->host_interrupt_status & HINT_GENERAL_ERROR)
         {
-		
-            WlanEventError_t  error_event;
             FW_EVENT_HANDLE_PRINT_ERROR("\n\rFwEvent_CallHandlers: GENERAL ERROR event received! FW is stuck\n\r");
-            error_event.error_num = -1;
-            error_event.module = WLAN_MODULE_FWEVENT;
-            error_event.severity = WLAN_SEVERITY_HIGH;
-            Wlan_HostSendEvent(WLAN_EVENT_FW_CRASH, (uint8_t*)&error_event, sizeof(WlanEventError_t));
-			core_status->host_interrupt_status &= ~HINT_GENERAL_ERROR;
+
+            WlanEventFwCrash_t *pArgs;
+            pArgs = os_zalloc(sizeof(WlanEventFwCrash_t));
+
+            // Here we read the log buffer (from the rx tx buffer)
+            if (general_error_event_get_log(pFwEvent) > 0)
+            {
+                pArgs->log_buffer = pFwEvent->rxTxBuffer + sizeof(NAB_header_t);
+                pArgs->log_buffer_len = (uint32_t)CC33XX_MAX_FW_LOGS_BUFFER_SIZE;
+            }
+            else
+            {
+                pArgs->log_buffer = NULL;
+                pArgs->log_buffer_len = 0;
+            }
+            FW_EVENT_HANDLE_PRINT_ERROR("\n\rSend to wlanDispatcherSendEvent\n\r");
+
+            wlanDispatcherSendEvent(WLAN_EVENT_FW_CRASH, (uint8_t *)pArgs, sizeof(WlanEventFwCrash_t));
+            core_status->host_interrupt_status &= ~HINT_GENERAL_ERROR;
+            os_free(pArgs);
         }
 
         if (core_status->host_interrupt_status
@@ -443,7 +507,7 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
                     FW_EVENT_HANDLE_PRINT_ERROR(
                            "\n\r Error !!! process_event_and_cmd_result: 0x%x\n\r",core_status->host_interrupt_status);
                     memset(core_status, 0, sizeof *core_status);
-                    assert(0);
+                    ASSERT_GENERAL(0);
                     return TXN_STATUS_ERROR;
                 }
                 CORE_STATUS_PRINT("\n\rcore_status ! HINT_COMMAND_COMPLETE,host_interrupt_status :0x%x,rx_status:%d tsf:0x%x\n\r",
@@ -458,6 +522,10 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
                 {
                     core_status_idle = TRUE;
                 }
+            }
+            else
+            {
+                core_status_idle = TRUE;// get out from the loop if there are no events to handle unless there are RX to handle
             }
 
             wlan_FW_tsf = core_status->tsf;
@@ -485,7 +553,7 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
                 read_data_len = bus_AlignLength(read_data_len);
                 FW_EVENT_HANDLE_PRINT("\n\rRx_status count: %d, headers_len:%d, next read total length : %d read-unaligned size:%d!!!\n\r", rx_byte_count,read_headers_len,read_data_len-sizeof(FwStatus_t), rx_byte_count + read_headers_len);//FwStatus_t is read directly by lower layers and no from the nab
 
-                //the maximum read is 4092 which is RX_TX_BUFFER
+                //the maximum read is RX_TX_BUFFER
                 //if the length exceeds that, we should do another read round so mark
                 //the core idle status as false
                 if (read_data_len > pFwEvent->rxTxBufSize)
@@ -497,55 +565,57 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
                 core_status->host_interrupt_status &= ~HINT_RX_DATA_PENDING;
                 if (read_data_message(read_buffer, read_data_len) < 0)
                 {
-                    assert(0);
-                    return TXN_STATUS_ERROR;
+                    FW_EVENT_HANDLE_PRINT_ERROR("\n\r warning!read_data_message failed, no data, continue, read_data_len:%d debugLastReadDataLen:%d !!!\n\r", read_data_len, debugLastReadDataLen);
                 }
-
-                new_core_stat = (FwStatus_t*) ((uint8_t*) read_buffer
-                        + read_data_len - sizeof(FwStatus_t));
-
-                //host_interrupt_status it suppose to be zero in here
-                previous_hint = core_status->host_interrupt_status;
-                memcpy(core_status, new_core_stat, sizeof(FwStatus_t));
-
-                wlan_FW_tsf = core_status->tsf;
-                /* Host interrupt filed is clear-on-read and we do not want
-                   to overrun previously unhandled bits. */
-                core_status->host_interrupt_status |= previous_hint;
-                CORE_STATUS_PRINT("\n\rcore_status ! Rx :host_interrupt_status :0x%x,rx_status:%d loopNum:%d tsf:0x%x\n\r",
-                        core_status->host_interrupt_status,
-                        core_status->rx_status & RX_BYTE_COUNT_MASK,
-                        loopNum,
-                        core_status->tsf);
-
-#ifdef DEBUG_FW_EVENT
-                printCoreStatus(core_status,1);
-#endif
-
-                NAB_rx_header = (NAB_rx_header_t*) read_buffer;
-
-                if (NAB_rx_header->len < NAB_RX_HEADER_LEN_SUBMISSION)
+                else // read data was succeeded
                 {
-                    assert(0);
-                    actual_read_data_len = 0;
-                    return TXN_STATUS_ERROR;
+
+                    debugLastReadDataLen = read_data_len;
+                    new_core_stat = (FwStatus_t*) ((uint8_t*) read_buffer
+                            + read_data_len - sizeof(FwStatus_t));
+
+                    //host_interrupt_status it suppose to be zero in here
+                    previous_hint = core_status->host_interrupt_status;
+                    memcpy(core_status, new_core_stat, sizeof(FwStatus_t));
+
+                    wlan_FW_tsf = core_status->tsf;
+                    /* Host interrupt filed is clear-on-read and we do not want
+                       to overrun previously unhandled bits. */
+                    core_status->host_interrupt_status |= previous_hint;
+                    CORE_STATUS_PRINT("\n\rcore_status ! Rx :host_interrupt_status :0x%x,rx_status:%d loopNum:%d tsf:0x%x\n\r",
+                            core_status->host_interrupt_status,
+                            core_status->rx_status & RX_BYTE_COUNT_MASK,
+                            loopNum,
+                            core_status->tsf);
+
+    #ifdef DEBUG_FW_EVENT
+                    printCoreStatus(core_status,1);
+        #endif
+
+                    NAB_rx_header = (NAB_rx_header_t*) read_buffer;
+
+                    if (NAB_rx_header->len < NAB_RX_HEADER_LEN_SUBMISSION)
+                    {
+                        ASSERT_GENERAL(0);
+                        actual_read_data_len = 0;
+                        return TXN_STATUS_ERROR;
+                    }
+                    else
+                    {
+                        actual_read_data_len = NAB_rx_header->len
+                                - NAB_RX_HEADER_LEN_SUBMISSION; ///the length contains part of the NAB_rx_header_t, so reduce 8 to get the real packet length
+                    } FW_EVENT_HANDLE_PRINT("\n\rFrom nab hdr, Rx data_len:%d", actual_read_data_len);
+
+                    if (actual_read_data_len != 0)
+                    {
+                        read_buffer = (uint8_t*) read_buffer
+                                + sizeof(NAB_rx_header_t);
+                        rx(read_buffer, actual_read_data_len);
+                        numRxBytesHandled += actual_read_data_len;
+
+                    }
                 }
-                else
-                {
-                    actual_read_data_len = NAB_rx_header->len
-                            - NAB_RX_HEADER_LEN_SUBMISSION; ///the length contains part of the NAB_rx_header_t, so reduce 8 to get the real packet length
-                } FW_EVENT_HANDLE_PRINT("\n\rFrom nab hdr, Rx data_len:%d", actual_read_data_len);
-
-                if (actual_read_data_len != 0)
-                {
-                    read_buffer = (uint8_t*) read_buffer
-                            + sizeof(NAB_rx_header_t);
-                    rx(read_buffer, actual_read_data_len);
-                    numRxBytesHandled += actual_read_data_len;
-
-                }
-            }
-
+            }// else if (rx_byte_count != 0)
         }
         
         if(!pFwEvent->isDuringInit)

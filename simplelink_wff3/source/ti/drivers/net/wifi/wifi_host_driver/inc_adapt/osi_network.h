@@ -69,6 +69,23 @@ struct sockaddr_in {
 };
 #endif /* defined(__ZEPHYR__) */
 
+#ifndef AF_INET
+#define AF_INET (2)
+#endif
+
+#if !defined(__ZEPHYR__)
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN  22
+#endif
+
+#ifndef INET6_ADDRSTRLEN
+#define INET6_ADDRSTRLEN 65
+#endif
+#endif /* !defined(__ZEPHYR__) */
+
+#ifndef AF_INET6
+#define AF_INET6        23
+#endif
 
 
 #endif /* INC_ADAPT_OSI_NETWORK_H_ */

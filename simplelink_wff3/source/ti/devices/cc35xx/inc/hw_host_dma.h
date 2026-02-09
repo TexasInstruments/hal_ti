@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the HOST_DMA peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,12 @@
 This section defines the register offsets of the HOST_DMA component
 
 --------------------------------------------------------------------------------- */
+
+//Host DMA Channel Controlled by Defined Peripheral
+#define HOST_DMA_O_CHCTL0                                            0x00000000U
+
+//Host DMA Channel Controlled by Defined Peripheral
+#define HOST_DMA_O_CHCTL1                                            0x00000004U
 
 //Priority Channel Configuration
 #define HOST_DMA_O_PRIOCFG                                           0x00000018U
@@ -204,7 +210,7 @@ This section defines the register offsets of the HOST_DMA component
 #define HOST_DMA_O_CH7TCTL                                           0x0000800CU
 
 //DMA command interface
-#define HOST_DMA_O_CH7TCTL2                                          0x00008030U
+#define HOST_DMA_O_CH7TCTL2                                          0x00008010U
 
 //Job completion reason - either last transaction or exception
 #define HOST_DMA_O_CH7TSTA                                           0x00008014U
@@ -296,6 +302,1012 @@ This section defines the register offsets of the HOST_DMA component
 //Job control register
 #define HOST_DMA_O_CH11JCTL                                          0x0000C01CU
 
+//Channel Status FSM state and run indication
+#define HOST_DMA_O_CH12STA                                           0x0000D000U
+
+//32 bit address pointer of channel current input
+#define HOST_DMA_O_CH12TIPTR                                         0x0000D004U
+
+//32 bit address pointer of channel current output
+#define HOST_DMA_O_CH12TOPTR                                         0x0000D008U
+
+//Transaction control
+#define HOST_DMA_O_CH12TCTL                                          0x0000D00CU
+
+//DMA command interface
+#define HOST_DMA_O_CH12TCTL2                                         0x0000D010U
+
+//Job completion reason - either last transaction or exception
+#define HOST_DMA_O_CH12TSTA                                          0x0000D014U
+
+//Job control register
+#define HOST_DMA_O_CH12JCTL                                          0x0000D01CU
+
+//Channel Status FSM state and run indication
+#define HOST_DMA_O_CH13STA                                           0x0000E000U
+
+//32 bit address pointer of channel current input
+#define HOST_DMA_O_CH13TIPTR                                         0x0000E004U
+
+//32 bit address pointer of channel current output
+#define HOST_DMA_O_CH13TOPTR                                         0x0000E008U
+
+//Transaction control
+#define HOST_DMA_O_CH13TCTL                                          0x0000E00CU
+
+//DMA command interface
+#define HOST_DMA_O_CH13TCTL2                                         0x0000E010U
+
+//Job completion reason - either last transaction or exception
+#define HOST_DMA_O_CH13TSTA                                          0x0000E014U
+
+//Job control register
+#define HOST_DMA_O_CH13JCTL                                          0x0000E01CU
+
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CHCTL0
+    Offset name:         HOST_DMA_O_CHCTL0
+    Relative address:    0x0
+    Description:         Host DMA Channel Controlled by Defined Peripheral.
+
+                        The value of each fields concats with [HOST_DMA:JOBCTLCHx.SRCDSTCFG] (when x is channel num)
+                        if [CHCTL0.CHx] = 4 and [JOBCTLCHx.SRCDSTCFG] = 1 (value = 0100_1 = 9)
+                        then flow control signals of channel x are connected to periph number 9 flow control signals
+
+                        Note: [CHCTL0.CHx] = 0xF is forbidden. This configuration should be only used for Dynamic Switch
+    Default Value:       0x00000000
+
+        Field:           CH0
+        From..to bits:   0...3
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 0 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH0_W                                        4U
+#define HOST_DMA_CHCTL0_CH0_M                                        0x0000000FU
+#define HOST_DMA_CHCTL0_CH0_S                                        0U
+#define HOST_DMA_CHCTL0_CH0_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH0_UART1                                    0x00000001U
+#define HOST_DMA_CHCTL0_CH0_SPIO                                     0x00000002U
+#define HOST_DMA_CHCTL0_CH0_SPI1                                     0x00000003U
+#define HOST_DMA_CHCTL0_CH0_I2C0                                     0x00000004U
+#define HOST_DMA_CHCTL0_CH0_I2C1                                     0x00000005U
+#define HOST_DMA_CHCTL0_CH0_SDMMC                                    0x00000006U
+#define HOST_DMA_CHCTL0_CH0_SDIO                                     0x00000007U
+#define HOST_DMA_CHCTL0_CH0_MCAN                                     0x00000008U
+#define HOST_DMA_CHCTL0_CH0_ADC                                      0x00000009U
+#define HOST_DMA_CHCTL0_CH0_PDM                                      0x0000000AU
+#define HOST_DMA_CHCTL0_CH0_HIF                                      0x0000000BU
+#define HOST_DMA_CHCTL0_CH0_UART2                                    0x0000000CU
+/*
+
+        Field:           CH1
+        From..to bits:   4...7
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 1 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH1_W                                        4U
+#define HOST_DMA_CHCTL0_CH1_M                                        0x000000F0U
+#define HOST_DMA_CHCTL0_CH1_S                                        4U
+#define HOST_DMA_CHCTL0_CH1_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH1_UART1                                    0x00000010U
+#define HOST_DMA_CHCTL0_CH1_SPIO                                     0x00000020U
+#define HOST_DMA_CHCTL0_CH1_SPI1                                     0x00000030U
+#define HOST_DMA_CHCTL0_CH1_I2C0                                     0x00000040U
+#define HOST_DMA_CHCTL0_CH1_I2C1                                     0x00000050U
+#define HOST_DMA_CHCTL0_CH1_SDMMC                                    0x00000060U
+#define HOST_DMA_CHCTL0_CH1_SDIO                                     0x00000070U
+#define HOST_DMA_CHCTL0_CH1_MCAN                                     0x00000080U
+#define HOST_DMA_CHCTL0_CH1_ADC                                      0x00000090U
+#define HOST_DMA_CHCTL0_CH1_PDM                                      0x000000A0U
+#define HOST_DMA_CHCTL0_CH1_HIF                                      0x000000B0U
+#define HOST_DMA_CHCTL0_CH1_UART2                                    0x000000C0U
+/*
+
+        Field:           CH2
+        From..to bits:   8...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 2 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH2_W                                        4U
+#define HOST_DMA_CHCTL0_CH2_M                                        0x00000F00U
+#define HOST_DMA_CHCTL0_CH2_S                                        8U
+#define HOST_DMA_CHCTL0_CH2_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH2_UART1                                    0x00000100U
+#define HOST_DMA_CHCTL0_CH2_SPIO                                     0x00000200U
+#define HOST_DMA_CHCTL0_CH2_SPI1                                     0x00000300U
+#define HOST_DMA_CHCTL0_CH2_I2C0                                     0x00000400U
+#define HOST_DMA_CHCTL0_CH2_I2C1                                     0x00000500U
+#define HOST_DMA_CHCTL0_CH2_SDMMC                                    0x00000600U
+#define HOST_DMA_CHCTL0_CH2_SDIO                                     0x00000700U
+#define HOST_DMA_CHCTL0_CH2_MCAN                                     0x00000800U
+#define HOST_DMA_CHCTL0_CH2_ADC                                      0x00000900U
+#define HOST_DMA_CHCTL0_CH2_PDM                                      0x00000A00U
+#define HOST_DMA_CHCTL0_CH2_HIF                                      0x00000B00U
+#define HOST_DMA_CHCTL0_CH2_UART2                                    0x00000C00U
+/*
+
+        Field:           CH3
+        From..to bits:   12...15
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 3 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH3_W                                        4U
+#define HOST_DMA_CHCTL0_CH3_M                                        0x0000F000U
+#define HOST_DMA_CHCTL0_CH3_S                                        12U
+#define HOST_DMA_CHCTL0_CH3_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH3_UART1                                    0x00001000U
+#define HOST_DMA_CHCTL0_CH3_SPIO                                     0x00002000U
+#define HOST_DMA_CHCTL0_CH3_SPI1                                     0x00003000U
+#define HOST_DMA_CHCTL0_CH3_I2C0                                     0x00004000U
+#define HOST_DMA_CHCTL0_CH3_I2C1                                     0x00005000U
+#define HOST_DMA_CHCTL0_CH3_SDMMC                                    0x00006000U
+#define HOST_DMA_CHCTL0_CH3_SDIO                                     0x00007000U
+#define HOST_DMA_CHCTL0_CH3_MCAN                                     0x00008000U
+#define HOST_DMA_CHCTL0_CH3_ADC                                      0x00009000U
+#define HOST_DMA_CHCTL0_CH3_PDM                                      0x0000A000U
+#define HOST_DMA_CHCTL0_CH3_HIF                                      0x0000B000U
+#define HOST_DMA_CHCTL0_CH3_UART2                                    0x0000C000U
+/*
+
+        Field:           CH4
+        From..to bits:   16...19
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 4 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH4_W                                        4U
+#define HOST_DMA_CHCTL0_CH4_M                                        0x000F0000U
+#define HOST_DMA_CHCTL0_CH4_S                                        16U
+#define HOST_DMA_CHCTL0_CH4_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH4_UART1                                    0x00010000U
+#define HOST_DMA_CHCTL0_CH4_SPIO                                     0x00020000U
+#define HOST_DMA_CHCTL0_CH4_SPI1                                     0x00030000U
+#define HOST_DMA_CHCTL0_CH4_I2C0                                     0x00040000U
+#define HOST_DMA_CHCTL0_CH4_I2C1                                     0x00050000U
+#define HOST_DMA_CHCTL0_CH4_SDMMC                                    0x00060000U
+#define HOST_DMA_CHCTL0_CH4_SDIO                                     0x00070000U
+#define HOST_DMA_CHCTL0_CH4_MCAN                                     0x00080000U
+#define HOST_DMA_CHCTL0_CH4_ADC                                      0x00090000U
+#define HOST_DMA_CHCTL0_CH4_PDM                                      0x000A0000U
+#define HOST_DMA_CHCTL0_CH4_HIF                                      0x000B0000U
+#define HOST_DMA_CHCTL0_CH4_UART2                                    0x000C0000U
+/*
+
+        Field:           CH5
+        From..to bits:   20...23
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 5 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH5_W                                        4U
+#define HOST_DMA_CHCTL0_CH5_M                                        0x00F00000U
+#define HOST_DMA_CHCTL0_CH5_S                                        20U
+#define HOST_DMA_CHCTL0_CH5_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH5_UART1                                    0x00100000U
+#define HOST_DMA_CHCTL0_CH5_SPIO                                     0x00200000U
+#define HOST_DMA_CHCTL0_CH5_SPI1                                     0x00300000U
+#define HOST_DMA_CHCTL0_CH5_I2C0                                     0x00400000U
+#define HOST_DMA_CHCTL0_CH5_I2C1                                     0x00500000U
+#define HOST_DMA_CHCTL0_CH5_SDMMC                                    0x00600000U
+#define HOST_DMA_CHCTL0_CH5_SDIO                                     0x00700000U
+#define HOST_DMA_CHCTL0_CH5_MCAN                                     0x00800000U
+#define HOST_DMA_CHCTL0_CH5_ADC                                      0x00900000U
+#define HOST_DMA_CHCTL0_CH5_PDM                                      0x00A00000U
+#define HOST_DMA_CHCTL0_CH5_HIF                                      0x00B00000U
+#define HOST_DMA_CHCTL0_CH5_UART2                                    0x00C00000U
+/*
+
+        Field:           CH6
+        From..to bits:   24...27
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 6 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH6_W                                        4U
+#define HOST_DMA_CHCTL0_CH6_M                                        0x0F000000U
+#define HOST_DMA_CHCTL0_CH6_S                                        24U
+#define HOST_DMA_CHCTL0_CH6_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH6_UART1                                    0x01000000U
+#define HOST_DMA_CHCTL0_CH6_SPIO                                     0x02000000U
+#define HOST_DMA_CHCTL0_CH6_SPI1                                     0x03000000U
+#define HOST_DMA_CHCTL0_CH6_I2C0                                     0x04000000U
+#define HOST_DMA_CHCTL0_CH6_I2C1                                     0x05000000U
+#define HOST_DMA_CHCTL0_CH6_SDMMC                                    0x06000000U
+#define HOST_DMA_CHCTL0_CH6_SDIO                                     0x07000000U
+#define HOST_DMA_CHCTL0_CH6_MCAN                                     0x08000000U
+#define HOST_DMA_CHCTL0_CH6_ADC                                      0x09000000U
+#define HOST_DMA_CHCTL0_CH6_PDM                                      0x0A000000U
+#define HOST_DMA_CHCTL0_CH6_HIF                                      0x0B000000U
+#define HOST_DMA_CHCTL0_CH6_UART2                                    0x0C000000U
+/*
+
+        Field:           CH7
+        From..to bits:   28...31
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 7 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL0_CH7_W                                        4U
+#define HOST_DMA_CHCTL0_CH7_M                                        0xF0000000U
+#define HOST_DMA_CHCTL0_CH7_S                                        28U
+#define HOST_DMA_CHCTL0_CH7_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL0_CH7_UART1                                    0x10000000U
+#define HOST_DMA_CHCTL0_CH7_SPIO                                     0x20000000U
+#define HOST_DMA_CHCTL0_CH7_SPI1                                     0x30000000U
+#define HOST_DMA_CHCTL0_CH7_I2C0                                     0x40000000U
+#define HOST_DMA_CHCTL0_CH7_I2C1                                     0x50000000U
+#define HOST_DMA_CHCTL0_CH7_SDMMC                                    0x60000000U
+#define HOST_DMA_CHCTL0_CH7_SDIO                                     0x70000000U
+#define HOST_DMA_CHCTL0_CH7_MCAN                                     0x80000000U
+#define HOST_DMA_CHCTL0_CH7_ADC                                      0x90000000U
+#define HOST_DMA_CHCTL0_CH7_PDM                                      0xA0000000U
+#define HOST_DMA_CHCTL0_CH7_HIF                                      0xB0000000U
+#define HOST_DMA_CHCTL0_CH7_UART2                                    0xC0000000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CHCTL1
+    Offset name:         HOST_DMA_O_CHCTL1
+    Relative address:    0x4
+    Description:         Host DMA Channel Controlled by Defined Peripheral.
+
+                        The value of each fields concats with [HOST_DMA:JOBCTLCHx.SRCDSTCFG] (when x is channel num)
+                        if [CHCTL1.CHx] = 4 and [JOBCTLCHx.SRCDSTCFG] = 1 (value = 0100_1 = 9)
+                        then flow control signals of channel x are connected to periph number 9 flow control signals
+
+                        Note: [CHCTL0.CHx] = 0xF is forbidden. This configuration should be only used for Dynamic Switch
+    Default Value:       0x00000000
+
+        Field:           CH8
+        From..to bits:   0...3
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 8 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL1_CH8_W                                        4U
+#define HOST_DMA_CHCTL1_CH8_M                                        0x0000000FU
+#define HOST_DMA_CHCTL1_CH8_S                                        0U
+#define HOST_DMA_CHCTL1_CH8_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL1_CH8_UART1                                    0x00000001U
+#define HOST_DMA_CHCTL1_CH8_SPIO                                     0x00000002U
+#define HOST_DMA_CHCTL1_CH8_SPI1                                     0x00000003U
+#define HOST_DMA_CHCTL1_CH8_I2C0                                     0x00000004U
+#define HOST_DMA_CHCTL1_CH8_I2C1                                     0x00000005U
+#define HOST_DMA_CHCTL1_CH8_SDMMC                                    0x00000006U
+#define HOST_DMA_CHCTL1_CH8_SDIO                                     0x00000007U
+#define HOST_DMA_CHCTL1_CH8_MCAN                                     0x00000008U
+#define HOST_DMA_CHCTL1_CH8_ADC                                      0x00000009U
+#define HOST_DMA_CHCTL1_CH8_PDM                                      0x0000000AU
+#define HOST_DMA_CHCTL1_CH8_HIF                                      0x0000000BU
+#define HOST_DMA_CHCTL1_CH8_UART2                                    0x0000000CU
+/*
+
+        Field:           CH9
+        From..to bits:   4...7
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 9 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL1_CH9_W                                        4U
+#define HOST_DMA_CHCTL1_CH9_M                                        0x000000F0U
+#define HOST_DMA_CHCTL1_CH9_S                                        4U
+#define HOST_DMA_CHCTL1_CH9_UART0                                    0x00000000U
+#define HOST_DMA_CHCTL1_CH9_UART1                                    0x00000010U
+#define HOST_DMA_CHCTL1_CH9_SPIO                                     0x00000020U
+#define HOST_DMA_CHCTL1_CH9_SPI1                                     0x00000030U
+#define HOST_DMA_CHCTL1_CH9_I2C0                                     0x00000040U
+#define HOST_DMA_CHCTL1_CH9_I2C1                                     0x00000050U
+#define HOST_DMA_CHCTL1_CH9_SDMMC                                    0x00000060U
+#define HOST_DMA_CHCTL1_CH9_SDIO                                     0x00000070U
+#define HOST_DMA_CHCTL1_CH9_MCAN                                     0x00000080U
+#define HOST_DMA_CHCTL1_CH9_ADC                                      0x00000090U
+#define HOST_DMA_CHCTL1_CH9_PDM                                      0x000000A0U
+#define HOST_DMA_CHCTL1_CH9_HIF                                      0x000000B0U
+#define HOST_DMA_CHCTL1_CH9_UART2                                    0x000000C0U
+/*
+
+        Field:           CH10
+        From..to bits:   8...11
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 10 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL1_CH10_W                                       4U
+#define HOST_DMA_CHCTL1_CH10_M                                       0x00000F00U
+#define HOST_DMA_CHCTL1_CH10_S                                       8U
+#define HOST_DMA_CHCTL1_CH10_UART0                                   0x00000000U
+#define HOST_DMA_CHCTL1_CH10_UART1                                   0x00000100U
+#define HOST_DMA_CHCTL1_CH10_SPIO                                    0x00000200U
+#define HOST_DMA_CHCTL1_CH10_SPI1                                    0x00000300U
+#define HOST_DMA_CHCTL1_CH10_I2C0                                    0x00000400U
+#define HOST_DMA_CHCTL1_CH10_I2C1                                    0x00000500U
+#define HOST_DMA_CHCTL1_CH10_SDMMC                                   0x00000600U
+#define HOST_DMA_CHCTL1_CH10_SDIO                                    0x00000700U
+#define HOST_DMA_CHCTL1_CH10_MCAN                                    0x00000800U
+#define HOST_DMA_CHCTL1_CH10_ADC                                     0x00000900U
+#define HOST_DMA_CHCTL1_CH10_PDM                                     0x00000A00U
+#define HOST_DMA_CHCTL1_CH10_HIF                                     0x00000B00U
+#define HOST_DMA_CHCTL1_CH10_UART2                                   0x00000C00U
+/*
+
+        Field:           CH11
+        From..to bits:   12...15
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 11 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL1_CH11_W                                       4U
+#define HOST_DMA_CHCTL1_CH11_M                                       0x0000F000U
+#define HOST_DMA_CHCTL1_CH11_S                                       12U
+#define HOST_DMA_CHCTL1_CH11_UART0                                   0x00000000U
+#define HOST_DMA_CHCTL1_CH11_UART1                                   0x00001000U
+#define HOST_DMA_CHCTL1_CH11_SPIO                                    0x00002000U
+#define HOST_DMA_CHCTL1_CH11_SPI1                                    0x00003000U
+#define HOST_DMA_CHCTL1_CH11_I2C0                                    0x00004000U
+#define HOST_DMA_CHCTL1_CH11_I2C1                                    0x00005000U
+#define HOST_DMA_CHCTL1_CH11_SDMMC                                   0x00006000U
+#define HOST_DMA_CHCTL1_CH11_SDIO                                    0x00007000U
+#define HOST_DMA_CHCTL1_CH11_MCAN                                    0x00008000U
+#define HOST_DMA_CHCTL1_CH11_ADC                                     0x00009000U
+#define HOST_DMA_CHCTL1_CH11_PDM                                     0x0000A000U
+#define HOST_DMA_CHCTL1_CH11_HIF                                     0x0000B000U
+#define HOST_DMA_CHCTL1_CH11_UART2                                   0x0000C000U
+/*
+
+        Field:           CH12
+        From..to bits:   16...19
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 12 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL1_CH12_W                                       4U
+#define HOST_DMA_CHCTL1_CH12_M                                       0x000F0000U
+#define HOST_DMA_CHCTL1_CH12_S                                       16U
+#define HOST_DMA_CHCTL1_CH12_UART0                                   0x00000000U
+#define HOST_DMA_CHCTL1_CH12_UART1                                   0x00010000U
+#define HOST_DMA_CHCTL1_CH12_SPIO                                    0x00020000U
+#define HOST_DMA_CHCTL1_CH12_SPI1                                    0x00030000U
+#define HOST_DMA_CHCTL1_CH12_I2C0                                    0x00040000U
+#define HOST_DMA_CHCTL1_CH12_I2C1                                    0x00050000U
+#define HOST_DMA_CHCTL1_CH12_SDMMC                                   0x00060000U
+#define HOST_DMA_CHCTL1_CH12_SDIO                                    0x00070000U
+#define HOST_DMA_CHCTL1_CH12_MCAN                                    0x00080000U
+#define HOST_DMA_CHCTL1_CH12_ADC                                     0x00090000U
+#define HOST_DMA_CHCTL1_CH12_PDM                                     0x000A0000U
+#define HOST_DMA_CHCTL1_CH12_HIF                                     0x000B0000U
+#define HOST_DMA_CHCTL1_CH12_UART2                                   0x000C0000U
+/*
+
+        Field:           CH13
+        From..to bits:   20...23
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Channel 13 Control.
+                         Flow control signals:
+                         25 UART2       TX
+                         24 UART2       RX
+                         23 HIF         TX
+                         22 HIF         RX
+                         21 Not Valid - PDM has only read
+                         20 PDM
+                         19 Not Valid - ADC has only read
+                         18 ADC
+                         17 MCAN        TX
+                         16 MCAN        RX
+                         15 SDIO        TX
+                         14 SDIO        RX
+                         13 SDMMC       TX
+                         12 SDMMC       RX
+                         11 I2C1        TX
+                         10 I2C1        RX
+                          9 I2C0        TX
+                          8 I2C0        RX
+                          7 SPI1        TX
+                          6 SPI1        RX
+                          5 SPI0        TX
+                          4 SPI0        RX
+                          3 UART1       TX
+                          2 UART1       RX
+                          1 UART0       TX
+                          0 UART0       RX
+
+
+        ENUMs:
+            UART0:                       UART0 peripheral
+            UART1:                       UART1 peripheral
+            SPIO:                        SPI0 peripheral
+            SPI1:                        SPI1 peripheral
+            I2C0:                        I2C0 peripheral
+            I2C1:                        I2C1 peripheral
+            SDMMC:                       SDMMC peripheral
+            SDIO:                        SDIO peripheral
+            MCAN:                        MCAN peripheral
+            ADC:                         ADC peripheral
+            PDM:                         PDM peripheral
+            HIF:                         HIF peripheral
+            UART2:                       UART2 peripheral
+*/
+#define HOST_DMA_CHCTL1_CH13_W                                       4U
+#define HOST_DMA_CHCTL1_CH13_M                                       0x00F00000U
+#define HOST_DMA_CHCTL1_CH13_S                                       20U
+#define HOST_DMA_CHCTL1_CH13_UART0                                   0x00000000U
+#define HOST_DMA_CHCTL1_CH13_UART1                                   0x00100000U
+#define HOST_DMA_CHCTL1_CH13_SPIO                                    0x00200000U
+#define HOST_DMA_CHCTL1_CH13_SPI1                                    0x00300000U
+#define HOST_DMA_CHCTL1_CH13_I2C0                                    0x00400000U
+#define HOST_DMA_CHCTL1_CH13_I2C1                                    0x00500000U
+#define HOST_DMA_CHCTL1_CH13_SDMMC                                   0x00600000U
+#define HOST_DMA_CHCTL1_CH13_SDIO                                    0x00700000U
+#define HOST_DMA_CHCTL1_CH13_MCAN                                    0x00800000U
+#define HOST_DMA_CHCTL1_CH13_ADC                                     0x00900000U
+#define HOST_DMA_CHCTL1_CH13_PDM                                     0x00A00000U
+#define HOST_DMA_CHCTL1_CH13_HIF                                     0x00B00000U
+#define HOST_DMA_CHCTL1_CH13_UART2                                   0x00C00000U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2797,7 +3809,7 @@ This section defines the register offsets of the HOST_DMA component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       CH7TCTL2
     Offset name:         HOST_DMA_O_CH7TCTL2
-    Relative address:    0x8030
+    Relative address:    0x8010
     Description:         DMA command interface
     Default Value:       0x00000000
 
@@ -4219,5 +5231,637 @@ This section defines the register offsets of the HOST_DMA component
 #define HOST_DMA_CH11JCTL_ENCLR                                      0x40000000U
 #define HOST_DMA_CH11JCTL_ENCLR_M                                    0x40000000U
 #define HOST_DMA_CH11JCTL_ENCLR_S                                    30U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12STA
+    Offset name:         HOST_DMA_O_CH12STA
+    Relative address:    0xD000
+    Description:         Channel Status FSM state and run indication.
+    Default Value:       0x00000000
+
+        Field:           HWEVENT
+        From..to bits:   0...2
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     HW event status.
+                         Channel status is a bit mask. Multiple bits can be set at the same time
+                         0. PROCESSING
+                         1. TRANS DONE
+                         2. ABORT
+                         4. EXCEPTION
+
+*/
+#define HOST_DMA_CH12STA_HWEVENT_W                                   3U
+#define HOST_DMA_CH12STA_HWEVENT_M                                   0x00000007U
+#define HOST_DMA_CH12STA_HWEVENT_S                                   0U
+/*
+
+        Field:           FSMSTATE
+        From..to bits:   8...11
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     FSM state:
+                         0x0. IDLE
+                         0x2. EXCEPTION
+                         0x3. DRAIN
+                         0x4. ABORT
+                         0x8. PENDING ARB
+                         0x9. COPY
+                         0xA. COPY LAST
+                         0xC. DONE
+                         0xD. SAVE CTX
+                         0xE. WAIT NEXT TRANS
+                         0xF. LAST
+
+*/
+#define HOST_DMA_CH12STA_FSMSTATE_W                                  4U
+#define HOST_DMA_CH12STA_FSMSTATE_M                                  0x00000F00U
+#define HOST_DMA_CH12STA_FSMSTATE_S                                  8U
+/*
+
+        Field:           RUN
+        From..to bits:   16...16
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Indication that channel is currently transfering data and is not idle.
+                         Channels that are waiting on arbitration are considered running.
+
+*/
+#define HOST_DMA_CH12STA_RUN                                         0x00010000U
+#define HOST_DMA_CH12STA_RUN_M                                       0x00010000U
+#define HOST_DMA_CH12STA_RUN_S                                       16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12TIPTR
+    Offset name:         HOST_DMA_O_CH12TIPTR
+    Relative address:    0xD004
+    Description:         32 bit address pointer of channel current input.
+    Default Value:       0x00000000
+
+        Field:           IPTR
+        From..to bits:   0...31
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     32 bit address pointer of channel current input.
+
+*/
+#define HOST_DMA_CH12TIPTR_IPTR_W                                    32U
+#define HOST_DMA_CH12TIPTR_IPTR_M                                    0xFFFFFFFFU
+#define HOST_DMA_CH12TIPTR_IPTR_S                                    0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12TOPTR
+    Offset name:         HOST_DMA_O_CH12TOPTR
+    Relative address:    0xD008
+    Description:         32 bit address pointer of channel current output.
+    Default Value:       0x00000000
+
+        Field:           OPTR
+        From..to bits:   0...31
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     32 bit address pointer of channel current output.
+
+*/
+#define HOST_DMA_CH12TOPTR_OPTR_W                                    32U
+#define HOST_DMA_CH12TOPTR_OPTR_M                                    0xFFFFFFFFU
+#define HOST_DMA_CH12TOPTR_OPTR_S                                    0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12TCTL
+    Offset name:         HOST_DMA_O_CH12TCTL
+    Relative address:    0xD00C
+    Description:         Transaction control
+    Default Value:       0x00000000
+
+        Field:           TRANSB
+        From..to bits:   0...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Number of bytes of the transaction to move from source to destination.
+
+*/
+#define HOST_DMA_CH12TCTL_TRANSB_W                                   14U
+#define HOST_DMA_CH12TCTL_TRANSB_M                                   0x00003FFFU
+#define HOST_DMA_CH12TCTL_TRANSB_S                                   0U
+/*
+
+        Field:           BURSTREQ
+        From..to bits:   16...16
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     In case number of words to tranfer smaller than block size, DMA would use signle request and work with block size of 1 word. In case we know request would be set on altough number of words to tranfer is smaller than block size, we can set this field on and DMA will wait for block_request and transact all remaining words in one block.
+
+*/
+#define HOST_DMA_CH12TCTL_BURSTREQ                                   0x00010000U
+#define HOST_DMA_CH12TCTL_BURSTREQ_M                                 0x00010000U
+#define HOST_DMA_CH12TCTL_BURSTREQ_S                                 16U
+/*
+
+        Field:           SPARE
+        From..to bits:   17...17
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     spare
+
+*/
+#define HOST_DMA_CH12TCTL_SPARE                                      0x00020000U
+#define HOST_DMA_CH12TCTL_SPARE_M                                    0x00020000U
+#define HOST_DMA_CH12TCTL_SPARE_S                                    17U
+/*
+
+        Field:           ENDIANESS
+        From..to bits:   24...25
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     0 -no endianess, 1 - byte endianess, 2 - bit endianess
+
+*/
+#define HOST_DMA_CH12TCTL_ENDIANESS_W                                2U
+#define HOST_DMA_CH12TCTL_ENDIANESS_M                                0x03000000U
+#define HOST_DMA_CH12TCTL_ENDIANESS_S                                24U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12TCTL2
+    Offset name:         HOST_DMA_O_CH12TCTL2
+    Relative address:    0xD010
+    Description:         DMA command interface
+    Default Value:       0x00000000
+
+        Field:           CMD
+        From..to bits:   0...2
+        DefaultValue:    0x0
+        Access type:     write-only
+        Description:     1 - run command. Start a transaction.
+                         2-  abort command - stop reansaction.
+                         4-  init command - init new transaction afet abort/error.
+
+*/
+#define HOST_DMA_CH12TCTL2_CMD_W                                     3U
+#define HOST_DMA_CH12TCTL2_CMD_M                                     0x00000007U
+#define HOST_DMA_CH12TCTL2_CMD_S                                     0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12TSTA
+    Offset name:         HOST_DMA_O_CH12TSTA
+    Relative address:    0xD014
+    Description:         Job completion reason - either last transaction or exception
+    Default Value:       0x00000000
+
+        Field:           STA
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     channel OCP rstatus recieved at one of the primary ports.
+                         Once an error is encountered the channel will enter an Exception state and stay the until an init command is recieved.
+                         ICLR does not affect this status.
+
+*/
+#define HOST_DMA_CH12TSTA_STA                                        0x00000001U
+#define HOST_DMA_CH12TSTA_STA_M                                      0x00000001U
+#define HOST_DMA_CH12TSTA_STA_S                                      0U
+/*
+
+        Field:           OFFSET
+        From..to bits:   8...15
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Offset in words from block boundary. Actually number of word have been transferred in this block
+
+*/
+#define HOST_DMA_CH12TSTA_OFFSET_W                                   8U
+#define HOST_DMA_CH12TSTA_OFFSET_M                                   0x0000FF00U
+#define HOST_DMA_CH12TSTA_OFFSET_S                                   8U
+/*
+
+        Field:           REMAINB
+        From..to bits:   16...29
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Number of bytes remaining to complete the transaction.
+
+*/
+#define HOST_DMA_CH12TSTA_REMAINB_W                                  14U
+#define HOST_DMA_CH12TSTA_REMAINB_M                                  0x3FFF0000U
+#define HOST_DMA_CH12TSTA_REMAINB_S                                  16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH12JCTL
+    Offset name:         HOST_DMA_O_CH12JCTL
+    Relative address:    0xD01C
+    Description:         Job control register
+    Default Value:       0x00000000
+
+        Field:           WORDSIZE
+        From..to bits:   0...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     00 -word size is 32 bits
+                         01 -word size is 16 bits
+                         10 -word size is 8  bits
+
+*/
+#define HOST_DMA_CH12JCTL_WORDSIZE_W                                 2U
+#define HOST_DMA_CH12JCTL_WORDSIZE_M                                 0x00000003U
+#define HOST_DMA_CH12JCTL_WORDSIZE_S                                 0U
+/*
+
+        Field:           BLKSIZE
+        From..to bits:   16...21
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     size of the block in words. If block mode is enabled, defines the address wrap around.
+                         Since channel arbitration decisions are made every block, this also effect how much bandwidth is given to a specific channel.
+
+
+
+*/
+#define HOST_DMA_CH12JCTL_BLKSIZE_W                                  6U
+#define HOST_DMA_CH12JCTL_BLKSIZE_M                                  0x003F0000U
+#define HOST_DMA_CH12JCTL_BLKSIZE_S                                  16U
+/*
+
+        Field:           DMASIGBPS
+        From..to bits:   26...26
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Tie high channel DMA req signal. This is useful for memory to memort transaction
+
+*/
+#define HOST_DMA_CH12JCTL_DMASIGBPS                                  0x04000000U
+#define HOST_DMA_CH12JCTL_DMASIGBPS_M                                0x04000000U
+#define HOST_DMA_CH12JCTL_DMASIGBPS_S                                26U
+/*
+
+        Field:           FIFOMODS
+        From..to bits:   27...27
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Source pointer fifo  mode
+
+*/
+#define HOST_DMA_CH12JCTL_FIFOMODS                                   0x08000000U
+#define HOST_DMA_CH12JCTL_FIFOMODS_M                                 0x08000000U
+#define HOST_DMA_CH12JCTL_FIFOMODS_S                                 27U
+/*
+
+        Field:           FIFOMODD
+        From..to bits:   28...28
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Destination pointer fifo  mode
+
+*/
+#define HOST_DMA_CH12JCTL_FIFOMODD                                   0x10000000U
+#define HOST_DMA_CH12JCTL_FIFOMODD_M                                 0x10000000U
+#define HOST_DMA_CH12JCTL_FIFOMODD_S                                 28U
+/*
+
+        Field:           SRCDSTCFG
+        From..to bits:   29...29
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     0 - Sorce is periph: transaction from periph to memory.
+                         1 - Destination is periph  :transaction from Memory to periph
+
+*/
+#define HOST_DMA_CH12JCTL_SRCDSTCFG                                  0x20000000U
+#define HOST_DMA_CH12JCTL_SRCDSTCFG_M                                0x20000000U
+#define HOST_DMA_CH12JCTL_SRCDSTCFG_S                                29U
+/*
+
+        Field:           ENCLR
+        From..to bits:   30...30
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Enable DMA to set a rd/wr clear pulse at the beginning of a job (one cycle after run cmd)
+
+*/
+#define HOST_DMA_CH12JCTL_ENCLR                                      0x40000000U
+#define HOST_DMA_CH12JCTL_ENCLR_M                                    0x40000000U
+#define HOST_DMA_CH12JCTL_ENCLR_S                                    30U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13STA
+    Offset name:         HOST_DMA_O_CH13STA
+    Relative address:    0xE000
+    Description:         Channel Status FSM state and run indication.
+    Default Value:       0x00000000
+
+        Field:           HWEVENT
+        From..to bits:   0...2
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     HW event status.
+                         Channel status is a bit mask. Multiple bits can be set at the same time
+                         0. PROCESSING
+                         1. TRANS DONE
+                         2. ABORT
+                         4. EXCEPTION
+
+*/
+#define HOST_DMA_CH13STA_HWEVENT_W                                   3U
+#define HOST_DMA_CH13STA_HWEVENT_M                                   0x00000007U
+#define HOST_DMA_CH13STA_HWEVENT_S                                   0U
+/*
+
+        Field:           FSMSTATE
+        From..to bits:   8...11
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     FSM state:
+                         0x0. IDLE
+                         0x2. EXCEPTION
+                         0x3. DRAIN
+                         0x4. ABORT
+                         0x8. PENDING ARB
+                         0x9. COPY
+                         0xA. COPY LAST
+                         0xC. DONE
+                         0xD. SAVE CTX
+                         0xE. WAIT NEXT TRANS
+                         0xF. LAST
+
+*/
+#define HOST_DMA_CH13STA_FSMSTATE_W                                  4U
+#define HOST_DMA_CH13STA_FSMSTATE_M                                  0x00000F00U
+#define HOST_DMA_CH13STA_FSMSTATE_S                                  8U
+/*
+
+        Field:           RUN
+        From..to bits:   16...16
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Indication that channel is currently transfering data and is not idle.
+                         Channels that are waiting on arbitration are considered running.
+
+*/
+#define HOST_DMA_CH13STA_RUN                                         0x00010000U
+#define HOST_DMA_CH13STA_RUN_M                                       0x00010000U
+#define HOST_DMA_CH13STA_RUN_S                                       16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13TIPTR
+    Offset name:         HOST_DMA_O_CH13TIPTR
+    Relative address:    0xE004
+    Description:         32 bit address pointer of channel current input.
+    Default Value:       0x00000000
+
+        Field:           IPTR
+        From..to bits:   0...31
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     32 bit address pointer of channel current input.
+
+*/
+#define HOST_DMA_CH13TIPTR_IPTR_W                                    32U
+#define HOST_DMA_CH13TIPTR_IPTR_M                                    0xFFFFFFFFU
+#define HOST_DMA_CH13TIPTR_IPTR_S                                    0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13TOPTR
+    Offset name:         HOST_DMA_O_CH13TOPTR
+    Relative address:    0xE008
+    Description:         32 bit address pointer of channel current output.
+    Default Value:       0x00000000
+
+        Field:           OPTR
+        From..to bits:   0...31
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     32 bit address pointer of channel current output.
+
+*/
+#define HOST_DMA_CH13TOPTR_OPTR_W                                    32U
+#define HOST_DMA_CH13TOPTR_OPTR_M                                    0xFFFFFFFFU
+#define HOST_DMA_CH13TOPTR_OPTR_S                                    0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13TCTL
+    Offset name:         HOST_DMA_O_CH13TCTL
+    Relative address:    0xE00C
+    Description:         Transaction control
+    Default Value:       0x00000000
+
+        Field:           TRANSB
+        From..to bits:   0...13
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Number of bytes of the transaction to move from source to destination.
+
+*/
+#define HOST_DMA_CH13TCTL_TRANSB_W                                   14U
+#define HOST_DMA_CH13TCTL_TRANSB_M                                   0x00003FFFU
+#define HOST_DMA_CH13TCTL_TRANSB_S                                   0U
+/*
+
+        Field:           BURSTREQ
+        From..to bits:   16...16
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     In case number of words to tranfer smaller than block size, DMA would use signle request and work with block size of 1 word. In case we know request would be set on altough number of words to tranfer is smaller than block size, we can set this field on and DMA will wait for block_request and transact all remaining words in one block.
+
+*/
+#define HOST_DMA_CH13TCTL_BURSTREQ                                   0x00010000U
+#define HOST_DMA_CH13TCTL_BURSTREQ_M                                 0x00010000U
+#define HOST_DMA_CH13TCTL_BURSTREQ_S                                 16U
+/*
+
+        Field:           SPARE
+        From..to bits:   17...17
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     spare
+
+*/
+#define HOST_DMA_CH13TCTL_SPARE                                      0x00020000U
+#define HOST_DMA_CH13TCTL_SPARE_M                                    0x00020000U
+#define HOST_DMA_CH13TCTL_SPARE_S                                    17U
+/*
+
+        Field:           ENDIANESS
+        From..to bits:   24...25
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     0 -no endianess, 1 - byte endianess, 2 - bit endianess
+
+*/
+#define HOST_DMA_CH13TCTL_ENDIANESS_W                                2U
+#define HOST_DMA_CH13TCTL_ENDIANESS_M                                0x03000000U
+#define HOST_DMA_CH13TCTL_ENDIANESS_S                                24U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13TCTL2
+    Offset name:         HOST_DMA_O_CH13TCTL2
+    Relative address:    0xE010
+    Description:         DMA command interface
+    Default Value:       0x00000000
+
+        Field:           CMD
+        From..to bits:   0...2
+        DefaultValue:    0x0
+        Access type:     write-only
+        Description:     1 - run command. Start a transaction.
+                         2-  abort command - stop reansaction.
+                         4-  init command - init new transaction afet abort/error.
+
+*/
+#define HOST_DMA_CH13TCTL2_CMD_W                                     3U
+#define HOST_DMA_CH13TCTL2_CMD_M                                     0x00000007U
+#define HOST_DMA_CH13TCTL2_CMD_S                                     0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13TSTA
+    Offset name:         HOST_DMA_O_CH13TSTA
+    Relative address:    0xE014
+    Description:         Job completion reason - either last transaction or exception
+    Default Value:       0x00000000
+
+        Field:           STA
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     channel OCP rstatus recieved at one of the primary ports.
+                         Once an error is encountered the channel will enter an Exception state and stay the until an init command is recieved.
+                         ICLR does not affect this status.
+
+*/
+#define HOST_DMA_CH13TSTA_STA                                        0x00000001U
+#define HOST_DMA_CH13TSTA_STA_M                                      0x00000001U
+#define HOST_DMA_CH13TSTA_STA_S                                      0U
+/*
+
+        Field:           OFFSET
+        From..to bits:   8...15
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Offset in words from block boundary. Actually number of word have been transferred in this block
+
+*/
+#define HOST_DMA_CH13TSTA_OFFSET_W                                   8U
+#define HOST_DMA_CH13TSTA_OFFSET_M                                   0x0000FF00U
+#define HOST_DMA_CH13TSTA_OFFSET_S                                   8U
+/*
+
+        Field:           REMAINB
+        From..to bits:   16...29
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Number of bytes remaining to complete the transaction.
+
+*/
+#define HOST_DMA_CH13TSTA_REMAINB_W                                  14U
+#define HOST_DMA_CH13TSTA_REMAINB_M                                  0x3FFF0000U
+#define HOST_DMA_CH13TSTA_REMAINB_S                                  16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CH13JCTL
+    Offset name:         HOST_DMA_O_CH13JCTL
+    Relative address:    0xE01C
+    Description:         Job control register
+    Default Value:       0x00000000
+
+        Field:           WORDSIZE
+        From..to bits:   0...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     00 -word size is 32 bits
+                         01 -word size is 16 bits
+                         10 -word size is 8  bits
+
+*/
+#define HOST_DMA_CH13JCTL_WORDSIZE_W                                 2U
+#define HOST_DMA_CH13JCTL_WORDSIZE_M                                 0x00000003U
+#define HOST_DMA_CH13JCTL_WORDSIZE_S                                 0U
+/*
+
+        Field:           BLKSIZE
+        From..to bits:   16...21
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     size of the block in words. If block mode is enabled, defines the address wrap around.
+                         Since channel arbitration decisions are made every block, this also effect how much bandwidth is given to a specific channel.
+
+
+
+*/
+#define HOST_DMA_CH13JCTL_BLKSIZE_W                                  6U
+#define HOST_DMA_CH13JCTL_BLKSIZE_M                                  0x003F0000U
+#define HOST_DMA_CH13JCTL_BLKSIZE_S                                  16U
+/*
+
+        Field:           DMASIGBPS
+        From..to bits:   26...26
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Tie high channel DMA req signal. This is useful for memory to memort transaction
+
+*/
+#define HOST_DMA_CH13JCTL_DMASIGBPS                                  0x04000000U
+#define HOST_DMA_CH13JCTL_DMASIGBPS_M                                0x04000000U
+#define HOST_DMA_CH13JCTL_DMASIGBPS_S                                26U
+/*
+
+        Field:           FIFOMODS
+        From..to bits:   27...27
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Source pointer fifo  mode
+
+*/
+#define HOST_DMA_CH13JCTL_FIFOMODS                                   0x08000000U
+#define HOST_DMA_CH13JCTL_FIFOMODS_M                                 0x08000000U
+#define HOST_DMA_CH13JCTL_FIFOMODS_S                                 27U
+/*
+
+        Field:           FIFOMODD
+        From..to bits:   28...28
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Destination pointer fifo  mode
+
+*/
+#define HOST_DMA_CH13JCTL_FIFOMODD                                   0x10000000U
+#define HOST_DMA_CH13JCTL_FIFOMODD_M                                 0x10000000U
+#define HOST_DMA_CH13JCTL_FIFOMODD_S                                 28U
+/*
+
+        Field:           SRCDSTCFG
+        From..to bits:   29...29
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     0 - Sorce is periph: transaction from periph to memory.
+                         1 - Destination is periph  :transaction from Memory to periph
+
+*/
+#define HOST_DMA_CH13JCTL_SRCDSTCFG                                  0x20000000U
+#define HOST_DMA_CH13JCTL_SRCDSTCFG_M                                0x20000000U
+#define HOST_DMA_CH13JCTL_SRCDSTCFG_S                                29U
+/*
+
+        Field:           ENCLR
+        From..to bits:   30...30
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Enable DMA to set a rd/wr clear pulse at the beginning of a job (one cycle after run cmd)
+
+*/
+#define HOST_DMA_CH13JCTL_ENCLR                                      0x40000000U
+#define HOST_DMA_CH13JCTL_ENCLR_M                                    0x40000000U
+#define HOST_DMA_CH13JCTL_ENCLR_S                                    30U
 
 #endif /* __HW_HOST_DMA_H__*/

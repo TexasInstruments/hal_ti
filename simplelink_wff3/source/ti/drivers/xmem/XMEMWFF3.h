@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Texas Instruments Incorporated
+ * Copyright (c) 2024-2026, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,27 @@
 extern "C" {
 #endif
 
-#define XMEM_NUM_DEVICE 1 /* In the future add support for PSRAM and increase the value by 1 */
-#define XMEM_FLASH      0
-#define XMEM_PSRAM      1 /* Placeholder - will be relevant when adding support for PSRAM */
+/*!
+ *  @brief  Device enumeration.
+ */
+#define XMEM_FLASH 0
+#define XMEM_PSRAM 1
+
+/*!
+ *  @brief  size of one word which can be read by STIG command and used in:
+ *  #XMEMWFF3_read()
+ */
+#define XMEM_WORD_SIZE 4
+
+/*!
+ *  @brief  Number of max available XMEM Configuration.
+ */
+#define CONFIG_XMEM_COUNT 1
+
+/*!
+ *  @brief  Number of max available XMEM handlers.
+ */
+#define XMEM_NUM_HANDLER 16
 
 /*!
  *  @brief   Successful status code returned by:
@@ -116,7 +134,34 @@ extern "C" {
  */
 #define XMEM_STATUS_VERIFYBUFFER (-8)
 
+/*!
+ *  @brief   An error status code returned by various XMEM functions
+ *
+ *  APIs return #XMEM_STATUS_INVALID_PARAMS if one or more of the
+ *  input parameters are invalid (e.g., invalid flag combinations,
+ *  NULL pointers, or out-of-range values).
+ */
+#define XMEM_STATUS_INVALID_PARAMS (-9)
+
 /** @}*/
+
+/*!
+ *
+ *   @brief read flag.
+ *
+ *  If #XMEM_READ_STIG is set in the flags passed to #XMEMWFF3_read(), the
+ *  read operation is done using udma.
+ */
+#define XMEM_READ (0x0)
+
+/*!
+ *
+ *   @brief read STIG flag.
+ *
+ *  If #XMEM_READ_STIG is set in the flags passed to #XMEMWFF3_read(), the
+ *  read operation is done using STIG command.
+ */
+#define XMEM_READ_STIG (0x1)
 
 /*!
  *  @brief XMEM write flags
@@ -125,6 +170,16 @@ extern "C" {
  *  to #XMEMWFF3_write().
  *  @{
  */
+
+/*!
+ *  @brief write flag.
+ *
+ *  If #XMEM_WRITE is used in #XMEMWFF3_write(), the write operation will be
+ *  performed directly without any validation or erasing of the destination
+ *  sectors. Operation is done using udma.
+ *
+ */
+#define XMEM_WRITE (0x0)
 
 /*!
  *  @brief Erase write flag.
@@ -154,51 +209,132 @@ extern "C" {
  */
 #define XMEM_WRITE_POST_VERIFY (0x4)
 
-/** @} */
-
 /*!
- *  @brief Special #XMEMWFF3_lock() timeout values
- *  @{
- */
-
-/*!
- *  @brief    #XMEMWFF3_lock() Wait forever define
- */
-#define XMEM_LOCK_WAIT_FOREVER (SemaphoreP_WAIT_FOREVER)
-
-/*!
- *  @brief    #XMEMWFF3_lock() No wait define
- */
-#define XMEM_LOCK_NO_WAIT (SemaphoreP_NO_WAIT)
-
-/** @} */
-
-/*!
- *  @brief      XMEMWFF3 hardware attributes
+ *  @brief Write STIG write flag.
  *
- *  @note       Currently XMEMWFF3 does not require any attributes
+ *  If #XMEM_WRITE_STIG is set in the flags passed to #XMEMWFF3_write(), the
+ *  write operation is done using STIG command.
+ */
+#define XMEM_WRITE_STIG (0x8)
+/** @} */
+
+/*!
+ *  @brief  Flash register structure for address-data pairs
+ *
+ *  Structure used to define register address and data value pairs for
+ *  STIG operations in flash memory.
+ */
+typedef struct
+{
+    uint32_t address; /*!< Register address for flash operation */
+    uint32_t data;    /*!< Data value to write to or read from the register */
+} FlashRegister;
+
+/*!
+ *  @brief  Flash STIG erase configuration structure
+ *
+ *  Structure containing configuration parameters and register operations
+ *  for STIG-based flash erase operations.
+ */
+typedef struct
+{
+    uint32_t preStigCfg;                /*!< Is pre STIG configuration needed */
+    uint32_t StigCfg;                   /*!< Is erase operation needed */
+    uint32_t postStigCfg;               /*!< Is post STIG configuration needed */
+    FlashRegister preStigOperation[1];  /*!< Register operations to perform before STIG erase */
+    FlashRegister stigOperation[1];     /*!< Register operations for STIG erase command */
+    FlashRegister postStigOperation[1]; /*!< Register operations to perform after STIG erase */
+} FlashStigEraseCfg;
+
+/*!
+ *  @brief  Flash STIG write configuration structure
+ *
+ *  Structure containing configuration parameters and register operations
+ *  for STIG-based flash write operations.
+ */
+typedef struct
+{
+    uint32_t preStigCfg;                /*!< Is pre STIG configuration needed */
+    uint32_t postStigCfg;               /*!< Is post STIG configuration needed */
+    FlashRegister preStigOperation[1];  /*!< Register operations to perform before STIG write */
+    FlashRegister stigOperation[1];     /*!< Register operations for STIG write command */
+    FlashRegister postStigOperation[1]; /*!< Register operations to perform after STIG write */
+} FlashStigWriteCfg;
+
+/*!
+ *  @brief  Flash STIG read configuration structure
+ *
+ *  Structure containing configuration parameters and register operations
+ *  for STIG-based flash read operations.
+ */
+typedef struct
+{
+    uint32_t preStigCfg;                /*!< Is pre STIG configuration needed */
+    uint32_t postStigCfg;               /*!< Is post STIG configuration needed */
+    FlashRegister preStigOperation[1];  /*!< Register operations to perform before STIG read */
+    FlashRegister stigOperation[1];     /*!< Register operations for STIG read command */
+    FlashRegister postStigOperation[1]; /*!< Register operations to perform after STIG read */
+} FlashStigReadCfg;
+
+/*!
+ *  @brief  Flash polling configuration structure
+ *
+ *  Structure containing parameters for polling flash status
+ *  during operations.
+ */
+typedef struct
+{
+    uint32_t NumOfIteration; /*!< Maximum number of polling iterations */
+    uint32_t command;        /*!< Command to execute for polling */
+    uint32_t timeOut;        /*!< Timeout value for polling operation */
+    uint32_t polarity;       /*!< Expected polarity of status bit */
+    uint32_t mask;           /*!< Bit mask for status checking */
+} FlashPollingCfg;
+
+/*!
+ *  @brief  Flash type configuration structure
+ *
+ *  Structure containing all configurations and parameters
+ *  for a specific flash memory type.
+ */
+typedef struct
+{
+    FlashRegister enterStigCfg[3];  /*!< Register operations to enter STIG mode */
+    FlashStigReadCfg readStigCfg;   /*!< Configuration for STIG read operations */
+    FlashStigWriteCfg writeStigCfg; /*!< Configuration for STIG write operations */
+    FlashStigEraseCfg eraseStigCfg; /*!< Configuration for STIG erase operations */
+    FlashRegister exitStigCfg[3];   /*!< Register operations to exit STIG mode */
+    FlashPollingCfg pollingCfg;     /*!< Configuration for status polling */
+    size_t sectorSize;              /*!< Size of a flash sector in bytes */
+    size_t verifyBufSize;           /*!< Size of verification buffer in bytes */
+} FlashType;
+
+/*!
+ *  @brief Hardware attributes structure for the XMEMWFF3 driver
+ *
+ *  Contains hardware-specific configuration for the XMEMWFF3 driver
+ *  that doesn't change during runtime.
  */
 
 typedef struct
 {
-    size_t sectorSize;         /*!< Erase sector size - fetched during init() */
-    size_t regionBase;         /*!< Offset from base of Ext flash - fetched during init() */
-    size_t regionStartAddr;    /*!< The regionBase translated to logical address - fetched during init() */
-    size_t regionOffset;       /*!< Offset from regionbase to regionStartAddr - fetched during init() */
-    size_t regionSize;         /*!< The size of the region in bytes - fetched during init() */
-    size_t sectorEraseOpcode;  /*!< Erase sector command opcode - fetched during init() */
-    size_t sectorEraseTimeOut; /*!< Erase Maximum Process Time  - fetched during init() */
-    size_t verifyBufSize;      /*!< Write Pre/Post verify buffer size */
+    FlashType flashType; /*!< Configuration for the specific flash memory hardware */
 } XMEMWFF3_HWAttrs;
 
 /*!
- *  @brief      XMEMWFF3 Object
+ *  @brief Runtime state object for the XMEMWFF3 driver instance
  *
- *  The application must not access any member variables of this structure!
+ *  Maintains state information for a XMEMWFF3 driver instance
+ *  including memory region parameters and access control.
  */
 typedef struct
 {
-    bool opened; /* Has this region been opened */
+    bool opened;            /*!< Has this region been opened */
+    uintptr_t mutexKey;     /*!< Store the mutex key */
+    size_t regionBase;      /*!< Offset from base of Ext flash - fetched during init() */
+    size_t regionStartAddr; /*!< The regionBase translated to logical address - fetched during init() */
+    size_t regionSize;      /*!< The size of the region in bytes - fetched during init() */
+    size_t deviceNum;       /*!< FLASH/PSRAM */
 } XMEMWFF3_Object;
 
 /*!
@@ -210,10 +346,7 @@ typedef struct
  */
 typedef struct
 {
-    void *regionBase;  /*!< Base address of the XMEM region. */
-    size_t regionSize; /*!< XMEM region size in bytes. */
-    size_t sectorSize; /*!< Erase sector size in bytes. This attribute is
-                            device specific. */
+    FlashType flashType; /*!< Configuration for the specific flash memory hardware */
 } XMEM_Attrs;
 
 /*!
@@ -238,17 +371,60 @@ typedef struct XMEM_Config_
     void *object;
 
     /*! Pointer to a driver specific hardware attributes structure */
-    void const *hwAttrs;
+    const void *hwAttrs;
 } XMEM_Config;
+
+/*!
+ *  @brief  Parameters for opening an XMEM region
+ *
+ *  This structure defines the parameters used when opening an XMEM region
+ *  with XMEMWFF3_open(). It specifies the region's location, size, and
+ *  the associated hardware device.
+ */
+typedef struct
+{
+    size_t regionBase;      /*!< physical Offset from base of Ext flash*/
+    size_t regionStartAddr; /*!< The regionBase translated to logical address*/
+    size_t regionSize;      /*!< The size of the region in bytes*/
+    uint8_t deviceNum;      /*!< FLASH/PSRAM */
+} XMEM_Params;
+
+/*!
+ *  @brief  External flash device type identifiers
+ *
+ *  This enumeration defines identifiers for supported external flash memory devices.
+ *  These values are used to select the appropriate flash device configuration and
+ *  command sequences for memory operations.
+ */
+typedef enum
+{
+    IS25WJ032F_IDX    = 0,
+    IS25WJ064F_IDX    = 1,
+    W25Q32JW_IDX      = 2,
+    W25Q64JW_IDX      = 3,
+    GD25LF32ETJGY_IDX = 4,
+    GD25LF64ETJGY_IDX = 5,
+    PY25Q32LB_IDX     = 6,
+    PY25Q64LB_IDX     = 7,
+    PY25Q128LA_IDX    = 8,
+    PY25Q256LC_IDX    = 9,
+    MX25U3235F_IDX    = 10,
+    MX25U6435F_IDX    = 11,
+    IS25WJ128F_IDX    = 12,
+    W25Q12PW_IDX      = 13,
+} XMEM_Flash_Idx;
 
 /*!
  *  @brief  Function to close an #XMEM_Handle.
  *
  *  @param  handle      A handle returned from #XMEMWFF3_open()
  *
+ *  @retval  #XMEM_STATUS_SUCCESS         Success.
+ *  @retval  #XMEM_STATUS_INVALID_PARAMS  If handle is NULL.
+ *
  *  @sa     #XMEMWFF3_open()
  */
-void XMEMWFF3_close(XMEM_Handle handle);
+int_fast16_t XMEMWFF3_close(XMEM_Handle handle);
 
 /*!
  *  @brief  Erase @p size bytes of the region beginning at @p offset bytes
@@ -295,6 +471,28 @@ int_fast16_t XMEMWFF3_erase(XMEM_Handle handle, size_t offset, size_t size);
 void XMEMWFF3_getAttrs(XMEM_Handle handle, XMEM_Attrs *attrs);
 
 /*!
+*  @brief  Function to get the XMEM object
+
+*  This function will populate an #XMEMWFF3_Object structure with the object
+*  data specific to the memory region associated with the #XMEM_Handle.
+*
+*  @param  handle      A handle returned from #XMEMWFF3_open()
+*
+*  @param  object      Location to store the XMEMWFF3 object.
+*/
+void XMEMWFF3_getObject(XMEM_Handle handle, XMEMWFF3_Object *object);
+
+/*!
+ *  @brief  Function to get the number of active XMEM handlers
+ *
+ *  This function will return the count of active handlers that have been
+ *  opened using the #XMEMWFF3_open() function and not yet closed.
+ *
+ *  @return  The number of currently active XMEM handlers.
+ */
+uint8_t XMEMWFF3_getActiveHandlers(void);
+
+/*!
  *  @brief  Function to initialize the XMEM module
  *
  *  @pre    The XMEM_config structure must exist and be persistent before this
@@ -338,12 +536,13 @@ int_fast16_t XMEMWFF3_lock(XMEM_Handle handle, uint32_t timeout);
  *
  *  @pre    #XMEMWFF3_init() was called.
  *
- *  @param  index         Index in the #XMEM_Config table of the region
- *                        to manage.
+ *  @param  params   Pointer to a parameter block.
+ *                   Parameters muse be initialized before
+ *                   calling #XMEMWFF3_open()
  *
  *  @return  A non-zero handle on success, else NULL.
  */
-XMEM_Handle XMEMWFF3_open(uint_least8_t index);
+XMEM_Handle XMEMWFF3_open(XMEM_Params *params);
 
 /*!
  *  @brief   Read data from the XMEM region associated with the #XMEM_Handle.
@@ -352,16 +551,27 @@ XMEM_Handle XMEMWFF3_open(uint_least8_t index);
  *
  *  @param   offset     The byte offset into the XMEM region to start
  *                      reading from.
+ *                      Note: When using STIG mode, the offset + word size
+ *                      must not cross page boundaries (256 bytes). Operations
+ *                      that would exceed the current page will return an error.
  *
  *  @param   buffer     A buffer to copy the data to.
  *
  *  @param   bufferSize The size of the buffer (number of bytes to read).
+ *           If #XMEM_READ_STIG flash is on, and bufferSize is higher than 4 (one word),
+ *           only the first 4 bytes will be read.
+ *           If #XMEM_READ_STIG flash is on, bufferSize is not allowed to be lower than 4 (one word).
+ *
+ *  @param   flags      Write flags (#XMEM_READ_STIG)
  *
  *  @retval  #XMEM_STATUS_SUCCESS     Success.
  *  @retval  #XMEM_STATUS_INV_OFFSET  If @p offset + @p size exceed the size
  *                                    of the region.
+ *  @retval  #XMEM_STATUS_ERROR       If #XMEM_READ_STIG flash is on and bufferSize is lower than 4 (one word).
+ *                                    If the internal read STIG operation is failed.
+ *  @retval  #XMEM_STATUS_INVALID_PARAMS  If flags is not contain allowed bits.
  */
-int_fast16_t XMEMWFF3_read(XMEM_Handle handle, size_t offset, void *buffer, size_t bufferSize);
+int_fast16_t XMEMWFF3_read(XMEM_Handle handle, size_t offset, void *buffer, size_t bufferSize, uint_fast16_t flags);
 
 /*!
  *  @brief  Function to unlock the XMEM driver
@@ -387,14 +597,20 @@ void XMEMWFF3_unlock(XMEM_Handle handle);
  *
  *  @param   offset     The byte offset into the XMEM region to start
  *                      writing.
+ *                      Note: When using STIG mode, the offset + word size
+ *                      must not cross page boundaries (256 bytes). Operations
+ *                      that would exceed the current page will return an error.
  *
  *  @param   buffer     A buffer containing data to write to
  *                      the XMEM region.
  *
  *  @param   bufferSize The size of the buffer (number of bytes to write).
+ *           If #XMEM_WRITE_STIG flash is on, and bufferSize is higher than 4 (one word),
+ *           only the first 4 bytes will be write.
+ *           If #XMEM_WRITE_STIG flash is on, bufferSize is not allowed to be lower than 4 (one word).
  *
  *  @param   flags      Write flags (#XMEM_WRITE_ERASE, #XMEM_WRITE_PRE_VERIFY,
- *                      #XMEM_WRITE_POST_VERIFY).
+ *                      #XMEM_WRITE_POST_VERIFY, #XMEM_WRITE_STIG).
  *
  *  @retval  #XMEM_STATUS_SUCCESS       Success.
  *  @retval  #XMEM_STATUS_ERROR         If the internal flash write operation
@@ -413,6 +629,8 @@ void XMEMWFF3_unlock(XMEM_Handle handle);
  *  @retval  #XMEM_STATUS_VERIFYBUFFER   If #XMEM_WRITE_PRE_VERIFY or #XMEM_WRITE_POST_VERIFY
  *                                      is requested but the verification buffer has not
  *                                      been configured.
+ *
+ *  @retval  #XMEM_STATUS_INVALID_PARAMS  If flags is not contain allowed bits.
  *
  *  @remark  This call may lock a region to ensure atomic access to the region.
  */

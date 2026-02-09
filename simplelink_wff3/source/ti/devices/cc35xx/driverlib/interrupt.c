@@ -3,7 +3,7 @@
  *
  *  Description:    Utility functions to interact with interrupts and the NVIC
  *
- *  Copyright (c) 2022-2024 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -158,7 +158,7 @@ void IntSetPriority(uint32_t intNum, uint8_t priority)
     // Check the arguments.
     ASSERT((intNum >= 4) && (intNum < NUM_INTERRUPTS));
     ASSERT((intNum != 8) && (intNum != 9) && (intNum != 10) && (intNum != 13));
-    ASSERT(priority <= INT_PRI_LEVEL7);
+    ASSERT(priority <= INT_PRI_LEVEL15);
 
     if (intNum < 16)
     {

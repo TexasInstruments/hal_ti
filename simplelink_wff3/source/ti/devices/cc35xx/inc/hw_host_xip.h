@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the HOST_XIP peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,9 @@ This section defines the register offsets of the HOST_XIP component
 //WRR Arbiter Enable
 #define HOST_XIP_O_ARBCTL                                            0x00000000U
 
+//WRR ARBITER HALT
+#define HOST_XIP_O_ARBHALT                                           0x00000004U
+
 //WRR Arbiter - Agent 0 Configuration
 #define HOST_XIP_O_ARBCFG0                                           0x00000008U
 
@@ -53,6 +56,9 @@ This section defines the register offsets of the HOST_XIP component
 //WRR Arbiter - Agent 2 Configuration
 #define HOST_XIP_O_ARBCFG2                                           0x00000010U
 
+//Register to configure the extra delay added before the device switch
+#define HOST_XIP_O_SWCHDLY                                           0x00000014U
+
 //Disable clocks using HOST_XIP_RCM Module
 #define HOST_XIP_O_RCMCLKDIS                                         0x00000020U
 
@@ -61,6 +67,9 @@ This section defines the register offsets of the HOST_XIP component
 
 //(ICG) Clock Status from HOST_XIP_RCM Module
 #define HOST_XIP_O_RCMCLKSTA                                         0x00000028U
+
+//OSPICFG
+#define HOST_XIP_O_OSPICFG                                           0x00000040U
 
 //uDMA source address for secured read master
 #define HOST_XIP_O_UDSCFG0                                           0x00001000U
@@ -86,6 +95,18 @@ This section defines the register offsets of the HOST_XIP component
 //uDMA secured IRQ Status bits
 #define HOST_XIP_O_UDSIRQ                                            0x00001024U
 
+//uDMA secured Status bits in addition to [UDMSSTA] register
+#define HOST_XIP_O_UDSSTA1                                           0x0000102CU
+
+//uDMA Secure channel peripheral config register
+#define HOST_XIP_O_UDSPERCFG                                         0x00001040U
+
+//Register to select the peripheral to be served on secured channel
+#define HOST_XIP_O_UDSPERSEL                                         0x00001060U
+
+//Register to select the peripheral to be served on non secured channel
+#define HOST_XIP_O_UDNSPERSEL                                        0x00001064U
+
 //uDMA source address for non-secured read master
 #define HOST_XIP_O_UDNSCFG0                                          0x00002000U
 
@@ -109,6 +130,15 @@ This section defines the register offsets of the HOST_XIP component
 
 //uDMA non-secured IRQ Status bits
 #define HOST_XIP_O_UDNSIRQ                                           0x00002024U
+
+//uDMA threshold configuration
+#define HOST_XIP_O_UTHRCNF                                           0x00002028U
+
+//uDMA non-secured Status bits in addition to [UDNSSTA] register
+#define HOST_XIP_O_UDNSSTA1                                          0x0000202CU
+
+//Non secure peirpheral job configuration
+#define HOST_XIP_O_UDNSPERCFG                                        0x00002040U
 
 //For Load/Read xSPI config job in OTFDE memory
 #define HOST_XIP_O_OTOSMEM                                           0x00003000U
@@ -224,8 +254,14 @@ This section defines the register offsets of the HOST_XIP component
 //Device 0 polling timer parameters
 #define HOST_XIP_O_OTD0PTMR                                          0x00005074U
 
+//Device 0 wrap configuration
+#define HOST_XIP_O_OTD0WRAP                                          0x00005078U
+
 //Device 1 parameters
 #define HOST_XIP_O_OTD1CFG                                           0x00005080U
+
+//Device 1 wrap configuration
+#define HOST_XIP_O_OTD1WRAP                                          0x00005084U
 
 //Global watchdog timer
 #define HOST_XIP_O_OTGLBTMR                                          0x00005090U
@@ -315,6 +351,41 @@ This section defines the register offsets of the HOST_XIP component
 
 
 /*-----------------------------------REGISTER------------------------------------
+    Register name:       ARBHALT
+    Offset name:         HOST_XIP_O_ARBHALT
+    Relative address:    0x4
+    Description:         WRR ARBITER HALT.
+                        With sending halt request, Arbiter will finish current burst and then stop transmission of data.
+                        Write ENABLE = 0 to stop halting
+    Default Value:       0x00000000
+
+        Field:           EN
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     MEM_ARBITER_HALT_EN ARBITER HALT.
+                         0: Arbiter transmiting data/ disable halt
+                         1: Arbiter will stop transmiting data
+
+*/
+#define HOST_XIP_ARBHALT_EN                                          0x00000001U
+#define HOST_XIP_ARBHALT_EN_M                                        0x00000001U
+#define HOST_XIP_ARBHALT_EN_S                                        0U
+/*
+
+        Field:           STS
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     1: Arbiter curently halted
+
+*/
+#define HOST_XIP_ARBHALT_STS                                         0x00000002U
+#define HOST_XIP_ARBHALT_STS_M                                       0x00000002U
+#define HOST_XIP_ARBHALT_STS_S                                       1U
+
+
+/*-----------------------------------REGISTER------------------------------------
     Register name:       ARBCFG0
     Offset name:         HOST_XIP_O_ARBCFG0
     Relative address:    0x8
@@ -368,15 +439,15 @@ This section defines the register offsets of the HOST_XIP component
     Offset name:         HOST_XIP_O_ARBCFG1
     Relative address:    0xC
     Description:         WRR Arbiter - Agent 1 Configuration
-    Default Value:       0x00020000
+    Default Value:       0x00020001
 
         Field:           NUMWORDS
         From..to bits:   0...12
-        DefaultValue:    0x0
+        DefaultValue:    0x1
         Access type:     read-write
         Description:     Number of words to be served in each arbitration grant.
                          Up to 8,192 words (32KB).
-                         Value must be > 0.
+                         Value must be atleast 1. 0(Zero) is not allowed.
 
 */
 #define HOST_XIP_ARBCFG1_NUMWORDS_W                                  13U
@@ -459,6 +530,34 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_ARBCFG2_TRANSDLY_W                                  5U
 #define HOST_XIP_ARBCFG2_TRANSDLY_M                                  0x1F000000U
 #define HOST_XIP_ARBCFG2_TRANSDLY_S                                  24U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       SWCHDLY
+    Offset name:         HOST_XIP_O_SWCHDLY
+    Relative address:    0x14
+    Description:         Register to configure the extra delay added before the device switch
+    Default Value:       0x00000001
+
+        Field:           DEVSWCHDLY
+        From..to bits:   0...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     This field configures the extra delay added before the device switch
+
+        ENUMs:
+            SEL0:                        No extra delay
+            SEL1:                        Extra delay of 16 cycles
+            SEL2:                        Extra delay of 32 cycles
+            SEL3:                        Extra delay of 64 cycles
+*/
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_W                                2U
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_M                                0x00000003U
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_S                                0U
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_SEL0                             0x00000000U
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_SEL1                             0x00000001U
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_SEL2                             0x00000002U
+#define HOST_XIP_SWCHDLY_DEVSWCHDLY_SEL3                             0x00000003U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -606,6 +705,49 @@ This section defines the register offsets of the HOST_XIP component
 
 
 /*-----------------------------------REGISTER------------------------------------
+    Register name:       OSPICFG
+    Offset name:         HOST_XIP_O_OSPICFG
+    Relative address:    0x40
+    Description:
+    Default Value:       0x00000003
+
+        Field:           HLDFIXEN
+        From..to bits:   0...0
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     HOLD FIX ENABLE
+
+                         Field to enable the *OSPI* hold fix
+
+        ENUMs:
+            DIS:                         Disable
+            EN:                          Enable
+*/
+#define HOST_XIP_OSPICFG_HLDFIXEN                                    0x00000001U
+#define HOST_XIP_OSPICFG_HLDFIXEN_M                                  0x00000001U
+#define HOST_XIP_OSPICFG_HLDFIXEN_S                                  0U
+#define HOST_XIP_OSPICFG_HLDFIXEN_DIS                                0x00000000U
+#define HOST_XIP_OSPICFG_HLDFIXEN_EN                                 0x00000001U
+/*
+
+        Field:           GLTFIXEN
+        From..to bits:   1...1
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     Field to enable the *OSPI* glitch fix
+
+        ENUMs:
+            DIS:                         Disable
+            EN:                          Enable
+*/
+#define HOST_XIP_OSPICFG_GLTFIXEN                                    0x00000002U
+#define HOST_XIP_OSPICFG_GLTFIXEN_M                                  0x00000002U
+#define HOST_XIP_OSPICFG_GLTFIXEN_S                                  1U
+#define HOST_XIP_OSPICFG_GLTFIXEN_DIS                                0x00000000U
+#define HOST_XIP_OSPICFG_GLTFIXEN_EN                                 0x00000002U
+
+
+/*-----------------------------------REGISTER------------------------------------
     Register name:       UDSCFG0
     Offset name:         HOST_XIP_O_UDSCFG0
     Relative address:    0x1000
@@ -661,7 +803,7 @@ This section defines the register offsets of the HOST_XIP component
         DefaultValue:    0x0
         Access type:     read-write
         Description:     DMA SEC JOB LENGTH:
-                         Resolution - 1 Word
+                         Resolution - 32 bits/4 bytes
                          Maximum configurable job size - 1 Mega byte (256K Words).
                          (Maximum available size in MEMSS is 1MB).
 
@@ -683,13 +825,27 @@ This section defines the register offsets of the HOST_XIP component
         DefaultValue:    0x0
         Access type:     read-write
         Description:     DMA SEC JOB MODE:
-                         0 - Data movement from External memory to Internal memory.
-                         1 - Data movement from Internal memory to External memory.
+                         0 - Data movement from External memory to Internal memory/Peripheral
+                         1 - Data movement from Internal memory/Peripheral to External memory.
 
 */
 #define HOST_XIP_UDSCFG3_JDIR                                        0x00000001U
 #define HOST_XIP_UDSCFG3_JDIR_M                                      0x00000001U
 #define HOST_XIP_UDSCFG3_JDIR_S                                      0U
+/*
+
+        Field:           SMODE
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Secure channel mode
+                         0: Memory Mode
+                         1: Peripheral Mode
+
+*/
+#define HOST_XIP_UDSCFG3_SMODE                                       0x00000002U
+#define HOST_XIP_UDSCFG3_SMODE_M                                     0x00000002U
+#define HOST_XIP_UDSCFG3_SMODE_S                                     1U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -768,17 +924,19 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_UDSSTA_JINPROG_S                                    4U
 /*
 
-        Field:           JWORDSLFT
-        From..to bits:   8...25
+        Field:           RDWRDSLFT
+        From..to bits:   8...27
         DefaultValue:    0x0
         Access type:     read-only
-        Description:     DMA SEC JOB IRQ WORDS LEFT:
-                         number of words left in sec job when IRQ error raised and IRQ rdcl status value is not 2'd3
+        Description:     DMA SEC JOB READ WORDS LEFT:
+                         number of read words left in sec job.
+                         Note: This value would be updated on a read to this register. [UDSSTA1.WRWRDSLFT] is updated on a read to this register
+                         This register value shows number of words in 32 bit when field [UDSCFG3.JDIR] is configured '0' else shows number of words in 8/16/32 bit based on the configuration of [UDSCFG3.SMODE] and [UDPERCFG.SWORDSZ] fields
 
 */
-#define HOST_XIP_UDSSTA_JWORDSLFT_W                                  18U
-#define HOST_XIP_UDSSTA_JWORDSLFT_M                                  0x03FFFF00U
-#define HOST_XIP_UDSSTA_JWORDSLFT_S                                  8U
+#define HOST_XIP_UDSSTA_RDWRDSLFT_W                                  20U
+#define HOST_XIP_UDSSTA_RDWRDSLFT_M                                  0x0FFFFF00U
+#define HOST_XIP_UDSSTA_RDWRDSLFT_S                                  8U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -794,13 +952,179 @@ This section defines the register offsets of the HOST_XIP component
         Access type:     read-only
         Description:     Status vector for IRQ indication for secured DMA IRQ:
                          2'd0 - DMA done.
-                         2'd1 - DMA bus error occurred. check SEC_STATUS in order to recovers
-                         2'd2 - DMA security error occurred. *** (==1'b0) - No DMA security error can occur in Security Channel ***
+                         2'd1 - DMA Internal bus error occurred. check SEC_STATUS in order to recovers
 
 */
 #define HOST_XIP_UDSIRQ_JIRQSTA_W                                    2U
 #define HOST_XIP_UDSIRQ_JIRQSTA_M                                    0x00000003U
 #define HOST_XIP_UDSIRQ_JIRQSTA_S                                    0U
+/*
+
+        Field:           JIRQBEDIR
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Bus Error direction
+                         0: Source bus
+                         1: Destination bus
+                         Note: Source and destination is determined based on [UDMA_SEC_MODE_CFG.MEM_DMA_SEC_JOB_MODE] configuration
+
+*/
+#define HOST_XIP_UDSIRQ_JIRQBEDIR                                    0x00000004U
+#define HOST_XIP_UDSIRQ_JIRQBEDIR_M                                  0x00000004U
+#define HOST_XIP_UDSIRQ_JIRQBEDIR_S                                  2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDSSTA1
+    Offset name:         HOST_XIP_O_UDSSTA1
+    Relative address:    0x102C
+    Description:         uDMA secured Status bits in addition to [UDMSSTA] register
+    Default Value:       NA
+
+        Field:           WRDOFST
+        From..to bits:   0...7
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     DMA SEC PERIPH WORD OFFSET:
+                         Number of words left in a peripheral block.
+                         Note: This value would be updated only on a read to [UDSSTA] register.
+                         This register value shows number of words in 8/16/32 bit based on the configuration of [UDSCFG3.SMODE] and [UDPERCFG.SWORDSZ] fields
+
+*/
+#define HOST_XIP_UDSSTA1_WRDOFST_W                                   8U
+#define HOST_XIP_UDSSTA1_WRDOFST_M                                   0x000000FFU
+#define HOST_XIP_UDSSTA1_WRDOFST_S                                   0U
+/*
+
+        Field:           WRWRDSLFT
+        From..to bits:   8...27
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     DMA SEC JOB WRITE WORDS LEFT:
+                         Number of write words left in sec job.
+                         Note: This value would be updated only on a read to [UDSSTA] register.
+                         This register value shows number of words in 32 bit when field [UDSCFG3.JDIR] is configured '1' else shows number of words in 8/16/32 bit based on the configuration of [UDSCFG3.SMODE] and [UDPERCFG.SWORDSZ] fields
+
+*/
+#define HOST_XIP_UDSSTA1_WRWRDSLFT_W                                 20U
+#define HOST_XIP_UDSSTA1_WRWRDSLFT_M                                 0x0FFFFF00U
+#define HOST_XIP_UDSSTA1_WRWRDSLFT_S                                 8U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDSPERCFG
+    Offset name:         HOST_XIP_O_UDSPERCFG
+    Relative address:    0x1040
+    Description:         uDMA Secure channel peripheral config register
+    Default Value:       0x00000000
+
+        Field:           SPERWDSZ
+        From..to bits:   0...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Secure channel peripheral job word size
+                         8/16/32 (Word Size of 1/2/4 bytes)
+                         Sel_0 - 32 bit
+                         Sel_1 -  16 bit
+                         Sel_2 - 8 bit
+
+*/
+#define HOST_XIP_UDSPERCFG_SPERWDSZ_W                                2U
+#define HOST_XIP_UDSPERCFG_SPERWDSZ_M                                0x00000003U
+#define HOST_XIP_UDSPERCFG_SPERWDSZ_S                                0U
+/*
+
+        Field:           SPERBLKSZ
+        From..to bits:   2...7
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Secure channel peripheral block size(in 32bits/4bytes)
+                         Multiplication of Word size
+
+                         Upto 64 words based on the word size selected
+
+                         Block = block_size * word_size
+
+*/
+#define HOST_XIP_UDSPERCFG_SPERBLKSZ_W                               6U
+#define HOST_XIP_UDSPERCFG_SPERBLKSZ_M                               0x000000FCU
+#define HOST_XIP_UDSPERCFG_SPERBLKSZ_S                               2U
+/*
+
+        Field:           SENCLRSRT
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Enable uDMA to set a rd/wr clear pulse at the beginning of a job
+
+*/
+#define HOST_XIP_UDSPERCFG_SENCLRSRT                                 0x00000100U
+#define HOST_XIP_UDSPERCFG_SENCLRSRT_M                               0x00000100U
+#define HOST_XIP_UDSPERCFG_SENCLRSRT_S                               8U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDSPERSEL
+    Offset name:         HOST_XIP_O_UDSPERSEL
+    Relative address:    0x1060
+    Description:         Register to select the peripheral to be served on secured channel
+    Default Value:       0x00000000
+
+        Field:           SPERSEL
+        From..to bits:   0...3
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Select the peripheral to serve job. This field along with [UDMA_SEC_MODE.MEM_SEC_MODE] selects the peripheral to the channel
+                         0x0 UART0
+                         0x1 UART1
+                         0x2 SPI0
+                         0x3 SPI1
+                         0x4 I2C0
+                         0x5 I2C1
+                         0x6 SDMMC
+                         0x7 SDIO
+                         0x8 MCAN
+                         0x9 ADC
+                         0xA PDM
+                         0xB HIF
+
+
+*/
+#define HOST_XIP_UDSPERSEL_SPERSEL_W                                 4U
+#define HOST_XIP_UDSPERSEL_SPERSEL_M                                 0x0000000FU
+#define HOST_XIP_UDSPERSEL_SPERSEL_S                                 0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDNSPERSEL
+    Offset name:         HOST_XIP_O_UDNSPERSEL
+    Relative address:    0x1064
+    Description:         Register to select the peripheral to be served on non secured channel
+    Default Value:       0x00000000
+
+        Field:           NSPERSEL
+        From..to bits:   0...3
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Select the peripheral to serve job. This field along with [UDMA_NONSEC_MODE.MEM_NON_SEC_MODE] selects the peripheral to the channel
+                         0x0 UART0
+                         0x1 UART1
+                         0x2 SPI0
+                         0x3 SPI1
+                         0x4 I2C0
+                         0x5 I2C1
+                         0x6 SDMMC
+                         0x7 SDIO
+                         0x8 MCAN
+                         0x9 ADC
+                         0xA PDM
+                         0xB HIF
+
+*/
+#define HOST_XIP_UDNSPERSEL_NSPERSEL_W                               4U
+#define HOST_XIP_UDNSPERSEL_NSPERSEL_M                               0x0000000FU
+#define HOST_XIP_UDNSPERSEL_NSPERSEL_S                               0U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -861,7 +1185,7 @@ This section defines the register offsets of the HOST_XIP component
         DefaultValue:    0x0
         Access type:     read-write
         Description:     DMA NONSEC JOB LENGTH:
-                         Resolution - 1 Word
+                         Resolution - 32 bits/4bytes
                          Maximum configurable job size - 1 Mega byte (256K Words).
                          (Maximum available size in MEMSS is 1MB).
 
@@ -890,6 +1214,20 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_UDNSCFG3_JDIR                                       0x00000001U
 #define HOST_XIP_UDNSCFG3_JDIR_M                                     0x00000001U
 #define HOST_XIP_UDNSCFG3_JDIR_S                                     0U
+/*
+
+        Field:           NSMODE
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Non secure channel mode
+                         0: Memory Mode
+                         1: Peripheral Mode
+
+*/
+#define HOST_XIP_UDNSCFG3_NSMODE                                     0x00000002U
+#define HOST_XIP_UDNSCFG3_NSMODE_M                                   0x00000002U
+#define HOST_XIP_UDNSCFG3_NSMODE_S                                   1U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -968,17 +1306,19 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_UDNSSTA_JINPROG_S                                   4U
 /*
 
-        Field:           JWORDSLFT
-        From..to bits:   8...25
+        Field:           RDWRDSLFT
+        From..to bits:   8...27
         DefaultValue:    0x0
         Access type:     read-only
-        Description:     DMA NONSEC JOB IRQ WORDS LEFT:
-                         number of words left in nonsec job when IRQ error raised and IRQ rdcl status value is not 2'd3
+        Description:     DMA NONSEC JOB READ WORDS LEFT:
+                         Number of read words left in nonsec job
+                         Note: This value would be updated on a read to this register. [UDNSSTA1.WRWRDSLFT] is updated on a read to this register
+                         This register value shows number of words in 32 bit when field [UDNSCFG3.JDIR] is configured '0' else shows number of words in 8/16/32 bit based on the configuration of [UDNSCFG3.NSMODE] and [UDPERCFG.NSWORDSZ] fields
 
 */
-#define HOST_XIP_UDNSSTA_JWORDSLFT_W                                 18U
-#define HOST_XIP_UDNSSTA_JWORDSLFT_M                                 0x03FFFF00U
-#define HOST_XIP_UDNSSTA_JWORDSLFT_S                                 8U
+#define HOST_XIP_UDNSSTA_RDWRDSLFT_W                                 20U
+#define HOST_XIP_UDNSSTA_RDWRDSLFT_M                                 0x0FFFFF00U
+#define HOST_XIP_UDNSSTA_RDWRDSLFT_S                                 8U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -995,12 +1335,154 @@ This section defines the register offsets of the HOST_XIP component
         Description:     Status vector for IRQ indication for non-secured DMA IRQ:
                          2'd0 - DMA done.
                          2'd1 - DMA bus error occurred. check NONSEC_STATUS in order to recovers
-                         2'd2 - DMA security error occurred.
 
 */
 #define HOST_XIP_UDNSIRQ_JIRQSTA_W                                   2U
 #define HOST_XIP_UDNSIRQ_JIRQSTA_M                                   0x00000003U
 #define HOST_XIP_UDNSIRQ_JIRQSTA_S                                   0U
+/*
+
+        Field:           JIRQBEDIR
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     Bus Error direction
+                         0: Source bus
+                         1: Destination bus
+                         Note: Source and destination is determined based on [UDMA_NONSEC_MODE_CFG.MEM_DMA_NONSEC_JOB_MODE] configuration
+
+*/
+#define HOST_XIP_UDNSIRQ_JIRQBEDIR                                   0x00000004U
+#define HOST_XIP_UDNSIRQ_JIRQBEDIR_M                                 0x00000004U
+#define HOST_XIP_UDNSIRQ_JIRQBEDIR_S                                 2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UTHRCNF
+    Offset name:         HOST_XIP_O_UTHRCNF
+    Relative address:    0x2028
+    Description:         uDMA threshold configuration
+    Default Value:       0x00000090
+
+        Field:           THRVAL
+        From..to bits:   0...4
+        DefaultValue:    0x10
+        Access type:     read-write
+        Description:     FIFO WRITE THRESHOLD:
+                         In case of write to ext mem, uDMA will reach the threshold and after that will send the data to the ext mem
+                         Note: 0(Zero) is not allowed
+
+*/
+#define HOST_XIP_UTHRCNF_THRVAL_W                                    5U
+#define HOST_XIP_UTHRCNF_THRVAL_M                                    0x0000001FU
+#define HOST_XIP_UTHRCNF_THRVAL_S                                    0U
+/*
+
+        Field:           BURSTVAL
+        From..to bits:   5...6
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     FIFO WRITE BURST LEN:
+                         After uDMA will reached the threshold, uDMA will sent the data in blocks.
+                         0x0 : block size = 4   word
+                         0x1 : block size = 8   word
+                         0x2 : block size = 16 word
+                         0x3 : block size = 32 word
+
+*/
+#define HOST_XIP_UTHRCNF_BURSTVAL_W                                  2U
+#define HOST_XIP_UTHRCNF_BURSTVAL_M                                  0x00000060U
+#define HOST_XIP_UTHRCNF_BURSTVAL_S                                  5U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDNSSTA1
+    Offset name:         HOST_XIP_O_UDNSSTA1
+    Relative address:    0x202C
+    Description:         uDMA non-secured Status bits in addition to [UDNSSTA] register
+    Default Value:       NA
+
+        Field:           WRWRDSLFT
+        From..to bits:   0...7
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     DMA NONSEC PERIPH WORD OFFSET:
+                         Number of words left in a peripheral block.
+                         Note: This value would be updated only on a read to [UDNSSTA] register.
+                         This register value shows number of words in 8/16/32 bit based on the configuration of [UDNSCFG3.NSMODE] and [UDPERCFG.NSWORDSZ] fields
+
+*/
+#define HOST_XIP_UDNSSTA1_WRWRDSLFT_W                                8U
+#define HOST_XIP_UDNSSTA1_WRWRDSLFT_M                                0x000000FFU
+#define HOST_XIP_UDNSSTA1_WRWRDSLFT_S                                0U
+/*
+
+        Field:           WRDOFST
+        From..to bits:   8...27
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     DMA NONSEC JOB WRITE WORDS LEFT:
+                         Number of write words left in nonsec job.
+                         Note: This value would be updated only on a read to [UDNSSTA] register.
+                         This register value shows number of words in 32 bit when field [UDNSCFG3.JDIR] is configured '1' else shows number of words in 8/16/32 bit based on the configuration of [UDNSCFG3.NSMODE] and [UDPERCFG.NSWORDSZ] fields
+
+*/
+#define HOST_XIP_UDNSSTA1_WRDOFST_W                                  20U
+#define HOST_XIP_UDNSSTA1_WRDOFST_M                                  0x0FFFFF00U
+#define HOST_XIP_UDNSSTA1_WRDOFST_S                                  8U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDNSPERCFG
+    Offset name:         HOST_XIP_O_UDNSPERCFG
+    Relative address:    0x2040
+    Description:         Non secure peirpheral job configuration
+    Default Value:       0x00000000
+
+        Field:           NSPERWDSZ
+        From..to bits:   0...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Non-secure channel peripheral job word size
+                         8/16/32 (Word Size of 1/2/4 bytes)
+
+                         Sel_0 - 32 bit
+                         Sel_1 -  16 bit
+                         Sel_2 - 8 bit
+
+*/
+#define HOST_XIP_UDNSPERCFG_NSPERWDSZ_W                              2U
+#define HOST_XIP_UDNSPERCFG_NSPERWDSZ_M                              0x00000003U
+#define HOST_XIP_UDNSPERCFG_NSPERWDSZ_S                              0U
+/*
+
+        Field:           NSPERBLSZ
+        From..to bits:   2...7
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Non-secure channel peripheral job block size(in 32bits/4bytes)
+                         Multiplication of Word size.
+
+                         Upto 64 words based on Word size
+
+                         Block = block_size * word_size
+
+*/
+#define HOST_XIP_UDNSPERCFG_NSPERBLSZ_W                              6U
+#define HOST_XIP_UDNSPERCFG_NSPERBLSZ_M                              0x000000FCU
+#define HOST_XIP_UDNSPERCFG_NSPERBLSZ_S                              2U
+/*
+
+        Field:           NSENCLRSRT
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Enable uDMA to set a rd/wr clear pulse at the beginning of a job
+
+*/
+#define HOST_XIP_UDNSPERCFG_NSENCLRSRT                               0x00000100U
+#define HOST_XIP_UDNSPERCFG_NSENCLRSRT_M                             0x00000100U
+#define HOST_XIP_UDNSPERCFG_NSENCLRSRT_S                             8U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -1728,7 +2210,7 @@ This section defines the register offsets of the HOST_XIP component
     Offset name:         HOST_XIP_O_OTSTA
     Relative address:    0x5020
     Description:         OTFDE status
-    Default Value:       0x00000000
+    Default Value:       0x00000100
 
         Field:           ACTIVESTA
         From..to bits:   0...0
@@ -1832,6 +2314,20 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_OTSTA_TASKREGION_W                                  2U
 #define HOST_XIP_OTSTA_TASKREGION_M                                  0x000000C0U
 #define HOST_XIP_OTSTA_TASKREGION_S                                  6U
+/*
+
+        Field:           OTFDENBUSY
+        From..to bits:   8...8
+        DefaultValue:    0x1
+        Access type:     read-only
+        Description:     OTFDE IS NOT BUSY.
+                         This bit set when OTFDE NOT in the middle of configuration or transmitting data.
+                         OTFDE can be halted only when this bit is set.
+
+*/
+#define HOST_XIP_OTSTA_OTFDENBUSY                                    0x00000100U
+#define HOST_XIP_OTSTA_OTFDENBUSY_M                                  0x00000100U
+#define HOST_XIP_OTSTA_OTFDENBUSY_S                                  8U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -1884,20 +2380,6 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_OTINDSTA_BYPASSEV                                   0x00000004U
 #define HOST_XIP_OTINDSTA_BYPASSEV_M                                 0x00000004U
 #define HOST_XIP_OTINDSTA_BYPASSEV_S                                 2U
-/*
-
-        Field:           DBGEV
-        From..to bits:   3...3
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     0 - Disable
-                         1- Set Indication
-                         OTFDE entered or exited debug mode
-
-*/
-#define HOST_XIP_OTINDSTA_DBGEV                                      0x00000008U
-#define HOST_XIP_OTINDSTA_DBGEV_M                                    0x00000008U
-#define HOST_XIP_OTINDSTA_DBGEV_S                                    3U
 /*
 
         Field:           GENERALERR
@@ -2147,20 +2629,6 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_OTINDMASK_BYPASSEV_S                                2U
 /*
 
-        Field:           DBGEV
-        From..to bits:   3...3
-        DefaultValue:    0x1
-        Access type:     read-only
-        Description:     0- Masked
-                         1- Enabled
-                         Enable / Mask debug mode change completion
-
-*/
-#define HOST_XIP_OTINDMASK_DBGEV                                     0x00000008U
-#define HOST_XIP_OTINDMASK_DBGEV_M                                   0x00000008U
-#define HOST_XIP_OTINDMASK_DBGEV_S                                   3U
-/*
-
         Field:           GENERALERR
         From..to bits:   4...4
         DefaultValue:    0x1
@@ -2362,16 +2830,16 @@ This section defines the register offsets of the HOST_XIP component
     Description:         Event IRQ next state
     Default Value:       0x0000F3FA
 
-        Field:           SPARE3
+        Field:           RSTNS
         From..to bits:   0...0
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     Spare register - unconnected in RTL.
+        Description:     RESET NON SECURED
 
 */
-#define HOST_XIP_OTINDNEXT_SPARE3                                    0x00000001U
-#define HOST_XIP_OTINDNEXT_SPARE3_M                                  0x00000001U
-#define HOST_XIP_OTINDNEXT_SPARE3_S                                  0U
+#define HOST_XIP_OTINDNEXT_RSTNS                                     0x00000001U
+#define HOST_XIP_OTINDNEXT_RSTNS_M                                   0x00000001U
+#define HOST_XIP_OTINDNEXT_RSTNS_S                                   0U
 /*
 
         Field:           SWRSTEV
@@ -2389,11 +2857,12 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_OTINDNEXT_SWRSTEV_S                                 1U
 /*
 
-        Field:           SPARE
+        Field:           BYPMDCH
         From..to bits:   2...2
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     Spare register - unconnected in RTL.
+        Description:     BYPASS MODE CHANGE
+
                          Used in ECO for PG1.
                          Problem Statement
                          In DDR 80MHz mode RD cmd, Seen in QPI (Octal not yet checked) the xSPI IP stop driving the data to soon violating Ext Mem hold requirement (~0.5ns v. up to ~2-3ns requirement for most vendors)
@@ -2401,23 +2870,9 @@ This section defines the register offsets of the HOST_XIP component
                          extend IO data drive by additional logic at IP for read commands in the DDR 80MHz mode
 
 */
-#define HOST_XIP_OTINDNEXT_SPARE                                     0x00000004U
-#define HOST_XIP_OTINDNEXT_SPARE_M                                   0x00000004U
-#define HOST_XIP_OTINDNEXT_SPARE_S                                   2U
-/*
-
-        Field:           DBGEV
-        From..to bits:   3...3
-        DefaultValue:    0x1
-        Access type:     read-only
-        Description:     0- Disable
-                         1- Active Idle
-                         Decision of next state for debug mode change completion
-
-*/
-#define HOST_XIP_OTINDNEXT_DBGEV                                     0x00000008U
-#define HOST_XIP_OTINDNEXT_DBGEV_M                                   0x00000008U
-#define HOST_XIP_OTINDNEXT_DBGEV_S                                   3U
+#define HOST_XIP_OTINDNEXT_BYPMDCH                                   0x00000004U
+#define HOST_XIP_OTINDNEXT_BYPMDCH_M                                 0x00000004U
+#define HOST_XIP_OTINDNEXT_BYPMDCH_S                                 2U
 /*
 
         Field:           GENERALERR
@@ -2465,16 +2920,16 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_OTINDNEXT_XSPICFGERR_S                              6U
 /*
 
-        Field:           SPARE2
+        Field:           XSPISERINT
         From..to bits:   7...7
         DefaultValue:    0x1
         Access type:     read-write
-        Description:     Spare register - unconnected in RTL.
+        Description:     XSPI SERVICE INTERRUPT
 
 */
-#define HOST_XIP_OTINDNEXT_SPARE2                                    0x00000080U
-#define HOST_XIP_OTINDNEXT_SPARE2_M                                  0x00000080U
-#define HOST_XIP_OTINDNEXT_SPARE2_S                                  7U
+#define HOST_XIP_OTINDNEXT_XSPISERINT                                0x00000080U
+#define HOST_XIP_OTINDNEXT_XSPISERINT_M                              0x00000080U
+#define HOST_XIP_OTINDNEXT_XSPISERINT_S                              7U
 /*
 
         Field:           DEVDISERR
@@ -2943,6 +3398,48 @@ This section defines the register offsets of the HOST_XIP component
 
 
 /*-----------------------------------REGISTER------------------------------------
+    Register name:       OTD0WRAP
+    Offset name:         HOST_XIP_O_OTD0WRAP
+    Relative address:    0x5078
+    Description:         Device 0 wrap configuration
+    Default Value:       0x000103FF
+
+        Field:           EN
+        From..to bits:   0...0
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     Enable wrap feature for device 0
+
+*/
+#define HOST_XIP_OTD0WRAP_EN                                         0x00000001U
+#define HOST_XIP_OTD0WRAP_EN_M                                       0x00000001U
+#define HOST_XIP_OTD0WRAP_EN_S                                       0U
+/*
+
+        Field:           SIZE
+        From..to bits:   1...4
+        DefaultValue:    0xF
+        Access type:     read-write
+        Description:     Define the wrap size, this field is active only if [EN] is set.
+                         0x0. 8 Bytes
+                         0x1. 16 Bytes
+                         0x2. 32 Bytes
+                         0x3. 64 Bytes
+                         0x4. 128 Bytes
+                         0x5. 256 Bytes
+                         0x6. 512 Bytes
+                         0x7. 1024 Bytes
+                         0x8. 2048 Bytes
+                         0x9. 4096 Bytes
+
+
+*/
+#define HOST_XIP_OTD0WRAP_SIZE_W                                     4U
+#define HOST_XIP_OTD0WRAP_SIZE_M                                     0x0000001EU
+#define HOST_XIP_OTD0WRAP_SIZE_S                                     1U
+
+
+/*-----------------------------------REGISTER------------------------------------
     Register name:       OTD1CFG
     Offset name:         HOST_XIP_O_OTD1CFG
     Relative address:    0x5080
@@ -3054,6 +3551,48 @@ This section defines the register offsets of the HOST_XIP component
 #define HOST_XIP_OTD1CFG_INTCRT_W                                    4U
 #define HOST_XIP_OTD1CFG_INTCRT_M                                    0x000F0000U
 #define HOST_XIP_OTD1CFG_INTCRT_S                                    16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       OTD1WRAP
+    Offset name:         HOST_XIP_O_OTD1WRAP
+    Relative address:    0x5084
+    Description:         Device 1 wrap configuration
+    Default Value:       0x000103FF
+
+        Field:           EN
+        From..to bits:   0...0
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     Enable wrap feature for device 1
+
+*/
+#define HOST_XIP_OTD1WRAP_EN                                         0x00000001U
+#define HOST_XIP_OTD1WRAP_EN_M                                       0x00000001U
+#define HOST_XIP_OTD1WRAP_EN_S                                       0U
+/*
+
+        Field:           SIZE
+        From..to bits:   1...4
+        DefaultValue:    0xF
+        Access type:     read-write
+        Description:     Define the wrap size, this field is active only if [EN] is set.
+                         0x0. 8 Bytes
+                         0x1. 16 Bytes
+                         0x2. 32 Bytes
+                         0x3. 64 Bytes
+                         0x4. 128 Bytes
+                         0x5. 256 Bytes
+                         0x6. 512 Bytes
+                         0x7. 1024 Bytes
+                         0x8. 2048 Bytes
+                         0x9. 4096 Bytes
+
+
+*/
+#define HOST_XIP_OTD1WRAP_SIZE_W                                     4U
+#define HOST_XIP_OTD1WRAP_SIZE_M                                     0x0000001EU
+#define HOST_XIP_OTD1WRAP_SIZE_S                                     1U
 
 
 /*-----------------------------------REGISTER------------------------------------

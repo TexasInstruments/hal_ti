@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the PRCM_AON peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,9 @@ This section defines the register offsets of the PRCM_AON component
 
 //HOST RESET OV CONTROL
 #define PRCM_AON_O_HRSTOV                                            0x00001064U
+
+//The register holds sleepdeep command for the host_mcu for debugging
+#define PRCM_AON_O_SLPDEEP                                           0x00001068U
 
 //SHARED PRECISE
 #define PRCM_AON_O_SHPRECISE                                         0x00002000U
@@ -527,7 +530,7 @@ This section defines the register offsets of the PRCM_AON component
                         1 - Reserved
                         2 - ON/OFF
                         3 - ON/RET
-    Default Value:       0x00003FFF
+    Default Value:       0x000FFFFF
 
         Field:           PWRSTATE1
         From..to bits:   0...1
@@ -625,6 +628,48 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_HFLXGRP_PWRSTATE7_W                                 2U
 #define PRCM_AON_HFLXGRP_PWRSTATE7_M                                 0x00003000U
 #define PRCM_AON_HFLXGRP_PWRSTATE7_S                                 12U
+/*
+
+        Field:           PWRSTATE8
+        From..to bits:   14...15
+        DefaultValue:    0x3
+        Access type:     read-write
+        Description:     POWER STATE 8
+
+                         Group 8
+
+*/
+#define PRCM_AON_HFLXGRP_PWRSTATE8_W                                 2U
+#define PRCM_AON_HFLXGRP_PWRSTATE8_M                                 0x0000C000U
+#define PRCM_AON_HFLXGRP_PWRSTATE8_S                                 14U
+/*
+
+        Field:           PWRSTATE9
+        From..to bits:   16...17
+        DefaultValue:    0x3
+        Access type:     read-write
+        Description:     POWER STATE 9
+
+                         Group 9
+
+*/
+#define PRCM_AON_HFLXGRP_PWRSTATE9_W                                 2U
+#define PRCM_AON_HFLXGRP_PWRSTATE9_M                                 0x00030000U
+#define PRCM_AON_HFLXGRP_PWRSTATE9_S                                 16U
+/*
+
+        Field:           PWRSTATE10
+        From..to bits:   18...19
+        DefaultValue:    0x3
+        Access type:     read-write
+        Description:     POWER STATE 10
+
+                         Group 10
+
+*/
+#define PRCM_AON_HFLXGRP_PWRSTATE10_W                                2U
+#define PRCM_AON_HFLXGRP_PWRSTATE10_M                                0x000C0000U
+#define PRCM_AON_HFLXGRP_PWRSTATE10_S                                18U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -736,6 +781,48 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_HFLXGRPIND_ISSHARED7                                0x00000040U
 #define PRCM_AON_HFLXGRPIND_ISSHARED7_M                              0x00000040U
 #define PRCM_AON_HFLXGRPIND_ISSHARED7_S                              6U
+/*
+
+        Field:           ISSHARED8
+        From..to bits:   7...7
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     IS SHARED 8
+
+                         Group 8
+
+*/
+#define PRCM_AON_HFLXGRPIND_ISSHARED8                                0x00000080U
+#define PRCM_AON_HFLXGRPIND_ISSHARED8_M                              0x00000080U
+#define PRCM_AON_HFLXGRPIND_ISSHARED8_S                              7U
+/*
+
+        Field:           ISSHARED9
+        From..to bits:   8...8
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     IS SHARED 9
+
+                         Group 9
+
+*/
+#define PRCM_AON_HFLXGRPIND_ISSHARED9                                0x00000100U
+#define PRCM_AON_HFLXGRPIND_ISSHARED9_M                              0x00000100U
+#define PRCM_AON_HFLXGRPIND_ISSHARED9_S                              8U
+/*
+
+        Field:           ISSHARED10
+        From..to bits:   9...9
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     IS SHARED 10
+
+                         Group 10
+
+*/
+#define PRCM_AON_HFLXGRPIND_ISSHARED10                               0x00000200U
+#define PRCM_AON_HFLXGRPIND_ISSHARED10_M                             0x00000200U
+#define PRCM_AON_HFLXGRPIND_ISSHARED10_S                             9U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -807,13 +894,15 @@ This section defines the register offsets of the PRCM_AON component
                         1 - Reserved
                         2 - ON/OFF
                         3 - ON/RET
-    Default Value:       0x02FBBFFF
+    Default Value:       0x0BEEFFFF
 
         Field:           PWRSTAT1
         From..to bits:   0...1
         DefaultValue:    0x3
         Access type:     read-write
-        Description:     Group 24
+        Description:     POWER STATE 1
+
+                         Group 23
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT1_W                               2U
@@ -827,7 +916,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 2
 
-                         Group 25
+                         Group 24
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT2_W                               2U
@@ -841,7 +930,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 3
 
-                         Group 26
+                         Group 25
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT3_W                               2U
@@ -855,7 +944,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 4
 
-                         Group 27
+                         Group 26
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT4_W                               2U
@@ -869,7 +958,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 5
 
-                         Group 28
+                         Group 27
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT5_W                               2U
@@ -883,7 +972,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 6
 
-                         Group 29
+                         Group 28
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT6_W                               2U
@@ -897,7 +986,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 7
 
-                         Group 30
+                         Group 29
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT7_W                               2U
@@ -907,11 +996,11 @@ This section defines the register offsets of the PRCM_AON component
 
         Field:           PWRSTAT8
         From..to bits:   14...15
-        DefaultValue:    0x2
+        DefaultValue:    0x3
         Access type:     read-write
         Description:     POWER STATE 8
 
-                         Group 31
+                         Group 30
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT8_W                               2U
@@ -921,11 +1010,11 @@ This section defines the register offsets of the PRCM_AON component
 
         Field:           PWRSTAT9
         From..to bits:   16...17
-        DefaultValue:    0x3
+        DefaultValue:    0x2
         Access type:     read-write
         Description:     POWER STATE 9
 
-                         Group 32
+                         Group 31
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT9_W                               2U
@@ -935,11 +1024,11 @@ This section defines the register offsets of the PRCM_AON component
 
         Field:           PWRSTAT10
         From..to bits:   18...19
-        DefaultValue:    0x2
+        DefaultValue:    0x3
         Access type:     read-write
         Description:     POWER STATE 10
 
-                         Group 33
+                         Group 32
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT10_W                              2U
@@ -949,11 +1038,11 @@ This section defines the register offsets of the PRCM_AON component
 
         Field:           PWRSTAT11
         From..to bits:   20...21
-        DefaultValue:    0x3
+        DefaultValue:    0x2
         Access type:     read-write
         Description:     POWER STATE 11
 
-                         HIF Group 34 - being used as shared memory
+                         Group 33
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT11_W                              2U
@@ -967,7 +1056,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 12
 
-                         Group 35
+                         HIF Group 34  - being used as shared memory
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT12_W                              2U
@@ -977,16 +1066,30 @@ This section defines the register offsets of the PRCM_AON component
 
         Field:           PWRSTAT13
         From..to bits:   24...25
-        DefaultValue:    0x2
+        DefaultValue:    0x3
         Access type:     read-write
         Description:     POWER STATE 13
 
-                         Group 36
+                         Group 35
 
 */
 #define PRCM_AON_HSTATICGRP_PWRSTAT13_W                              2U
 #define PRCM_AON_HSTATICGRP_PWRSTAT13_M                              0x03000000U
 #define PRCM_AON_HSTATICGRP_PWRSTAT13_S                              24U
+/*
+
+        Field:           PWRSTAT14
+        From..to bits:   26...27
+        DefaultValue:    0x2
+        Access type:     read-write
+        Description:     POWER STATE 14
+
+                         Group 36
+
+*/
+#define PRCM_AON_HSTATICGRP_PWRSTAT14_W                              2U
+#define PRCM_AON_HSTATICGRP_PWRSTAT14_M                              0x0C000000U
+#define PRCM_AON_HSTATICGRP_PWRSTAT14_S                              26U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -1005,7 +1108,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     IS SHARED 1
 
-                         Group 24
+                         Group 23
 
 */
 #define PRCM_AON_HSTATICGRPIND_ISSHARED1                             0x00000001U
@@ -1019,7 +1122,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     IS SHARED 2
 
-                         Group 25
+                         Group 24
 
 */
 #define PRCM_AON_HSTATICGRPIND_ISSHARED2                             0x00000002U
@@ -1033,12 +1136,26 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     IS SHARED 3
 
-                         Group 26
+                         Group 25
 
 */
 #define PRCM_AON_HSTATICGRPIND_ISSHARED3                             0x00000004U
 #define PRCM_AON_HSTATICGRPIND_ISSHARED3_M                           0x00000004U
 #define PRCM_AON_HSTATICGRPIND_ISSHARED3_S                           2U
+/*
+
+        Field:           ISSHARED4
+        From..to bits:   3...3
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     IS SHARED 4
+
+                         Group 26
+
+*/
+#define PRCM_AON_HSTATICGRPIND_ISSHARED4                             0x00000008U
+#define PRCM_AON_HSTATICGRPIND_ISSHARED4_M                           0x00000008U
+#define PRCM_AON_HSTATICGRPIND_ISSHARED4_S                           3U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -1049,14 +1166,14 @@ This section defines the register offsets of the PRCM_AON component
     Default Value:       0x00000000
 
         Field:           AONIN
-        From..to bits:   0...12
+        From..to bits:   0...13
         DefaultValue:    0x0
         Access type:     read-only
         Description:     Host Memory AONIN indication
 
 */
-#define PRCM_AON_LOGHMEMSTA_AONIN_W                                  13U
-#define PRCM_AON_LOGHMEMSTA_AONIN_M                                  0x00001FFFU
+#define PRCM_AON_LOGHMEMSTA_AONIN_W                                  14U
+#define PRCM_AON_LOGHMEMSTA_AONIN_M                                  0x00003FFFU
 #define PRCM_AON_LOGHMEMSTA_AONIN_S                                  0U
 
 
@@ -1065,7 +1182,7 @@ This section defines the register offsets of the PRCM_AON component
     Offset name:         PRCM_AON_O_CONNSTP
     Relative address:    0x1060
     Description:         Connectivity Stop
-    Default Value:       0x00000005
+    Default Value:       0x00000001
 
         Field:           SET
         From..to bits:   0...0
@@ -1103,6 +1220,26 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_HRSTOV_PULSE                                        0x00000001U
 #define PRCM_AON_HRSTOV_PULSE_M                                      0x00000001U
 #define PRCM_AON_HRSTOV_PULSE_S                                      0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       SLPDEEP
+    Offset name:         PRCM_AON_O_SLPDEEP
+    Relative address:    0x1068
+    Description:         The register holds sleepdeep command for the host_mcu for debugging
+    Default Value:       0x00000000
+
+        Field:           SET
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Set this field to force HOST deepsleep.
+                         It will cleared by HW when [HSLPIND] is '1'.
+
+*/
+#define PRCM_AON_SLPDEEP_SET                                         0x00000001U
+#define PRCM_AON_SLPDEEP_SET_M                                       0x00000001U
+#define PRCM_AON_SLPDEEP_SET_S                                       0U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2114,24 +2251,6 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_FUSEDATA14_SOCPROCES_W                              2U
 #define PRCM_AON_FUSEDATA14_SOCPROCES_M                              0x00180000U
 #define PRCM_AON_FUSEDATA14_SOCPROCES_S                              19U
-/*
-
-        Field:           SOCVARIANT
-        From..to bits:   21...22
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     SOC VARIANT
-
-                         The value defined according to the following:
-                         0b00 - Flavor1\, Small (18.66um)(New)
-                         0b01 - Flavor1\, Large (26.56um)(WSCP)
-                         0b10 - Flavor2\, Small (18.66um)(New)
-                         0b11 - Flavor2\, Large (26.56um)(WSCP)
-
-*/
-#define PRCM_AON_FUSEDATA14_SOCVARIANT_W                             2U
-#define PRCM_AON_FUSEDATA14_SOCVARIANT_M                             0x00600000U
-#define PRCM_AON_FUSEDATA14_SOCVARIANT_S                             21U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2896,24 +3015,6 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_PRCMRAWFS9_SOCPROCES_W                              2U
 #define PRCM_AON_PRCMRAWFS9_SOCPROCES_M                              0x00180000U
 #define PRCM_AON_PRCMRAWFS9_SOCPROCES_S                              19U
-/*
-
-        Field:           SOCVARIANT
-        From..to bits:   21...22
-        DefaultValue:    0x0
-        Access type:     read-only
-        Description:     SOC VARIANT
-
-                         The value defined according to the following:
-                         0b00 - Flavor1\, Small (18.66um)(New)
-                         0b01 - Flavor1\, Large (26.56um)(WSCP)
-                         0b10 - Flavor2\, Small (18.66um)(New)
-                         0b11 - Flavor2\, Large (26.56um)(WSCP)
-
-*/
-#define PRCM_AON_PRCMRAWFS9_SOCVARIANT_W                             2U
-#define PRCM_AON_PRCMRAWFS9_SOCVARIANT_M                             0x00600000U
-#define PRCM_AON_PRCMRAWFS9_SOCVARIANT_S                             21U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -3766,6 +3867,8 @@ This section defines the register offsets of the PRCM_AON component
                          '1' - keeps awake at sleep state
                          '0' - regular operation
 
+                         note: in order to set this field as '1', PMS OV must be set as well.
+
 */
 #define PRCM_AON_HPRCMSHAR_FREFREQOV                                 0x00000002U
 #define PRCM_AON_HPRCMSHAR_FREFREQOV_M                               0x00000002U
@@ -3780,6 +3883,8 @@ This section defines the register offsets of the PRCM_AON component
 
                          '1' - keeps awake at sleep state
                          '0' - regular operation
+
+                         note: in order to set this field as '1', FREF OV and PMS OV must be set as well.
 
 */
 #define PRCM_AON_HPRCMSHAR_PSHREQOV                                  0x00000004U
@@ -4270,6 +4375,8 @@ This section defines the register offsets of the PRCM_AON component
         DefaultValue:    0x0
         Access type:     read-write
         Description:     BOD reset cause clear value
+                         Set '1' to this field will automated a pulse to pmu.
+                         clear this field to '0' after use.
 
 */
 #define PRCM_AON_BOD_RSTCAUSECLR                                     0x80000000U
@@ -5540,6 +5647,9 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     RVM RESET CAUSE CLEAR
 
+                         Set '1' to this field will automated a pulse to pmu.
+                         clear this field to '0' after use.
+
 */
 #define PRCM_AON_RVMTRIMCTL_RVMRSTCAUSCLR                            0x80000000U
 #define PRCM_AON_RVMTRIMCTL_RVMRSTCAUSCLR_M                          0x80000000U
@@ -6793,13 +6903,14 @@ This section defines the register offsets of the PRCM_AON component
     Offset name:         PRCM_AON_O_OSCITRIM
     Relative address:    0x70C4
     Description:         oscillator itrim cfg register
-    Default Value:       0x000BEF00
+    Default Value:       0x00002F00
 
         Field:           SELOV
         From..to bits:   0...0
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     1: select override value for osc trimming : 0: Logic select between normal and boost values
+        Description:     1: select override for osc gain normal values, need to use fast_osc_gain_norm
+                         0: Logic select itrim value
 
 */
 #define PRCM_AON_OSCITRIM_SELOV                                      0x00000001U
@@ -6819,6 +6930,19 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_OSCITRIM_FSNORMGN_S                                 1U
 /*
 
+        Field:           SELOVOSCGN
+        From..to bits:   7...7
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     1: select override for osc gain values, need to use fast_osc_gain_boost (debug only)
+                         0: Logic select between normal and boost values
+
+*/
+#define PRCM_AON_OSCITRIM_SELOVOSCGN                                 0x00000080U
+#define PRCM_AON_OSCITRIM_SELOVOSCGN_M                               0x00000080U
+#define PRCM_AON_OSCITRIM_SELOVOSCGN_S                               7U
+/*
+
         Field:           FSM
         From..to bits:   8...13
         DefaultValue:    0x2F
@@ -6829,20 +6953,6 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_OSCITRIM_FSM_W                                      6U
 #define PRCM_AON_OSCITRIM_FSM_M                                      0x00003F00U
 #define PRCM_AON_OSCITRIM_FSM_S                                      8U
-/*
-
-        Field:           GNSHDOW
-        From..to bits:   14...19
-        DefaultValue:    0x2F
-        Access type:     read-only
-        Description:     GAIN SHADOW
-
-                         oscillator gain shadow value - normal mode
-
-*/
-#define PRCM_AON_OSCITRIM_GNSHDOW_W                                  6U
-#define PRCM_AON_OSCITRIM_GNSHDOW_M                                  0x000FC000U
-#define PRCM_AON_OSCITRIM_GNSHDOW_S                                  14U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -7175,7 +7285,7 @@ This section defines the register offsets of the PRCM_AON component
     Description:         OSC GAIN
 
                         XTAL oscillator gain control cfg register
-    Default Value:       0x00000BEF
+    Default Value:       0x0000066F
 
         Field:           BOOST
         From..to bits:   0...5
@@ -7189,16 +7299,16 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_OSCGN_BOOST_S                                       0U
 /*
 
-        Field:           OV
+        Field:           OV_NORM
         From..to bits:   6...11
-        DefaultValue:    0x2F
+        DefaultValue:    0x19
         Access type:     read-write
-        Description:     gain for boost mode - when enabling
+        Description:     gain for normal mode - when enabling
 
 */
-#define PRCM_AON_OSCGN_OV_W                                          6U
-#define PRCM_AON_OSCGN_OV_M                                          0x00000FC0U
-#define PRCM_AON_OSCGN_OV_S                                          6U
+#define PRCM_AON_OSCGN_OV_NORM_W                                     6U
+#define PRCM_AON_OSCGN_OV_NORM_M                                     0x00000FC0U
+#define PRCM_AON_OSCGN_OV_NORM_S                                     6U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -7356,34 +7466,6 @@ This section defines the register offsets of the PRCM_AON component
     Relative address:    0x7108
     Description:         fast CLK control over selectors and overrides
     Default Value:       0x00000840
-
-        Field:           SELOVREQIN
-        From..to bits:   0...0
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     not used-
-                         fast CLK request in select
-                         override CLK request to FSM
-
-*/
-#define PRCM_AON_FCLK_SELOVREQIN                                     0x00000001U
-#define PRCM_AON_FCLK_SELOVREQIN_M                                   0x00000001U
-#define PRCM_AON_FCLK_SELOVREQIN_S                                   0U
-/*
-
-        Field:           OVREQIN
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     not used-
-                         fast CLK request in override
-                         override CLK request to FSM
-
-*/
-#define PRCM_AON_FCLK_OVREQIN                                        0x00000002U
-#define PRCM_AON_FCLK_OVREQIN_M                                      0x00000002U
-#define PRCM_AON_FCLK_OVREQIN_S                                      1U
-/*
 
         Field:           SELOVVAL
         From..to bits:   4...4
@@ -8417,87 +8499,87 @@ This section defines the register offsets of the PRCM_AON component
     Default Value:       0x13000000
 
         Field:           CRAONIN
-        From..to bits:   0...15
+        From..to bits:   0...11
         DefaultValue:    0x0
         Access type:     read-only
         Description:     CORE AONIN
 
 */
-#define PRCM_AON_LOGICMEMSTA_CRAONIN_W                               16U
-#define PRCM_AON_LOGICMEMSTA_CRAONIN_M                               0x0000FFFFU
+#define PRCM_AON_LOGICMEMSTA_CRAONIN_W                               12U
+#define PRCM_AON_LOGICMEMSTA_CRAONIN_M                               0x00000FFFU
 #define PRCM_AON_LOGICMEMSTA_CRAONIN_S                               0U
 /*
 
         Field:           FLXAONIN
-        From..to bits:   17...23
-        DefaultValue:    0x0
+        From..to bits:   16...25
+        DefaultValue:    0x300
         Access type:     read-only
         Description:     FLEX AONIN
 
 */
-#define PRCM_AON_LOGICMEMSTA_FLXAONIN_W                              7U
-#define PRCM_AON_LOGICMEMSTA_FLXAONIN_M                              0x00FE0000U
-#define PRCM_AON_LOGICMEMSTA_FLXAONIN_S                              17U
+#define PRCM_AON_LOGICMEMSTA_FLXAONIN_W                              10U
+#define PRCM_AON_LOGICMEMSTA_FLXAONIN_M                              0x03FF0000U
+#define PRCM_AON_LOGICMEMSTA_FLXAONIN_S                              16U
 /*
 
         Field:           CRPONIN
-        From..to bits:   24...24
-        DefaultValue:    0x1
+        From..to bits:   26...26
+        DefaultValue:    0x0
         Access type:     read-only
         Description:     CORE PONIN
 
 */
-#define PRCM_AON_LOGICMEMSTA_CRPONIN                                 0x01000000U
-#define PRCM_AON_LOGICMEMSTA_CRPONIN_M                               0x01000000U
-#define PRCM_AON_LOGICMEMSTA_CRPONIN_S                               24U
+#define PRCM_AON_LOGICMEMSTA_CRPONIN                                 0x04000000U
+#define PRCM_AON_LOGICMEMSTA_CRPONIN_M                               0x04000000U
+#define PRCM_AON_LOGICMEMSTA_CRPONIN_S                               26U
 /*
 
         Field:           AAONPONIN
-        From..to bits:   25...25
-        DefaultValue:    0x1
+        From..to bits:   27...27
+        DefaultValue:    0x0
         Access type:     read-only
         Description:     AAON PONIN
 
 */
-#define PRCM_AON_LOGICMEMSTA_AAONPONIN                               0x02000000U
-#define PRCM_AON_LOGICMEMSTA_AAONPONIN_M                             0x02000000U
-#define PRCM_AON_LOGICMEMSTA_AAONPONIN_S                             25U
+#define PRCM_AON_LOGICMEMSTA_AAONPONIN                               0x08000000U
+#define PRCM_AON_LOGICMEMSTA_AAONPONIN_M                             0x08000000U
+#define PRCM_AON_LOGICMEMSTA_AAONPONIN_S                             27U
 /*
 
         Field:           CRISO
-        From..to bits:   26...26
-        DefaultValue:    0x0
+        From..to bits:   28...28
+        DefaultValue:    0x1
         Access type:     read-only
         Description:     CORE ISO
 
 */
-#define PRCM_AON_LOGICMEMSTA_CRISO                                   0x04000000U
-#define PRCM_AON_LOGICMEMSTA_CRISO_M                                 0x04000000U
-#define PRCM_AON_LOGICMEMSTA_CRISO_S                                 26U
+#define PRCM_AON_LOGICMEMSTA_CRISO                                   0x10000000U
+#define PRCM_AON_LOGICMEMSTA_CRISO_M                                 0x10000000U
+#define PRCM_AON_LOGICMEMSTA_CRISO_S                                 28U
 /*
 
         Field:           AAONISO
-        From..to bits:   27...27
+        From..to bits:   29...29
         DefaultValue:    0x0
         Access type:     read-only
         Description:     AAON ISO
 
 */
-#define PRCM_AON_LOGICMEMSTA_AAONISO                                 0x08000000U
-#define PRCM_AON_LOGICMEMSTA_AAONISO_M                               0x08000000U
-#define PRCM_AON_LOGICMEMSTA_AAONISO_S                               27U
+#define PRCM_AON_LOGICMEMSTA_AAONISO                                 0x20000000U
+#define PRCM_AON_LOGICMEMSTA_AAONISO_M                               0x20000000U
+#define PRCM_AON_LOGICMEMSTA_AAONISO_S                               29U
 /*
 
         Field:           MEMSPWRUDNE
-        From..to bits:   28...28
-        DefaultValue:    0x1
+        From..to bits:   30...30
+        DefaultValue:    0x0
         Access type:     read-only
         Description:     MEMORIES POWERUP DONE
 
 */
-#define PRCM_AON_LOGICMEMSTA_MEMSPWRUDNE                             0x10000000U
-#define PRCM_AON_LOGICMEMSTA_MEMSPWRUDNE_M                           0x10000000U
-#define PRCM_AON_LOGICMEMSTA_MEMSPWRUDNE_S                           28U
+#define PRCM_AON_LOGICMEMSTA_MEMSPWRUDNE                             0x40000000U
+#define PRCM_AON_LOGICMEMSTA_MEMSPWRUDNE_M                           0x40000000U
+#define PRCM_AON_LOGICMEMSTA_MEMSPWRUDNE_S                           30U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -8512,6 +8594,26 @@ This section defines the register offsets of the PRCM_AON component
         DefaultValue:    0x0
         Access type:     read-only
         Description:     STATE
+
+                         HOL_IDLE              		= 5'b00000
+                         HOL_HW_BOOT1          		= 5'b00001
+                         HOL_HW_BOOT2          		= 5'b00010
+                         HOL_HW_BOOT3          		= 5'b00011
+                         HOL_ACTIVE2           		= 5'b00100 (CORE & HOST active)
+                         HOL_ACTIVE3           		= 5'b00101 (CORE sleep, HOST active)
+                         HOL_ACTIVE4           		= 5'b00110 (CORE active, HOST sleep)
+                         HOL_TRN_TRUE_SLEEP1		= 5'b00111
+                         HOL_TRN_TRUE_SLEEP2		= 5'b01000
+                         HOL_TRN_TRUE_SLEEP3		= 5'b01001
+                         HOL_TRUE_SLEEP        		= 5'b01010 (CORE & HOST sleep)
+                         HOL_PRCM_VLD_ACTIVE3  		= 5'b01011
+                         HOL_AAON_ACTIVE3      		= 5'b01100
+                         HOL_CORE_SLP_ACTIVE3  		= 5'b01101
+                         HOL_CORE_ACT_ACTIVE3  		= 5'b01110
+                         HOL_PRCM_VLD_ACTIVE4  		= 5'b01111
+                         HOL_AAON_ACTIVE4      		= 5'b10000
+                         HOL_HOST_SLP_ACTIVE4  		= 5'b10001
+                         HOL_HOST_ACT_ACTIVE4  		= 5'b10010
 
 */
 #define PRCM_AON_HOL_STA_W                                           5U
@@ -9332,14 +9434,19 @@ This section defines the register offsets of the PRCM_AON component
     Offset name:         PRCM_AON_O_PMURSTCLR
     Relative address:    0x71A4
     Description:         PMU RESET CLEAR
-    Default Value:       0x00000004
+
+                        Level registers- need to set high and low to clear WDT or DEBUGSS indications.
+                        Set '1' to those fields will automated a pulse to pmu.
+                        clear this field to '0' after use.
+    Default Value:       0x00000000
 
         Field:           WDTCAUS
         From..to bits:   0...0
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     WDT CAUSE
+        Description:     PRCM SPARE REG 1
 
+                         [7] - mem_rst_wdt_cause_clr
                          '1' - clear wdt reset cause
 
 */
@@ -9352,8 +9459,9 @@ This section defines the register offsets of the PRCM_AON component
         From..to bits:   1...1
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     DEBUGSS CAUSE
+        Description:     PRCM SPARE REG 1
 
+                         [8] - mem_rst_debugss_cause_clr
                          '1' - clear debugss reset cause
 
 */
@@ -9382,7 +9490,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 1
 
-                         Group 8
+                         Group 11
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA1_W                            2U
@@ -9396,7 +9504,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 2
 
-                         Group 9
+                         Group 12
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA2_W                            2U
@@ -9410,7 +9518,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 3
 
-                         Group 10
+                         Group 13
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA3_W                            2U
@@ -9424,7 +9532,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 4
 
-                         Group 11
+                         Group 14
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA4_W                            2U
@@ -9438,7 +9546,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 5
 
-                         Group 12
+                         Group 15
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA5_W                            2U
@@ -9452,7 +9560,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 6
 
-                         Group 13
+                         Group 16
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA6_W                            2U
@@ -9466,7 +9574,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 7
 
-                         Group 14
+                         Group 17
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA7_W                            2U
@@ -9480,7 +9588,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 8
 
-                         Group 15
+                         Group 18
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA8_W                            2U
@@ -9494,7 +9602,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 9
 
-                         Group 16
+                         Group 19
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA9_W                            2U
@@ -9508,7 +9616,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 10
 
-                         Group 17
+                         Group 20
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA10_W                           2U
@@ -9522,7 +9630,7 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 11
 
-                         Group 18
+                         Group 21
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA11_W                           2U
@@ -9536,68 +9644,12 @@ This section defines the register offsets of the PRCM_AON component
         Access type:     read-write
         Description:     POWER STATE 12
 
-                         Group 19
+                         Group 22
 
 */
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA12_W                           2U
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA12_M                           0x00C00000U
 #define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA12_S                           22U
-/*
-
-        Field:           PWRSTA13
-        From..to bits:   24...25
-        DefaultValue:    0x3
-        Access type:     read-write
-        Description:     POWER STATE 13
-
-                         Group 20
-
-*/
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA13_W                           2U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA13_M                           0x03000000U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA13_S                           24U
-/*
-
-        Field:           PWRSTA14
-        From..to bits:   26...27
-        DefaultValue:    0x3
-        Access type:     read-write
-        Description:     POWER STATE 14
-
-                         Group 21
-
-*/
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA14_W                           2U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA14_M                           0x0C000000U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA14_S                           26U
-/*
-
-        Field:           PWRSTA15
-        From..to bits:   28...29
-        DefaultValue:    0x3
-        Access type:     read-write
-        Description:     POWER STATE 15
-
-                         Group 22
-
-*/
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA15_W                           2U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA15_M                           0x30000000U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA15_S                           28U
-/*
-
-        Field:           PWRSTA16
-        From..to bits:   30...31
-        DefaultValue:    0x3
-        Access type:     read-write
-        Description:     POWER STATE 16
-
-                         Group 23
-
-*/
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA16_W                           2U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA16_M                           0xC0000000U
-#define PRCM_AON_MEMGCTLCRSTAT1_PWRSTA16_S                           30U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -9613,7 +9665,7 @@ This section defines the register offsets of the PRCM_AON component
                         1 - Reserved
                         2 - ON/OFF
                         3 - ON/RET
-    Default Value:       0x00003FFF
+    Default Value:       0x000FFFFF
 
         Field:           PWRSTA1
         From..to bits:   0...1
@@ -9711,6 +9763,48 @@ This section defines the register offsets of the PRCM_AON component
 #define PRCM_AON_MEMGCTLCRFLEX_PWRSTA7_W                             2U
 #define PRCM_AON_MEMGCTLCRFLEX_PWRSTA7_M                             0x00003000U
 #define PRCM_AON_MEMGCTLCRFLEX_PWRSTA7_S                             12U
+/*
+
+        Field:           PWRSTA8
+        From..to bits:   14...15
+        DefaultValue:    0x3
+        Access type:     read-write
+        Description:     POWER STATE 8
+
+                         Group 8
+
+*/
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA8_W                             2U
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA8_M                             0x0000C000U
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA8_S                             14U
+/*
+
+        Field:           PWRSTA9
+        From..to bits:   16...17
+        DefaultValue:    0x3
+        Access type:     read-write
+        Description:     POWER STATE 9
+
+                         Group 9
+
+*/
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA9_W                             2U
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA9_M                             0x00030000U
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA9_S                             16U
+/*
+
+        Field:           PWRSTA10
+        From..to bits:   18...19
+        DefaultValue:    0x3
+        Access type:     read-write
+        Description:     POWER STATE 10
+
+                         Group 10
+
+*/
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA10_W                            2U
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA10_M                            0x000C0000U
+#define PRCM_AON_MEMGCTLCRFLEX_PWRSTA10_S                            18U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -9746,6 +9840,8 @@ This section defines the register offsets of the PRCM_AON component
                          '1' - keeps awake at sleep state
                          '0' - regular operation
 
+                         note: in order to set this field as '1', PMS OV must be set as well.
+
 */
 #define PRCM_AON_CRSH_FREFREQOV                                      0x00000002U
 #define PRCM_AON_CRSH_FREFREQOV_M                                    0x00000002U
@@ -9760,6 +9856,8 @@ This section defines the register offsets of the PRCM_AON component
 
                          '1' - keeps awake at sleep state
                          '0' - regular operation
+
+                         note: in order to set this field as '1', FREF OV and PMS OV must be set as well.
 
 */
 #define PRCM_AON_CRSH_PLLSHREQOV                                     0x00000004U

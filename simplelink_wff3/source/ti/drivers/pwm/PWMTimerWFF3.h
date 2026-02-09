@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Texas Instruments Incorporated
+ * Copyright (c) 2024-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,8 +125,8 @@
  *
  *******************************************************************************
  */
-#ifndef ti_drivers_pwm__PWMTimerWFF3_include
-#define ti_drivers_pwm__PWMTimerWFF3_include
+#ifndef ti_drivers_pwm_PWMTimerWFF3__include
+#define ti_drivers_pwm_PWMTimerWFF3__include
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -180,4 +180,4 @@ typedef struct PWMTimerWFF3_Object
 #ifdef __cplusplus
 }
 #endif
-#endif /* ti_driver_pwm_PWMTimerWFF3_include */
+#endif /* ti_drivers_pwm_PWMTimerWFF3__include */

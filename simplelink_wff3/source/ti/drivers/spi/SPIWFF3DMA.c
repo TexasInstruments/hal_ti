@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, Texas Instruments Incorporated
+ * Copyright (c) 2024-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1076,9 +1076,20 @@ static void configNextTransfer(SPIWFF3DMA_Object *object, SPIWFF3DMA_HWAttrs con
          * accounts for 8 or 16-bit sized transfers.
          */
         object->dmaRxDstAddr = (void *)((uint32_t)transaction->rxBuf + (uint32_t)(framesQueued * dmaFrameSize));
+
+        /* Make sure the RX DMA is incrementing the destination address. */
+        DMADisableDestinationFifoMode(hwAttrs->rxDmaChannel);
     }
     else
     {
+        /*
+         * When the rxBuf pointer is NULL a scratch buffer (2 bytes) will be
+         * used since the SPI transactions are always full-duplex. Configure the
+         * DMA destination as FIFO to make sure it is not incrementing the
+         * destination address.
+         */
+        DMAEnableDestinationFifoMode(hwAttrs->rxDmaChannel);
+
         object->dmaRxDstAddr = &object->rxScratchBuf;
     }
     object->dmaRxSrcAddr      = (void *)(hwAttrs->baseAddr + SPI_O_RXDATA);
@@ -1587,7 +1598,7 @@ static void initDMA(SPI_Handle handle)
 {
     SPIWFF3DMA_Object *object         = handle->object;
     SPIWFF3DMA_HWAttrs const *hwAttrs = handle->hwAttrs;
-    uint8_t dmaWordSize               = DMAWFF3_WORD_SIZE_1B;
+    DMAWFF3_WordSize dmaWordSize      = DMAWFF3_WORD_SIZE_1B;
 
     DMAWFF3_init();
 

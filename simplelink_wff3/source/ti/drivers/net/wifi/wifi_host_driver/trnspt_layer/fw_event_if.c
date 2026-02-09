@@ -106,10 +106,10 @@ ETxnStatus FwEvent_SmReadIntrInfo (TFwEvent *pFwEvent)
 {
     ETxnStatus eStatus;
 
-
+#ifdef TWIF_FW_NEED_WAKE_UP
     /* Indicate that the chip is awake (since it interrupted us) */
     twIf_HwAvailable();
-
+#endif
     /*
      * Read FW-Status structure from HW ==> Special mapping, see note!!
      *
@@ -267,7 +267,7 @@ int FwEvent_irq_handler ()
     }
     else
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return OSI_OPERATION_FAILED;
     }
     return OSI_OK;
@@ -303,7 +303,7 @@ int fwEvent_Init (uint32_t rxTxBufferSize, uint32_t commandsEventsSize)
     gFwEvent = os_malloc (sizeof(TFwEvent));
     if (gFwEvent == NULL)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__HIGH, WLAN_ERROR_MODULE__FW_EVENTS, WLAN_ERROR_TYPE__MALLOC);
     }
 
@@ -313,13 +313,13 @@ int fwEvent_Init (uint32_t rxTxBufferSize, uint32_t commandsEventsSize)
 
     if(FwEvent_AllocateStatus(pFwEvent) != TXN_STATUS_OK)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__HIGH, WLAN_ERROR_MODULE__FW_EVENTS, WLAN_ERROR_TYPE__MALLOC);
     }
     pFwEvent->rxTxBuffer = os_malloc(rxTxBufferSize);
     if(NULL == pFwEvent->rxTxBuffer)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__HIGH, WLAN_ERROR_MODULE__FW_EVENTS, WLAN_ERROR_TYPE__MALLOC);
     }
     pFwEvent->rxTxBufSize = rxTxBufferSize;
@@ -521,7 +521,7 @@ void FwEvent_StateMachine ()
 		else if (eStatus == TXN_STATUS_ERROR)
 		{
    		    FW_EVENT_HANDLE_PRINT_ERROR("FwEvent_StateMachine: NewState=%d, Status=%d, IntrPending=%d, EventVector=0x%x, EventMask=0x%x\n\r", pFwEvent->eSmState, eStatus, pFwEvent->bIntrPending, pFwEvent->uEventVector, pFwEvent->uEventMask);
-            assert(0);
+            ASSERT_GENERAL(0);
             error_event.error_num = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__FW_EVENTS, WLAN_ERROR_TYPE__TRANSACTION);
             error_event.module = WLAN_MODULE_FWEVENT;
             error_event.severity = WLAN_SEVERITY_MID;
@@ -577,7 +577,6 @@ uint32_t FwEvent_TranslateToFwTime (uint32_t uHostTime)
     uint32_t ret = (uHostTime * 1000) - pFwEvent->uFwTimeOffset;
     return ret;
 }
-
 
 
 

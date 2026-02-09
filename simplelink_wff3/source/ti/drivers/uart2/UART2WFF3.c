@@ -1063,7 +1063,7 @@ static void UART2WFF3_initHw(UART2_Handle handle)
     UART2WFF3_HWAttrs const *hwAttrs = handle->hwAttrs;
     uint32_t dmaTxChannel            = hwAttrs->txDmaChannel;
     uint32_t dmaRxChannel            = hwAttrs->rxDmaChannel;
-    uint32_t periphOffset            = 0;
+    uint32_t peripheral              = DMA_PERIPH_UARTLIN_0;
 
     ClockP_getCpuFreq(&freq);
 #if DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX
@@ -1139,15 +1139,21 @@ static void UART2WFF3_initHw(UART2_Handle handle)
         DMAWFF3_clearInterrupt(1 << dmaRxChannel);
         DMAWFF3_initChannel(dmaRxChannel);
 
+        /* Update the peripheral index if the base address is different from UARTLIN0_BASE */
         if (hwAttrs->baseAddr == UARTLIN1_BASE)
         {
-            periphOffset = 1;
+            peripheral = DMA_PERIPH_UARTLIN_1;
         }
+        else if (hwAttrs->baseAddr == UARTLIN2_BASE)
+        {
+            peripheral = DMA_PERIPH_UARTLIN_2;
+        }
+
         /* Mux RX DMA channel to UART peripheral */
-        DMAWFF3_connectChannel(dmaRxChannel, DMA_PERIPH_UARTLIN_0 + periphOffset);
+        DMAWFF3_connectChannel(dmaRxChannel, peripheral);
 
         /* Mux TX DMA channel to UART peripheral */
-        DMAWFF3_connectChannel(dmaTxChannel, DMA_PERIPH_UARTLIN_0 + periphOffset);
+        DMAWFF3_connectChannel(dmaTxChannel, peripheral);
     }
 }
 

@@ -36,8 +36,8 @@
 
 #include <ti/drivers/dpl/HwiP.h>
 
-#include <ti/drivers/watchdog/WatchdogWFF3.h>
 #include <ti/drivers/Watchdog.h>
+#include <ti/drivers/watchdog/WatchdogWFF3.h>
 
 #include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(driverlib/watchdog.h)
@@ -56,12 +56,6 @@ uint32_t WatchdogWFF3_convertMsToTicks(Watchdog_Handle handle, uint32_t millisec
 /* WatchdogWFF3 internal functions */
 static void WatchdogWFF3_initHw(Watchdog_Handle handle);
 
-/* WatchdogWFF3 internal callback function */
-static void WatchdogWFF3_callbackFxn(void);
-
-/* WatchdogWFF3 global variables */
-static Watchdog_Handle watchdogHandle;
-
 /* Watchdog function table for WFF3 implementation */
 const Watchdog_FxnTable WatchdogWFF3_fxnTable = {WatchdogWFF3_clear,
                                                  WatchdogWFF3_close,
@@ -71,106 +65,16 @@ const Watchdog_FxnTable WatchdogWFF3_fxnTable = {WatchdogWFF3_clear,
                                                  WatchdogWFF3_setReload,
                                                  WatchdogWFF3_convertMsToTicks};
 
-#define CALLBACK_THRESHOLD_DIVISOR 2        /* Ratio defining how soon the callback occurs before the reset */
-#define LFCLK_FREQ_HZ              32768    /* LFCLK frequency in Hz */
-#define MAX_RELOAD_TICKS           0x7FFFFF /* Maximum possible reset value in ticks */
-#define MIN_RELOAD_TICKS           0x2      /* Minimum allowable reload value in ticks */
-#define MS_PER_SEC                 1000     /* Millisecond to second ratio */
+#define LFCLK_FREQ_HZ         32768    /* LFCLK frequency in Hz */
+#define MAX_RELOAD_TICKS      0x7FFFFF /* Maximum possible reset value in ticks */
+#define MIN_RELOAD_TICKS      0x1      /* Minimum allowable reload value in ticks */
+#define MS_PER_SEC            1000     /* Millisecond to second ratio */
 /* The reload value has a resolution of 256 (8 bits)/LFCLK_FREQ_HZ = 7.8125 ms.
  * By taking the inverse we get the tick frequency and avoid working with
  * decimal values. This division by 256 is possible without losing any precision
  * because 32768 is divisible by 256.
  */
-#define WATCHDOG_TICK_FREQ_HZ      (LFCLK_FREQ_HZ >> (HOSTMCU_AON_CFGWDT_THR_S))
-
-/*
- *  ======== WatchdogWFF3_callbackFxn ========
- */
-static void WatchdogWFF3_callbackFxn(void)
-{
-    WatchdogWFF3_Object *object = watchdogHandle->object;
-
-    /* Call user callback function */
-    (object->callbackFxn)((uintptr_t)watchdogHandle);
-
-    /* If reset is disabled the watchdog is used as another timer interrupt. In
-     * this case, clear the interrupt event cause and the interrupt request.
-     */
-    if (object->resetMode == Watchdog_RESET_OFF)
-    {
-        /* Pause the timer */
-        WatchdogStopSequence();
-
-        /* Restart the timer clearing the callback cause (set timer back to 0) */
-        WatchdogStartSequence();
-
-        /* Clear timer wakeup IRQ */
-        WatchdogClearWakeUpEvent();
-    }
-}
-
-/*
- *  ======== WatchdogWFF3_enableEvents ========
- */
-static void WatchdogWFF3_enableEvents(Watchdog_ResetMode resetMode, Watchdog_Callback callbackFxn)
-{
-    if (resetMode == Watchdog_RESET_ON)
-    {
-        /* Enable the reset event and if a callback function is provided, enable
-         * the callback event.
-         */
-        WatchdogEnableResetEvent();
-        if (callbackFxn != NULL)
-        {
-            WatchdogEnableWakeUpEvent();
-        }
-        else
-        {
-            WatchdogDisableWakeUpEvent();
-        }
-    }
-    else
-    {
-        /* If resets are off disable the reset event and enable the callback
-         * event. It is not necessary to check for NULL callbackFxn as we must
-         * provide a callback function when resets are off. This is checked
-         * by WatchdogWFF3_open().
-         */
-        WatchdogDisableResetEvent();
-        WatchdogEnableWakeUpEvent();
-    }
-}
-
-/*
- *  ======== WatchdogWFF3_setThresholds ========
- */
-static void WatchdogWFF3_setThresholds(Watchdog_ResetMode resetMode, Watchdog_Callback callbackFxn, uint32_t ticks)
-{
-    if (resetMode == Watchdog_RESET_ON)
-    {
-        /* Set reset threshold */
-        WatchdogSetResetThreshold(ticks);
-
-        /* If a callback function is provided also set the wakeup threshold.
-         * This allows the application to perform any necessary tasks before the
-         * reset occurs. The wakeup time is set to half the reset threshold time
-         * as a design decision.
-         */
-        if (callbackFxn != NULL)
-        {
-            WatchdogSetWakeUpThreshold(ticks / CALLBACK_THRESHOLD_DIVISOR);
-        }
-    }
-    else
-    {
-        /* If resets are off we only set the wakeup threshold. It is not
-         * necessary to check for NULL callbackFxn as we must provide a callback
-         * function when resets are off. This is checked against when calling
-         * WatchdogWFF3_open().
-         */
-        WatchdogSetWakeUpThreshold(ticks);
-    }
-}
+#define WATCHDOG_TICK_FREQ_HZ (LFCLK_FREQ_HZ >> (HOSTMCU_AON_CFGWDT_THR_S))
 
 /*
  *  ======== WatchdogWFF3_clear ========
@@ -185,7 +89,11 @@ void WatchdogWFF3_clear(Watchdog_Handle handle)
  */
 void WatchdogWFF3_close(Watchdog_Handle handle)
 {
-    /* Not supported for WFF3 */
+    WatchdogWFF3_Object *object = handle->object;
+    object->isOpen              = false;
+
+    WatchdogDisableResetEvent();
+    WatchdogStopSequence();
 }
 
 /*
@@ -224,10 +132,8 @@ Watchdog_Handle WatchdogWFF3_open(Watchdog_Handle handle, Watchdog_Params *param
         return NULL;
     }
 
-    /* Return if no callback is provided when the watchdog is configured not to
-     * generate a reset.
-     */
-    if (params->callbackFxn == NULL && params->resetMode == Watchdog_RESET_OFF)
+    /* Return if an unsupported reset mode is configured */
+    if (params->resetMode != Watchdog_RESET_ON)
     {
         return NULL;
     }
@@ -255,26 +161,9 @@ Watchdog_Handle WatchdogWFF3_open(Watchdog_Handle handle, Watchdog_Params *param
     object->isOpen = true;
     HwiP_restore(key);
 
-    /* Initialize the Watchdog object */
-    object->resetMode   = params->resetMode;
-    object->callbackFxn = params->callbackFxn;
-
-    /* Setup callback function if defined */
-    if (object->callbackFxn != NULL)
-    {
-        watchdogHandle = handle;
-        /* Directly install the ISR to the vector table instead of using
-         * HwiP_construct, as we can't rely on HwiP if something goes wrong.
-         */
-        HwiP_plug(INT_HOST_ELP_TMR_WAKEUP_REQ, (void *)WatchdogWFF3_callbackFxn);
-        HwiP_clearInterrupt(INT_HOST_ELP_TMR_WAKEUP_REQ);
-        HwiP_setPriority(INT_HOST_ELP_TMR_WAKEUP_REQ, 0);
-        HwiP_enableInterrupt(INT_HOST_ELP_TMR_WAKEUP_REQ);
-    }
-    else
-    {
-        HwiP_disableInterrupt(INT_HOST_ELP_TMR_WAKEUP_REQ);
-    }
+    /* Callback is not supported (HW reserved), make sure interrupt is disabled.
+     */
+    HwiP_disableInterrupt(INT_HOST_ELP_TMR_WAKEUP_REQ);
 
     /* Initialize the watchdog hardware */
     WatchdogWFF3_initHw(handle);
@@ -288,15 +177,9 @@ Watchdog_Handle WatchdogWFF3_open(Watchdog_Handle handle, Watchdog_Params *param
  */
 int_fast16_t WatchdogWFF3_setReload(Watchdog_Handle handle, uint32_t ticks)
 {
-    WatchdogWFF3_Object *object;
-
-    /* Get the pointer to the object */
-    object = handle->object;
-
     WatchdogStopSequence();
 
-    /* Set thresholds based on reset mode */
-    WatchdogWFF3_setThresholds(object->resetMode, object->callbackFxn, ticks);
+    WatchdogSetResetThreshold(ticks);
 
     WatchdogStartSequence();
 
@@ -313,32 +196,28 @@ int_fast16_t WatchdogWFF3_setReload(Watchdog_Handle handle, uint32_t ticks)
 static void WatchdogWFF3_initHw(Watchdog_Handle handle)
 {
     uint32_t tickValue;
-    WatchdogWFF3_Object *object;
     WatchdogWFF3_HWAttrs const *hwAttrs;
 
-    /* Get the pointer to the object and hwAttrs */
-    object  = handle->object;
+    /* Get the pointer to the hwAttrs. */
     hwAttrs = handle->hwAttrs;
 
     /* Configure the timer to be controlled by software. This makes it
-     * operational during sleep and wakeup and allows to manually control it
-     * in software.
+     * operational during sleep and active states, and allows to manually
+     * control it in software.
      */
     WatchdogSetSwMode();
 
-    /* Stop the timer before updating the reload value */
+    /* Stop the timer before updating the reload value. */
     WatchdogStopSequence();
 
-    /* Convert milliseconds to reset threshold ticks */
+    /* Convert milliseconds to reset threshold ticks. */
     tickValue = WatchdogWFF3_convertMsToTicks(handle, hwAttrs->reloadValue);
 
-    /* Set the threshold for the events and enable the interrupt events based on
-     * reset mode and callback function
-     */
-    WatchdogWFF3_setThresholds(object->resetMode, object->callbackFxn, tickValue);
-    WatchdogWFF3_enableEvents(object->resetMode, object->callbackFxn);
+    /* Set and enable the threshold. */
+    WatchdogSetResetThreshold(tickValue);
+    WatchdogEnableResetEvent();
 
-    /* Start the Watchdog */
+    /* Start the Watchdog counter. */
     WatchdogStartSequence();
 }
 

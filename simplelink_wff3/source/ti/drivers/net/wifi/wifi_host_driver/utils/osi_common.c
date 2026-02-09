@@ -32,6 +32,7 @@
 #include <time.h>
 #include <limits.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "osi_kernel.h"
 #include <stdlib.h>
 
@@ -106,6 +107,22 @@ char * os_readfile(const char *name, size_t *len)
     return NULL;
 }
 
+int os_strncasecmp(const char *s1, const char *s2, size_t n)
+{
+    const unsigned char *p1 = (const unsigned char *)s1;
+    const unsigned char *p2 = (const unsigned char *)s2;
+
+    int result;
+    int count=0;
+    while (( (result = tolower(*p1) - tolower(*p2++)) == 0 ) && (count < n)) {
+        if (*p1++ == '\0') {
+            break;
+        }
+        count++;
+    }
+    return result;
+}
+
 char * os_strdup(const char *s)
 {
     char *res;
@@ -122,7 +139,12 @@ char * os_strdup(const char *s)
 
 void * os_memdup(const void *src, size_t len)
 {
-    void *r = os_malloc(len);
+    void *r;
+
+    if (len)
+        r = os_malloc(len);
+    else
+        r = os_malloc(1);
 
     if (r)
         os_memcpy(r, src, len);

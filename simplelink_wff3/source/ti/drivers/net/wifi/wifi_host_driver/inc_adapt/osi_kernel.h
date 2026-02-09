@@ -39,22 +39,25 @@
 #ifndef __OSI_H__
 #define __OSI_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(__ZEPHYR__)
 #include <zephyr/kernel.h>
-#include <sys/types.h>
 #include <stdarg.h>
 #include <unistd.h>
 #if defined(CONFIG_POSIX_API)
 #include <zephyr/posix/unistd.h>
 #endif
-#endif
+#endif /* defined(__ZEPHYR__) */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#ifdef TI_CLANG
+#if defined(__clang__) || (__GNUC__)
 #include <sys/types.h>
 #endif
 #include "user_errno.h"
@@ -71,7 +74,8 @@ extern int Report(const char *pcFormat,...);
 extern void assert(unsigned int condition);
 #endif
 
-#define ASSERT_GENERAL assert
+//#define ASSERT_GENERAL assert
+extern void ASSERT_GENERAL(unsigned int condition);
 
 /************************************************************************
  *                                                                      *
@@ -90,7 +94,7 @@ extern void assert(unsigned int condition);
 
 #ifdef COLLECT_HEAP_DEBUG_INFO
 
-#define HEAP_DBG_SIZE 350
+#define HEAP_DBG_SIZE 60
 #define HEAP_DBG_VPORT_SIZE 100
 
 typedef struct
@@ -125,47 +129,7 @@ extern uint32_t dbg_vport_offset;
 extern int ReportNoLock(const char *pcFormat,...);
 #endif
 
-/*-----------------------------------------------------------------------------
-    Basic types definitions
-  ----------------------------------------------------------------------------- */
 
-/* unsigned types */
-#ifndef uint8
-typedef uint8_t uint8;
-#endif
-
-#ifndef uint16
-typedef uint16_t uint16;
-#endif
-
-#ifndef uint32
-typedef uint32_t uint32;
-#endif
-
-#ifndef uint64
-typedef uint64_t uint64;
-#endif
-
-/* signed types */
-#ifndef int8
-typedef int8_t int8;
-#endif
-
-#ifndef int16
-typedef int16_t int16;
-#endif
-
-#ifndef int32
-typedef int32_t int32;
-#endif
-
-#ifndef int64
-typedef int64_t int64;
-#endif
-
-#ifndef VOID
-#define VOID void
-#endif
 /*-----------------------------------------------------------------------------
     Basic macros
   ----------------------------------------------------------------------------- */
@@ -251,8 +215,6 @@ typedef signed   short  INT16;
 typedef signed   long   INT64;
 #endif
 
-typedef float           FLOAT;
-typedef double          DOUBLE;
 
 #ifdef _BOOLEAN
 #else
@@ -260,7 +222,6 @@ typedef double          DOUBLE;
 typedef unsigned char   BOOLEAN;
 #endif
 
-typedef unsigned char   UBYTE;
 
 #ifdef __arm
 #define PACKED  __packed
@@ -278,9 +239,6 @@ typedef unsigned char   UBYTE;
 /*-----------------------------------------------------------------------------
     Prototypes
   ----------------------------------------------------------------------------- */
-#ifndef AF_INET
-#define AF_INET (2)
-#endif
 
 /*******************************************************************************
 
@@ -295,6 +253,8 @@ uint32_t osi_ExitCritical(uint32_t ulKey);
 /************************** GET LR HELPER FUNCTION ************************/
 #define __ASM __asm /*!< asm keyword for GNU Compiler */
 #define __INLINE inline /*!< inline keyword for GNU Compiler */
+
+#if defined(__clang__) || (__GNUC__)
 #define __STATIC_INLINE static inline
 
 /**
@@ -304,11 +264,13 @@ uint32_t osi_ExitCritical(uint32_t ulKey);
 */
 __attribute__( ( always_inline ) ) __STATIC_INLINE uint32_t __get_LR(void)
 {
-  register uint32_t result;
+    uint32_t result;
 
-  __ASM volatile ("MOV %0, LR\n" : "=r" (result) );
-  return(result);
+    __ASM volatile ("MOV %0, LR\n" : "=r" (result) );
+    return(result);
 }
+#endif
+
 /************************************************************************/
 
 /*******************************************************************************
@@ -379,6 +341,22 @@ struct os_reltime {
     os_time_t usec;
 };
 
+typedef enum
+{
+    OSI_FLASH_CONNECTIVITY_FW_SLOT_1 = 1,
+    OSI_FLASH_CONNECTIVITY_FW_SLOT_2
+}osiFlashFwSlot_e;
+
+typedef enum
+{
+    OSI_FILESYSTEM_SET_CONNECTIVITY_FW_CONTAINER
+}osiFileSetType;
+
+typedef enum
+{
+    OSI_FILESYSTEM_GET_CONNECTIVITY_FW_CONTAINER
+}osiFileGetType;
+
 typedef void (*P_OSI_TASK_ENTRY)(void* pValue);
 typedef void (*P_THREAD_ENTRY_FUNCTION)(void* pParam);
 typedef void (*P_TIMER_EXPIRY_LEGACY_FUNCTION)(void* pParam);
@@ -388,6 +366,9 @@ typedef void (*P_TIMER_EXPIRY_LEGACY_FUNCTION)(void* pParam);
 #define OSI_WAIT_FOR_SECOND         (1000)
 #define OSI_MIN_THREAD_STACK_SIZE   (256)
 #define OSI_WAIT_FOR_MINUTES        (60000)
+#define OSI_WAIT_FOR_COMMAND_COMPLETE (100)
+#define OSI_WAIT_FOR_SCAN_MS        (30000)
+
 
 
 #define OSI_FLAG_FROM_INTR            (0)
@@ -955,11 +936,14 @@ int rand(void);
 extern int ATTRIBUTE osi_fclose(FILE *_fp);
 extern FILE * ATTRIBUTE osi_fopen(const char *_fname, const char *_mode);
 extern size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp);
-extern size_t osi_fwrite(const void *_ptr, size_t _size, size_t _count, register FILE *_fp);
+extern size_t osi_fwrite(const void *_ptr, size_t _size, size_t _count, FILE *_fp);
+extern int ATTRIBUTE osi_fset(osiFileSetType containerType, void *params);
+extern int ATTRIBUTE osi_fget(osiFileGetType containerType, void *params);
 extern size_t ATTRIBUTE osi_filelength(const char * FileName);
+extern int osi_fremove(FILE *_fp);
 int fprintf(FILE *_fp, const char *_format, ...);
-int fputc(int _c, register FILE *_fp);
-char *fgets(char *_ptr, register int _size, register FILE *_fp);
+int fputc(int _c, FILE *_fp);
+char *fgets(char *_ptr, int _size, FILE *_fp);
 int rename(const char *_old, const char *_new);
 //-----------------------------------------------------------
 
@@ -1372,20 +1356,9 @@ char * os_strchr(const char *s, int c);
  */
 char *os_strtok_r(char *s, const char *delim, char **last);
 
+
+
 #if !defined(__ZEPHYR__)
-//TODO move from kernel
-#ifndef INET_ADDRSTRLEN
-#define INET_ADDRSTRLEN  22
-#endif
-
-#ifndef INET6_ADDRSTRLEN
-#define INET6_ADDRSTRLEN 65
-#endif
-
-#ifndef AF_INET6
-#define AF_INET6        23
-#endif
-
 #ifndef inet_ntop
 extern int inet_ntop(int af, const void *src, void *dst, size_t size);
 #endif
@@ -1427,7 +1400,33 @@ int os_memcmp_const(const void *a, const void *b, size_t len);
 void os_printHeapdbg();
 #endif
 
+/*-----------------------------------------------------------*/
+/*!
+    \brief  Get time from the operating system
+    \brief
+    \brief t
+    \param
+    \return - time in seconds
+    \note
+    \warning
+*/
+uint64_t osi_GetDateTimeS();
 
+/*-----------------------------------------------------------*/
+/*!
+    \brief  Set time from the operating system
+    \brief
+    \brief t
+    \param
+    \return - time in  seconds
+    \note
+    \warning
+*/
+void osi_SetDateTimeS(uint64_t time);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__OSI_H__
 

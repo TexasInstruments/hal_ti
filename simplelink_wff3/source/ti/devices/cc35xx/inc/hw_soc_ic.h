@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the SOC_IC peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -1296,17 +1296,16 @@ This section defines the register offsets of the SOC_IC component
         DefaultValue:    0x0
         Access type:     read-write
         Description:     select master for timeout by masterid.
-                         masterid 2 MSBs are fixed, 2 LSBs defined in [SOC_AON:PROTENUM.*] register.
 
-                         { '00' , [SOC_AON:PROTENUM.M33NSEC]} - M33NS
-                         { '00' , [SOC_AON:PROTENUM.M33SEC]}    - M33S
-                         { '01' , [SOC_AON:PROTENUM.CORE]}         - Core (wsoc_ic)
-                         { '10' , [SOC_AON:PROTENUM.M33NSEC]}  - I2S/HSM M33NS access
-                         { '10' , [SOC_AON:PROTENUM.M33SEC]}    - I2S/HSM M33S access
-                         { '10' , [SOC_AON:PROTENUM.CORE]}         - I2S/HSM Core access
-                         { '11' , [SOC_AON:PROTENUM.M33NSEC]}  - DMA M33NS access
-                         { '11' , [SOC_AON:PROTENUM.M33SEC]}    - DMA M33S access
-                         { '11' , [SOC_AON:PROTENUM.CORE]}         - DMA Core access
+                         0x0. M33NS
+                         0x1. M33S
+                         0x6. Core (wsoc_ic)
+                         0x8. I2S/HSM M33NS access
+                         0x9. I2S/HSM M33S access
+                         0xA. I2S/HSM Core access
+                         0xC. DMA M33NS access
+                         0xD. DMA M33S access
+                         0xE. DMA Core access
 
 
 */

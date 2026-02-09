@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the ADC peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -159,67 +159,67 @@ This section defines the register offsets of the ADC component
 #define ADC_O_MEMCTL_0                                               0x00001180U
 
 //ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
-#define ADC_O_MEMCTL_1                                               0x00001180U
+#define ADC_O_MEMCTL_1                                               0x00001184U
 
 //ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
-#define ADC_O_MEMCTL_2                                               0x00001180U
+#define ADC_O_MEMCTL_2                                               0x00001188U
 
 //ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
-#define ADC_O_MEMCTL_3                                               0x00001180U
+#define ADC_O_MEMCTL_3                                               0x0000118CU
 
 //ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
-#define ADC_O_MEMCTL_4                                               0x00001180U
+#define ADC_O_MEMCTL_4                                               0x00001190U
 
 //ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
-#define ADC_O_MEMCTL_5                                               0x00001180U
+#define ADC_O_MEMCTL_5                                               0x00001194U
 
 //Memory Results Register
 #define ADC_O_MEMRES_0                                               0x00001280U
 
 //Memory Results Register
-#define ADC_O_MEMRES_1                                               0x00001280U
+#define ADC_O_MEMRES_1                                               0x00001284U
 
 //Memory Results Register
-#define ADC_O_MEMRES_2                                               0x00001280U
+#define ADC_O_MEMRES_2                                               0x00001288U
 
 //Memory Results Register
-#define ADC_O_MEMRES_3                                               0x00001280U
+#define ADC_O_MEMRES_3                                               0x0000128CU
 
 //Memory Results Register
-#define ADC_O_MEMRES_4                                               0x00001280U
+#define ADC_O_MEMRES_4                                               0x00001290U
 
 //Memory Results Register
-#define ADC_O_MEMRES_5                                               0x00001280U
+#define ADC_O_MEMRES_5                                               0x00001294U
 
 //Memory Results Register
-#define ADC_O_MEMRES_6                                               0x00001280U
+#define ADC_O_MEMRES_6                                               0x00001298U
 
 //Memory Results Register
-#define ADC_O_MEMRES_7                                               0x00001280U
+#define ADC_O_MEMRES_7                                               0x0000129CU
 
 //Memory Results Register
-#define ADC_O_MEMRES_8                                               0x00001280U
+#define ADC_O_MEMRES_8                                               0x000012A0U
 
 //Memory Results Register
-#define ADC_O_MEMRES_9                                               0x00001280U
+#define ADC_O_MEMRES_9                                               0x000012A4U
 
 //Memory Results Register
-#define ADC_O_MEMRES_10                                              0x00001280U
+#define ADC_O_MEMRES_10                                              0x000012A8U
 
 //Memory Results Register
-#define ADC_O_MEMRES_11                                              0x00001280U
+#define ADC_O_MEMRES_11                                              0x000012ACU
 
 //Memory Results Register
-#define ADC_O_MEMRES_12                                              0x00001280U
+#define ADC_O_MEMRES_12                                              0x000012B0U
 
 //Memory Results Register
-#define ADC_O_MEMRES_13                                              0x00001280U
+#define ADC_O_MEMRES_13                                              0x000012B4U
 
 //Memory Results Register
-#define ADC_O_MEMRES_14                                              0x00001280U
+#define ADC_O_MEMRES_14                                              0x000012B8U
 
 //Memory Results Register
-#define ADC_O_MEMRES_15                                              0x00001280U
+#define ADC_O_MEMRES_15                                              0x000012BCU
 
 //STATUS
 #define ADC_O_STA                                                    0x00001340U
@@ -268,6 +268,9 @@ This section defines the register offsets of the ADC component
 
 //INTERNAL CHANNEL CONTROL
 #define ADC_O_INTCHCTL                                               0x00001F20U
+
+//SETTLING TIME
+#define ADC_O_STLTIM                                                 0x00001F24U
 
 //ADC CLK CONFIG
 #define ADC_O_CLKCFG                                                 0x00002000U
@@ -379,6 +382,22 @@ This section defines the register offsets of the ADC component
         Access type:     read-write
         Description:     CONFIG
 
+                         bit[0] - Enable Internal Reference Mode
+                         bits[3:1] - Vsel for 3.3V mode Internal Reference Mode.  Vrefbuf = 1.3V
+                         bits[6:4] - Vsel bits for higher tap points - For debug purpose
+                         <6:4> --> 001 (0.9V)
+                         <6:4> --> 010 (1.45V)
+                         <6:4> --> 100 (1.4V)
+                         bits[8:7] - Enable Test mux to check ground and reference thought test pins
+                         01--> Vref Internal available to measure
+                         10 --> vss Internal Reference available to measure
+                         bits[10:9] - Trim bits to change the bias current in Ref buf 1st stage
+                         bits[12:11] - Trim bits to change the bias current in Ref buf
+                         bits[14:13] - Trim bits to change the bias current in Ref buf output stage
+                         bits[16:15] - NU
+                         bits[19:17] - Vsel for 1.8V mode Internal Reference Mode .Vrefbuf = 1.35V
+                         bits[31:20] - NU
+
 */
 #define ADC_REFBUF_CFG_W                                             32U
 #define ADC_REFBUF_CFG_M                                             0xFFFFFFFFU
@@ -398,75 +417,19 @@ This section defines the register offsets of the ADC component
         Access type:     read-write
         Description:     CONTROL
 
-        ENUMs:
-            NO_INTR:                     No bit is set means there is no pending interrupt request
-            OVIFG:                       MEMRESx overflow interrupt
-            UVIFG:                       MEMRESx underflow interrupt
-            TOVIFG:                      Sequence Conversion time overflow interrupt
-            HIGHIFG:                     High threshold compare interrupt
-            LOWIFG:                      Low threshold compare interrupt
-            INIFG:                       Primary Sequence In range comparator interrupt
-            MEMRESIFG0:                  MEMRES0 data loaded interrupt
-            MEMRESIFG1:                  MEMRES1 data loaded interrupt
-            MEMRESIFG2:                  MEMRES2 data loaded interrupt
-            MEMRESIFG3:                  MEMRES3 data loaded interrupt
-            MEMRESIFG4:                  MEMRES4 data loaded interrupt
-            MEMRESIFG5:                  MEMRES5 data loaded interrupt
-            MEMRESIFG6:                  MEMRES6 data loaded interrupt
-            MEMRESIFG7:                  MEMRES7 data loaded interrupt
-            MEMRESIFG8:                  MEMRES8 data loaded interrupt
-            MEMRESIFG9:                  MEMRES9 data  loaded interrupt
-            MEMRESIFG10:                 MEMRES10 data  loaded interrupt
-            MEMRESIFG11:                 MEMRES11 data  loaded interrupt
-            MEMRESIFG12:                 MEMRES12 data  loaded interrupt
-            MEMRESIFG13:                 MEMRES13 data  loaded interrupt
-            MEMRESIFG14:                 MEMRES14 data  loaded interrupt
-            MEMRESIFG15:                 MEMRES15 data  loaded interrupt
-            MEMRESIFG16:                 MEMRES16 data loaded interrupt
-            MEMRESIFG17:                 MEMRES17 data loaded interrupt
-            MEMRESIFG18:                 MEMRES18 data loaded interrupt
-            MEMRESIFG19:                 MEMRES19 data loaded interrupt
-            MEMRESIFG20:                 MEMRES20 data loaded interrupt
-            MEMRESIFG21:                 MEMRES21 data loaded interrupt
-            MEMRESIFG22:                 MEMRES22 data loaded interrupt
-            MEMRESIFG23:                 MEMRES23 data loaded interrupt
-            DMADONE:                     DMA done interrupt, generated on DMA transfer completion,
+                         bit0- master enable of test mux for AIP
+                         bit1- refbuf test enable
+                         bit2- 20uA current (scaled from PMCIO) test enable
+                         bit3- vbat_div test enable
+                         bit4- Tsense test enable
+                         bit5- Bandgap 0p9v test enable
+                         bit6- No connect
+                         bit7- No connect
+
 */
 #define ADC_ATB_CTRL_W                                               8U
 #define ADC_ATB_CTRL_M                                               0x000000FFU
 #define ADC_ATB_CTRL_S                                               0U
-#define ADC_ATB_CTRL_NO_INTR                                         0x00000000U
-#define ADC_ATB_CTRL_OVIFG                                           0x00000001U
-#define ADC_ATB_CTRL_UVIFG                                           0x00000007U
-#define ADC_ATB_CTRL_TOVIFG                                          0x00000002U
-#define ADC_ATB_CTRL_HIGHIFG                                         0x00000003U
-#define ADC_ATB_CTRL_LOWIFG                                          0x00000004U
-#define ADC_ATB_CTRL_INIFG                                           0x00000005U
-#define ADC_ATB_CTRL_MEMRESIFG0                                      0x00000009U
-#define ADC_ATB_CTRL_MEMRESIFG1                                      0x0000000AU
-#define ADC_ATB_CTRL_MEMRESIFG2                                      0x0000000BU
-#define ADC_ATB_CTRL_MEMRESIFG3                                      0x0000000CU
-#define ADC_ATB_CTRL_MEMRESIFG4                                      0x0000000DU
-#define ADC_ATB_CTRL_MEMRESIFG5                                      0x0000000EU
-#define ADC_ATB_CTRL_MEMRESIFG6                                      0x0000000FU
-#define ADC_ATB_CTRL_MEMRESIFG7                                      0x00000010U
-#define ADC_ATB_CTRL_MEMRESIFG8                                      0x00000011U
-#define ADC_ATB_CTRL_MEMRESIFG9                                      0x00000012U
-#define ADC_ATB_CTRL_MEMRESIFG10                                     0x00000013U
-#define ADC_ATB_CTRL_MEMRESIFG11                                     0x00000014U
-#define ADC_ATB_CTRL_MEMRESIFG12                                     0x00000015U
-#define ADC_ATB_CTRL_MEMRESIFG13                                     0x00000016U
-#define ADC_ATB_CTRL_MEMRESIFG14                                     0x00000017U
-#define ADC_ATB_CTRL_MEMRESIFG15                                     0x00000018U
-#define ADC_ATB_CTRL_MEMRESIFG16                                     0x00000019U
-#define ADC_ATB_CTRL_MEMRESIFG17                                     0x0000001AU
-#define ADC_ATB_CTRL_MEMRESIFG18                                     0x0000001BU
-#define ADC_ATB_CTRL_MEMRESIFG19                                     0x0000001CU
-#define ADC_ATB_CTRL_MEMRESIFG20                                     0x0000001DU
-#define ADC_ATB_CTRL_MEMRESIFG21                                     0x0000001EU
-#define ADC_ATB_CTRL_MEMRESIFG22                                     0x0000001FU
-#define ADC_ATB_CTRL_MEMRESIFG23                                     0x00000020U
-#define ADC_ATB_CTRL_DMADONE                                         0x00000006U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -475,7 +438,7 @@ This section defines the register offsets of the ADC component
     Relative address:    0x1020
     Description:         INTERNAL EVENT 0 IRQ IDX
 
-                        This register provides the highest priority enabled interrupt index. 0x0 means no event pending. Interrupt 1 is the highest priority, 2 next highest, 4, 8, ...2^31 is the least priority. That is, the least bit position that is set to 1 denotes the highest priority pending interrupt. The priority order is fixed. However, users can implement their own prioritization schemes using other registers that expose the full set of interrupts that have occurred.
+                        This register provides the highest priority enabled interrupt index. 0x0 means no event pending. Interrupt 1 is the highest priority, 2 next highest, 4, 8, ... 2^31 is the least priority. That is, the least bit position that is set to 1 denotes the highest priority pending interrupt. The priority order is fixed. However, users can implement their own prioritization schemes using other registers that expose the full set of interrupts that have occurred.
 
                         On each read, only one interrupt is indicated. On a read, the current interrupt (highest priority) is automatically cleared by the hardware and the corresponding interrupt flag in the RIS and MIS are cleared as well. After a read from the CPU (not from the debug interface), the register must be updated with the next highest priority interrupt, if none are pending, then it should display 0x0.
 
@@ -709,8 +672,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -730,8 +692,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -751,8 +712,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -772,8 +732,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -793,8 +752,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -814,8 +772,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -835,8 +792,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -856,8 +812,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -877,8 +832,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -898,8 +852,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -919,8 +872,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -940,8 +892,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -961,8 +912,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -982,8 +932,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1003,8 +952,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1024,8 +972,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1191,8 +1138,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1212,8 +1158,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1233,8 +1178,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1254,8 +1198,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1275,8 +1218,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1296,8 +1238,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1317,8 +1258,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1338,8 +1278,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1359,8 +1298,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1380,8 +1318,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1401,8 +1338,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1422,8 +1358,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1443,8 +1378,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1464,8 +1398,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1485,8 +1418,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1506,8 +1438,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1673,8 +1604,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 11
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1694,8 +1624,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1715,8 +1644,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1736,8 +1664,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1757,8 +1684,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1778,8 +1704,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1799,8 +1724,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1820,8 +1744,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1841,8 +1764,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1862,8 +1784,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1883,8 +1804,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1904,8 +1824,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1925,8 +1844,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1946,8 +1864,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1967,8 +1884,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -1988,8 +1904,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -2155,8 +2070,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2176,8 +2090,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2197,8 +2110,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2218,8 +2130,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2239,8 +2150,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2260,8 +2170,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2281,8 +2190,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2302,8 +2210,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2323,8 +2230,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2344,8 +2250,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2365,8 +2270,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2386,8 +2290,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2407,8 +2310,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2428,8 +2330,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2449,8 +2350,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2470,8 +2370,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2637,8 +2536,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2658,8 +2556,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2679,8 +2576,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2700,8 +2596,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2721,8 +2616,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2742,8 +2636,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2763,8 +2656,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2784,8 +2676,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2805,8 +2696,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2826,8 +2716,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2847,8 +2736,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2868,8 +2756,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2889,8 +2776,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2910,8 +2796,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2931,8 +2816,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2952,8 +2836,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -2972,7 +2855,7 @@ This section defines the register offsets of the ADC component
     Relative address:    0x1050
     Description:         INTERNAL EVENT 1 IRQ IDX
 
-                        This register provides the highest priority enabled interrupt index. 0x0 means no event pending. Interrupt 1 is the highest priority, 2 next highest, 4, 8, ...2^31 is the least priority. That is, the least bit position that is set to 1 denotes the highest priority pending interrupt. The priority order is fixed. However, users can implement their own prioritization schemes using other registers that expose the full set of interrupts that have occurred.
+                        This register provides the highest priority enabled interrupt index. 0x0 means no event pending. Interrupt 1 is the highest priority, 2 next highest, 4, 8, ... 2^31 is the least priority. That is, the least bit position that is set to 1 denotes the highest priority pending interrupt. The priority order is fixed. However, users can implement their own prioritization schemes using other registers that expose the full set of interrupts that have occurred.
 
                         On each read, only one interrupt is indicated. On a read, the current interrupt (highest priority) is automatically cleared by the hardware and the corresponding interrupt flag in the RIS and MIS are cleared as well. After a read from the CPU (not from the debug interface), the register must be updated with the next highest priority interrupt, if none are pending, then it should display 0x0.
 
@@ -3078,8 +2961,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3169,8 +3051,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3260,8 +3141,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3351,8 +3231,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -3442,8 +3321,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -3462,7 +3340,7 @@ This section defines the register offsets of the ADC component
     Relative address:    0x1080
     Description:         INTERNAL EVENT 2 IRQ IDX
 
-                        This register provides the highest priority enabled interrupt index. 0x0 means no event pending. Interrupt 1 is the highest priority, 2 next highest, 4, 8, ...2^31 is the least priority. That is, the least bit position that is set to 1 denotes the highest priority pending interrupt. The priority order is fixed. However, users can implement their own prioritization schemes using other registers that expose the full set of interrupts that have occurred.
+                        This register provides the highest priority enabled interrupt index. 0x0 means no event pending. Interrupt 1 is the highest priority, 2 next highest, 4, 8, ... 2^31 is the least priority. That is, the least bit position that is set to 1 denotes the highest priority pending interrupt. The priority order is fixed. However, users can implement their own prioritization schemes using other registers that expose the full set of interrupts that have occurred.
 
                         On each read, only one interrupt is indicated. On a read, the current interrupt (highest priority) is automatically cleared by the hardware and the corresponding interrupt flag in the RIS and MIS are cleared as well. After a read from the CPU (not from the debug interface), the register must be updated with the next highest priority interrupt, if none are pending, then it should display 0x0.
 
@@ -3547,8 +3425,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3568,8 +3445,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3589,8 +3465,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3610,8 +3485,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3631,8 +3505,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3652,8 +3525,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3673,8 +3545,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3694,8 +3565,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3715,8 +3585,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3736,8 +3605,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3757,8 +3625,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3778,8 +3645,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3799,8 +3665,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3820,8 +3685,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3841,8 +3705,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3862,8 +3725,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3892,8 +3754,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3913,8 +3774,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3934,8 +3794,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3955,8 +3814,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3976,8 +3834,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -3997,8 +3854,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4018,8 +3874,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4039,8 +3894,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4060,8 +3914,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4081,8 +3934,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4102,8 +3954,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4123,8 +3974,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4144,8 +3994,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4165,8 +4014,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4186,8 +4034,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4207,8 +4054,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4237,8 +4083,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4258,8 +4103,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4279,8 +4123,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4300,8 +4143,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4321,8 +4163,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4342,8 +4183,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4363,8 +4203,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4384,8 +4223,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4405,8 +4243,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4426,8 +4263,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4447,8 +4283,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4468,8 +4303,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4489,8 +4323,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4510,8 +4343,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4531,8 +4363,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4552,8 +4383,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             CLR:                         No new data ready.
@@ -4582,8 +4412,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4603,8 +4432,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4624,8 +4452,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4645,8 +4472,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4666,8 +4492,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4687,8 +4512,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4708,8 +4532,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4729,8 +4552,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4750,8 +4572,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4771,8 +4592,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4792,8 +4612,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4813,8 +4632,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4834,8 +4652,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4855,8 +4672,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4876,8 +4692,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4897,8 +4712,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4927,8 +4741,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES0.
                          This bit is set to 1 when MEMRES0 is loaded with a new
                          conversion result.
-                         Reading MEMRES0 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4948,8 +4761,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES1.
                          This bit is set to 1 when MEMRES1 is loaded with a new
                          conversion result.
-                         Reading MEMRES1 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4969,8 +4781,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES2.
                          This bit is set to 1 when MEMRES2 is loaded with a new
                          conversion result.
-                         Reading MEMRES2 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -4990,8 +4801,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES3.
                          This bit is set to 1 when MEMRES3 is loaded with a new
                          conversion result.
-                         Reading MEMRES3 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5011,8 +4821,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES4.
                          This bit is set to 1 when MEMRES4 is loaded with a new
                          conversion result.
-                         Reading MEMRES4 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5032,8 +4841,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES5.
                          This bit is set to 1 when MEMRES5 is loaded with a new
                          conversion result.
-                         Reading MEMRES5 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5053,8 +4861,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES6.
                          This bit is set to 1 when MEMRES6 is loaded with a new
                          conversion result.
-                         Reading MEMRES6 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5074,8 +4881,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES7.
                          This bit is set to 1 when MEMRES7 is loaded with a new
                          conversion result.
-                         Reading MEMRES7 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5095,8 +4901,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES8.
                          This bit is set to 1 when MEMRES8 is loaded with a new
                          conversion result.
-                         Reading MEMRES8 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5116,8 +4921,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES9.
                          This bit is set to 1 when MEMRES9 is loaded with a new
                          conversion result.
-                         Reading MEMRES9 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5137,8 +4941,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES10.
                          This bit is set to 1 when MEMRES10 is loaded with a new
                          conversion result.
-                         Reading MEMRES10 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5158,8 +4961,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES11.
                          This bit is set to 1 when MEMRES11 is loaded with a new
                          conversion result.
-                         Reading MEMRES11 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5179,8 +4981,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES12.
                          This bit is set to 1 when MEMRES12 is loaded with a new
                          conversion result.
-                         Reading MEMRES12 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5200,8 +5001,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES13.
                          This bit is set to 1 when MEMRES13 is loaded with a new
                          conversion result.
-                         Reading MEMRES13 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5221,8 +5021,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES14.
                          This bit is set to 1 when MEMRES14 is loaded with a new
                          conversion result.
-                         Reading MEMRES14 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5242,8 +5041,7 @@ This section defines the register offsets of the ADC component
         Description:     Raw interrupt status for MEMRES15.
                          This bit is set to 1 when MEMRES15 is loaded with a new
                          conversion result.
-                         Reading MEMRES15 register will clear this bit, or when the
-                         corresponding bit in ICLR is set to 1
+                         To clear this bit, corresponding bit in ICLR should be set to 1
 
         ENUMs:
             NO_EFFECT:                   No new data ready.
@@ -5268,7 +5066,7 @@ This section defines the register offsets of the ADC component
         Field:           INT0CFG
         From..to bits:   0...1
         DefaultValue:    0x1
-        Access type:     read-only
+        Access type:     read-write
         Description:     INTERNAL 0 CONFIG
 
                          Event line mode select for event corresponding to [IPSTANDARD.INT_EVENT0]
@@ -5289,7 +5087,7 @@ This section defines the register offsets of the ADC component
         Field:           EVT1CFG
         From..to bits:   2...3
         DefaultValue:    0x0
-        Access type:     read-only
+        Access type:     read-write
         Description:     EVENT 1 CONFIG
 
                          Event line mode select for event corresponding to [IPSTANDARD.INT_EVENT1]
@@ -5441,7 +5239,9 @@ This section defines the register offsets of the ADC component
         From..to bits:   24...26
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     Selects divide ratio of of sample clock.
+        Description:     NU - should keep as '0'.
+
+                         Selects divide ratio of of sample clock.
 
         ENUMs:
             DIV_BY_1:                    Do not divide clock source
@@ -5643,15 +5443,11 @@ This section defines the register offsets of the ADC component
                          Note : A value of 3 defaults to 12 bit resolution.
 
         ENUMs:
-            BIT_8:                       12-bits resolution
-            BIT_10:                      14-bits resolution
             BIT_12:                      16-bits resolution
 */
 #define ADC_CTL2_RES_W                                               2U
 #define ADC_CTL2_RES_M                                               0x00000006U
 #define ADC_CTL2_RES_S                                               1U
-#define ADC_CTL2_RES_BIT_8                                           0x00000004U
-#define ADC_CTL2_RES_BIT_10                                          0x00000002U
 #define ADC_CTL2_RES_BIT_12                                          0x00000000U
 /*
 
@@ -5956,14 +5752,12 @@ This section defines the register offsets of the ADC component
                          Note: Writing value 0x3 defaults to INTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      Internal reference.
 */
 #define ADC_CTL3_ASCVRSEL_W                                          2U
 #define ADC_CTL3_ASCVRSEL_M                                          0x00003000U
 #define ADC_CTL3_ASCVRSEL_S                                          12U
-#define ADC_CTL3_ASCVRSEL_VDDA                                       0x00000000U
 #define ADC_CTL3_ASCVRSEL_EXTREF                                     0x00001000U
 #define ADC_CTL3_ASCVRSEL_INTREF                                     0x00002000U
 /*
@@ -5974,7 +5768,7 @@ This section defines the register offsets of the ADC component
         Access type:     read-write
         Description:     Full scale range of ADC limited to 1.8V or 3.3V
 
-                         * Exact range may be limited below the above mentioned voltages based on the design constraints
+                         *Exact range may be limited below the above mentioned voltages based on the design constraints
 
 */
 #define ADC_CTL3_ASCFSR                                              0x00004000U
@@ -6006,6 +5800,8 @@ This section defines the register offsets of the ADC component
         DefaultValue:    0x0
         Access type:     read-write
         Description:     Frequency Range.
+
+                         NU
 
         ENUMs:
             RANGE1TO4:                   1 to 4 MHz
@@ -6040,7 +5836,7 @@ This section defines the register offsets of the ADC component
     Default Value:       0x00000000
 
         Field:           SMP
-        From..to bits:   0...9
+        From..to bits:   0...13
         DefaultValue:    0x0
         Access type:     read-write
         Description:     SAMPLE
@@ -6048,8 +5844,8 @@ This section defines the register offsets of the ADC component
                          This bit-field specify the number of sample time clocks  (SCOMPx +1) for a conversion when SAMPLE_TIME in MEMCTLx is set to SCOMPx.
 
 */
-#define ADC_SCOMP0_SMP_W                                             10U
-#define ADC_SCOMP0_SMP_M                                             0x000003FFU
+#define ADC_SCOMP0_SMP_W                                             14U
+#define ADC_SCOMP0_SMP_M                                             0x00003FFFU
 #define ADC_SCOMP0_SMP_S                                             0U
 
 
@@ -6063,7 +5859,7 @@ This section defines the register offsets of the ADC component
     Default Value:       0x00000000
 
         Field:           SMP
-        From..to bits:   0...9
+        From..to bits:   0...13
         DefaultValue:    0x0
         Access type:     read-write
         Description:     SAMPLE
@@ -6071,8 +5867,8 @@ This section defines the register offsets of the ADC component
                          This bitfield specify the number of sample time clocks  (SCOMPx +1) for a conversion when SAMPLE_TIME in MEMCTLx is set to SCOMPx.
 
 */
-#define ADC_SCOMP1_SMP_W                                             10U
-#define ADC_SCOMP1_SMP_M                                             0x000003FFU
+#define ADC_SCOMP1_SMP_W                                             14U
+#define ADC_SCOMP1_SMP_M                                             0x00003FFFU
 #define ADC_SCOMP1_SMP_S                                             0U
 
 
@@ -6108,13 +5904,11 @@ This section defines the register offsets of the ADC component
 
         ENUMs:
             V1P4:                        REFBUF generates 1.4V output
-            V2P5:                        REFBUF generates 2.5V output
 */
 #define ADC_REFCFG_REFVSEL                                           0x00000002U
 #define ADC_REFCFG_REFVSEL_M                                         0x00000002U
 #define ADC_REFCFG_REFVSEL_S                                         1U
 #define ADC_REFCFG_REFVSEL_V1P4                                      0x00000000U
-#define ADC_REFCFG_REFVSEL_V2P5                                      0x00000002U
 /*
 
         Field:           IBEN
@@ -6380,17 +6174,15 @@ This section defines the register offsets of the ADC component
         Description:     Selects the combination of V(Rp) and V(Rn) sources.
                          It is recommended to connect VeREFn0 to on-board ground when VeREFn is selected for V(Rn).
 
-                         Note: A value of 3 defaults to INTREF.
+                         Note: A value of 3 defaults to INTREF and value of 0 defaults to EXTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      INTREF reference.
 */
 #define ADC_MEMCTL_0_VRSEL_W                                         2U
 #define ADC_MEMCTL_0_VRSEL_M                                         0x00000300U
 #define ADC_MEMCTL_0_VRSEL_S                                         8U
-#define ADC_MEMCTL_0_VRSEL_VDDA                                      0x00000000U
 #define ADC_MEMCTL_0_VRSEL_EXTREF                                    0x00000100U
 #define ADC_MEMCTL_0_VRSEL_INTREF                                    0x00000200U
 /*
@@ -6496,7 +6288,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMCTL_1
     Offset name:         ADC_O_MEMCTL_1
-    Relative address:    0x1180
+    Relative address:    0x1184
     Description:         ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
                         CTL0.ENC  must be set to 0 to write to this register.
     Default Value:       0x00000100
@@ -6589,17 +6381,15 @@ This section defines the register offsets of the ADC component
         Description:     Selects the combination of V(Rp) and V(Rn) sources.
                          It is recommended to connect VeREFn0 to on-board ground when VeREFn is selected for V(Rn).
 
-                         Note: A value of 3 defaults to INTREF.
+                         Note: A value of 3 defaults to INTREF and value of 0 defaults to EXTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      INTREF reference.
 */
 #define ADC_MEMCTL_1_VRSEL_W                                         2U
 #define ADC_MEMCTL_1_VRSEL_M                                         0x00000300U
 #define ADC_MEMCTL_1_VRSEL_S                                         8U
-#define ADC_MEMCTL_1_VRSEL_VDDA                                      0x00000000U
 #define ADC_MEMCTL_1_VRSEL_EXTREF                                    0x00000100U
 #define ADC_MEMCTL_1_VRSEL_INTREF                                    0x00000200U
 /*
@@ -6705,7 +6495,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMCTL_2
     Offset name:         ADC_O_MEMCTL_2
-    Relative address:    0x1180
+    Relative address:    0x1188
     Description:         ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
                         CTL0.ENC  must be set to 0 to write to this register.
     Default Value:       0x00000100
@@ -6798,17 +6588,15 @@ This section defines the register offsets of the ADC component
         Description:     Selects the combination of V(Rp) and V(Rn) sources.
                          It is recommended to connect VeREFn0 to on-board ground when VeREFn is selected for V(Rn).
 
-                         Note: A value of 3 defaults to INTREF.
+                         Note: A value of 3 defaults to INTREF and value of 0 defaults to EXTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      INTREF reference.
 */
 #define ADC_MEMCTL_2_VRSEL_W                                         2U
 #define ADC_MEMCTL_2_VRSEL_M                                         0x00000300U
 #define ADC_MEMCTL_2_VRSEL_S                                         8U
-#define ADC_MEMCTL_2_VRSEL_VDDA                                      0x00000000U
 #define ADC_MEMCTL_2_VRSEL_EXTREF                                    0x00000100U
 #define ADC_MEMCTL_2_VRSEL_INTREF                                    0x00000200U
 /*
@@ -6914,7 +6702,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMCTL_3
     Offset name:         ADC_O_MEMCTL_3
-    Relative address:    0x1180
+    Relative address:    0x118C
     Description:         ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
                         CTL0.ENC  must be set to 0 to write to this register.
     Default Value:       0x00000100
@@ -7007,17 +6795,15 @@ This section defines the register offsets of the ADC component
         Description:     Selects the combination of V(Rp) and V(Rn) sources.
                          It is recommended to connect VeREFn0 to on-board ground when VeREFn is selected for V(Rn).
 
-                         Note: A value of 3 defaults to INTREF.
+                         Note: A value of 3 defaults to INTREF and value of 0 defaults to EXTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      INTREF reference.
 */
 #define ADC_MEMCTL_3_VRSEL_W                                         2U
 #define ADC_MEMCTL_3_VRSEL_M                                         0x00000300U
 #define ADC_MEMCTL_3_VRSEL_S                                         8U
-#define ADC_MEMCTL_3_VRSEL_VDDA                                      0x00000000U
 #define ADC_MEMCTL_3_VRSEL_EXTREF                                    0x00000100U
 #define ADC_MEMCTL_3_VRSEL_INTREF                                    0x00000200U
 /*
@@ -7123,7 +6909,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMCTL_4
     Offset name:         ADC_O_MEMCTL_4
-    Relative address:    0x1180
+    Relative address:    0x1190
     Description:         ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
                         CTL0.ENC  must be set to 0 to write to this register.
     Default Value:       0x00000100
@@ -7216,17 +7002,15 @@ This section defines the register offsets of the ADC component
         Description:     Selects the combination of V(Rp) and V(Rn) sources.
                          It is recommended to connect VeREFn0 to on-board ground when VeREFn is selected for V(Rn).
 
-                         Note: A value of 3 defaults to INTREF.
+                         Note: A value of 3 defaults to INTREF and value of 0 defaults to EXTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      INTREF reference.
 */
 #define ADC_MEMCTL_4_VRSEL_W                                         2U
 #define ADC_MEMCTL_4_VRSEL_M                                         0x00000300U
 #define ADC_MEMCTL_4_VRSEL_S                                         8U
-#define ADC_MEMCTL_4_VRSEL_VDDA                                      0x00000000U
 #define ADC_MEMCTL_4_VRSEL_EXTREF                                    0x00000100U
 #define ADC_MEMCTL_4_VRSEL_INTREF                                    0x00000200U
 /*
@@ -7332,7 +7116,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMCTL_5
     Offset name:         ADC_O_MEMCTL_5
-    Relative address:    0x1180
+    Relative address:    0x1194
     Description:         ULP_ADCHP Conversion Memory Control Register x (x=0 to 31)
                         CTL0.ENC  must be set to 0 to write to this register.
     Default Value:       0x00000100
@@ -7425,17 +7209,15 @@ This section defines the register offsets of the ADC component
         Description:     Selects the combination of V(Rp) and V(Rn) sources.
                          It is recommended to connect VeREFn0 to on-board ground when VeREFn is selected for V(Rn).
 
-                         Note: A value of 3 defaults to INTREF.
+                         Note: A value of 3 defaults to INTREF and value of 0 defaults to EXTREF.
 
         ENUMs:
-            VDDA:                        VDDA reference.
             EXTREF:                      EXTREF pin reference.
             INTREF:                      INTREF reference.
 */
 #define ADC_MEMCTL_5_VRSEL_W                                         2U
 #define ADC_MEMCTL_5_VRSEL_M                                         0x00000300U
 #define ADC_MEMCTL_5_VRSEL_S                                         8U
-#define ADC_MEMCTL_5_VRSEL_VDDA                                      0x00000000U
 #define ADC_MEMCTL_5_VRSEL_EXTREF                                    0x00000100U
 #define ADC_MEMCTL_5_VRSEL_INTREF                                    0x00000200U
 /*
@@ -7568,7 +7350,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_1
     Offset name:         ADC_O_MEMRES_1
-    Relative address:    0x1280
+    Relative address:    0x1284
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7595,7 +7377,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_2
     Offset name:         ADC_O_MEMRES_2
-    Relative address:    0x1280
+    Relative address:    0x1288
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7622,7 +7404,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_3
     Offset name:         ADC_O_MEMRES_3
-    Relative address:    0x1280
+    Relative address:    0x128C
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7649,7 +7431,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_4
     Offset name:         ADC_O_MEMRES_4
-    Relative address:    0x1280
+    Relative address:    0x1290
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7676,7 +7458,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_5
     Offset name:         ADC_O_MEMRES_5
-    Relative address:    0x1280
+    Relative address:    0x1294
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7703,7 +7485,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_6
     Offset name:         ADC_O_MEMRES_6
-    Relative address:    0x1280
+    Relative address:    0x1298
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7730,7 +7512,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_7
     Offset name:         ADC_O_MEMRES_7
-    Relative address:    0x1280
+    Relative address:    0x129C
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7757,7 +7539,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_8
     Offset name:         ADC_O_MEMRES_8
-    Relative address:    0x1280
+    Relative address:    0x12A0
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7784,7 +7566,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_9
     Offset name:         ADC_O_MEMRES_9
-    Relative address:    0x1280
+    Relative address:    0x12A4
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7811,7 +7593,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_10
     Offset name:         ADC_O_MEMRES_10
-    Relative address:    0x1280
+    Relative address:    0x12A8
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7838,7 +7620,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_11
     Offset name:         ADC_O_MEMRES_11
-    Relative address:    0x1280
+    Relative address:    0x12AC
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7865,7 +7647,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_12
     Offset name:         ADC_O_MEMRES_12
-    Relative address:    0x1280
+    Relative address:    0x12B0
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7892,7 +7674,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_13
     Offset name:         ADC_O_MEMRES_13
-    Relative address:    0x1280
+    Relative address:    0x12B4
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7919,7 +7701,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_14
     Offset name:         ADC_O_MEMRES_14
-    Relative address:    0x1280
+    Relative address:    0x12B8
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -7946,7 +7728,7 @@ This section defines the register offsets of the ADC component
 /*-----------------------------------REGISTER------------------------------------
     Register name:       MEMRES_15
     Offset name:         ADC_O_MEMRES_15
-    Relative address:    0x1280
+    Relative address:    0x12BC
     Description:         Memory Results Register
     Default Value:       NA
 
@@ -8494,12 +8276,26 @@ This section defines the register offsets of the ADC component
                          0x2 - HFXT
                          0x3 - SOC_PLL_CLK_DIV
 
-                         only '0' to '1' transition should be selected, otherwise use with care
+                         note: not glitch free, therefore ICG should be enabled after selecting the right clk
 
 */
 #define ADC_CONVCTL_CONCLKSEL_W                                      2U
 #define ADC_CONVCTL_CONCLKSEL_M                                      0x00030000U
 #define ADC_CONVCTL_CONCLKSEL_S                                      16U
+/*
+
+        Field:           CONVCLKEN
+        From..to bits:   18...18
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     CONV CLK ICG EN
+
+                         should be enabled after selecting CONV CLK
+
+*/
+#define ADC_CONVCTL_CONVCLKEN                                        0x00040000U
+#define ADC_CONVCTL_CONVCLKEN_M                                      0x00040000U
+#define ADC_CONVCTL_CONVCLKEN_S                                      18U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -8617,6 +8413,49 @@ This section defines the register offsets of the ADC component
 
 
 /*-----------------------------------REGISTER------------------------------------
+    Register name:       STLTIM
+    Offset name:         ADC_O_STLTIM
+    Relative address:    0x1F24
+    Description:         SETTLING TIME
+    Default Value:       0x01670027
+
+        Field:           SWCTRLDEL
+        From..to bits:   0...5
+        DefaultValue:    0x27
+        Access type:     read-write
+        Description:     SWITCH CONTROL DELAY
+                         delay value for SWITCH CONTROL.
+                         calculated using conv clk
+                         '1' - 2 conv clks
+                         '2' - 3 conv clks
+                         ...
+                         '3F' - 64 conv clks
+
+*/
+#define ADC_STLTIM_SWCTRLDEL_W                                       6U
+#define ADC_STLTIM_SWCTRLDEL_M                                       0x0000003FU
+#define ADC_STLTIM_SWCTRLDEL_S                                       0U
+/*
+
+        Field:           RCSETDEL
+        From..to bits:   16...25
+        DefaultValue:    0x167
+        Access type:     read-write
+        Description:     RC SETTLING DELAY
+                         delay value for RC SETTLING DELAY. value should be added to switch control delay.
+                         calculated using conv clk
+                         '1' - 1 conv clks
+                         '2' - 2 conv clks
+                         ...
+                         '3FF' - 1023 conv clks
+
+*/
+#define ADC_STLTIM_RCSETDEL_W                                        10U
+#define ADC_STLTIM_RCSETDEL_M                                        0x03FF0000U
+#define ADC_STLTIM_RCSETDEL_S                                        16U
+
+
+/*-----------------------------------REGISTER------------------------------------
     Register name:       CLKCFG
     Offset name:         ADC_O_CLKCFG
     Relative address:    0x2000
@@ -8629,17 +8468,13 @@ This section defines the register offsets of the ADC component
         Access type:     read-write
         Description:     ENABLE
 
+                         enables system clk to work with ADC
                          '1' - enable adc clk
                          '0' - disable adc clk
 
-        ENUMs:
-            MINIMUM:                     Smallest value
-            MAXIMUM:                     Highest possible value
 */
 #define ADC_CLKCFG_EN                                                0x00000001U
 #define ADC_CLKCFG_EN_M                                              0x00000001U
 #define ADC_CLKCFG_EN_S                                              0U
-#define ADC_CLKCFG_EN_MINIMUM                                        0x00000000U
-#define ADC_CLKCFG_EN_MAXIMUM                                        0xFFFFFFFFU
 
 #endif /* __HW_ADC_H__*/

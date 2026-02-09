@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the SDIO_CORE peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -136,6 +136,12 @@ This section defines the register offsets of the SDIO_CORE component
 
 //FN0 CIS patch3 address
 #define SDIO_CORE_O_CISP3ADDR                                        0x0001FFE8U
+
+//FN0 CIS patch4 address
+#define SDIO_CORE_O_CISP4ADDR                                        0x0001FFECU
+
+//FN0 CIS patch5 address
+#define SDIO_CORE_O_CISP5ADDR                                        0x0001FFF0U
 
 
 
@@ -1073,11 +1079,11 @@ This section defines the register offsets of the SDIO_CORE component
     Offset name:         SDIO_CORE_O_FBR1R108
     Relative address:    0x108
     Description:
-    Default Value:       0x00002000
+    Default Value:       0x00000000
 
         Field:           CISPTR0
         From..to bits:   8...15
-        DefaultValue:    0x20
+        DefaultValue:    0x0
         Access type:     read-only
         Description:     Bits 7:0 of address pointer to function 1 CIS
 
@@ -1290,5 +1296,67 @@ This section defines the register offsets of the SDIO_CORE component
 #define SDIO_CORE_CISP3ADDR_PCH3DAT_W                                8U
 #define SDIO_CORE_CISP3ADDR_PCH3DAT_M                                0x00FF0000U
 #define SDIO_CORE_CISP3ADDR_PCH3DAT_S                                16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CISP4ADDR
+    Offset name:         SDIO_CORE_O_CISP4ADDR
+    Relative address:    0x1FFEC
+    Description:         FN0 CIS patch4 address
+    Default Value:       0x00000000
+
+        Field:           PCH4ADDR
+        From..to bits:   0...15
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     CIS address patch 4
+
+*/
+#define SDIO_CORE_CISP4ADDR_PCH4ADDR_W                               16U
+#define SDIO_CORE_CISP4ADDR_PCH4ADDR_M                               0x0000FFFFU
+#define SDIO_CORE_CISP4ADDR_PCH4ADDR_S                               0U
+/*
+
+        Field:           PCH4DAT
+        From..to bits:   16...23
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     CIS data patch 4
+
+*/
+#define SDIO_CORE_CISP4ADDR_PCH4DAT_W                                8U
+#define SDIO_CORE_CISP4ADDR_PCH4DAT_M                                0x00FF0000U
+#define SDIO_CORE_CISP4ADDR_PCH4DAT_S                                16U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       CISP5ADDR
+    Offset name:         SDIO_CORE_O_CISP5ADDR
+    Relative address:    0x1FFF0
+    Description:         FN0 CIS patch5 address
+    Default Value:       0x00000000
+
+        Field:           PCH5ADDR
+        From..to bits:   0...15
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     CIS address patch 5
+
+*/
+#define SDIO_CORE_CISP5ADDR_PCH5ADDR_W                               16U
+#define SDIO_CORE_CISP5ADDR_PCH5ADDR_M                               0x0000FFFFU
+#define SDIO_CORE_CISP5ADDR_PCH5ADDR_S                               0U
+/*
+
+        Field:           PCH5DAT
+        From..to bits:   16...23
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     CIS data patch 5
+
+*/
+#define SDIO_CORE_CISP5ADDR_PCH5DAT_W                                8U
+#define SDIO_CORE_CISP5ADDR_PCH5DAT_M                                0x00FF0000U
+#define SDIO_CORE_CISP5ADDR_PCH5DAT_S                                16U
 
 #endif /* __HW_SDIO_CORE_H__*/

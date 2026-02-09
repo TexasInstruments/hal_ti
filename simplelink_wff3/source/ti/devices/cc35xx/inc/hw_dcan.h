@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the DCAN peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -11011,7 +11011,8 @@ This section defines the register offsets of the DCAN component
     Offset name:         DCAN_O_SRAM
     Relative address:    0x1000
     Description:
-    Default Value:       0x000000
+    Default Value:       0x00000000
+
 */
 
 /*-----------------------------------REGISTER------------------------------------

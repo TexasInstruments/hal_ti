@@ -57,16 +57,16 @@
  *  #Watchdog_open(). Once opened, the Watchdog will count up from zero to the
  *  reload value specified in #WatchdogWFF3_HWAttrs. If it times out, a reset
  *  signal will be generated. To prevent a reset, #Watchdog_clear() must be
- *  called to clear the timer.
+ *  called to clear the timer, or #Watchdog_close() to stop the Watchdog timer.
  *
  *  @note
- *  In this device, the Watchdog Timer operates differently: it counts up from
- *  zero to the reload value (reset threshold), instead of counting down from a
- *  reload value to zero as described in the general API. However, the
- *  device-specific API abstracts this difference, allowing the user to interact
- *  with the Watchdog Timer as though it behaves as described in the general
- *  API. Be aware that internally, the implementation and naming conventions may
- *  differ to accommodate this behavior.
+ *  In these devices, the Watchdog Timer operates differently: it counts up to
+ *  the reload value (reset threshold) instead of counting down from a reload
+ *  value to zero as described in the general API. However, the device-specific
+ *  API abstracts this difference, allowing the user to interact with the
+ *  Watchdog Timer as though it behaves as described in the general API. Be
+ *  aware that internally, the implementation and naming conventions may differ
+ *  to accommodate this behavior.
  *
  *  The Watchdog counts up at the rate of the device clock LFCLK divided by 2^8,
  *  which results in a frequency of 128 Hz. The watchdog driver assumes LFCLK is
@@ -77,11 +77,11 @@
  *
  *  The reload value which the Watchdog timer counts up to may be changed during
  *  runtime using #Watchdog_setReload(). This value should be specified in
- *  Watchdog threshold ticks and should not exceed "2^23 - 1" or fall below "2".
+ *  Watchdog threshold ticks and should not exceed "2^23 - 1" or fall below "1".
  *  At the rate of 128 Hz, the resolution of each threshold tick is 7.8125 ms.
  *  This corresponds to a maximum timeout period of 65535992 ms and a minimum
- *  period of 16 ms. Calling #Watchdog_setReload() will also set the timer back
- *  to 0.
+ *  period of 7.8125 ms. Calling #Watchdog_setReload() will also reset counter
+ *  value.
  *
  *  The function #Watchdog_convertMsToTicks() can be used to convert from ms
  *  to Watchdog threshold ticks. If the converted value exceeds or falls below
@@ -92,11 +92,10 @@
  *  nearest possible value within the resolution. For instance, if a period of
  *  22 ms is specified, the actual implemented period will be 23.4375 ms.
  *
- *  Watchdog_close() is <b>not</b> supported by this driver implementation. Once
- *  started, the Watchdog timer can only be stopped by a hardware reset.
+ *  #Watchdog_close() can be used to stop the Watchdog timer.
  *
  *  <b>No</b> WFF3 specific command exists. Any call to #Watchdog_control() will
- *  receive the return code #Watchdog_STATUS_UNDEFINEDCMD.
+ *  return #Watchdog_STATUS_UNDEFINEDCMD.
  *
  *  The Watchdog module available on WFF3 devices does not support debug
  *  stalling. Therefore, the #Watchdog_Params.debugStallMode parameter in the
@@ -104,27 +103,15 @@
  *  #Watchdog_open() with the debug stall mode to Watchdog_DEBUG_STALL_ON will
  *  fail and return a NULL handle.
  *
- *  The Watchdog driver has reset enabled by default. However, it may be
- *  disabled through the #Watchdog_Params.resetMode parameter in the
- *  #Watchdog_Params struct, which allows the Watchdog Timer to be used like
- *  another timer interrupt.
- *
- *  When resets are disabled, a callback function must be specified. If not,
- *  calling #Watchdog_open() will return a NULL handle. The callback function
- *  is specified through the #Watchdog_Params.callbackFxn parameter in the
- *  #Watchdog_Params struct and will be called when the timer times out.
- *
- *  When resets are enabled, specifying a callback function is optional. If no
- *  callback function is specified (default is NULL), the device will reset when
- *  the timer times out. If a callback function is specified, it will be invoked
- *  when half of the timeout period has elapsed, and a reset will be generated
- *  when the full period expires. Upon invocation of the callback function, the
- *  application must decide on the appropriate action before the reset occurs.
- *  Note that if the callback request is not cleared, the callback function will
- *  be called repeatedly.
+ *  The Watchdog driver available for WFF3 only supports reset enabled mode, it
+ *  cannot be used as a timer interrupt, that is, specifying a callback function
+ *  is not supported by the driver.
  *
  *  # Power Management #
- *  Once started, the Watchdog will keep running in Active, Idle and Standby mode.
+ *  Once started, the Watchdog will keep running in Active, Idle and Standby
+ *  mode. Note that the Watchdog timer is restarted by the Power driver whenever
+ *  the device enters Standby. If the device remains in Standby for a duration
+ *  longer than the Watchdog timeout, the device will reset.
  *
  *  # Supported Functions #
  *  | Generic API Function         | API Function                    | Description                               |
@@ -200,9 +187,7 @@ typedef struct
  */
 typedef struct
 {
-    bool isOpen;                   /* Flag for open/close status */
-    Watchdog_Callback callbackFxn; /* Pointer to callback */
-    Watchdog_ResetMode resetMode;  /* Mode to enable resets */
+    bool isOpen; /* Flag for open/close status */
 } WatchdogWFF3_Object;
 
 #ifdef __cplusplus

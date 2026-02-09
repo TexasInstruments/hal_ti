@@ -42,9 +42,12 @@
 #ifndef USER_INTEFACE_WLAN_IF_H_
 #define USER_INTEFACE_WLAN_IF_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "osi_type.h"
 #include "osi_kernel.h"
-
 /*****************************************************************************/
 /* TYPES DEFINITIONS                                                         */
 /*****************************************************************************/
@@ -60,6 +63,11 @@
 #ifndef TRUE
 #define TRUE        (!FALSE)
 #endif
+
+#ifndef BIT
+#define BIT(x) (1U << (x))
+#endif
+
 #define DEVICE_ON (1)
 #define DEVICE_OFF (0)
 #define WLAN_WAIT_FOREVER               (0xFFFFFFFF)
@@ -137,22 +145,27 @@
 #define WLAN_DISCONNECT_CERTIFICATE_EXPIRED                                 (210)
 #define WLAN_DISCONNECT_AP_REMOVE_PEER                                      (255)
 
+
+#define WLAN_WPA_PROTO_WPA BIT(0) //WPA_PROTO_WPA
+#define WLAN_WPA_PROTO_RSN BIT(1) //WPA_PROTO_RSN
+#define WLAN_WPA_PROTO_WAPI BIT(2) //WPA_PROTO_WAPI
+#define WLAN_WPA_PROTO_OSEN BIT(3) //WPA_PROTO_OSEN
+
 #define WLAN_SEC_TYPE_OPEN                                                        (0)
-#define WLAN_SEC_TYPE_WEP                                                         (1)
 #define WLAN_SEC_TYPE_WPA                                                         (2) /* deprecated */
 #define WLAN_SEC_TYPE_WPA_WPA2                                                    (2)
 #define WLAN_SEC_TYPE_WPS_PBC                                                     (3)
 #define WLAN_SEC_TYPE_WPS_PIN                                                     (4)
-#define WLAN_SEC_TYPE_WPA_ENT                                                     (5)
+#define WLAN_SEC_TYPE_WPA_ENT                                                 (5)
 #define WLAN_SEC_TYPE_P2P_PBC                                                     (6)
 #define WLAN_SEC_TYPE_P2P_PIN_KEYPAD                                              (7)
 #define WLAN_SEC_TYPE_P2P_PIN_DISPLAY                                             (8)
 #define WLAN_SEC_TYPE_P2P_PIN_AUTO                                                (9) /* NOT Supported yet */
-#define WLAN_SEC_TYPE_WEP_SHARED                                                  (10)
 #define WLAN_SEC_TYPE_WPA2_PLUS                                                   (11) /* Support to WPA2 WPA2+PMF (Protected Managmant Frame) networks */
 #define WLAN_SEC_TYPE_WPA3                                                        (12) /* Support WPA3 only networks */
 #define WLAN_SEC_TYPE_WPA_PMK                                                     (15)
 #define WLAN_SEC_TYPE_WPA2_WPA3                                                   (16) /*transition mode WPA2 WPA2+PMF WPA3 */
+
 
 /* AP access List Macros */
 #define WLAN_AP_ACCESS_LIST_MODE_DISABLED         0
@@ -190,7 +203,11 @@
 #define UPPER_MAC_VERSION_MAX_SIZE (20)
 
 #define WLAN_CONNECT_FLAG_FAST_TRANSITION_EN   0x00000001
+#define WLAN_CONNECT_FLAG_PROFILE_CONNECT 0x00000002
+#define WLAN_CONNECT_FLAG_ENTERPRISE_CONNECT 0x00000004
 
+
+#define WLAN_WPS_PIN_STR_LEN    9
 
 /*****************************************************************************/
 /* ENUM DEFINITIONS                                                     */
@@ -204,7 +221,8 @@ typedef enum
     WLAN_ROLE_DEVICE                 , /* 3  */
     WLAN_ROLE_P2P_CL                 , /* 4  */
     WLAN_ROLE_P2P_GO                 , /* 5  */
-    WLAN_ROLE_RESERVED
+    WLAN_ROLE_RESERVED               , /* 6  */
+    WLAN_ROLE_NONE                   = 0xff
 }WlanRole_e;//this is also roleTypes must to be same numbers as in :RoleType_e
 
 /* CSI defines */
@@ -278,10 +296,20 @@ typedef enum
     CHANNEL_188 = 188,
     CHANNEL_192 = 192,
     CHANNEL_196 = 196
-} WlanChannel49G_e;;
+} WlanChannel49G_e;
 
+typedef enum
+{
+    WPS_METHOD_PBC,
+    WPS_METHOD_PIN
+} WlanWpsConfigMethod_e;
 
-
+typedef enum
+{
+    SAE_ANTI_CLOGGING_DEFAULT = 5,
+    SAE_ANTI_CLOGGING_ALWAYS = 0,
+    SAE_ANTI_CLOGGING_LOW = 15
+} WlanSaeAntiCloggingType_e;
 /*****************************************************************************/
 /* STRUCTURE DEFINITIONS                                                     */
 /*****************************************************************************/
@@ -311,7 +339,7 @@ typedef struct
     uint8_t       HtCapabilitiesIe[WLAN_DOT11_HT_CAPABILITIES_ELE_LEN + WLAN_LEN_OF_IE_HEADER];   /* HT capabilities IE unparsed */
 
     uint16_t      erpIeLen;     // HT capabilities IE were received
-    uint8_t       erpIe[WLAN_DOT11_ERP_ELE_LEN + WLAN_LEN_OF_IE_HEADER];;
+    uint8_t       erpIe[WLAN_DOT11_ERP_ELE_LEN + WLAN_LEN_OF_IE_HEADER];
     Bool_e        mErpPresent;
     uint8_t       mUseProtection; //erp capabilities
     uint8_t/*EPreamble*/    mBarkerPreambleMode; //erp capabilities
@@ -341,26 +369,36 @@ typedef struct
     uint8_t   KeyLen;
 }WlanSecParams_t;
 
+typedef struct
+{
+    int8_t*   User;
+    uint8_t   UserLen;
+    int8_t*   AnonUser;
+    uint8_t   AnonUserLen;
+    uint8_t   CertIndex;  /* not supported */
+    uint32_t  EapMethod;
+}WlanSecParamsExt_t;
+
 typedef struct WpsParams
 {
     /* WPS UUID */
-    const uint8_t *uuid;
+    uint8_t *uuid;
     /* WPS device name */
-    const char *deviceName;
+    char *deviceName;
     /* WPS manufacturer */
-    const char *manufacturer;
+    char *manufacturer;
     /* WPS model name */
-    const char *modelName;
+    char *modelName;
     /* WPS model number */
-    const char *modelNumber;
+    char *modelNumber;
     /* WPS serial number */
-    const char *serialNumber;
+    char *serialNumber;
     /* WPS device type */
-    const uint8_t *deviceType;
+    uint8_t *deviceType;
     /* WPS os version */
-    const uint8_t *osVersion;
+    uint8_t *osVersion;
     /* WPS config methods */
-    const char *configMethods;
+    char *configMethods;
 }WpsParams_t;
 
 typedef struct P2pParams
@@ -396,6 +434,12 @@ typedef struct RoleUpApCmd
     WlanSecParams_t secParams;
     /* Set regulatory Domain */
     uint8_t countryDomain[3];
+    /* SAE PWE Options */
+    uint8_t sae_pwe;
+    /* SAE anti-clogging threshold  - see WlanSaeAntiCloggingType_e */
+    uint8_t sae_anticlogging_threshold;
+    /* Set transition disable */
+    uint8_t transitionDisable;
     /* Set AP to start as autonomous P2P Group Owner */
     uint8_t p2p_aGO; //TRUE/FALSE
     /* AP WPS enabled/disabled */
@@ -407,6 +451,23 @@ typedef struct RoleUpApCmd
     /* Set P2P Params */
     P2pParams_t P2pParams;
 }RoleUpApCmd_t;
+
+typedef struct RoleUpStaCmd
+{
+    /* Set regulatory Domain */
+    /* The first two characters represent country code: ["00","EU","JP","CS"] */
+    /* The third character represent indoor ["I"] */
+    /* For example countryDomain = "EUI" (EUrope Indoor) */
+    uint8_t countryDomain[3];
+    /* STA WPS enabled/disabled */
+    Bool_e wpsDisabled; //TRUE/FALSE
+    /* Set WPS parameters */
+    WpsParams_t wpsParams; //only relevant for CC35xx
+    /* P2P enabled/disabled */
+    Bool_e p2pDeviceEnabled; //TRUE/FALSE //only relevant for CC35xx
+    /* Set P2P Params */
+    P2pParams_t P2pParams; //only relevant for CC35xx
+}RoleUpStaCmd_t;
 
 typedef struct __PACKED__
 {
@@ -513,7 +574,7 @@ typedef struct __attribute__((packed))
 
 typedef struct __PACKED__
 {
-    uint32_t    bitmask;
+    uint64_t    bitmask;
     uint8_t     preambleType;
     uint8_t     phyRate;
     int8_t      txPower;
@@ -545,7 +606,10 @@ typedef struct __PACKED__
     uint8_t     startsStsNum;
     uint8_t     tbAutoMode;
     uint8_t     disamb;
-    uint8_t     padding[1];
+    uint8_t     eht_sig_rate;
+    uint8_t     ru_80_subblock;
+    uint8_t     regulatory_TxPowerLimit;
+    uint8_t	    padding[2];//padding
 }CalibratorStartTxParams_t;
 
 
@@ -587,6 +651,16 @@ typedef struct __PACKED__
     uint8_t padding[2];
 }CalibratorBASessionparams_t;
 
+typedef enum
+{
+    CAL_FORCE_DISABLE_DCM          = 0,
+    CAL_FORCE_DISABLE_ER           = 1,
+    CAL_FORCE_DISABLE_ER_UPPER     = 2,
+    CAL_FORCE_LONG_TERM_POLICY     = 3,
+    CAL_FORCE_NOMINAL_PADDING      = 4,
+    CAL_ENABLE_DEBUG_TRACE         = 5
+}LinkAdaptCalDebug_e ;
+
 typedef struct __PACKED__
 {
     uint32_t param1;
@@ -594,6 +668,18 @@ typedef struct __PACKED__
     uint8_t type;
     uint8_t padding[3];
 }CalibratorLinkAdaptParams_t;
+
+typedef struct __PACKED__
+{
+    int16_t  highThr_24G;
+    int16_t  lowThr_24G;
+    int16_t  highThr_5G;
+    int16_t  lowThr_5G;
+    int16_t  HighSampleThr;
+    uint8_t  enable_value;
+    uint8_t  padding[1];
+}CalibratorThermalParams_t;
+
 
 typedef struct
 {
@@ -611,9 +697,13 @@ typedef enum
     WLAN_EVENT_SCAN_RESULT,
     WLAN_EVENT_ADD_PEER,
     WLAN_EVENT_REMOVE_PEER,
+    WLAN_EVENT_AUTHENTICATION_REJECTED,
     WLAN_EVENT_CONNECTING,
+    WLAN_EVENT_ASSOCIATION_REJECTED,
     WLAN_EVENT_ACTION_FRAME_RX,
     WLAN_EVENT_ASSOCIATED,
+    WLAN_EVENT_WPS_INVALID_PIN,
+    WLAN_EVENT_AP_WPS_START_FAILED,
     WLAN_EVENT_AP_EXT_WPS_SETTING_FAILED,
     WLAN_EVENT_BLE_ENABLED,
     WLAN_EVENT_CS_FINISH,
@@ -623,10 +713,15 @@ typedef enum
     WLAN_EVENT_EXTENDED_SCAN_RESULT,
 	WLAN_EVENT_P2P_GROUP_STARTED,
     WLAN_EVENT_P2P_GROUP_REMOVED,   
-    WLAN_EVENT_P2P_SCAN_COMPLETED, 
+    WLAN_EVENT_P2P_SCAN_COMPLETED,
+    WLAN_EVENT_P2P_GROUP_FORMATION_FAILED,
+    WLAN_EVENT_P2P_PEER_NOT_FOUND,
     WLAN_EVENT_CONNECT_PERIODIC_SCAN_COMPLETE,
     WLAN_EVENT_FW_CRASH,
+    WLAN_EVENT_COMMAND_TIMEOUT,
+    WLAN_EVENT_GENERAL_ERROR,
     WLAN_EVENT_BSS_TRANSITION_INITIATED,
+    WLAN_EVENT_PEER_AGING,
     WLAN_EVENT_ERROR,	
     WLAN_EVENT_MAX = 0xFFFF
 } WlanEventId_e;
@@ -663,6 +758,7 @@ typedef struct
     uint8_t     SsidName[WLAN_SSID_MAX_LENGTH];
     uint8_t     Bssid[WLAN_BSSID_LENGTH];
     uint8_t     Channel;
+    int32_t     Status;
 } WlanEventConnect_t;
 
 typedef struct
@@ -681,6 +777,12 @@ typedef struct
     int16_t                 ReasonCode;
     uint8_t                 IsStaIsDiscnctInitiator;
 } WlanEventDisconnect_t;
+
+typedef struct
+{
+    uint32_t                 inactiveTime;//for how long the sTA was inactive in ms
+    uint8_t                  peer_mac[6];
+} WlanEventPeerAging_t;
 
 typedef struct
 {
@@ -741,6 +843,12 @@ typedef struct
 
 typedef struct
 {
+    uint8_t *log_buffer;
+    uint32_t log_buffer_len;
+} WlanEventFwCrash_t;
+
+typedef struct
+{
     uint8_t     SsidLen;
     uint8_t     SsidName[WLAN_SSID_MAX_LENGTH];
     uint8_t     Bssid[WLAN_BSSID_LENGTH];
@@ -752,7 +860,9 @@ typedef union
 {
     /* STA Role */
     WlanEventConnect_t                    Connect; /* WLAN_EVENT_CONNECT */
+    uint16_t                              AuthStatusCode; /* WLAN_EVENT_AUTHENTICATION_REJECTED */
     WlanEventConnecting_t                 Connecting; /* WLAN_EVENT_CONNECTING */
+    uint16_t                              AssocStatusCode; /* WLAN_EVENT_ASSOCIATION_REJECTED */
     WlanEventDisconnect_t                 Disconnect; /* WLAN_EVENT_DISCONNECT */
     WlanEventScanResult_t                 ScanResult; /* WLAN_EVENT_SCAN_RESULT */
     WlanEventExtendedScanResult_t*        pExtendedScanResult; /* WLAN_EVENT_EXTENDED_SCAN_RESULT */
@@ -763,15 +873,17 @@ typedef union
     WlanEventSTAAdded_t          AddPeer; /* WLAN_EVENT_ADD_PEER */
     WlanEventSTARemoved_t        RemovePeer; /* WLAN_EVENT_REMOVE_PEER */
     WlanEvenWfdMgmtFrame_t       WfdActionFrame;/* WLAN_EVENT_ACTION_FRAME_RX - this event will be triggered only if defined WlanExternalApp_t*/
-    int8_t                       wpsFailCode; /* WLAN_EVENT_AP_EXT_WPS_SETTING_FAILED - reason code arrives from supplicant */
+    int8_t                       wpsFailCode; /* WLAN_EVENT_AP_WPS_START_FAILED/WLAN_EVENT_AP_EXT_WPS_SETTING_FAILED - reason code arrives from supplicant */
     int32_t                      bleEnableStatus;
     int32_t                      dppCROCevenReasonTimeout;//dppCROCevenReasonTimeout=1 if triggered due to timeout
     /* P2P */
     WlanEventFormationComplete_t FormationComplete; /* WLAN_EVENT_P2P_GROUP_STARTED */
     WlanEventGroupRemoved_t      GroupRemoved;      /* WLAN_EVENT_P2P_GROUP_REMOVED */
-
+    WlanEventPeerAging_t         peerAging;
     /* General*/
     WlanEventError_t       error;  /* WLAN_EVENT_ERROR */
+    /* General */
+    WlanEventFwCrash_t           FwCrashLog; /* WLAN_EVENT_FW_CRASH */
 } WlanEventData_u;
 
 typedef struct
@@ -811,6 +923,12 @@ typedef enum
     POWER_MANAGEMENT_ELP_MODE,
     POWER_MANAGEMENT_NUM_OF_MODES
 } WlanPowerManagement_e;
+
+typedef struct
+{
+    uint32_t* channelArray;
+    uint32_t  length;
+} WlanSelectedChannelsArray_t;
 
 typedef enum
 {
@@ -895,6 +1013,37 @@ typedef struct
 } WlanNonPrefChannels_t;
 
 
+typedef struct {
+    uint8_t    max_dwell_time_passive_msec;
+    uint8_t    min_dwell_time_passive_msec;
+
+    uint8_t    max_dwell_time_active_msec ;
+    uint8_t    min_dwell_time_active_msec ;
+
+    uint8_t    dwell_time_dfs_passive_msec;
+}WlanScanDwellTime_t;
+
+typedef struct
+{
+    WlanRole_e roleType;
+    uint16_t vendorElements_length;
+    uint8_t* pVendorElements;
+} WlanSetVendorElements_t;
+
+typedef struct
+{
+    uint8_t fastPolicy;
+    uint8_t autoPolicy;
+    uint8_t fastPersistant;
+    uint8_t reserved;
+} WlanPolicySetGet_t;
+
+typedef struct
+{
+    char pin[WLAN_WPS_PIN_STR_LEN];
+    uint32_t timeout;
+} WlanSetWpsApPinParam_t;
+
 typedef enum
 {
     WLAN_SET_MACADDRESS,
@@ -931,6 +1080,7 @@ typedef enum
     WLAN_SET_EXT_P2P_BUILD_ACTION_FRAME,
     WLAN_SET_EXT_OFFCHANNEL_ROC,
     WLAN_SET_EXT_OFFCHANNEL_SEND_RAW_ACTION,
+    WLAN_SET_WPS_SESSION,
     WLAN_SET_EXT_WPS_SESSION,
     WLAN_SET_EXTENDED_SCAN_RESULTS,
     WLAN_SET_BLE_ENABLE,
@@ -947,18 +1097,30 @@ typedef enum
     WLAN_SET_STA_WIFI_BAND,
     WLAN_SET_TRIGGER_FW_ASSERT,
     WLAN_SET_PSD_METHOD,
-    WLAN_SET_CSI
+    WLAN_SET_CSI,
+    WLAN_SET_WIRELESS_PROTOCOL,
+    WLAN_SET_PEER_AGING_TIMEOUT,
+    WLAN_SET_CALIBRATOR_THERMAL_CFG,
+    WLAN_SET_PRIMARY_CONNECTIVITY_FW,
+    WLAN_SET_CONNECTION_SCAN_EARLY_TERMINATION,
+    WLAN_SET_CONNECTION_POLICY,
+    WLAN_SET_SCAN_DWELL_TIME,
+    WLAN_SET_LISTED_CHANNELS_FOR_SCAN,
+    WLAN_SET_WPS_AP_PIN
 } WlanSet_e;
+
 
 typedef enum
 {
     WLAN_GET_MACADDRESS,
     WLAN_GET_POWER_SAVE,
+    WLAN_GET_CUSTOM_DOMAIN_ENTRY,
     WLAN_GET_CALIBRATOR_TX_PARAMS,
     WLAN_GET_CALIBRATOR_RX_STATS,
     WLAN_GET_CALIBRATOR_GET_IO_CFG,
     WLAN_GET_RSSI,
     WLAN_GET_FWVERSION,
+    WLAN_GET_SPVERSION,
     WLAN_GET_DEVICE_INFO,
     WLAN_GET_CALIBRATOR_BEACON_RSSI,
     WLAN_GET_COUNTERS,
@@ -972,7 +1134,11 @@ typedef enum
     WLAN_GET_ANT_DIV_RSSI_THRESHOLD,
     WLAN_GET_DEFAULT_ANTENNA,
     WLAN_GET_HOST_VERSION,
-    WLAN_GET_CSI
+    WLAN_GET_CSI,
+    WLAN_GET_PRIMARY_CONNECTIVITY_FW,
+    WLAN_GET_CONNECTION_SCAN_EARLY_TERMINATION,
+    WLAN_GET_CONNECTION_POLICY,
+    WLAN_GET_SYSINFO
 } WlanGet_e;
 
 typedef struct __attribute__((packed))
@@ -1001,6 +1167,7 @@ typedef struct
     unsigned char pMacAddress[6];
 }WlanMacAddress_t;
 
+
 typedef struct __PACKED__
 {
     uint16 major_version;
@@ -1009,8 +1176,20 @@ typedef struct __PACKED__
     uint16 build_version;
 
     uint8 phy_version[8];
-    //uint8 pad[2];
+    uint8_t container_type;
+    uint8_t padding[3];
 } WlanFWVersions_t;
+
+typedef struct __PACKED__
+{
+    uint8  major_version;
+    uint8  minor_version;
+    uint16 revision_version;
+    uint32 build_version;
+
+    uint8 phy_version[8];
+
+} WlanSPVersions_t;
 
 typedef struct __PACKED__
 {
@@ -1053,7 +1232,8 @@ typedef enum
     CALIBRATOR_ACTION_GET_IO_CFG,
     CALIBRATOR_ACTION__BLE_ENABLE,
     CALIBRATOR_ACTION_BA_SESSION,
-    CALIBRATOR_ACTION_LINK_ADAPT
+    CALIBRATOR_ACTION_LINK_ADAPT,
+    CALIBRATOR_ACTION_THERMAL_PROTECTION,
 } CalibratorAction_e;
 
 typedef enum
@@ -1212,6 +1392,16 @@ typedef struct
     uint8_t     data[WLAN_BEACON_MAX_SIZE];
 }wlanSetVendorInfo_t;
 
+typedef struct
+{
+    uint32_t    peerAgingTimeoutMs;
+}wlanSetStaAgingTimout_t;
+
+typedef struct
+{
+    WlanWpsConfigMethod_e   wpsMethod;
+    char                    pin[WLAN_WPS_PIN_STR_LEN];
+}wlanWpsSession_t;
 
 typedef struct
 {
@@ -1365,8 +1555,61 @@ typedef struct
     uint16_t maxChannel;
     uint8_t  numOfChannels;
     uint32_t chanBitmap;
-} WLanSetRegDomainCustomEntry_t;
+#ifdef CC35XX
+    uint8_t  customIndex; // This param is used in CC35xx only
+    uint8_t  resetEntry;  // This param is used in CC35xx only
+#endif
+} WlanSetRegDomainCustomEntry_t;
 
+typedef struct
+{
+    uint32_t    Connectivityslot;
+}WlanConnectivityFWSlot_t;
+
+
+#define WLAN_MAX_USER_LEN 32
+#define WLAN_MAX_ANON_LEN 32
+#define WLAN_MAX_PASS_LEN 32
+
+
+
+typedef enum
+{
+    WLAN_TLS,
+    WLAN_TTLS,
+    WLAN_PEAP0,//PEAP0_MSCHAP
+    WLAN_PEAP1,//not supported
+    WLAN_PEAP2,
+}WlanEapPhase1Val_t;
+
+typedef enum
+{
+    WLAN_MSCHAPV2_TYPE,
+    WLAN_TLS_TYPE,//not supported
+    WLAN_PSK_TYPE,//not supported
+    WLAN_GTC_TYPE
+}WlanEapPhase2Val_t;
+
+typedef struct
+{
+    WlanEapPhase1Val_t  eap_phase1_val;
+    WlanEapPhase2Val_t  eap_phase2_val;
+
+    uint8_t*      pEap_client_cert;  //pointer to the client certificate
+    uint32_t            eap_client_cert_len;//length of the certificate without the null termination
+
+    uint8_t*      pEap_ca_cert; //pointer to the ca certificate
+    uint32_t            eap_ca_cert_len; //length of ca certificate without the null termination
+
+    uint8_t*      pEap_private_key;///pointer to the key
+    uint32_t            eap_private_key_len;//length of the key certificate without the null termination
+
+    uint8_t             eapIdentity[WLAN_MAX_USER_LEN + 1]; //identity string
+    uint32_t            eapIdentityLen; //identity len
+    uint8_t             eapAnonymous[WLAN_MAX_ANON_LEN + 1];//anonymous string
+    uint32_t            eapAnonUserLen;//anonymous string length
+
+}WlanEapConnectParams_t;
 /*****************************************************************************/
 /* Data path CB function                                                     */
 /*****************************************************************************/
@@ -1381,17 +1624,17 @@ typedef void (* WlanNetworkDataRecvCB_t)(WlanRole_e role_id,uint8_t *input,uint3
 
 #define WLAN_REG_CUSTOM_SET_MAX_TX(_MaxTxPower, _DomainCustomEntry) (_DomainCustomEntry).MaxTxPower = (_MaxTxPower)
 
-static inline void WlanRegCustomSetChannel(int channel, WLanSetRegDomainCustomEntry_t *DomainCustomEntry)
+static inline void WlanRegCustomSetChannel(int channel, WlanSetRegDomainCustomEntry_t *DomainCustomEntry)
 {
     if ((DomainCustomEntry->minChannel == 0 || DomainCustomEntry->minChannel > channel))
     {
         //Find Minimum channel entry
-        DomainCustomEntry->minChannel = channel;
+        DomainCustomEntry->minChannel = (uint16_t)channel;
     }
     if ((DomainCustomEntry->maxChannel == 0 || DomainCustomEntry->maxChannel < channel))
     {
-       //Find Maximum channel entry
-        DomainCustomEntry->maxChannel = channel;
+        // Find Maximum channel entry
+        DomainCustomEntry->maxChannel = (uint16_t)channel;
     }
     switch (DomainCustomEntry->band)
     {
@@ -1476,6 +1719,8 @@ int Wlan_Stop(uint32_t flags);
 
     \param[in]      Configuration - role type
                     Configuration - *params (per role)
+                                    RoleUpApCmd_t for AP
+                                    RoleUpStaCmd_t for STA
                     timeout - Blocking API
 
     \return         role id, Zero on success, or a negative value if an error occurred
@@ -1528,9 +1773,14 @@ int Wlan_RoleDown(WlanRole_e roleType, unsigned long int timeout);
     \param[in]      pMacAddr    6 bytes for MAC address
     \param[in]      SecType     Security type
                                 security types options:
-                                - CME_SEC_TYPE_OPEN
-                                - CME_SEC_TYPE_WEP
-                                - CME_SEC_TYPE_WPA_WPA2
+                                    WLAN_SEC_TYPE_OPEN
+                                    WLAN_SEC_TYPE_WPA
+                                    WLAN_SEC_TYPE_WPA_WPA2
+                                    WLAN_SEC_TYPE_WPS_PBC
+                                    WLAN_SEC_TYPE_WPS_PIN
+                                    WLAN_SEC_TYPE_WPA2_PLUS
+                                    WLAN_SEC_TYPE_WPA3
+                                    WLAN_SEC_TYPE_WPA2_WPA3
 
     \param[in]      pPass       The password to be used for connection. There are two types of passwords:
                                   1. Regular Password: A string containing up to 63 characters.
@@ -1548,10 +1798,72 @@ int Wlan_RoleDown(WlanRole_e roleType, unsigned long int timeout);
 
     \sa             Wlan_Disconnect
 
+    \note          for enterprise connection please use Wlan_Connect_extended
+
 */
 int Wlan_Connect(const signed char *pName, const int NameLen,
                         const unsigned char *pMacAddr, char SecType, const char *pPass,
                         const char PassLen, unsigned int flags);
+
+/*!
+    \brief Connect to wlan network as a station, it extended Wlan_Connect and enables to connect to enterprise networks
+
+    \param[in]      pName       Up to 32 bytes in case of STA the name is the SSID of the Access Point
+    \param[in]      NameLen     Name length
+    \param[in]      pMacAddr    6 bytes for MAC address
+    \param[in]      SecType     Security type
+                                security types options:
+                                    WLAN_SEC_TYPE_OPEN
+                                    WLAN_SEC_TYPE_WPA
+                                    WLAN_SEC_TYPE_WPA_WPA2
+                                    WLAN_SEC_TYPE_WPS_PBC
+                                    WLAN_SEC_TYPE_WPS_PIN
+                                    WLAN_SEC_TYPE_WPA2_PLUS
+                                    WLAN_SEC_TYPE_WPA3
+                                    WLAN_SEC_TYPE_WPA2_WPA3
+
+    \param[in]      pPass       The password to be used for connection. There are two types of passwords:
+                                  1. Regular Password: A string containing up to 63 characters.
+                                  2. Pairwise Master Key (PMK): A string of exactly 64 characters (WLAN_PMK_KEY_SIZE).
+                                     for example -  "e23fc3086d2e8296c00b700c39ade3564fc39303ba75a90b45bd1b9008c9f3fc"
+
+    \param[in]      PassLen     The length of the password.
+                                  For regular passwords, this value should be up to 63.
+                                  For Pairwise Master Keys (PMK), use WLAN_PMK_KEY_SIZE.
+
+    \param[in]      flags     Bitfield for connection options
+
+    \param[in]      params    parameters for enterprise connection
+
+
+    \param[in]ENT   eap_phase1_val
+    \param[in]ENT   eap_phase2_val
+    \param[in]ENT
+    \param[in]ENT   pEap_client_cert      pointer to the client certificate
+    \param[in]ENT   eap_client_cert_len   length of the certificate without the null termination
+    \param[in]ENT
+    \param[in]ENT   pEap_ca_cert          pointer to the ca certificate
+    \param[in]ENT   eap_ca_cert_len       length of ca certificate without the null termination
+    \param[in]ENT
+    \param[in]ENT   pEap_private_key      pointer to the key
+    \param[in]ENT   eap_private_key_len   length of the key certificate without the null termination
+    \param[in]ENT
+    \param[in]ENT   eapIdentity[WLAN_MAX_USER_LEN + 1]   identity string
+    \param[in]ENT   eapIdentityLen;                      identity len
+    \param[in]ENT   eapAnonymous[WLAN_MAX_ANON_LEN + 1]  anonymous string
+    \param[in]ENT   eapAnonUserLen;                      anonymous string length
+
+    \return         Zero on success, or negative error code on failure
+
+
+    \sa             Wlan_Disconnect
+
+    \note for enterprise connection please pass on the params structure of type WlanEapConnectParams_t*
+
+*/
+int Wlan_Connect_extended(const signed char *pName, const int NameLen, const unsigned char *pMacAddr,
+                 char SecType, const char *pPass, const char PassLen, unsigned int flags, void* params);
+
 
 /*!
     \brief Wlan disconnect
@@ -1620,12 +1932,31 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
 
     ## Explanation of Specific Types
 
+            ### Wlan_Set Type 'WLAN_SET_PRIMARY_CONNECTIVITY_FW'
+            Set the primary connectivity firmware container.
+            This function allows the user to choose between slot 1 and slot 2 to determine
+            the primary container to use for connectivity firmware.
+            The user must call Wlan_Set(WLAN_SET_PRIMARY_CONNECTIVITY_FW, &primaryStruct)
+            before calling wlan_start in order to activate the selected primary slot.
+            By default, the primary connectivity firmware container is set to slot 1.
+
+            \param[in] WlanConnectivityFWSlot_t A struct containing the firmware slot parameter (1 or 2).
+
+            ## Example of how to use for selecting slot 2 as primary.
+            WlanConnectivityFWSlot_t primarySetStruct;
+            primarySetStruct.Connectivityslot = 2;
+            Wlan_Set(WLAN_SET_PRIMARY_CONNECTIVITY_FW, &primarySetStruct);
+
+            ## Example of how to get the primary slot
+            WlanConnectivityFWSlot_t primaryGetStruct;
+            Wlan_Get(WLAN_GET_PRIMARY_CONNECTIVITY_FW, &primaryGetStruct);
+
             ### Wlan_Set Type 'WLAN_SET_CUSTOM_DOMAIN_ENTRY'
 
             Create your own custom domain by setting up to 7 entries in our table. Each entry allows you to specify your unique requirements.
             To set up a new entry using the WLAN_SET_CUSTOM_DOMAIN_ENTRY type, please provide the following parameters:
 
-            \param[in] WLanSetRegDomainCustomEntry_t    Parameters of Entry
+            \param[in] WlanSetRegDomainCustomEntry_t    Parameters of Entry
 
                            band             -     Entry Band to use - \param[in] WlanBand_e
                            chanBitmap       -     Channel bitmap contains supported channels
@@ -1666,7 +1997,7 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                            maxChannel - Max channel in chanBitmap
                            numOfChannels - Number of channels in chanBitmap
 
-            ## Example of how to use MACROS and functions to set WLanSetRegDomainCustomEntry_t and set an entry
+            ## Example of how to use MACROS and functions to set WlanSetRegDomainCustomEntry_t and set an entry
 
                 Configure your custom domain with the following settings:
                 Frequency Band: 2.4 GHz
@@ -1674,10 +2005,10 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                 Maximum Transmit Power: 19 dBm
                 DFS Mode: Disabled (Active Scan enabled)
 
-                --note!!! WlanRegCustomSetChannel updates "minChannel","maxChannel", "numOfChannels" for each 'WLanSetRegDomainCustomEntry_t'
+                --note!!! WlanRegCustomSetChannel updates "minChannel","maxChannel", "numOfChannels" for each 'WlanSetRegDomainCustomEntry_t'
                 *************************************************
                 int ret_domain_entry_status;
-                WLanSetRegDomainCustomEntry_t test_entry = {0};
+                WlanSetRegDomainCustomEntry_t test_entry = {0};
                 WLAN_REG_CUSTOM_SET_MAX_TX(19, test_entry);
                 WLAN_REG_CUSTOM_SET_DFS(FALSE, test_entry);
                 WLAN_REG_CUSTOM_SET_BAND(BAND_24GHZ, test_entry);    //It is required to set Band before using WlanRegCustomSetChannel
@@ -1694,10 +2025,10 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                 Maximum Transmit Power: 16 dBm
                 DFS Mode: Disabled (Passive Scan enabled)
 
-                --note!!! WlanRegCustomSetChannel updates "minChannel","maxChannel", "numOfChannels" for each 'WLanSetRegDomainCustomEntry_t'
+                --note!!! WlanRegCustomSetChannel updates "minChannel","maxChannel", "numOfChannels" for each 'WlanSetRegDomainCustomEntry_t'
                 *************************************************
                 int ret_domain_entry_status;
-                WLanSetRegDomainCustomEntry_t test_entry = {0};
+                WlanSetRegDomainCustomEntry_t test_entry = {0};
                 WLAN_REG_CUSTOM_SET_MAX_TX(16, test_entry);
                 WLAN_REG_CUSTOM_SET_DFS(TRUE, test_entry);
                 WLAN_REG_CUSTOM_SET_BAND(BAND_5GHZ, test_entry);      //It is required to set Band before using WlanRegCustomSetChannel
@@ -1719,7 +2050,7 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                 ///Configure test_entry_1 for Channel 40, Maximum TX Power of 16 dBm, and DFS Enable.
                 int ret_domain_entry_status;
 
-                WLanSetRegDomainCustomEntry_t test_entry_1 = {0};
+                WlanSetRegDomainCustomEntry_t test_entry_1 = {0};
                 WLAN_REG_CUSTOM_SET_MAX_TX(16, test_entry_1);
                 WLAN_REG_CUSTOM_SET_DFS(TRUE, test_entry_1);
                 WLAN_REG_CUSTOM_SET_BAND(BAND_5GHZ, test_entry_1);      //It is required to set Band before using WlanRegCustomSetChannel
@@ -1727,7 +2058,7 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                 ret_domain_status = Wlan_Set(WLAN_SET_CUSTOM_DOMAIN_ENTRY, (void *)&test_entry_1)
 
                 /// Configure test_entry_1 for Channel 40, Maximum TX Power of 20 dBm, and DFS Disable.
-                WLanSetRegDomainCustomEntry_t test_entry_2 = {0};
+                WlanSetRegDomainCustomEntry_t test_entry_2 = {0};
                 WLAN_REG_CUSTOM_SET_MAX_TX(20, test_entry_2);
                 WLAN_REG_CUSTOM_SET_DFS(FALSE, test_entry_2);
                 WLAN_REG_CUSTOM_SET_BAND(BAND_5GHZ, test_entry_2);      //It is required to set Band before using WlanRegCustomSetChannel
@@ -1736,6 +2067,35 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
 
                 //RESULTS//
                 Channel 40 will be configured based on test_entry_2, with a Maximum TX Power of 20 dBm and DFS Disabled.
+
+                ### Wlan_Set Type 'WLAN_SET_LISTED_CHANNELS_FOR_SCAN'
+                Set a list of channels for next/upcoming Scan/Connect
+                This command sets a list of channels that will only be set when doing scan or connect, the list is used only
+                one time, meaning you need to set it again if you cant to list specific channels for scan/connect, after you
+                scan or connect the listed channels will be resetted and the next scan/connect will be on all possible channels
+
+                the WLAN_SET_LISTED_CHANNEL_FOR_SCAN set command takes struct of WlanSelectedChannelsArray_t which includes
+                an allocated array of the list of channels we want to scan and the length that represents channels being set or not
+
+                \param[in]  WlanSelectedChannelsArray_t
+
+                ## Example of how to set a channels 1,3 ,5
+
+                uint32_t channelsArray[3] = {1,3,5};
+
+                WlanSelectedChannelsArray_t selectedChannels = {
+
+                    .channelArray = channelsArray
+                    .length = 3
+
+                };
+                Wlan_Set(WLAN_SET_LISTED_CHANNELS_FOR_SCAN, (void *)&selectedChannels);
+
+                for setting all the channels to be scanned we can
+                do the following
+
+                Wlan_Set(WLAN_SET_LISTED_CHANNELS_FOR_SCAN, NULL);
+
 */
 int Wlan_Set(WlanSet_e wlanSetType, void *params);
 
@@ -1774,6 +2134,106 @@ int Wlan_EtherPacketSend(WlanRole_e role, uint8_t *inbuf, uint32_t inbuf_len,uin
     \warning
 */
 int Wlan_EtherPacketRecvRegisterCallback(WlanRole_e role, WlanNetworkDataRecvCB_t cb);
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/*!
+    \brief Add profile
+
+    When auto start is enabled, the device connects to a
+    station from the profiles table. Up to SL_WLAN_MAX_PROFILES profiles
+    are supported.
+    If several profiles configured the device chose
+    the highest priority profile, within each priority group,
+    device will chose profile based on security policy, signal
+    strength, etc parameters.
+
+    \param[in]      pName       Up to 32 bytes in case of STA the name is the SSID of the Access Point
+    \param[in]      NameLen     Name length
+    \param[in]      pMacAddr    6 bytes for MAC address
+    \param[in]      pSecParam   Security parameters
+                                security types options:
+                                - CME_SEC_TYPE_OPEN
+                                - CME_SEC_TYPE_WEP
+                                - CME_SEC_TYPE_WPA_WPA2
+
+    \param[in]      pSecExtParams  Enterprise parameters - identity, identity length,
+                                   Anonymous, Anonymous length, CertIndex (not supported,
+                                   certificates need to be placed in a specific file ID),
+                                   EapMethod.
+                                   Use NULL in case Enterprise parameters is not in use
+
+    \param[in]      Priority    Profile priority. Lowest priority: 0, Highest priority: 15.
+    \param[in]      Options     Not supported
+
+    \return         Profile stored index on success, or negative error code on failure.
+
+    \warning        Only one Enterprise profile is supported.
+                    Please Note that in case of adding an existing profile (compared by pName,pMACAddr and security type)
+                    the old profile will be deleted and the same index will be returned.
+
+    \sa             Wlan_ProfileAdd
+
+*/
+int Wlan_ProfileAdd(const signed char *pName, const int NameLen,
+                        const unsigned char *pMacAddr, const WlanSecParams_t* pSecParams, const WlanSecParamsExt_t* pSecExtParams,
+                        const uint32_t Priority, const uint8_t Hidden, const uint32_t Options);
+
+/*!
+    \brief Get profile
+
+    Read profile from the device
+
+    \param[in]      Index          Profile stored index, if index does not exists error is return
+    \param[out]     pName          Up to 32 bytes, in case of sta mode the name of the Access Point
+                                   (In case of p2p mode the name of the Remote Device)
+    \param[out]     pNameLen       Name length
+    \param[out]     pMacAddr       6 bytes for MAC address
+    \param[out]     pSecParams     Security parameters. Security types options:
+									- WLAN_SEC_TYPE_OPEN
+									- WLAN_SEC_TYPE_WPA_WPA2
+									- WLAN_SEC_TYPE_WPA_ENT
+
+								   Key and key length are not return. In case of p2p security type pin the key refers to pin code
+                                   return due to security reasons.
+    \param[out]     pSecExtParams  Enterprise parameters - identity, identity length,
+                                   Anonymous, Anonymous length
+                                   CertIndex (not supported), EapMethod.
+    \param[out]     pPriority      Profile priority
+
+    \param[out]     pHidden        Profile scan_ssid
+
+    \return         Profile security type is returned (0 or positive number) on success, or negative error code on failure
+
+    \sa             Wlan_ProfileGet
+
+    \warning
+*/
+
+int Wlan_ProfileGet(const uint16_t Index, signed char* pName, int *pNameLen,
+                        uint8_t *pMacAddr, WlanSecParams_t* pSecParams, WlanSecParamsExt_t* pSecExtParams,
+                        uint32_t *pPriority, uint32_t *pHidden);
+
+
+/*!
+    \brief Delete WLAN profile
+
+    Delete WLAN profile
+
+    \param[in]      Index   number of profile to delete. Possible values are 0 to TBD
+                            Index value SL_WLAN_DEL_ALL_PROFILES will delete all saved profiles
+
+    \return         Zero on success or a negative error code on failure
+
+    \sa             Wlan_ProfileDel
+
+    \warning
+*/
+int Wlan_ProfileDel(const uint8_t Index);
+
 
 #endif /* USER_INTEFACE_WLAN_IF_H_ */
 

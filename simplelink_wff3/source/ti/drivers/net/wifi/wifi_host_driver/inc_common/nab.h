@@ -42,6 +42,8 @@
 #define HOST_CNYS_PATTERN   0xC5C5C5C5
 #define DEVICE_SYNC_PATTERN 0xABCDDCBA
 #define DEVICE_RECV_OPCODE  0x1004
+#define NAB_GENERAL_ERROR_FW_LOGS_OPCODE  0x900
+#define CC33XX_MAX_FW_LOGS_BUFFER_SIZE    ((0x1000) - (sizeof(NAB_header_t))) //a bit under ~4KB
 
 
 #define FW_STATUS_ADDR      0x0000BFFC //read from status register address

@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the PDM peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -1853,6 +1853,9 @@ This section defines the register offsets of the PDM component
     Offset name:         PDM_O_CLKCFG
     Relative address:    0x1000
     Description:         Clock configuration register
+                        Note: Disable the [CLKCFG.MEM_CLK_EN] and [CLKCFG.ADFS_EN] to change [CLK_CFG.MEM_CLK_SEL] or [ADFS_CTRL1]/[ADFS_CTRL2]
+                        After changing [CLK_CFG.MEM_CLK_SEL] or [ADFS_CTRL1]/[ADFS_CTRL2],  enable [CLKCFG.ADFS_EN] followed by [CLKCFG.MEM_CLK_EN]
+
     Default Value:       0x00000000
 
         Field:           CLKEN

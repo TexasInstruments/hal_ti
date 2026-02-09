@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the SOC_DEBUGSS_DSSM peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -47,17 +47,20 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
 //Interrupt Mask
 #define SOC_DEBUGSS_DSSM_O_IMASK                                     0x00000028U
 
-//Raw interrupt status
+//Raw Interrupt Status
 #define SOC_DEBUGSS_DSSM_O_RIS                                       0x00000030U
 
-//Masked interrupt status
+//Masked Interrupt Status
 #define SOC_DEBUGSS_DSSM_O_MIS                                       0x00000038U
 
-//Interrupt clear
+//Interrupt Clear
 #define SOC_DEBUGSS_DSSM_O_ICLR                                      0x00000040U
 
-//Interrupt set
+//Interrupt Set
 #define SOC_DEBUGSS_DSSM_O_TRIG                                      0x00000048U
+
+//This register is to select the primary debug domain
+#define SOC_DEBUGSS_DSSM_O_PRIDBGDMN                                 0x000000E0U
 
 //This register is used for data transfers from external debug tools to the DSSM module
 #define SOC_DEBUGSS_DSSM_O_TXD                                       0x00000060U
@@ -88,7 +91,7 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
                         On each read, only one interrupt is indicated. On a read, the current interrupt (highest priority) is automatically cleared by the hardware and the corresponding interrupt flag in the RIS and MIS are cleared as well. After a read from the CPU (not from the debug interface), the register must be updated with the next highest priority interrupt, if none are pending, then it displays FFh.
     Default Value:       0x00000000
 
-        Field:           STA
+        Field:           STAT
         From..to bits:   0...1
         DefaultValue:    0x0
         Access type:     read-only
@@ -99,19 +102,21 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
             MSG_PEND:                    TX interrupt
             MSG_TAKEN:                   RX interrupt
 */
-#define SOC_DEBUGSS_DSSM_IIDX_STA_W                                  2U
-#define SOC_DEBUGSS_DSSM_IIDX_STA_M                                  0x00000003U
-#define SOC_DEBUGSS_DSSM_IIDX_STA_S                                  0U
-#define SOC_DEBUGSS_DSSM_IIDX_STA_NO_INTR                            0x00000000U
-#define SOC_DEBUGSS_DSSM_IIDX_STA_MSG_PEND                           0x00000001U
-#define SOC_DEBUGSS_DSSM_IIDX_STA_MSG_TAKEN                          0x00000002U
+#define SOC_DEBUGSS_DSSM_IIDX_STAT_W                                 2U
+#define SOC_DEBUGSS_DSSM_IIDX_STAT_M                                 0x00000003U
+#define SOC_DEBUGSS_DSSM_IIDX_STAT_S                                 0U
+#define SOC_DEBUGSS_DSSM_IIDX_STAT_NO_INTR                           0x00000000U
+#define SOC_DEBUGSS_DSSM_IIDX_STAT_MSG_PEND                          0x00000001U
+#define SOC_DEBUGSS_DSSM_IIDX_STAT_MSG_TAKEN                         0x00000002U
 
 
 /*-----------------------------------REGISTER------------------------------------
     Register name:       IMASK
     Offset name:         SOC_DEBUGSS_DSSM_O_IMASK
     Relative address:    0x28
-    Description:         Interrupt Mask. If a bit is set, then corresponding interrupt is un-masked. Un-masking the interrupt causes the raw interrupt to be visible in IIDX, as well as MIS.
+    Description:         Interrupt Mask.
+
+                        If a bit is set, then corresponding interrupt is un-masked. Un-masking the interrupt causes the raw interrupt to be visible in IIDX, as well as MIS.
     Default Value:       0x00000000
 
         Field:           MSGPEND
@@ -152,7 +157,9 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
     Register name:       RIS
     Offset name:         SOC_DEBUGSS_DSSM_O_RIS
     Relative address:    0x30
-    Description:         Raw interrupt status. Reflects all pending interrupts, regardless of masking. The RIS register allows the user to implement a poll scheme. A flag set in this register can be cleared by writing 1 to the ICLR register bit even if the corresponding IMASK bit is not enabled.
+    Description:         Raw Interrupt Status.
+
+                        Reflects all pending interrupts, regardless of masking. The RIS register allows the user to implement a poll scheme. A flag set in this register can be cleared by writing 1 to the ICLR register bit even if the corresponding IMASK bit is not enabled.
     Default Value:       0x00000000
 
         Field:           MSGPEND
@@ -193,7 +200,9 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
     Register name:       MIS
     Offset name:         SOC_DEBUGSS_DSSM_O_MIS
     Relative address:    0x38
-    Description:         Masked interrupt status. This is an AND of the IMASK and RIS registers.
+    Description:         Masked Interrupt Status.
+
+                        This is an AND of the IMASK and RIS registers.
     Default Value:       0x00000000
 
         Field:           MSGPEND
@@ -234,7 +243,9 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
     Register name:       ICLR
     Offset name:         SOC_DEBUGSS_DSSM_O_ICLR
     Relative address:    0x40
-    Description:         Interrupt clear. Write a 1 to clear corresponding Interrupt.
+    Description:         Interrupt Clear.
+
+                        Write a 1 to clear corresponding Interrupt.
     Default Value:       0x00000000
 
         Field:           MSGPEND
@@ -275,7 +286,9 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
     Register name:       TRIG
     Offset name:         SOC_DEBUGSS_DSSM_O_TRIG
     Relative address:    0x48
-    Description:         Interrupt set. Allows interrupts to be set by software (useful in diagnostics and safety checks). Writing a 1 to a bit in ISET will set the event and therefore the related RIS bit also gets set. If the interrupt is enabled through the mask, then the corresponding MIS bit is also set.
+    Description:         Interrupt Set.
+
+                        Allows interrupts to be set by software (useful in diagnostics and safety checks). Writing a 1 to a bit in ISET will set the event and therefore the related RIS bit also gets set. If the interrupt is enabled through the mask, then the corresponding MIS bit is also set.
     Default Value:       0x00000000
 
         Field:           MSGPEND
@@ -310,6 +323,37 @@ This section defines the register offsets of the SOC_DEBUGSS_DSSM component
 #define SOC_DEBUGSS_DSSM_TRIG_MSGTAKEN_S                             1U
 #define SOC_DEBUGSS_DSSM_TRIG_MSGTAKEN_SET                           0x00000002U
 #define SOC_DEBUGSS_DSSM_TRIG_MSGTAKEN_NO_EFFECT                     0x00000000U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       PRIDBGDMN
+    Offset name:         SOC_DEBUGSS_DSSM_O_PRIDBGDMN
+    Relative address:    0xE0
+    Description:         This register is to select the primary debug domain. Whichever domain is selected as primary gets powered up by writing onto csyspwrupreq bit
+    Default Value:       0x00000001
+
+        Field:           HOST
+        From..to bits:   0...0
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     Set this bit to 1 if host is to be selected as primary debug domain
+
+*/
+#define SOC_DEBUGSS_DSSM_PRIDBGDMN_HOST                              0x00000001U
+#define SOC_DEBUGSS_DSSM_PRIDBGDMN_HOST_M                            0x00000001U
+#define SOC_DEBUGSS_DSSM_PRIDBGDMN_HOST_S                            0U
+/*
+
+        Field:           CORE
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Set this bit to 1 if core is to be selected as primary debug domain
+
+*/
+#define SOC_DEBUGSS_DSSM_PRIDBGDMN_CORE                              0x00000002U
+#define SOC_DEBUGSS_DSSM_PRIDBGDMN_CORE_M                            0x00000002U
+#define SOC_DEBUGSS_DSSM_PRIDBGDMN_CORE_S                            1U
 
 
 /*-----------------------------------REGISTER------------------------------------

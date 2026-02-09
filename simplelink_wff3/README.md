@@ -6,7 +6,7 @@ Simplelink WFF3 SDK.
 ### Version
 
 The current version of simplelink_wff3 is based on
-Simplelink Wi-Fi SDK 9.10.00.01.
+Simplelink Wi-Fi SDK 9.22.00.15.
 
 ## Contents
 

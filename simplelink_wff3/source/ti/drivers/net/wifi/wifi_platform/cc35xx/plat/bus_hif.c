@@ -36,9 +36,7 @@
 #include "nab.h"
 #include "dma_channel_usage.h"
 #include "fw_status.h"
-#include <ti/devices/cc35xx/driverlib/hif.h> //from driverlib
-#include <ti/devices/cc35xx/inc/hw_hif.h> //from driverlib
-#include <ti/devices/cc35xx/inc/hw_memmap.h> //from driverlib
+#include "hif.h"
 #include "macro_utils.h"
 #include "osi_kernel.h"
 
@@ -58,30 +56,12 @@ WBUS_HIF_DB_STRCT wbus_hif_db = {.dmaChannel = HOSTDMA_DRIVER_CH_HIF};
 
 volatile core_fw_status_t gFwStatusInfo __attribute((section(".connectivity_shared_status_section")));
 /*=====================*/
-//TODO later on,those are used for debug in case of assert, can be removed later on
-//#define HIF_BASE             0x408a0000
-//#define HIF_O_FIFOSTA                                               0x0000002CU
-//clear on read
-//#define HIF_O_FIFO_UNDERFLOW                                         0x00000030U
-//clear on read
-//#define HIF_O_FIFO_OVERFLOW                                          0x00000034U
 
 
-
-
-#define HWREG(x)                                                              \
-        (*((volatile unsigned long *)(x)))
-
-#define HWREG32(x)                                                            \
-        (*((volatile unsigned long *)(x)))
-
-
-
-static int readStatusRegs(FwStatus_t* rcv_bufffer, uint32_t flags);
+static int HIFReadStatusRegs(FwStatus_t* rcv_bufffer, uint32_t flags);
 
 
 uint8_t init_done = 0;
-uint32 gStsl,gUnderFlow,g_overFlow;
 
 //#define HIF_COLLECT_DEBUG_STAT
 #ifdef HIF_COLLECT_DEBUG_STAT
@@ -126,16 +106,17 @@ int bus_sendInitCommand(uint32_t config, uint8_t fbrw)
      uint32_t actualLengthRead = 0;
      int32_t  ret;
      FwStatus_t buf;
+#ifndef REMOVE_HIF_READ_DELAY
      volatile int32_t tmp_cnt = 0;
-
+#endif
      if (length < sizeof(FwStatus_t))
      {
-         assert(0);
+         ASSERT_GENERAL(0);
          return(1);
      }
      if(!init_done)
      {
-         assert(0);
+         ASSERT_GENERAL(0);
          return(1);
      }
 
@@ -152,15 +133,11 @@ int bus_sendInitCommand(uint32_t config, uint8_t fbrw)
              debugStatArr[g_debug_arr_offset].tsf =  os_GetTimeInUS();
          }
 #endif
-        HIFInit((uint32_t)wbus_hif_db.dmaChannel);
          ret = HIFRead( wbus_hif_db.dmaChannel, address, data, length-sizeof(FwStatus_t), &actualLengthRead);
          if(ret<0)
          {
-             //collect values for debug purpose
-             gStsl = HWREG32(HIF_BASE+HIF_O_FIFOSTA);
-             gUnderFlow = HWREG32(HIF_BASE+HIF_O_UNDER);
-             g_overFlow = HWREG32(HIF_BASE+HIF_O_OVER);
-             assert(0);
+             HIFCollectDebugInfo();
+             ASSERT_GENERAL(0);
          }
          
          data += length-sizeof(FwStatus_t);
@@ -168,6 +145,7 @@ int bus_sendInitCommand(uint32_t config, uint8_t fbrw)
 
      }
 
+#ifndef REMOVE_HIF_READ_DELAY
      //Work Around
      //Wait for the NAB to finish his job
      while(tmp_cnt < 100)
@@ -175,9 +153,10 @@ int bus_sendInitCommand(uint32_t config, uint8_t fbrw)
          tmp_cnt++;
      }
      tmp_cnt = 0;
+#endif
+     HIFReadStatusRegs((FwStatus_t *)data,flags);
 
-     readStatusRegs((FwStatus_t *)data,flags);
-     HWREG32(HIF_BASE+HIF_O_MOD) = 0; //HIF_MODE_DIRECT_ACCESS_WR - set IDLE mode
+     HIFSetIdle();
 
 #ifdef HIF_COLLECT_DEBUG_STAT
          uint32 os_GetTimeInUS();
@@ -206,9 +185,10 @@ int bus_sendWriteCommand(uint32_t address, uint8_t *data, uint32_t length, uint8
     {
         return(1);
     }
-    HIFInit((uint32_t)wbus_hif_db.dmaChannel);
     HIFWrite(wbus_hif_db.dmaChannel, data, length);
-    HWREG32(HIF_BASE+HIF_O_MOD) = 0; //HIF_MODE_DIRECT_ACCESS_WR - set IDLE mode
+
+    HIFSetIdle();
+
     return 0;
 }
 
@@ -217,8 +197,8 @@ int bus_Send_deInit()
     return(0);
 }
 
-// Internal function
-static int readStatusRegs(FwStatus_t* fwStatus, uint32_t flags)
+
+static int HIFReadStatusRegs(FwStatus_t* fwStatus, uint32_t flags)
 {
     if (flags & HIF_GET_RX_HINT_CNTRL_STATUS)
     {
@@ -235,5 +215,6 @@ static int readStatusRegs(FwStatus_t* fwStatus, uint32_t flags)
     }
     return 0;
 }
+
 
 #endif

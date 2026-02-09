@@ -44,6 +44,9 @@
 //      Host Event Handler
 // ============================================================================
 extern OsiMsgQ_t eventMsgQueue;
+#define FW_CRASH_EVENT_ID                               (0x40000000)//   BIT_30,
+#define ERROR_EVENT_ID                                  (0x80000000)//   BIT_31,
+
 void Wlan_HostSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
 {
     // marking the parameter as unused to bypass 'unused parameter' warning
@@ -51,39 +54,59 @@ void Wlan_HostSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
 
     EventMessage_t event;
     uint8_t *event_data;
-    event_data = os_malloc(sizeof(WlanEvent_t) + HOST_EVENT_RESERVED_EVENT_HEADER);
+    WlanEvent_t* pEvent;
+    uint32_t* pId;
+
+
+    event_data = os_malloc(HOST_EVENT_RESERVED_EVENT_HEADER + sizeof(WlanEvent_t));
 
     if (!args)
     {
-        TX_DATA_SEND_PRINT_ERROR("\n\r[dispatcherSendEvent] ERROR NULL buffer,opcode:%d\n\r",opcode);
+        TX_DATA_SEND_PRINT_ERROR("\n\r[Wlan_HostSendEvent] ERROR NULL buffer,opcode:%d\n\r",opcode);
+    }
+    if(event_data == NULL)
+    {
+        TX_DATA_SEND_PRINT_ERROR("\n\r[Wlan_HostSendEvent] ERROR event_data allocation error\n\r");
+        return;
     }
 
     switch (opcode)
     {
         case WLAN_EVENT_ERROR:
         {
-            WlanEventError_t*  pArgs = (WlanEventError_t *)(event_data + sizeof(uint32_t) + HOST_EVENT_RESERVED_EVENT_HEADER);
-            pArgs->module = ((WlanEventError_t *)(args))->module;
-            pArgs->error_num = ((WlanEventError_t *)(args))->error_num;
-            pArgs->severity = ((WlanEventError_t *)(args))->severity;
-            ((WlanEvent_t *)(event_data + HOST_EVENT_RESERVED_EVENT_HEADER))->Id = WLAN_EVENT_ERROR;
+            //those lines are for use by CC35XX , the data is written to HOST_EVENT_RESERVED_EVENT_HEADER
+            //first 32 bit represent the eventId.
+            pId = (uint32_t*)event_data;
+            *pId = (uint32_t)ERROR_EVENT_ID;
+            //end of code to support MX
+            pEvent = (WlanEvent_t*)(event_data + HOST_EVENT_RESERVED_EVENT_HEADER);
+            pEvent->Id = WLAN_EVENT_ERROR;
+            pEvent->Data.error.module = ((WlanEventError_t *)(args))->module;
+            pEvent->Data.error.error_num = ((WlanEventError_t *)(args))->error_num;
+            pEvent->Data.error.severity =  ((WlanEventError_t *)(args))->severity;
 
         }
         break;
         case WLAN_EVENT_FW_CRASH:
         {
-            WlanEventError_t*  pArgs = (WlanEventError_t *)(event_data + sizeof(uint32_t) + HOST_EVENT_RESERVED_EVENT_HEADER);
-            pArgs->module = ((WlanEventError_t *)(args))->module;
-            pArgs->error_num = ((WlanEventError_t *)(args))->error_num;
-            pArgs->severity = ((WlanEventError_t *)(args))->severity;
-            ((WlanEvent_t *)(event_data + HOST_EVENT_RESERVED_EVENT_HEADER))->Id = WLAN_EVENT_FW_CRASH;
+            //those lines are for use by CC35XX , the data is written to HOST_EVENT_RESERVED_EVENT_HEADER
+            //first 32 bit represent the eventId.
+            pId = (uint32_t*)event_data;
+            *pId = (uint32_t)FW_CRASH_EVENT_ID;
+            //end of code to support MX
+            pEvent = (WlanEvent_t*)(event_data + HOST_EVENT_RESERVED_EVENT_HEADER);
+            pEvent->Id = WLAN_EVENT_FW_CRASH;
+            pEvent->Data.error.module = ((WlanEventError_t *)(args))->module;
+            pEvent->Data.error.error_num = ((WlanEventError_t *)(args))->error_num;
+            pEvent->Data.error.severity =  ((WlanEventError_t *)(args))->severity;
+
+
         }
         break;
     }
 
-
     event.message = event_data;
-    event.len = sizeof(WlanEvent_t) + HOST_EVENT_RESERVED_EVENT_HEADER;
+    event.len = HOST_EVENT_RESERVED_EVENT_HEADER + sizeof(WlanEvent_t);
     osi_MsgQWrite(&eventMsgQueue, &event, OSI_WAIT_FOREVER,OSI_FLAG_NOT_FROM_INTR);
 
 

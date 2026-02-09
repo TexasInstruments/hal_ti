@@ -59,14 +59,15 @@ static inline uint64_t mac_addr_to_u64(uint8_t *addr);
 static inline void u64_to_mac_addr(uint64_t u, uint8_t *addr);
 static void inc_mac_addr(uint8_t* pMacAddr);
 extern int  ctrlCmdFw_DownloadIniParams();
+extern int  ctrlCmdFw_FirstCommand();
 extern int  ctrlCmdFw_GetCmdSize();
 extern int  WLSendFWDownloadCommand(void *cmd, uint32_t len, void *out,uint32_t outLen);
 extern int  ctrlCmdFw_GetMacAddress(Macaddress_t* macaddress);
 
 
 #define CHUNK_SIZE (600)
-#define RECORD_MAGIC_NUM (0x96f3b83d)
-
+#define RECORD_MAGIC_NUM (0x690c47c2)
+#define RECORD_MAGIC_NUM_ALT (0x96f3b83d)
 
 #define LIST_SIZE_OFFSET (18) //offset of numberOf records in the manifest
 #define RECORD_SUFFIX_SIZE (82U) //parameter of manifest container
@@ -129,14 +130,14 @@ int ctrlCmdFw_ContainerDownload(char *containerName)
     if(NULL == buffer)
     {
         Report("\n\rcouldn't allocate for record download\n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
     containerFileHandle = osi_fopen(containerName, "rb");
     osi_fread(buffer, sizeof(recordHeader_t), offset, containerFileHandle);
 
     header = (recordHeader_t *)buffer;
 
-    while( RECORD_MAGIC_NUM == header->magicNum )
+    while( (RECORD_MAGIC_NUM == header->magicNum) || (RECORD_MAGIC_NUM_ALT == header->magicNum) )
     {
         // find number of records
         if (0 == recordCounter)
@@ -222,17 +223,17 @@ int32_t init_device(uint32_t commandsEventsSizeBTL,uint32_t commandsEventsSize)
     fwEvent_SetDuringInit(1,commandsEventsSize);
 
     /* start downloading the RAM btlr and FW */
-    Report("Starting software download.....\r\n");
+    Report("\n\rStarting software download.....\r\n");
 
     /* we need to wait so the LX device will wake up */
     if(fwEvent_Wait(OSI_WAIT_FOREVER,HINT_ROM_LOADER_INIT_COMPLETE) == -1)
     {
         Report("didn't receive ROM init complete\n\r");
-        //assert(0);
+        //ASSERT_GENERAL(0);
         while(1);
     }
 
-    Report("received ROM init complete.....\r\n");
+    Report("\n\rreceived ROM init complete.....\r\n");
 
     // RAM Bootloader download
     ctrlCmdFw_ContainerDownload("fw");
@@ -241,11 +242,16 @@ int32_t init_device(uint32_t commandsEventsSizeBTL,uint32_t commandsEventsSize)
     if(fwEvent_Wait(OSI_WAIT_FOREVER,HINT_FW_WAKEUP_COMPLETE) == -1)
     {
         Report("didn't receive ROM init complete");
-        //assert(0);
+        //ASSERT_GENERAL(0);
         while(1);
     }
 
     fwEvent_SetDuringInit(0,commandsEventsSize);
+
+    Report("-------------- Download First CMD\n\r");
+    // download first comand
+    // Note: ! Must come before ini !
+    ctrlCmdFw_FirstCommand();
 
     Report("-------------- Download IniParams\n\r");
 
@@ -315,9 +321,6 @@ int32_t HwInit(void)
 
     /* turn on the device */
     wlan_TurnOnWlan();
-
-    /* enable the IRQ interrupt */
-    wlan_IRQEnableInt();
 
     return ret;
 }

@@ -80,8 +80,10 @@ void InsertNode( TQueNodeHdr volatile *pNode, TQueNodeHdr volatile *pPrev, TQueN
  */
 void RemoveNode( TQueNodeHdr volatile *pPrev, TQueNodeHdr volatile *pNext)
 {
-    pNext->pPrev = pPrev;
-    pPrev->pNext = pNext;
+    TQueNodeHdr volatile *prev = pPrev;
+    TQueNodeHdr volatile *next = pNext;
+    pNext->pPrev = prev;
+    pPrev->pNext = next;
 }
 
 /*
@@ -105,7 +107,9 @@ void AddToTail( TQueNodeHdr volatile *pNode, TQueNodeHdr volatile *pListHead)
  */
 void DelFromTail (TQueNodeHdr volatile *pNode)
 {
-	RemoveNode (pNode->pPrev, pNode->pNext);
+    TQueNodeHdr volatile *prev = pNode->pPrev;
+    TQueNodeHdr volatile *next = pNode->pNext;
+	RemoveNode (prev, next);
 }
 
 

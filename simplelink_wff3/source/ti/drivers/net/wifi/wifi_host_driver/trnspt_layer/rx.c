@@ -172,7 +172,7 @@ int rx_GetDesc(uint8_t *rawBuffer, uint32_t *rawBufferLen)
     }
     if(gRx->rxStateMachine.desc == NULL)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return -1;
     }
     //check here if we are going to exceed the write of the descriptor
@@ -206,13 +206,23 @@ int rx_GetDesc(uint8_t *rawBuffer, uint32_t *rawBufferLen)
         //desc length  = desc + padding + packetLen + extraBytes
         if((gRx->rxStateMachine.desc->length==0) || (gRx->rxStateMachine.desc->length < (gRx->rxStateMachine.desc->extraBytes + padding + sizeof(RxIfDescriptor_t))))
         {
-            assert(0);
+            WlanEventError_t  error_event;
+            RX_PRINT_ERROR("\n\r rx_GetDesc: Fail in getting RX Descriptor\n\r");
+            error_event.error_num = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__RX, WLAN_ERROR_TYPE__RX_SM_LENGTH_OF_FRAME_IS_INVALID_FROM_FW);
+            error_event.module = WLAN_MODULE_RX;
+            error_event.severity = WLAN_SEVERITY_MID;
+            Wlan_HostSendEvent(WLAN_EVENT_ERROR, (uint8_t*)&error_event, sizeof(WlanEventError_t));
+
             gRx->rxStateMachine.state = RX_IDLE;
             if(NULL != gRx->rxStateMachine.desc)
             {
                 os_free(gRx->rxStateMachine.desc);
                 gRx->rxStateMachine.desc = NULL;
             }
+
+            ret = *rawBufferLen;
+            *rawBufferLen = reminder;
+            return ret;
         }
         gRx->rxStateMachine.frameSizeNeto = gRx->rxStateMachine.desc->length - gRx->rxStateMachine.desc->extraBytes - padding - sizeof(RxIfDescriptor_t);
     }
@@ -318,7 +328,7 @@ int rx_CopyBuffer(uint8_t *rawBuffer, uint32_t *rawBufferLen)
         tempBlock = (char *)(gRx->rxStateMachine.frame);
         if((gRx->rxStateMachine.handled_bytes + *rawBufferLen) > packetLength)
         {
-            assert(0);
+            ASSERT_GENERAL(0);
             return -1;
         }
         os_memcpy(tempBlock + includeDescSize + gRx->rxStateMachine.handled_bytes,rawBuffer,*rawBufferLen);
@@ -438,7 +448,7 @@ void rx_StateMachine(uint8_t *rawBuffer, uint32_t rawBufferLen)
 
     while(rawBufferLen > 0)
     {
-        rxState_e state = gRx->rxStateMachine.state;
+        rxState_e state = (rxState_e) gRx->rxStateMachine.state;
         switch(state)
         {
         case RX_IDLE:

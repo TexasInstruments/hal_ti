@@ -67,12 +67,35 @@
 #include DeviceFamily_constructPath(inc/hw_uartlin.h)
 #include DeviceFamily_constructPath(inc/hw_sdio_card_fn1.h)
 #include DeviceFamily_constructPath(inc/hw_adc.h)
+#include DeviceFamily_constructPath(driverlib/cpu.h)
 
 /* Missing defines from hw_hostmcu_aon.h */
 #define HOSTMCU_AON_CFGWICSNS_RTC_EN                       (1U << 13)
 #define HOSTMCU_AON_CFGWICSNS_DEBUGSS_HOST_CSYSPWRUPREQ_EN (1U << 14)
 #define HOSTMCU_AON_CFGWUTP_RTC_FAST                       (1U << 13)
 #define HOSTMCU_AON_CFGWUTP_DEBUGSS_HOST_CSYSPWRUPREQ_FAST (1U << 14)
+
+/* Defines for NVIC bitmasks */
+#define NVIC_IRQ_REG_NUM(num) ((num) >> 5U)
+#define NVIC_IRQ_BIT_POS(num) (uint32_t)(1UL << (((uint32_t)(num)) & 0x1FUL))
+
+/* Defines used by PowerWFF3_enterSleep() */
+/* Workaround uses ELP wake-up timer to delay wake-up through problematic
+ * time window. The threshold value is defined here.
+ */
+#define ELP_WAKEUP_THRESHOLD 0x3U
+#define ELP_TIMER_IS_ENABLED() \
+    (((HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) & HOSTMCU_AON_ELPTMREN_VAL_M)) != HOSTMCU_AON_ELPTMREN_VAL_DIS)
+#define ELP_TIMER_STOP_AND_RELOAD()                                                            \
+    do                                                                                         \
+    {                                                                                          \
+        HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) |= HOSTMCU_AON_ELPTMREN_ELPTMRRST;    \
+        while (ELP_TIMER_IS_ENABLED()) {}                                                      \
+        HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) &= ~(HOSTMCU_AON_ELPTMREN_ELPTMRRST | \
+                                                              HOSTMCU_AON_ELPTMREN_ELPTMRSET); \
+        HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) |= HOSTMCU_AON_ELPTMREN_ELPTMRLD;     \
+    } while (0)
+#define ELP_TIMER_START() HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) |= HOSTMCU_AON_ELPTMREN_ELPTMRSET
 
 /* Forward declarations */
 int_fast16_t PowerWFF3_notify(uint_fast16_t eventType);
@@ -87,14 +110,23 @@ extern const uint_least8_t GPIO_pinUpperBound;
 
 /* Static Globals */
 
-/* Array to maintain constraint reference counts */
-static uint8_t constraintCounts[PowerWFF3_NUMCONSTRAINTS];
+/* Array to maintain constraint reference counts.
+ * Declare volatile variable to ensure the toolchain does not use
+ * stack for the variable and does not optimize this memory allocation away.
+ */
+static volatile uint8_t constraintCounts[PowerWFF3_NUMCONSTRAINTS];
 
-/* Mask of Power constraints for quick access */
-static uint32_t constraintMask = 0;
+/* Mask of Power constraints for quick access.
+ * Declare volatile variable to ensure the toolchain does not use
+ * stack for the variable and does not optimize this memory allocation away.
+ */
+static volatile uint32_t constraintMask = 0;
 
-/* Array to maintain resource dependency reference counts */
-static uint8_t resourceCounts[PowerWFF3_NUMRESOURCES];
+/* Array to maintain resource dependency reference counts.
+ * Declare volatile variable to ensure the toolchain does not use
+ * stack for the variable and does not optimize this memory allocation away.
+ */
+static volatile uint8_t resourceCounts[PowerWFF3_NUMRESOURCES];
 
 /* Array of addresses to the clock enable register for each resource */
 static const uint32_t resourceClkEnRegs[PowerWFF3_NUMRESOURCES] = {
@@ -112,6 +144,7 @@ static const uint32_t resourceClkEnRegs[PowerWFF3_NUMRESOURCES] = {
     UARTLIN1_BASE + UARTLIN_O_CLKCFG,           /* PowerWFF3_PERIPH_UARTLIN1 */
     SDIO_CARD_FN1_BASE + SDIO_CARD_FN1_O_CLKEN, /* PowerWFF3_PERIPH_SDIO */
     ADC_BASE + ADC_O_CLKCFG,                    /* PowerWFF3_PERIPH_ADC0 */
+    UARTLIN2_BASE + UARTLIN_O_CLKCFG,           /* PowerWFF3_PERIPH_UARTLIN2 */
 };
 
 /* Keeps track of the configured Power policy. Power_idleFunc() will not run
@@ -132,7 +165,7 @@ static uint8_t powerState = Power_ACTIVE;
 static List_List notifyList;
 
 /* Macro for weak definition of the Power Log module */
-Log_MODULE_DEFINE_WEAK(LogModule_Power, {0});
+Log_MODULE_DEFINE_WEAK(LogModule_Power, Log_MODULE_INIT_SINK_DUMMY);
 
 /* ****************** Power APIs ******************** */
 
@@ -570,18 +603,124 @@ void PowerWFF3_doWFI(void)
 /*
  *  ======== PowerWFF3_enterSleep ========
  *  Low level function used to enter sleep.
+ *
+ *  This function implements a workaround for a CM33 race condition between
+ *  wakeup event and slow clock. If a wakeup event occurs within 1-2 slow clocks
+ *  (~30.5-61 us) after the WFI instruction, the CM33 continues execution while
+ *  the system goes to power-down. During this time window the CM33 cannot
+ *  execute code from FLASH. Therefore, this function is placed in RAM and
+ *  avoids external function calls.
+ *
+ *  The workaround uses ELP wake-up threshold and therefore that threshold
+ *  cannot be used by other parts of the application. It delays the CM33 wakeup
+ *  to happen at earliest when the ELP timer interrupt occurs.
  */
-void PowerWFF3_enterSleep(void)
+__attribute__((noinline, section(".TI.ramfunc"))) void PowerWFF3_enterSleep(void)
 {
-    /* Set the SLEEPDEEP bit in SCB.SCR before executing WFI instruction */
+    uint32_t irqStatus0;
+    uint32_t irqStatus1;
+    uint32_t elptmren;
+
+    bool elpRunning;
+    bool elpSwMode;
+
+    /* Set the SLEEPDEEP bit in SCB.SCR before executing WFI instruction. */
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 
-    /* Ensure that the SLEEPDEEP bit is set before executing WFI instruction */
+    /* Store register values
+     * - ISER[n]: NVIC IRQ status. IRQs 32-52 (bits 0-20) are valid in ISER[1].
+     * - ELPTMR: ELP configuration
+     */
+#if NUM_INTERRUPTS > (64 + 16)
+    #error "This driver has only been implemented to support up to 64 IRQs, but this device has more than 64 IRQs"
+#endif
+    irqStatus0 = NVIC->ISER[0];
+    irqStatus1 = NVIC->ISER[1];
+    elptmren   = HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN);
+
+    /* Determine status of ELP module */
+    elpRunning = (elptmren & HOSTMCU_AON_ELPTMREN_VAL_M) == HOSTMCU_AON_ELPTMREN_VAL_EN;
+    elpSwMode  = (elptmren & HOSTMCU_AON_ELPTMREN_TMRSWCTL_M) == HOSTMCU_AON_ELPTMREN_TMRSWCTL_SW;
+
+    /* Disable all enabled NVIC IRQs.
+     * DSB and ISB instructions: Mimic CMSIS function NVIC_DisableIRQ().
+     */
+    NVIC->ICER[1] = irqStatus1;
+    NVIC->ICER[0] = irqStatus0;
     __DSB();
     __ISB();
 
-    /* Enter sleep using WFI instruction */
+    /* Configure ELP timer interrupt:
+     * - Enable ELP timer interrupt in NVIC.
+     * - Disable ELP timer as wakeup source.
+     * - Clear any pending ELP timer interrupt.
+     * Compiler barrier macro included to mimic CMSIS function NVIC_EnableIRQ().
+     */
+    __COMPILER_BARRIER();
+    NVIC->ISER[NVIC_IRQ_REG_NUM(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn)] = NVIC_IRQ_BIT_POS(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn);
+    __COMPILER_BARRIER();
+    HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_CFGWICSNS) &= ~HOSTMCU_AON_CFGWICSNS_VAL_TMRREQ_EN;
+    NVIC->ICPR[NVIC_IRQ_REG_NUM(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn)] = NVIC_IRQ_BIT_POS(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn);
+
+    /* Make sure SW mode is enabled. */
+    if (!elpSwMode)
+    {
+        HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) |= HOSTMCU_AON_ELPTMREN_TMRSWCTL_SW;
+    }
+
+    /* Make sure ELP timer is stopped and counter reset. */
+    ELP_TIMER_STOP_AND_RELOAD();
+
+    /* Set and enable the wake-up threshold */
+    HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_CFGTMRWU) = (ELP_WAKEUP_THRESHOLD | HOSTMCU_AON_CFGTMRWU_EN_EN);
+
+    /* Start the counter by setting the SET bit. We intentionally do not wait
+     * for the ELP timer's enable bit (VAL) to go high as this takes around 2
+     * slow clocks. The WFI acts as the waiting mechanism: The CPU stops
+     * executing at WFI and will at earliest execute when the timer interrupt
+     * gets pending.
+     */
+    ELP_TIMER_START();
+
+    /* Ensure all memory accesses and side effects complete before WFI, and that
+     * the pipeline is synchronized after wakeup.
+     */
+    __DSB();
     __WFI();
+    __ISB();
+
+    /* Disable wake-up timer threshold */
+    HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_CFGTMRWU) &= ~HOSTMCU_AON_CFGTMRWU_EN_EN;
+
+    /* Disable ELP timer interrupt.
+     * DSB and ISB instructions: Mimic CMSIS function NVIC_DisableIRQ().
+     */
+    NVIC->ICER[NVIC_IRQ_REG_NUM(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn)] = NVIC_IRQ_BIT_POS(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn);
+    __DSB();
+    __ISB();
+
+    /* Clear the ELP wake-up timer event. */
+    HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_TMRWUREQ) = HOSTMCU_AON_TMRWUREQ_CLR_M;
+
+    /* Clear the SET bit (skipped when calling ELP_TIMER_START()) */
+    HWREG(HOSTMCU_AON_BASE + HOSTMCU_AON_O_ELPTMREN) &= ~HOSTMCU_AON_ELPTMREN_ELPTMRSET;
+
+    /* Stop ELP timer if it was not originally running. */
+    if (!elpSwMode || (elpSwMode && !elpRunning))
+    {
+        ELP_TIMER_STOP_AND_RELOAD();
+    }
+
+    /* Clear pending ELP timer interrupt. */
+    NVIC->ICPR[NVIC_IRQ_REG_NUM(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn)] = NVIC_IRQ_BIT_POS(INT_HOST_ELP_TMR_WAKEUP_REQ_IRQn);
+
+    /* Restore previously enabled interrupts.
+     * Compiler barrier macro included to mimic CMSIS function NVIC_EnableIRQ().
+     */
+    __COMPILER_BARRIER();
+    NVIC->ISER[1] = irqStatus1;
+    NVIC->ISER[0] = irqStatus0;
+    __COMPILER_BARRIER();
 
     /* Clear the SLEEPDEEP bit in SCB.SCR such that any future WFI instructions
      * will only cause the CPU to enter IDLE.

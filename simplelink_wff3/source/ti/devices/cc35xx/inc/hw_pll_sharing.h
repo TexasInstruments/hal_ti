@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the PLL_SHARING peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -271,7 +271,7 @@ This section defines the register offsets of the PLL_SHARING component
     Description:         WCS PLL CONFIG
 
                         gen cfg for WCS PLL
-    Default Value:       0x00020270
+    Default Value:       0x012A0270
 
         Field:           EN
         From..to bits:   0...0
@@ -429,6 +429,56 @@ This section defines the register offsets of the PLL_SHARING component
 #define PLL_SHARING_WCSPLLCFG_HFREQMODEN                             0x00020000U
 #define PLL_SHARING_WCSPLLCFG_HFREQMODEN_M                           0x00020000U
 #define PLL_SHARING_WCSPLLCFG_HFREQMODEN_S                           17U
+/*
+
+        Field:           CLRVCOSLP
+        From..to bits:   18...18
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     CLEAR VCO DURING SLEEP
+
+                         '1' - during sleep VCO 300-400MHz will be gated
+                         '0' - during sleep VCO 300-400MHz will stay high
+
+*/
+#define PLL_SHARING_WCSPLLCFG_CLRVCOSLP                              0x00040000U
+#define PLL_SHARING_WCSPLLCFG_CLRVCOSLP_M                            0x00040000U
+#define PLL_SHARING_WCSPLLCFG_CLRVCOSLP_S                            18U
+/*
+
+        Field:           PHSEL
+        From..to bits:   19...23
+        DefaultValue:    0x5
+        Access type:     read-write
+        Description:     PHASE SELECT
+
+                         the following values should be used:
+                         10MHz - up to decimal 0..31
+                         26MHz - up to decimal 0..11
+                         40MHz - up to decimal 0..7
+                         52MHz - up to decimal 0..5
+                         notes:
+                         *delayes are set in 320MHz clk
+                         *due to sync issues delay could get +1 of the setting value
+
+*/
+#define PLL_SHARING_WCSPLLCFG_PHSEL_W                                5U
+#define PLL_SHARING_WCSPLLCFG_PHSEL_M                                0x00F80000U
+#define PLL_SHARING_WCSPLLCFG_PHSEL_S                                19U
+/*
+
+        Field:           PHASEOV
+        From..to bits:   24...24
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     PHASE OVERRIDE
+
+                         '1' - Overrideing phase control implementation.
+
+*/
+#define PLL_SHARING_WCSPLLCFG_PHASEOV                                0x01000000U
+#define PLL_SHARING_WCSPLLCFG_PHASEOV_M                              0x01000000U
+#define PLL_SHARING_WCSPLLCFG_PHASEOV_S                              24U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -847,7 +897,7 @@ This section defines the register offsets of the PLL_SHARING component
     Offset name:         PLL_SHARING_O_ICG
     Relative address:    0x34
     Description:         ICG
-    Default Value:       0x00000000
+    Default Value:       0x00000050
 
         Field:           CRM3DIS
         From..to bits:   0...0
@@ -913,20 +963,20 @@ This section defines the register offsets of the PLL_SHARING component
 #define PLL_SHARING_ICG_HDIS_S                                       3U
 /*
 
-        Field:           PLL32
+        Field:           PLL32DIS
         From..to bits:   4...4
-        DefaultValue:    0x0
+        DefaultValue:    0x1
         Access type:     read-write
-        Description:     PLL 32
+        Description:     PLL 32 DISABLE
 
                          ICG control
-                         '0' - disable
-                         '1' - enable
+                         '1' - disable
+                         '0' - enable
 
 */
-#define PLL_SHARING_ICG_PLL32                                        0x00000010U
-#define PLL_SHARING_ICG_PLL32_M                                      0x00000010U
-#define PLL_SHARING_ICG_PLL32_S                                      4U
+#define PLL_SHARING_ICG_PLL32DIS                                     0x00000010U
+#define PLL_SHARING_ICG_PLL32DIS_M                                   0x00000010U
+#define PLL_SHARING_ICG_PLL32DIS_S                                   4U
 /*
 
         Field:           PHYDIS
@@ -943,5 +993,21 @@ This section defines the register offsets of the PLL_SHARING component
 #define PLL_SHARING_ICG_PHYDIS                                       0x00000020U
 #define PLL_SHARING_ICG_PHYDIS_M                                     0x00000020U
 #define PLL_SHARING_ICG_PHYDIS_S                                     5U
+/*
+
+        Field:           SOCPSWLDIS
+        From..to bits:   6...6
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     SOC PSWL DISABLE
+
+                         ICG Disable control
+                         '1' - disable
+                         '0' - enable
+
+*/
+#define PLL_SHARING_ICG_SOCPSWLDIS                                   0x00000040U
+#define PLL_SHARING_ICG_SOCPSWLDIS_M                                 0x00000040U
+#define PLL_SHARING_ICG_SOCPSWLDIS_S                                 6U
 
 #endif /* __HW_PLL_SHARING_H__*/

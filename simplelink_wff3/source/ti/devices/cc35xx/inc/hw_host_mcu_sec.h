@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the HOST_MCU_SEC peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -47,6 +47,9 @@ This section defines the register offsets of the HOST_MCU_SEC component
 //Software Interrupt to CM3
 #define HOST_MCU_SEC_O_SWIRQ2CM3                                     0x00000004U
 
+//Software Interrupt to CM3
+#define HOST_MCU_SEC_O_LCKUP                                         0x00000008U
+
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -87,5 +90,29 @@ This section defines the register offsets of the HOST_MCU_SEC component
 #define HOST_MCU_SEC_SWIRQ2CM3_EN                                    0x00000001U
 #define HOST_MCU_SEC_SWIRQ2CM3_EN_M                                  0x00000001U
 #define HOST_MCU_SEC_SWIRQ2CM3_EN_S                                  0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       LCKUP
+    Offset name:         HOST_MCU_SEC_O_LCKUP
+    Relative address:    0x8
+    Description:         Software Interrupt to CM3
+    Default Value:       0x00000000
+
+        Field:           VAL
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-only
+        Description:     The processor enters a lockup state if a fault occurs when it cannot be serviced or escalated. When
+                         the processor is in lockup state, it does not execute any instructions.
+                         The processor remains in lockup state until either:
+                         * It is reset.
+                         * Preemption by a higher priority exception occurs.
+                         * It is halted by a debugger.
+
+*/
+#define HOST_MCU_SEC_LCKUP_VAL                                       0x00000001U
+#define HOST_MCU_SEC_LCKUP_VAL_M                                     0x00000001U
+#define HOST_MCU_SEC_LCKUP_VAL_S                                     0U
 
 #endif /* __HW_HOST_MCU_SEC_H__*/

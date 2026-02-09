@@ -48,8 +48,8 @@
  *  ============================================================================
  */
 
-#ifndef ti_drivers_power_PowerWFF3_
-#define ti_drivers_power_PowerWFF3_
+#ifndef ti_drivers_power_PowerWFF3__include
+#define ti_drivers_power_PowerWFF3__include
 
 #include <ti/drivers/dpl/HwiP.h>
 #include <ti/drivers/dpl/ClockP.h>
@@ -114,10 +114,13 @@ extern "C" {
 /*! Resource ID: ADC */
 #define PowerWFF3_PERIPH_ADC0 13
 
+/*! Resource ID: UARTLIN 2 */
+#define PowerWFF3_PERIPH_UARTLIN2 14
+
 /* \cond */
 /* Number of resources in database.
  */
-#define PowerWFF3_NUMRESOURCES 14
+#define PowerWFF3_NUMRESOURCES 15
 /* \endcond */
 
 #define PowerWFF3_SLEEP   0x1 /*!< The SLEEP state */
@@ -246,7 +249,7 @@ void PowerWFF3_doWFI(void);
 static inline PowerWFF3_ResetReason PowerWFF3_getResetReason(void)
 {
     // TODO: Implement
-    return 0;
+    return PowerWFF3_RESET_PIN;
 }
 
 /*!
@@ -280,4 +283,4 @@ void PowerWFF3_schedulerRestore(void);
 }
 #endif
 
-#endif /* POWER_WFF3_ */
+#endif /* ti_drivers_power_PowerWFF3__include */

@@ -34,9 +34,11 @@
  */
 
 #include <ti/drivers/sdio/SDIOWFF3.h>
-#include <ti/drivers/power/PowerWFF3.h>
+#include <ti/drivers/Power.h>
 #include <ti/drivers/dma/DMAWFF3.h>
-#include <ti/drivers/gpio/GPIOWFF3.h>
+#include <ti/drivers/GPIO.h>
+#include <ti/devices/DeviceFamily.h>
+#include DeviceFamily_constructPath(driverlib/dma.h)
 
 /* ========================================================================== */
 /*                          Local Defines                                     */
@@ -285,7 +287,7 @@ void SDIOWFF3_initSdioHw()
               SDIO_CORE_CCCR14_EAI_S,
               !SDIOWFF3_REG_IS_WR_ONLY);
 
-    // Config DMA-SDIO block size
+    /* Config DMA-SDIO block size */
     _setField(0x05,
               SDIOWFF3_attrs_P->FN1baseAddr,
               SDIO_CARD_FN1_O_DMABLKTHR,
@@ -300,6 +302,10 @@ void SDIOWFF3_initSdioHw()
               !SDIOWFF3_REG_IS_WR_ONLY);
 
     HWREG(SDIOWFF3_attrs_P -> FN1baseAddr + SDIO_CARD_FN1_O_RXTHR) = SDIOWFF3_attrs_P->thresholdLen;
+
+    /* Set Rx and Tx DMA channels to input and output respectively */
+    DMAConfigureChannel(SDIOWFF3_attrs_P->txDmaChannel, DMAWFF3_BLOCK_SIZE_4B, DMAWFF3_WORD_SIZE_4B, DMA_CONFIG_TX);
+    DMAConfigureChannel(SDIOWFF3_attrs_P->rxDmaChannel, DMAWFF3_BLOCK_SIZE_4B, DMAWFF3_WORD_SIZE_4B, DMA_CONFIG_RX);
 
     SDIOWFF3_statusClear(SDIOWFF3_ALL_STATUS);
     SDIOWFF3_irqEnable(SDIOWFF3_ALL_INTR);
@@ -575,7 +581,7 @@ void SDIOWFF3_overrideIomux()
 
     /* ======== override data 0 GPIO ============= */
     GPIO_setConfigAndMux(SDIOWFF3_attrs_P->data0Pin,
-                         IOMUX_GPIO2CFG_ODISOVEN_M | IOMUX_GPIO20CFG_IOSTR_M | IOMUX_GPIO2CTL_OUTOVREN_M,
+                         IOMUX_GPIO2CFG_OUTDISOVREN_M | IOMUX_GPIO20CFG_IOSTR_M | IOMUX_GPIO2CTL_OUTOVREN_M,
                          SDIOWFF3_attrs_P->data0PinMux);
 
     /* ======== reset config data 1 GPIO ========= */

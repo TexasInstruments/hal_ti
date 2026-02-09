@@ -1139,8 +1139,8 @@ This section defines the register offsets of the SYSTIM component
     Offset name:         SYSTIM_O_ARMSET
     Relative address:    0x144
     Description:         ARMSET on read gives out the status of the 2 channels
-                        	1.	Channel state UNARMED returns 0
-                        	2.	Channel state CAPTURE or COMPARE returns 1
+				1.	Channel state UNARMED returns 0
+				2.	Channel state CAPTURE or COMPARE returns 1
                         A write to ARMSET has for each channel the following effect:
                         1.	If ARMSTA[x]==0  -> no effect
                         2.	If ARMSTA[x]==1 and channel x is in CAPTURE state then no effect on the channel
@@ -1187,11 +1187,11 @@ This section defines the register offsets of the SYSTIM component
     Offset name:         SYSTIM_O_ARMCLR
     Relative address:    0x148
     Description:         ARMCLR on read gives out the status of the 2 channels
-                        	1.	Channel state UNARMED returns 0
-                        	2.	Channel state CAPTURE or COMPARE returns 1
+				1.	Channel state UNARMED returns 0
+				2.	Channel state CAPTURE or COMPARE returns 1
                         A write to ARMCLR has for each channel the following effect:
-                        	1.	If ARMCLR[x]==0 no effect
-                        	2.	Else Set channel in UNARMED state without triggering event unless a compare/capture event happens in the same cycle
+				1.	If ARMCLR[x]==0 no effect
+				2.	Else Set channel in UNARMED state without triggering event unless a compare/capture event happens in the same cycle
     Default Value:       0x00000000
 
         Field:           CH0

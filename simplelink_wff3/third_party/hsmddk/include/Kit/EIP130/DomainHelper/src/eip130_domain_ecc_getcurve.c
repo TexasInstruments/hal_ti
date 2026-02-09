@@ -44,6 +44,8 @@
 #include <third_party/hsmddk/include/Kit/DriverFramework/Basic_Defs_API/incl/basic_defs.h>
 #include <third_party/hsmddk/include/Kit/EIP130/DomainHelper/incl/eip130_domain_ecc_curves.h>
 
+#include <DeviceFamily.h>
+
 #ifndef EIP130DOMAIN_ECC_CURVES_192
 // #define EIP130DOMAIN_ECC_CURVES_192
 #endif

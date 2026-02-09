@@ -3,7 +3,7 @@
  *
  *  Description:    Driver for the UART peripheral.
  *
- *  Copyright (c) 2022-2024 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -62,7 +62,7 @@ void UARTClockCtrl(uint32_t base, bool clkEnable)
 void UARTEnable(uint32_t base)
 {
     // Check the arguments.
-    ASSERT((base == UARTLIN0_BASE) || (base == UARTLIN1_BASE))
+    ASSERT((base == UARTLIN0_BASE) || (base == UARTLIN1_BASE) || (base == UARTLIN2_BASE))
 
     // Enable the FIFO.
     UARTEnableFifo(base);

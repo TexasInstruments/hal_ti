@@ -38,7 +38,7 @@
 #define COMMAND_PRINT_ERROR Report
 #else
 #define COMMAND_PRINT(...)
-#define COMMAND_PRINT_ERROR 
+#define COMMAND_PRINT_ERROR Report
 #endif
 
 
@@ -121,14 +121,6 @@ int cmd_Send(char *in,uint32_t inLen, char *out, uint32_t outLen);
  */
 void cmd_SetTimeoutMs(uint32_t timeMS);
 
-
-/**
- * CmdCallbackFunction_t - cmd function pointer Callback
- *
- * @param cmdStatus - Status of current cmd
- * @param ptr - Pointer of current cmd
- */
-typedef void (* CmdCallbackFunction_t)(int cmdStatus,void *ptr);
 
 /**
  * CmdCallbackFunction_t - cmd function pointer Callback

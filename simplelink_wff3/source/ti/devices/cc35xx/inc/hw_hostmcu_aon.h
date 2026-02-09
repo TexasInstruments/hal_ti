@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the HOSTMCU_AON peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -154,7 +154,7 @@ This section defines the register offsets of the HOSTMCU_AON component
     Default Value:       0x00000000
 
         Field:           VAL
-        From..to bits:   0...16
+        From..to bits:   0...17
         DefaultValue:    0x0
         Access type:     read-write
         Description:     Field to control wake up source
@@ -177,18 +177,55 @@ This section defines the register offsets of the HOSTMCU_AON component
                          Bit 12 : ble_rfc_gpo_8_irq
                          Bit 13 : RTC
                          Bit 14 : DebugSS Csyspwrupreq
-                         Bit 15 : DebugSS Force-active
+                         Bit 15 : DebugSS Forceactive
                          Bit 16 : secured_error_irq
+                         Bit 17 : core wdt irq
+
+                         Note: GPIO wakeup src 0 is AND of wakeup sources and GPIO wakup src 1 is OR of wakeup sources
 
         ENUMs:
             DIS:                         Disable wakeup source
-            EN:                          Enable wakeup source
+            TMRREQ_EN:                   ELP timer wakeup request
+            WUSRC0_EN:                   AND of wakeup sources
+            WUSRC1_EN:                   OR of wakeup sources
+            DRBL0_EN:                    Doorbell 0
+            DRBL1_EN:                    Doorbell 1
+            DRBL2_EN:                    Doorbell 2
+            DRBL3_EN:                    Doorbell 3
+            DRBL4_EN:                    Doorbell 4
+            DRBL5_EN:                    Doorbell 5
+            DRBL6_EN:                    Doorbell 6
+            DRBL7_EN:                    Doorbell 7
+            NAB_EN:                      NAB host irq
+            BLERFCGPO_EN:                BLE RFC GPO 9 irq
+            RTC_EN:                      RTC
+            DBGPWRUP_EN:                 Debugss Csyspwrupreq
+            DBGFRCACT_EN:                Debugss forecactive
+            SECERR_EN:                   Secure error irq
+            COREWDT_EN:                  Core WDT request
 */
-#define HOSTMCU_AON_CFGWICSNS_VAL_W                                  17U
-#define HOSTMCU_AON_CFGWICSNS_VAL_M                                  0x0001FFFFU
+#define HOSTMCU_AON_CFGWICSNS_VAL_W                                  18U
+#define HOSTMCU_AON_CFGWICSNS_VAL_M                                  0x0003FFFFU
 #define HOSTMCU_AON_CFGWICSNS_VAL_S                                  0U
 #define HOSTMCU_AON_CFGWICSNS_VAL_DIS                                0x00000000U
-#define HOSTMCU_AON_CFGWICSNS_VAL_EN                                 0x00000001U
+#define HOSTMCU_AON_CFGWICSNS_VAL_TMRREQ_EN                          0x00000001U
+#define HOSTMCU_AON_CFGWICSNS_VAL_WUSRC0_EN                          0x00000002U
+#define HOSTMCU_AON_CFGWICSNS_VAL_WUSRC1_EN                          0x00000004U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL0_EN                           0x00000008U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL1_EN                           0x00000010U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL2_EN                           0x00000020U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL3_EN                           0x00000040U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL4_EN                           0x00000080U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL5_EN                           0x00000100U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL6_EN                           0x00000200U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DRBL7_EN                           0x00000400U
+#define HOSTMCU_AON_CFGWICSNS_VAL_NAB_EN                             0x00000800U
+#define HOSTMCU_AON_CFGWICSNS_VAL_BLERFCGPO_EN                       0x00001000U
+#define HOSTMCU_AON_CFGWICSNS_VAL_RTC_EN                             0x00002000U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DBGPWRUP_EN                        0x00004000U
+#define HOSTMCU_AON_CFGWICSNS_VAL_DBGFRCACT_EN                       0x00008000U
+#define HOSTMCU_AON_CFGWICSNS_VAL_SECERR_EN                          0x00010000U
+#define HOSTMCU_AON_CFGWICSNS_VAL_COREWDT_EN                         0x00020000U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -201,7 +238,7 @@ This section defines the register offsets of the HOSTMCU_AON component
     Default Value:       0x00000000
 
         Field:           VAL
-        From..to bits:   0...16
+        From..to bits:   0...17
         DefaultValue:    0x0
         Access type:     read-write
         Description:     Field to configure wake up type
@@ -224,18 +261,55 @@ This section defines the register offsets of the HOSTMCU_AON component
                          Bit 12 : ble_rfc_gpo_8_irq
                          Bit 13 : RTC
                          Bit 14 : DebugSS Csyspwrupreq
-                         Bit 15 : DebugSS Force-active
+                         Bit 15 : DebugSS Forceactive
                          Bit 16 : secured_error_irq
+                         Bit 17 : core wdt irq
+
+                         Note: GPIO wakeup src 0 is AND of wakeup sources and GPIO wakup src 1 is OR of wakeup sources
 
         ENUMs:
-            SLOW:
-            FAST:                        Fast wake up (assume system is already active when event is triggered)
+            SLOW:                        Slow wakeup(precise wakup)
+            TMRREQ:                      Fast Wake up
+            WUSRC0:                      Fast Wake up
+            WUSRC1:                      Fast Wake up
+            DRBL0:                       Fast Wake up
+            DRBL1:                       Fast Wake up
+            DRBL2:                       Fast Wake up
+            DRBL3:                       Fast Wake up
+            DRBL4:                       Fast Wake up
+            DRBL5:                       Fast Wake up
+            DRBL6:                       Fast Wake up
+            DRBL7:                       Fast Wake up
+            NAB:                         Fast Wake up
+            BLERFCGPO:                   Fast Wake up
+            RTC:                         Fast Wake up
+            DBGPWRUP:                    Fast Wake up
+            DBGFRCACT:                   Fast Wake up
+            SECERR:                      Fast Wake up
+            COREWDT:                     Fast Wake up
 */
-#define HOSTMCU_AON_CFGWUTP_VAL_W                                    17U
-#define HOSTMCU_AON_CFGWUTP_VAL_M                                    0x0001FFFFU
+#define HOSTMCU_AON_CFGWUTP_VAL_W                                    18U
+#define HOSTMCU_AON_CFGWUTP_VAL_M                                    0x0003FFFFU
 #define HOSTMCU_AON_CFGWUTP_VAL_S                                    0U
 #define HOSTMCU_AON_CFGWUTP_VAL_SLOW                                 0x00000000U
-#define HOSTMCU_AON_CFGWUTP_VAL_FAST                                 0x00000001U
+#define HOSTMCU_AON_CFGWUTP_VAL_TMRREQ                               0x00000001U
+#define HOSTMCU_AON_CFGWUTP_VAL_WUSRC0                               0x00000002U
+#define HOSTMCU_AON_CFGWUTP_VAL_WUSRC1                               0x00000004U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL0                                0x00000008U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL1                                0x00000010U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL2                                0x00000020U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL3                                0x00000040U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL4                                0x00000080U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL5                                0x00000100U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL6                                0x00000200U
+#define HOSTMCU_AON_CFGWUTP_VAL_DRBL7                                0x00000400U
+#define HOSTMCU_AON_CFGWUTP_VAL_NAB                                  0x00000800U
+#define HOSTMCU_AON_CFGWUTP_VAL_BLERFCGPO                            0x00001000U
+#define HOSTMCU_AON_CFGWUTP_VAL_RTC                                  0x00002000U
+#define HOSTMCU_AON_CFGWUTP_VAL_DBGPWRUP                             0x00004000U
+#define HOSTMCU_AON_CFGWUTP_VAL_DBGFRCACT                            0x00008000U
+#define HOSTMCU_AON_CFGWUTP_VAL_SECERR                               0x00010000U
+#define HOSTMCU_AON_CFGWUTP_VAL_COREWDT                              0x00020000U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -623,7 +697,7 @@ This section defines the register offsets of the HOSTMCU_AON component
     Default Value:       0x00000000
 
         Field:           VAL
-        From..to bits:   0...16
+        From..to bits:   0...17
         DefaultValue:    0x0
         Access type:     read-only
         Description:     Field to show the event request
@@ -645,11 +719,52 @@ This section defines the register offsets of the HOSTMCU_AON component
                          Bit 14 : DebugSS Csyspwrupreq
                          Bit 15 : DebugSS Force-active
                          Bit 16 : secured_error_irq
+                         Bit 17 : core wdt irq
+                         Note: GPIO wakeup src 0 is AND of wakeup sources and GPIO wakup src 1 is OR of wakeup sources
 
+        ENUMs:
+            CLEAR:                       No event request
+            TMRREQ:                      ELP timer wakeup request
+            WUSRC0:                      AND of wakeup sources
+            WUSRC1:                      OR of wakeup sources
+            DRBL0:                       Doorbell 0
+            DRBL1:                       Doorbell 1
+            DRBL2:                       Doorbell 2
+            DRBL3:                       Doorbell 3
+            DRBL4:                       Doorbell 4
+            DRBL5:                       Doorbell 5
+            DRBL6:                       Doorbell 6
+            DRBL7:                       Doorbell 7
+            NAB:                         NAB host irq
+            BLERFCGPO:                   BLE RFC GPO 9 irq
+            RTC:                         RTC
+            DBGPWRUP:                    Debugss Csyspwrupreq
+            DBGFRCACT:                   Debugss forecactive
+            SECERR:                      Secure error irq
+            COREWDT:                     Core WDT request
 */
-#define HOSTMCU_AON_WUREQ_VAL_W                                      17U
-#define HOSTMCU_AON_WUREQ_VAL_M                                      0x0001FFFFU
+#define HOSTMCU_AON_WUREQ_VAL_W                                      18U
+#define HOSTMCU_AON_WUREQ_VAL_M                                      0x0003FFFFU
 #define HOSTMCU_AON_WUREQ_VAL_S                                      0U
+#define HOSTMCU_AON_WUREQ_VAL_CLEAR                                  0x00000000U
+#define HOSTMCU_AON_WUREQ_VAL_TMRREQ                                 0x00000001U
+#define HOSTMCU_AON_WUREQ_VAL_WUSRC0                                 0x00000002U
+#define HOSTMCU_AON_WUREQ_VAL_WUSRC1                                 0x00000004U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL0                                  0x00000008U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL1                                  0x00000010U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL2                                  0x00000020U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL3                                  0x00000040U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL4                                  0x00000080U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL5                                  0x00000100U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL6                                  0x00000200U
+#define HOSTMCU_AON_WUREQ_VAL_DRBL7                                  0x00000400U
+#define HOSTMCU_AON_WUREQ_VAL_NAB                                    0x00000800U
+#define HOSTMCU_AON_WUREQ_VAL_BLERFCGPO                              0x00001000U
+#define HOSTMCU_AON_WUREQ_VAL_RTC                                    0x00002000U
+#define HOSTMCU_AON_WUREQ_VAL_DBGPWRUP                               0x00004000U
+#define HOSTMCU_AON_WUREQ_VAL_DBGFRCACT                              0x00008000U
+#define HOSTMCU_AON_WUREQ_VAL_SECERR                                 0x00010000U
+#define HOSTMCU_AON_WUREQ_VAL_COREWDT                                0x00020000U
 
 
 /*-----------------------------------REGISTER------------------------------------

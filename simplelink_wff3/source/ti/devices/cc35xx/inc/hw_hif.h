@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the HIF peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -470,7 +470,7 @@ This section defines the register offsets of the HIF component
     Default Value:       0x00000001
 
         Field:           RIS
-        From..to bits:   0...4
+        From..to bits:   0...5
         DefaultValue:    0x1
         Access type:     read-only
         Description:     RIS
@@ -482,10 +482,11 @@ This section defines the register offsets of the HIF component
                          bit[2] - underflow
                          bit[3] - overflow
                          bit[4] - not empty with direct access read
+                         bit[5] - nab data receive done
 
 */
-#define HIF_IRQ_RIS_W                                                5U
-#define HIF_IRQ_RIS_M                                                0x0000001FU
+#define HIF_IRQ_RIS_W                                                6U
+#define HIF_IRQ_RIS_M                                                0x0000003FU
 #define HIF_IRQ_RIS_S                                                0U
 
 
@@ -494,11 +495,11 @@ This section defines the register offsets of the HIF component
     Offset name:         HIF_O_IM
     Relative address:    0x48
     Description:         IRQ MASK Config
-    Default Value:       0x0000001F
+    Default Value:       0x0000003F
 
         Field:           EVTBM
-        From..to bits:   0...4
-        DefaultValue:    0x1F
+        From..to bits:   0...5
+        DefaultValue:    0x3F
         Access type:     read-write
         Description:     EVENT BIT MASK
 
@@ -510,15 +511,16 @@ This section defines the register offsets of the HIF component
                          bit[2] - underflow
                          bit[3] - overflow
                          bit[4] - not empty with direct access read
+                         bit[5] - nab data receive done
 
 */
-#define HIF_IM_EVTBM_W                                               5U
-#define HIF_IM_EVTBM_M                                               0x0000001FU
+#define HIF_IM_EVTBM_W                                               6U
+#define HIF_IM_EVTBM_M                                               0x0000003FU
 #define HIF_IM_EVTBM_S                                               0U
 /*
 
         Field:           STA
-        From..to bits:   5...9
+        From..to bits:   6...11
         DefaultValue:    0x0
         Access type:     read-only
         Description:     STATUS
@@ -528,11 +530,12 @@ This section defines the register offsets of the HIF component
                          bit[2] - underflow
                          bit[3] - overflow
                          bit[4] - not empty with direct access read
+                         bit[5] - nab data receive done
 
 */
-#define HIF_IM_STA_W                                                 5U
-#define HIF_IM_STA_M                                                 0x000003E0U
-#define HIF_IM_STA_S                                                 5U
+#define HIF_IM_STA_W                                                 6U
+#define HIF_IM_STA_M                                                 0x00000FC0U
+#define HIF_IM_STA_S                                                 6U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -556,6 +559,48 @@ This section defines the register offsets of the HIF component
 #define HIF_NABRDY_TORCV                                             0x00000001U
 #define HIF_NABRDY_TORCV_M                                           0x00000001U
 #define HIF_NABRDY_TORCV_S                                           0U
+/*
+
+        Field:           RCVDONE
+        From..to bits:   1...1
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     RECEIVE DONE
+
+                         indication when NAB data recieve done
+
+*/
+#define HIF_NABRDY_RCVDONE                                           0x00000002U
+#define HIF_NABRDY_RCVDONE_M                                         0x00000002U
+#define HIF_NABRDY_RCVDONE_S                                         1U
+/*
+
+        Field:           RCVDONEM2MIDL
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     RECEIVE DONE AND M2M IDLE
+
+                         indication when NAB data recieve done and M2M FSM IDLE
+
+*/
+#define HIF_NABRDY_RCVDONEM2MIDL                                     0x00000004U
+#define HIF_NABRDY_RCVDONEM2MIDL_M                                   0x00000004U
+#define HIF_NABRDY_RCVDONEM2MIDL_S                                   2U
+/*
+
+        Field:           FIFONEMPT
+        From..to bits:   3...3
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     NAB HOST FIFO NOT EMPTY
+
+                         indication when NAB FIFO not empty
+
+*/
+#define HIF_NABRDY_FIFONEMPT                                         0x00000008U
+#define HIF_NABRDY_FIFONEMPT_M                                       0x00000008U
+#define HIF_NABRDY_FIFONEMPT_S                                       3U
 
 
 /*-----------------------------------REGISTER------------------------------------

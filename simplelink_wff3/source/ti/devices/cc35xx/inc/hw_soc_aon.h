@@ -3,7 +3,7 @@
 *
 *  Description:    Defines and prototypes for the SOC_AON peripheral.
 *
-*  Copyright (c) 2023, Texas Instruments Incorporated
+*  Copyright (c) 2023-2025, Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -197,12 +197,6 @@ This section defines the register offsets of the SOC_AON component
 //GPTIMER1 Sync, Tick Enable and Fault Event MUXs Selectors
 #define SOC_AON_O_GPT1EVTCTL1                                        0x000000F4U
 
-//Host DMA Channel Controlled by Defined Peripheral
-#define SOC_AON_O_CHCTL0                                             0x000000FCU
-
-//Host DMA Channel Controlled by Defined Peripheral
-#define SOC_AON_O_CHCTL1                                             0x00000100U
-
 //Customer ESMs Status
 #define SOC_AON_O_ESMSTACST                                          0x00000104U
 
@@ -295,9 +289,6 @@ This section defines the register offsets of the SOC_AON component
 
 //HOST_AON_SLV firewall access permission
 #define SOC_AON_O_FWHOSTAON                                          0x000001A8U
-
-//SYSRESOURCES firewall access permission
-#define SOC_AON_O_FWSYSRES                                           0x000001ACU
 
 //HIF firewall access permission
 #define SOC_AON_O_FWHIF                                              0x000001B0U
@@ -461,8 +452,167 @@ This section defines the register offsets of the SOC_AON component
 //SDIO firewall access permission
 #define SOC_AON_O_FWSPSDIO                                           0x00000284U
 
+//UART2 firewall access permission
+#define SOC_AON_O_FWSPUART2                                          0x00000288U
+
+//uDMA Non-secured Channel Control
+#define SOC_AON_O_UDMANSCTL                                          0x0000028CU
+
+//IOMUX_PAD_0 firewall access permission
+#define SOC_AON_O_FWIOPAD0                                           0x00000290U
+
+//IOMUX_PAD_1 firewall access permission
+#define SOC_AON_O_FWIOPAD1                                           0x00000294U
+
+//IOMUX_PAD_2 firewall access permission
+#define SOC_AON_O_FWIOPAD2                                           0x00000298U
+
+//IOMUX_PAD_3 firewall access permission
+#define SOC_AON_O_FWIOPAD3                                           0x0000029CU
+
+//IOMUX_PAD_4 firewall access permission
+#define SOC_AON_O_FWIOPAD4                                           0x000002A0U
+
+//IOMUX_PAD_5 firewall access permission
+#define SOC_AON_O_FWIOPAD5                                           0x000002A4U
+
+//IOMUX_PAD_6 firewall access permission
+#define SOC_AON_O_FWIOPAD6                                           0x000002A8U
+
+//IOMUX_PAD_7 firewall access permission
+#define SOC_AON_O_FWIOPAD7                                           0x000002ACU
+
+//IOMUX_PAD_8 firewall access permission
+#define SOC_AON_O_FWIOPAD8                                           0x000002B0U
+
+//IOMUX_PAD_9 firewall access permission
+#define SOC_AON_O_FWIOPAD9                                           0x000002B4U
+
+//IOMUX_PAD_10 firewall access permission
+#define SOC_AON_O_FWIOPAD10                                          0x000002B8U
+
+//IOMUX_PAD_11 firewall access permission
+#define SOC_AON_O_FWIOPAD11                                          0x000002BCU
+
+//IOMUX_PAD_12 firewall access permission
+#define SOC_AON_O_FWIOPAD12                                          0x000002C0U
+
+//IOMUX_PAD_13 firewall access permission
+#define SOC_AON_O_FWIOPAD13                                          0x000002C4U
+
+//IOMUX_PAD_14 firewall access permission
+#define SOC_AON_O_FWIOPAD14                                          0x000002C8U
+
+//IOMUX_PAD_15 firewall access permission
+#define SOC_AON_O_FWIOPAD15                                          0x000002CCU
+
+//IOMUX_PAD_16 firewall access permission
+#define SOC_AON_O_FWIOPAD16                                          0x000002D0U
+
+//IOMUX_PAD_17 firewall access permission
+#define SOC_AON_O_FWIOPAD17                                          0x000002D4U
+
+//IOMUX_PAD_18 firewall access permission
+#define SOC_AON_O_FWIOPAD18                                          0x000002D8U
+
+//IOMUX_PAD_19 firewall access permission
+#define SOC_AON_O_FWIOPAD19                                          0x000002DCU
+
+//IOMUX_PAD_20 firewall access permission
+#define SOC_AON_O_FWIOPAD20                                          0x000002E0U
+
+//IOMUX_PAD_21 firewall access permission
+#define SOC_AON_O_FWIOPAD21                                          0x000002E4U
+
+//IOMUX_PAD_22 firewall access permission
+#define SOC_AON_O_FWIOPAD22                                          0x000002E8U
+
+//IOMUX_PAD_23 firewall access permission
+#define SOC_AON_O_FWIOPAD23                                          0x000002ECU
+
+//IOMUX_PAD_24 firewall access permission
+#define SOC_AON_O_FWIOPAD24                                          0x000002F0U
+
+//IOMUX_PAD_25 firewall access permission
+#define SOC_AON_O_FWIOPAD25                                          0x000002F4U
+
+//IOMUX_PAD_26 firewall access permission
+#define SOC_AON_O_FWIOPAD26                                          0x000002F8U
+
+//IOMUX_PAD_27 firewall access permission
+#define SOC_AON_O_FWIOPAD27                                          0x000002FCU
+
+//IOMUX_PAD_28 firewall access permission
+#define SOC_AON_O_FWIOPAD28                                          0x00000300U
+
+//IOMUX_PAD_29 firewall access permission
+#define SOC_AON_O_FWIOPAD29                                          0x00000304U
+
+//IOMUX_PAD_30 firewall access permission
+#define SOC_AON_O_FWIOPAD30                                          0x00000308U
+
+//IOMUX_PAD_31 firewall access permission
+#define SOC_AON_O_FWIOPAD31                                          0x0000030CU
+
+//IOMUX_PAD_32 firewall access permission
+#define SOC_AON_O_FWIOPAD32                                          0x00000310U
+
+//IOMUX_PAD_33 firewall access permission
+#define SOC_AON_O_FWIOPAD33                                          0x00000314U
+
+//IOMUX_PAD_34 firewall access permission
+#define SOC_AON_O_FWIOPAD34                                          0x00000318U
+
+//IOMUX_PAD_35 firewall access permission
+#define SOC_AON_O_FWIOPAD35                                          0x0000031CU
+
+//IOMUX_PAD_36 firewall access permission
+#define SOC_AON_O_FWIOPAD36                                          0x00000320U
+
+//IOMUX_PAD_37 firewall access permission
+#define SOC_AON_O_FWIOPAD37                                          0x00000324U
+
+//IOMUX_PAD_38 firewall access permission
+#define SOC_AON_O_FWIOPAD38                                          0x00000328U
+
+//IOMUX_PAD_39 firewall access permission
+#define SOC_AON_O_FWIOPAD39                                          0x0000032CU
+
+//IOMUX_PAD_40 firewall access permission
+#define SOC_AON_O_FWIOPAD40                                          0x00000330U
+
+//IOMUX_PAD_41 firewall access permission
+#define SOC_AON_O_FWIOPAD41                                          0x00000334U
+
+//IOMUX_PAD_42 firewall access permission
+#define SOC_AON_O_FWIOPAD42                                          0x00000338U
+
+//IOMUX_PAD_43 firewall access permission
+#define SOC_AON_O_FWIOPAD43                                          0x0000033CU
+
+//IOMUX_PAD_44 firewall access permission
+#define SOC_AON_O_FWIOPAD44                                          0x00000340U
+
+//IOMUX_PAD_45 firewall access permission
+#define SOC_AON_O_FWIOPAD45                                          0x00000344U
+
+//IOMUX_PAD_46 firewall access permission
+#define SOC_AON_O_FWIOPAD46                                          0x00000348U
+
+//IOMUX_PAD_47 firewall access permission
+#define SOC_AON_O_FWIOPAD47                                          0x0000034CU
+
+//IOMUX_PAD_48 firewall access permission
+#define SOC_AON_O_FWIOPAD48                                          0x00000350U
+
+//DMA_CH_12 firewall access permission
+#define SOC_AON_O_FWDMA12                                            0x00000354U
+
+//DMA_CH_13 firewall access permission
+#define SOC_AON_O_FWDMA13                                            0x00000358U
+
 //Spare firewall access register
-#define SOC_AON_O_FWSPARE0                                           0x00000288U
+#define SOC_AON_O_FWSPARE0                                           0x0000035CU
 
 //Micro Second STB
 #define SOC_AON_O_USECSTB                                            0x00001000U
@@ -683,11 +833,14 @@ This section defines the register offsets of the SOC_AON component
 //Execution RAM (CRAM) - Protect from write
 #define SOC_AON_O_CRAMPROT0                                          0x00002150U
 
-//Execution RAM (CRAM) - Threshold register
+//Data RAM (DRAM) - Threshold register
 #define SOC_AON_O_DRAMPROT1                                          0x00002154U
 
 //Data RAM (DRAM) - Protect from fetch
 #define SOC_AON_O_DRAMPROT0                                          0x00002158U
+
+//Packet RAM (PRAM) - Protect from fetch
+#define SOC_AON_O_PRAMPROT0                                          0x0000215CU
 
 //Security Strong Pattern
 #define SOC_AON_O_STRONGPAT                                          0x00002160U
@@ -739,9 +892,6 @@ This section defines the register offsets of the SOC_AON component
 
 //Top Debug Selectors
 #define SOC_AON_O_TOPDBG                                             0x000021A8U
-
-//Global Protect Enumeration
-#define SOC_AON_O_PROTENUM                                           0x000021BCU
 
 //Doorbell 0 M3 Clear Register
 #define SOC_AON_O_DB0M3CLR                                           0x00002370U
@@ -935,141 +1085,6 @@ This section defines the register offsets of the SOC_AON component
 //OTFDE_NON_LOCK firewall access permission
 #define SOC_AON_O_FWOTFNLCK                                          0x000026B4U
 
-//IOMUX_PAD_0 firewall access permission
-#define SOC_AON_O_FWIOPAD0                                           0x000026B8U
-
-//IOMUX_PAD_1 firewall access permission
-#define SOC_AON_O_FWIOPAD1                                           0x000026BCU
-
-//IOMUX_PAD_2 firewall access permission
-#define SOC_AON_O_FWIOPAD2                                           0x000026C0U
-
-//IOMUX_PAD_3 firewall access permission
-#define SOC_AON_O_FWIOPAD3                                           0x000026C4U
-
-//IOMUX_PAD_4 firewall access permission
-#define SOC_AON_O_FWIOPAD4                                           0x000026C8U
-
-//IOMUX_PAD_5 firewall access permission
-#define SOC_AON_O_FWIOPAD5                                           0x000026CCU
-
-//IOMUX_PAD_6 firewall access permission
-#define SOC_AON_O_FWIOPAD6                                           0x000026D0U
-
-//IOMUX_PAD_7 firewall access permission
-#define SOC_AON_O_FWIOPAD7                                           0x000026D4U
-
-//IOMUX_PAD_8 firewall access permission
-#define SOC_AON_O_FWIOPAD8                                           0x000026D8U
-
-//IOMUX_PAD_9 firewall access permission
-#define SOC_AON_O_FWIOPAD9                                           0x000026DCU
-
-//IOMUX_PAD_10 firewall access permission
-#define SOC_AON_O_FWIOPAD10                                          0x000026E0U
-
-//IOMUX_PAD_11 firewall access permission
-#define SOC_AON_O_FWIOPAD11                                          0x000026E4U
-
-//IOMUX_PAD_12 firewall access permission
-#define SOC_AON_O_FWIOPAD12                                          0x000026E8U
-
-//IOMUX_PAD_13 firewall access permission
-#define SOC_AON_O_FWIOPAD13                                          0x000026ECU
-
-//IOMUX_PAD_14 firewall access permission
-#define SOC_AON_O_FWIOPAD14                                          0x000026F0U
-
-//IOMUX_PAD_15 firewall access permission
-#define SOC_AON_O_FWIOPAD15                                          0x000026F4U
-
-//IOMUX_PAD_16 firewall access permission
-#define SOC_AON_O_FWIOPAD16                                          0x000026F8U
-
-//IOMUX_PAD_17 firewall access permission
-#define SOC_AON_O_FWIOPAD17                                          0x000026FCU
-
-//IOMUX_PAD_18 firewall access permission
-#define SOC_AON_O_FWIOPAD18                                          0x00002700U
-
-//IOMUX_PAD_19 firewall access permission
-#define SOC_AON_O_FWIOPAD19                                          0x00002704U
-
-//IOMUX_PAD_20 firewall access permission
-#define SOC_AON_O_FWIOPAD20                                          0x00002708U
-
-//IOMUX_PAD_21 firewall access permission
-#define SOC_AON_O_FWIOPAD21                                          0x0000270CU
-
-//IOMUX_PAD_22 firewall access permission
-#define SOC_AON_O_FWIOPAD22                                          0x00002710U
-
-//IOMUX_PAD_23 firewall access permission
-#define SOC_AON_O_FWIOPAD23                                          0x00002714U
-
-//IOMUX_PAD_24 firewall access permission
-#define SOC_AON_O_FWIOPAD24                                          0x00002718U
-
-//IOMUX_PAD_25 firewall access permission
-#define SOC_AON_O_FWIOPAD25                                          0x0000271CU
-
-//IOMUX_PAD_26 firewall access permission
-#define SOC_AON_O_FWIOPAD26                                          0x00002720U
-
-//IOMUX_PAD_27 firewall access permission
-#define SOC_AON_O_FWIOPAD27                                          0x00002724U
-
-//IOMUX_PAD_28 firewall access permission
-#define SOC_AON_O_FWIOPAD28                                          0x00002728U
-
-//IOMUX_PAD_29 firewall access permission
-#define SOC_AON_O_FWIOPAD29                                          0x0000272CU
-
-//IOMUX_PAD_30 firewall access permission
-#define SOC_AON_O_FWIOPAD30                                          0x00002730U
-
-//IOMUX_PAD_31 firewall access permission
-#define SOC_AON_O_FWIOPAD31                                          0x00002734U
-
-//IOMUX_PAD_32 firewall access permission
-#define SOC_AON_O_FWIOPAD32                                          0x00002738U
-
-//IOMUX_PAD_33 firewall access permission
-#define SOC_AON_O_FWIOPAD33                                          0x0000273CU
-
-//IOMUX_PAD_34 firewall access permission
-#define SOC_AON_O_FWIOPAD34                                          0x00002740U
-
-//IOMUX_PAD_35 firewall access permission
-#define SOC_AON_O_FWIOPAD35                                          0x00002744U
-
-//IOMUX_PAD_36 firewall access permission
-#define SOC_AON_O_FWIOPAD36                                          0x00002748U
-
-//IOMUX_PAD_37 firewall access permission
-#define SOC_AON_O_FWIOPAD37                                          0x0000274CU
-
-//IOMUX_PAD_38 firewall access permission
-#define SOC_AON_O_FWIOPAD38                                          0x00002750U
-
-//IOMUX_PAD_39 firewall access permission
-#define SOC_AON_O_FWIOPAD39                                          0x00002754U
-
-//IOMUX_PAD_40 firewall access permission
-#define SOC_AON_O_FWIOPAD40                                          0x00002758U
-
-//IOMUX_PAD_41 firewall access permission
-#define SOC_AON_O_FWIOPAD41                                          0x0000275CU
-
-//IOMUX_PAD_42 firewall access permission
-#define SOC_AON_O_FWIOPAD42                                          0x00002760U
-
-//IOMUX_PAD_43 firewall access permission
-#define SOC_AON_O_FWIOPAD43                                          0x00002764U
-
-//IOMUX_PAD_44 firewall access permission
-#define SOC_AON_O_FWIOPAD44                                          0x00002768U
-
 //CORE_AON firewall access permission
 #define SOC_AON_O_FWCOREAON                                          0x00002808U
 
@@ -1168,6 +1183,15 @@ This section defines the register offsets of the SOC_AON component
 
 //This register contains information on Device Life Cycles ad follow:
 #define SOC_AON_O_LCSTA                                              0x0000295CU
+
+//DRAM_ASSET
+#define SOC_AON_O_DRMAST                                             0x00002960U
+
+//FLASH MASK
+#define SOC_AON_O_FLASHMASK                                          0x00002964U
+
+//WSOC ROM Unhide
+#define SOC_AON_O_WSOCROM                                            0x00002968U
 
 
 
@@ -1666,7 +1690,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-                         	0. not taken
+				0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -1741,7 +1765,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-                         	0. not taken
+				0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -1816,7 +1840,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-                         	0. not taken
+				0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -1891,7 +1915,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-                         	0. not taken
+				0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -2460,6 +2484,20 @@ This section defines the register offsets of the SOC_AON component
 #define SOC_AON_SECCFG_SELNSIRQ                                      0x00000002U
 #define SOC_AON_SECCFG_SELNSIRQ_M                                    0x00000002U
 #define SOC_AON_SECCFG_SELNSIRQ_S                                    1U
+/*
+
+        Field:           BLKSBSWR
+        From..to bits:   2...2
+        DefaultValue:    NA
+        Access type:     read-write
+        Description:     BLOCK SBUS WRITE LOCK
+
+                         Enable this field to block sbus write transactions
+
+*/
+#define SOC_AON_SECCFG_BLKSBSWR                                      0x00000004U
+#define SOC_AON_SECCFG_BLKSBSWR_M                                    0x00000004U
+#define SOC_AON_SECCFG_BLKSBSWR_S                                    2U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -2471,11 +2509,11 @@ This section defines the register offsets of the SOC_AON component
 
                         0. CLR - Clear Interrupt Mask
                         1. SET - Set Interrupt Mask
-    Default Value:       0x0000FFFF
+    Default Value:       0x00000000
 
         Field:           IMASK
         From..to bits:   0...3
-        DefaultValue:    0xF
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Bits division to events:
 
@@ -2669,24 +2707,27 @@ This section defines the register offsets of the SOC_AON component
                         Mask Event.
                         '0' - CLR - Clear Interrupt Mask
                         '1' - SET - Set Interrupt Mask
-    Default Value:       0x000000FF
+    Default Value:       0x00000000
 
         Field:           IMASK
-        From..to bits:   0...7
-        DefaultValue:    0xFF
+        From..to bits:   0...8
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
                          bit[0] - HSM fatal error
 
 */
-#define SOC_AON_ERRSIMASK_IMASK_W                                    8U
-#define SOC_AON_ERRSIMASK_IMASK_M                                    0x000000FFU
+#define SOC_AON_ERRSIMASK_IMASK_W                                    9U
+#define SOC_AON_ERRSIMASK_IMASK_M                                    0x000001FFU
 #define SOC_AON_ERRSIMASK_IMASK_S                                    0U
 
 
@@ -2701,23 +2742,25 @@ This section defines the register offsets of the SOC_AON component
     Default Value:       0x00000000
 
         Field:           ISET
-        From..to bits:   0...7
+        From..to bits:   0...8
         DefaultValue:    0x0
         Access type:     write-only
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
                          bit[0] - HSM fatal error
-
                          Type: Write-Clear
 
 */
-#define SOC_AON_ERRSISET_ISET_W                                      8U
-#define SOC_AON_ERRSISET_ISET_M                                      0x000000FFU
+#define SOC_AON_ERRSISET_ISET_W                                      9U
+#define SOC_AON_ERRSISET_ISET_M                                      0x000001FFU
 #define SOC_AON_ERRSISET_ISET_S                                      0U
 
 
@@ -2732,13 +2775,16 @@ This section defines the register offsets of the SOC_AON component
     Default Value:       0x00000000
 
         Field:           ICLR
-        From..to bits:   0...7
+        From..to bits:   0...8
         DefaultValue:    0x0
         Access type:     write-only
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
@@ -2747,8 +2793,8 @@ This section defines the register offsets of the SOC_AON component
                          Type: Write-Clear
 
 */
-#define SOC_AON_ERRSICLR_ICLR_W                                      8U
-#define SOC_AON_ERRSICLR_ICLR_M                                      0x000000FFU
+#define SOC_AON_ERRSICLR_ICLR_W                                      9U
+#define SOC_AON_ERRSICLR_ICLR_M                                      0x000001FFU
 #define SOC_AON_ERRSICLR_ICLR_S                                      0U
 
 
@@ -2763,13 +2809,16 @@ This section defines the register offsets of the SOC_AON component
     Default Value:       0x00000000
 
         Field:           IMSET
-        From..to bits:   0...7
+        From..to bits:   0...8
         DefaultValue:    0x0
         Access type:     write-only
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
@@ -2778,8 +2827,8 @@ This section defines the register offsets of the SOC_AON component
                          Type: Write-Clear
 
 */
-#define SOC_AON_ERRSIMSET_IMSET_W                                    8U
-#define SOC_AON_ERRSIMSET_IMSET_M                                    0x000000FFU
+#define SOC_AON_ERRSIMSET_IMSET_W                                    9U
+#define SOC_AON_ERRSIMSET_IMSET_M                                    0x000001FFU
 #define SOC_AON_ERRSIMSET_IMSET_S                                    0U
 
 
@@ -2794,13 +2843,16 @@ This section defines the register offsets of the SOC_AON component
     Default Value:       0x00000000
 
         Field:           IMCLR
-        From..to bits:   0...7
+        From..to bits:   0...8
         DefaultValue:    0x0
         Access type:     write-only
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
@@ -2809,8 +2861,8 @@ This section defines the register offsets of the SOC_AON component
                          Type: Write-Clear
 
 */
-#define SOC_AON_ERRSIMCLR_IMCLR_W                                    8U
-#define SOC_AON_ERRSIMCLR_IMCLR_M                                    0x000000FFU
+#define SOC_AON_ERRSIMCLR_IMCLR_W                                    9U
+#define SOC_AON_ERRSIMCLR_IMCLR_M                                    0x000001FFU
 #define SOC_AON_ERRSIMCLR_IMCLR_S                                    0U
 
 
@@ -2826,21 +2878,24 @@ This section defines the register offsets of the SOC_AON component
     Default Value:       0x00000000
 
         Field:           RIS
-        From..to bits:   0...7
+        From..to bits:   0...8
         DefaultValue:    0x0
         Access type:     read-only
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
                          bit[0] - HSM fatal error
 
 */
-#define SOC_AON_ERRSRIS_RIS_W                                        8U
-#define SOC_AON_ERRSRIS_RIS_M                                        0x000000FFU
+#define SOC_AON_ERRSRIS_RIS_W                                        9U
+#define SOC_AON_ERRSRIS_RIS_M                                        0x000001FFU
 #define SOC_AON_ERRSRIS_RIS_S                                        0U
 
 
@@ -2855,21 +2910,24 @@ This section defines the register offsets of the SOC_AON component
     Default Value:       0x00000000
 
         Field:           MIS
-        From..to bits:   0...7
+        From..to bits:   0...8
         DefaultValue:    0x0
         Access type:     read-only
         Description:     Bits division to events:
 
+                         bit[8] - UDMA ERR IRQ
                          bit[7] - CORE ELP WATCHDOG Timer
-                         bit[6:4] - SOC IC IRQs
+                         bit[6] - SOC IC IRQs - Address Watch
+                         bit[5] - SOC IC IRQs - IC Timeout
+                         bit[4] - SOC IC IRQs - serror
                          bit[3] - CORE to SDIO WATCHDOG
                          bit[2] - PLL Unlock
                          bit[1] - MEMss bus fault
                          bit[0] - HSM fatal error
 
 */
-#define SOC_AON_ERRSMIS_MIS_W                                        8U
-#define SOC_AON_ERRSMIS_MIS_M                                        0x000000FFU
+#define SOC_AON_ERRSMIS_MIS_W                                        9U
+#define SOC_AON_ERRSMIS_MIS_M                                        0x000001FFU
 #define SOC_AON_ERRSMIS_MIS_S                                        0U
 
 
@@ -2969,460 +3027,6 @@ This section defines the register offsets of the SOC_AON component
 #define SOC_AON_GPT1EVTCTL1_FAULT_W                                  7U
 #define SOC_AON_GPT1EVTCTL1_FAULT_M                                  0x007F0000U
 #define SOC_AON_GPT1EVTCTL1_FAULT_S                                  16U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       CHCTL0
-    Offset name:         SOC_AON_O_CHCTL0
-    Relative address:    0xFC
-    Description:         Host DMA Channel Controlled by Defined Peripheral.
-
-                        The value of each fields concats with [HOST_DMA:JOBCTLCHx.SRCDSTCFG] (when x is channel num)
-                        if [CHCTL0.CHx] = 4 and [JOBCTLCHx.SRCDSTCFG] = 1 (value = 0100_1 = 9)
-                        then flow control signals of channel x are connected to periph number 9 flow control signals
-    Default Value:       NA
-
-        Field:           CH0
-        From..to bits:   0...3
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 0 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH0_W                                         4U
-#define SOC_AON_CHCTL0_CH0_M                                         0x0000000FU
-#define SOC_AON_CHCTL0_CH0_S                                         0U
-/*
-
-        Field:           CH1
-        From..to bits:   4...7
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 1 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH1_W                                         4U
-#define SOC_AON_CHCTL0_CH1_M                                         0x000000F0U
-#define SOC_AON_CHCTL0_CH1_S                                         4U
-/*
-
-        Field:           CH2
-        From..to bits:   8...11
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 2 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH2_W                                         4U
-#define SOC_AON_CHCTL0_CH2_M                                         0x00000F00U
-#define SOC_AON_CHCTL0_CH2_S                                         8U
-/*
-
-        Field:           CH3
-        From..to bits:   12...15
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 3 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH3_W                                         4U
-#define SOC_AON_CHCTL0_CH3_M                                         0x0000F000U
-#define SOC_AON_CHCTL0_CH3_S                                         12U
-/*
-
-        Field:           CH4
-        From..to bits:   16...19
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 4 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH4_W                                         4U
-#define SOC_AON_CHCTL0_CH4_M                                         0x000F0000U
-#define SOC_AON_CHCTL0_CH4_S                                         16U
-/*
-
-        Field:           CH5
-        From..to bits:   20...23
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 5 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH5_W                                         4U
-#define SOC_AON_CHCTL0_CH5_M                                         0x00F00000U
-#define SOC_AON_CHCTL0_CH5_S                                         20U
-/*
-
-        Field:           CH6
-        From..to bits:   24...27
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 6 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH6_W                                         4U
-#define SOC_AON_CHCTL0_CH6_M                                         0x0F000000U
-#define SOC_AON_CHCTL0_CH6_S                                         24U
-/*
-
-        Field:           CH7
-        From..to bits:   28...31
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 7 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL0_CH7_W                                         4U
-#define SOC_AON_CHCTL0_CH7_M                                         0xF0000000U
-#define SOC_AON_CHCTL0_CH7_S                                         28U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       CHCTL1
-    Offset name:         SOC_AON_O_CHCTL1
-    Relative address:    0x100
-    Description:         Host DMA Channel Controlled by Defined Peripheral.
-
-                        The value of each fields concats with [HOST_DMA:JOBCTLCHx.SRCDSTCFG] (when x is channel num)
-                        if [CHCTL1.CHx] = 4 and [JOBCTLCHx.SRCDSTCFG] = 1 (value = 0100_1 = 9)
-                        then flow control signals of channel x are connected to periph number 9 flow control signals
-    Default Value:       NA
-
-        Field:           CH8
-        From..to bits:   0...3
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 8 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL1_CH8_W                                         4U
-#define SOC_AON_CHCTL1_CH8_M                                         0x0000000FU
-#define SOC_AON_CHCTL1_CH8_S                                         0U
-/*
-
-        Field:           CH9
-        From..to bits:   4...7
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 9 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL1_CH9_W                                         4U
-#define SOC_AON_CHCTL1_CH9_M                                         0x000000F0U
-#define SOC_AON_CHCTL1_CH9_S                                         4U
-/*
-
-        Field:           CH10
-        From..to bits:   8...11
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 10 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL1_CH10_W                                        4U
-#define SOC_AON_CHCTL1_CH10_M                                        0x00000F00U
-#define SOC_AON_CHCTL1_CH10_S                                        8U
-/*
-
-        Field:           CH11
-        From..to bits:   12...15
-        DefaultValue:    NA
-        Access type:     read-write
-        Description:     Channel 11 Control.
-                         Flow control signals:
-                         22 HIF
-                         21 Not Valid - PDM has only read
-                         20 PDM
-                         19 Not Valid - ADC has only read
-                         18 ADC
-                         17 MCAN 1
-                         16 MCAN 0
-                         15 SDIO  TX
-                         14 SDIO  RX
-                         13 SDMMC TX
-                         12 SDMMC RX
-                         11 I2C   TX
-                         10 I2C   RX
-                          9 I2C   TX
-                          8 I2C   RX
-                          7 SPI   TX
-                          6 SPI   RX
-                          5 SPI   TX
-                          4 SPI   RX
-                          3 UART  TX
-                          2 UART  RX
-                          1 UART  TX
-                          0 UART  RX
-
-*/
-#define SOC_AON_CHCTL1_CH11_W                                        4U
-#define SOC_AON_CHCTL1_CH11_M                                        0x0000F000U
-#define SOC_AON_CHCTL1_CH11_S                                        12U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -3859,11 +3463,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -3912,11 +3516,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33S
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 Secured:
                          '0' - access not allowed
@@ -3965,11 +3569,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4018,11 +3622,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33SWR
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 Secured:
                          '0' - access not allowed
@@ -4113,11 +3717,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4166,11 +3770,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NSWR
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4261,11 +3865,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4314,11 +3918,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4367,11 +3971,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4420,11 +4024,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4473,11 +4077,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NSWR
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4569,14 +4173,14 @@ This section defines the register offsets of the SOC_AON component
                         1 - M33 Secured (valid only in privilege mode)
                         2 - Core (Non Secure)
 
-                        MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                        for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                        max window size is 512Kb
-    Default Value:       0x00000001
+                        MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                        for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                        max window size is 256Kb (M33D banks) + 10*32K (Flex) = 576Kb
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured: (valid only in privilege mode)
                          '0' - access not allowed
@@ -4617,7 +4221,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...13
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -4625,27 +4229,28 @@ This section defines the register offsets of the SOC_AON component
                          is the the offset start address from a worker base address
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
-                         MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                         for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                         max window size is 512Kb
+                         MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                         for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                         max base value is 0x23F
+                         max window size is 576Kb
                          example:
-                         worker base address: 0x41C78000
-                         current address to access: 0x41C78504
+                         worker base address: 0x41C40000
+                         current address to access: 0x41C40504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x41C78504 --> ((0x41C78504 - 0x41C78000) >> 10) --> 0x1
+                         0x41C40504 --> ((0x41C40504 - 0x41C40000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWMEMSS0_BASE_W                                      9U
-#define SOC_AON_FWMEMSS0_BASE_M                                      0x00001FF0U
+#define SOC_AON_FWMEMSS0_BASE_W                                      10U
+#define SOC_AON_FWMEMSS0_BASE_M                                      0x00003FF0U
 #define SOC_AON_FWMEMSS0_BASE_S                                      4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -4654,23 +4259,23 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                         for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                         max window size is 512Kb
+                         MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                         for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                         max window size is 576Kb
 
                          example:
-                         worker base address: 0x41C00000
-                         current address to access: 0x41C01514
+                         worker base address: 0x41C40000
+                         current address to access: 0x41C41514
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x41C01514 --> ((0x41C01514 - 0x41C00000) >> 10) -->0x5
+                         0x41C41514 --> ((0x41C41514 - 0x41C40000) >> 10) -->0x5
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWMEMSS0_LEN_W                                       9U
-#define SOC_AON_FWMEMSS0_LEN_M                                       0x01FF0000U
+#define SOC_AON_FWMEMSS0_LEN_W                                       10U
+#define SOC_AON_FWMEMSS0_LEN_M                                       0x03FF0000U
 #define SOC_AON_FWMEMSS0_LEN_S                                       16U
 
 
@@ -4684,14 +4289,14 @@ This section defines the register offsets of the SOC_AON component
                         1 - M33 Secured (valid only in privilege mode)
                         2 - Core (Non Secure)
 
-                        MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                        for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                        max window size is 512Kb
-    Default Value:       0x00000001
+                        MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                        for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                        max window size is 256Kb (M33D banks) + 10*32K (Flex) = 576Kb
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured: (valid only in privilege mode)
                          '0' - access not allowed
@@ -4732,7 +4337,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...13
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -4741,26 +4346,27 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                         for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                         max window size is 512Kb
+                         for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                         max base value is 0x23F
+                         max window size is 576Kb
                          example:
-                         worker base address: 0x41C78000
-                         current address to access: 0x41C78504
+                         worker base address: 0x41C40000
+                         current address to access: 0x41C40504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x41C78504 --> ((0x41C78504 - 0x41C78000) >> 10) --> 0x1
+                         0x41C40504 --> ((0x41C40504 - 0x41C40000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWMEMSS1_BASE_W                                      9U
-#define SOC_AON_FWMEMSS1_BASE_M                                      0x00001FF0U
+#define SOC_AON_FWMEMSS1_BASE_W                                      10U
+#define SOC_AON_FWMEMSS1_BASE_M                                      0x00003FF0U
 #define SOC_AON_FWMEMSS1_BASE_S                                      4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -4769,23 +4375,23 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                         for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                         max window size is 512Kb
+                         MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                         for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                         max window size is 576Kb
 
                          example:
-                         worker base address: 0x41C00000
-                         current address to access: 0x41C01514
+                         worker base address: 0x41C40000
+                         current address to access: 0x41C41514
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x41C01514 --> ((0x41C01514 - 0x41C00000) >> 10) -->0x5
+                         0x41C41514 --> ((0x41C41514 - 0x41C40000) >> 10) -->0x5
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWMEMSS1_LEN_W                                       9U
-#define SOC_AON_FWMEMSS1_LEN_M                                       0x01FF0000U
+#define SOC_AON_FWMEMSS1_LEN_W                                       10U
+#define SOC_AON_FWMEMSS1_LEN_M                                       0x03FF0000U
 #define SOC_AON_FWMEMSS1_LEN_S                                       16U
 
 
@@ -4795,18 +4401,18 @@ This section defines the register offsets of the SOC_AON component
     Relative address:    0x1A4
     Description:         MEMSS region 2 firewall access permission
                         for 3 controller id :
-                        0 - M33 Non Secured (not in use - avoid M33 access MEMSS)
-                        1 - M33 Secured (not in use - avoid M33 access MEMSS)
+                        0 - M33 Non Secured (valid only in privilege mode)
+                        1 - M33 Secured (valid only in privilege mode)
                         2 - Core (Non Secure)
 
-                        MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                        for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                        max window size is 512Kb
-    Default Value:       0x00000001
+                        MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                        for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                        max window size is 256Kb (M33D banks) + 10*32K (Flex) = 576Kb
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 non Secured: (valid only in privilege mode)
                          '0' - access not allowed
@@ -4847,7 +4453,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...13
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -4856,26 +4462,27 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                         for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                         max window size is 512Kb
+                         for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                         max base value is 0x23F
+                         max window size is 576Kb
                          example:
-                         worker base address: 0x41C78000
-                         current address to access: 0x41C78504
+                         worker base address: 0x41C40000
+                         current address to access: 0x41C40504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x41C78504 --> ((0x41C78504 - 0x41C78000) >> 10) --> 0x1
+                         0x41C40504 --> ((0x41C40504 - 0x41C40000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWMEMSS2_BASE_W                                      9U
-#define SOC_AON_FWMEMSS2_BASE_M                                      0x00001FF0U
+#define SOC_AON_FWMEMSS2_BASE_W                                      10U
+#define SOC_AON_FWMEMSS2_BASE_M                                      0x00003FF0U
 #define SOC_AON_FWMEMSS2_BASE_S                                      4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -4884,23 +4491,23 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         MEMSS address space: 0x41C00000 - 0x41DFFFFF
-                         for Memss the base address for security firewalls is 0x41c78000 ( M33 Data Ram from global port access)
-                         max window size is 512Kb
+                         MEMSS address space: 0x41C00000 - 0x41CCFFFF
+                         for Memss the base address for security firewalls is 0x41c40000 ( M33 Data Ram from global port access)
+                         max window size is 576Kb
 
                          example:
-                         worker base address: 0x41C00000
-                         current address to access: 0x41C01514
+                         worker base address: 0x41C40000
+                         current address to access: 0x41C41514
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x41C01514 --> ((0x41C01514 - 0x41C00000) >> 10) -->0x5
+                         0x41C41514 --> ((0x41C41514 - 0x41C40000) >> 10) -->0x5
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWMEMSS2_LEN_W                                       9U
-#define SOC_AON_FWMEMSS2_LEN_M                                       0x01FF0000U
+#define SOC_AON_FWMEMSS2_LEN_W                                       10U
+#define SOC_AON_FWMEMSS2_LEN_M                                       0x03FF0000U
 #define SOC_AON_FWMEMSS2_LEN_S                                       16U
 
 
@@ -4913,11 +4520,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -4958,59 +4565,6 @@ This section defines the register offsets of the SOC_AON component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       FWSYSRES
-    Offset name:         SOC_AON_O_FWSYSRES
-    Relative address:    0x1AC
-    Description:         SYSRESOURCES firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWSYSRES_M33NS                                       0x00000001U
-#define SOC_AON_FWSYSRES_M33NS_M                                     0x00000001U
-#define SOC_AON_FWSYSRES_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWSYSRES_M33S                                        0x00000002U
-#define SOC_AON_FWSYSRES_M33S_M                                      0x00000002U
-#define SOC_AON_FWSYSRES_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWSYSRES_CORENS                                      0x00000004U
-#define SOC_AON_FWSYSRES_CORENS_M                                    0x00000004U
-#define SOC_AON_FWSYSRES_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       FWHIF
     Offset name:         SOC_AON_O_FWHIF
     Relative address:    0x1B0
@@ -5018,12 +4572,12 @@ This section defines the register offsets of the SOC_AON component
                         for 3 controller id :
                         0 - M33 Non Secured
                         1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
+                        2 - Core (Non Secure) - Not in use , core always has access.
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5072,11 +4626,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5117,7 +4671,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5129,30 +4683,30 @@ This section defines the register offsets of the SOC_AON component
                          HOST_MCU_REGION_0 is assigned to TCM DATA RAM
                          HOST_MCU_REGION_0 base address can range from:
                          ##register base value##
-                         0x0 - 0x7F
+                         0x0 - 0x27F
                          ##absolute equivalent value##
-                         0x200000000 - 0x20001FFFF
+                         0x23F800000 - 0x2401FC00
 
-                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x200000000 ( M33 TCM Data RAM )
+                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x23F80000 ( M33 TCM Data RAM )
                          max window size is 128Kb
                          example:
-                         worker base address: 0x200000000
-                         current address to access: 0x20000504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F80504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x20000504 --> ((0x20000504 - 0x200000000) >> 10) --> 0x1
+                         0x23F80504 --> ((0x23F80504 - 0x23F800000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST0_BASE_W                                       9U
-#define SOC_AON_FWHOST0_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST0_BASE_W                                       11U
+#define SOC_AON_FWHOST0_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST0_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5166,22 +4720,22 @@ This section defines the register offsets of the SOC_AON component
                          ##register base_len value##
                          0x0 - 0x7F
 
-                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x20000000 ( HOST_MCU_REGION_0 )
+                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x23F80000 ( HOST_MCU_REGION_0 )
                          max window size is 128Kb
 
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F81504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x23F81504 --> ((0x23F81504 - 0x23F80000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST0_LEN_W                                        9U
-#define SOC_AON_FWHOST0_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST0_LEN_W                                        10U
+#define SOC_AON_FWHOST0_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST0_LEN_S                                        16U
 
 
@@ -5194,11 +4748,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5239,7 +4793,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5251,30 +4805,30 @@ This section defines the register offsets of the SOC_AON component
                          HOST_MCU_REGION_1 is assigned to TCM DATA RAM
                          HOST_MCU_REGION_1 base address can range from:
                          ##register base value##
-                         0x0 - 0x7F
+                         0x0 - 0x27F
                          ##absolute equivalent value##
-                         0x200000000 - 0x20001FFFF
+                         0x23F800000 - 0x2401FC00
 
-                         for HSM the base address for security firewalls is 0x200000000 ( M33 TCM Data RAM )
+                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x23F80000 ( M33 TCM Data RAM )
                          max window size is 128Kb
                          example:
-                         worker base address: 0x200000000
-                         current address to access: 0x20000504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F80504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x20000504 --> ((0x20000504 - 0x200000000) >> 10) --> 0x1
+                         0x23F80504 --> ((0x23F80504 - 0x23F800000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST1_BASE_W                                       9U
-#define SOC_AON_FWHOST1_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST1_BASE_W                                       11U
+#define SOC_AON_FWHOST1_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST1_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5288,22 +4842,22 @@ This section defines the register offsets of the SOC_AON component
                          ##register base_len value##
                          0x0 - 0x7F
 
-                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x20000000 ( HOST_MCU_REGION_0 )
+                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x23F80000 ( HOST_MCU_REGION_1 )
                          max window size is 128Kb
 
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F81504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x23F81504 --> ((0x23F81504 - 0x23F80000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST1_LEN_W                                        9U
-#define SOC_AON_FWHOST1_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST1_LEN_W                                        10U
+#define SOC_AON_FWHOST1_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST1_LEN_S                                        16U
 
 
@@ -5316,11 +4870,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5361,7 +4915,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5370,33 +4924,33 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          HOST_MCU address space: 0x00000000 - 0x2FFFFFFF / 0x41900000 - 0x4190FFFF
-                         HOST_MCU_REGION_2 is assigned to TCM DATA RAM
+                         HOST_MCU_REGION_2 is assigned to M33 DATA RAM
                          HOST_MCU_REGION_2 base address can range from:
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280068000
+                         0x2BF00000 - 0x2C08FC00
 
-                         for HOST_MCU_REGION_2 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         for HOST_MCU_REGION_2 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF000000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF000000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST2_BASE_W                                       9U
-#define SOC_AON_FWHOST2_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST2_BASE_W                                       11U
+#define SOC_AON_FWHOST2_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST2_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5405,27 +4959,27 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         HOST_MCU_REGION_0 address space: 0x20000000 - 0x2FFFFFFF
-                         HOST_MCU_REGION_0 base_len can range from:
+                         HOST_MCU_REGION_2 address space: 0x20000000 - 0x2FFFFFFF
+                         HOST_MCU_REGION_2 base_len can range from:
                          ##register base_len value##
-                         0x0 - 0x7F
+                         0x0 - 0x240
 
-                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x20000000 ( HOST_MCU_REGION_0 )
-                         max window size is 128Kb
+                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x2BF00000 ( HOST_MCU_REGION_2 )
+                         max window size is 576Kb
 
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x2BF00000
+                         current address to access: 0x2BF01504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x2BF01504 --> ((0x2BF01504 - 0x2BF00000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST2_LEN_W                                        9U
-#define SOC_AON_FWHOST2_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST2_LEN_W                                        10U
+#define SOC_AON_FWHOST2_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST2_LEN_S                                        16U
 
 
@@ -5438,11 +4992,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5483,7 +5037,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5492,33 +5046,33 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          HOST_MCU address space: 0x00000000 - 0x2FFFFFFF / 0x41900000 - 0x4190FFFF
-                         HOST_MCU_REGION_3 is assigned to TCM DATA RAM
+                         HOST_MCU_REGION_3 is assigned to M33 DATA RAM
                          HOST_MCU_REGION_3 base address can range from:
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280068000
+                         0x2BF00000 - 0x2C08FC00
 
-                         for HOST_MCU_REGION_3 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         for HOST_MCU_REGION_2 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF000000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF000000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST3_BASE_W                                       9U
-#define SOC_AON_FWHOST3_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST3_BASE_W                                       11U
+#define SOC_AON_FWHOST3_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST3_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5527,27 +5081,27 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         HOST_MCU_REGION_0 address space: 0x20000000 - 0x2FFFFFFF
-                         HOST_MCU_REGION_0 base_len can range from:
+                         HOST_MCU_REGION_2 address space: 0x20000000 - 0x2FFFFFFF
+                         HOST_MCU_REGION_2 base_len can range from:
                          ##register base_len value##
-                         0x0 - 0x7F
+                         0x0 - 0x240
 
-                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x20000000 ( HOST_MCU_REGION_0 )
-                         max window size is 128Kb
+                         for HOST_MCU_REGION_0 the base address for security firewalls is 0x2BF00000 ( HOST_MCU_REGION_2 )
+                         max window size is 576Kb
 
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x2BF00000
+                         current address to access: 0x2BF01504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x2BF01504 --> ((0x2BF01504 - 0x2BF00000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST3_LEN_W                                        9U
-#define SOC_AON_FWHOST3_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST3_LEN_W                                        10U
+#define SOC_AON_FWHOST3_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST3_LEN_S                                        16U
 
 
@@ -5559,11 +5113,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5604,7 +5158,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5617,38 +5171,38 @@ This section defines the register offsets of the SOC_AON component
                          HOST_MCU_REGION_4 base address can range from:
                          (base_sel = 0)
                          ##register base value##
-                         0x0 - 0x80
+                         0x0 - 0x27F
                          ##absolute equivalent value##
-                         0x200000000 - 0x20001FFFF
-                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x200000000 ( TCM Data RAM )
+                         0x23F80000 - 0x2401FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM Data RAM )
                          max window size is 128Kb
                          ##################
                          (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280068000
-                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         0x2BF000000 - 0x2C08FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF000000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST4_BASE_W                                       9U
-#define SOC_AON_FWHOST4_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST4_BASE_W                                       11U
+#define SOC_AON_FWHOST4_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST4_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base len for firewall
@@ -5661,33 +5215,33 @@ This section defines the register offsets of the SOC_AON component
                          base_sel = 0
                          ##register base_len value##
                          0x0 - 0x7F
-                         base_sel = 0 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x20000000 ( TCM M33 Data RAM )
+                         base_sel = 0 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM M33 Data RAM )
                          max window size is 128Kb
                          #################
                          base_sel = 1
                          ##register base_len value##
-                         0x0 - 0x1A0
-                         base_sel = 1 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x28000000 (M33 Data RAM )
-                         max window size is 416Kb
+                         0x0 - 0x240
+                         base_sel = 1 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 (M33 Data RAM )
+                         max window size is 576Kb
                          #################
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F81504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x23F81504 --> ((0x23F81504 - 0x23F80000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST4_LEN_W                                        9U
-#define SOC_AON_FWHOST4_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST4_LEN_W                                        10U
+#define SOC_AON_FWHOST4_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST4_LEN_S                                        16U
 /*
 
         Field:           BASESEL
-        From..to bits:   25...25
+        From..to bits:   26...26
         DefaultValue:    0x0
         Access type:     read-write
         Description:     Base select for Reserved region defaulted to M33 TCM Data RAM (base_sel = 0):
@@ -5700,30 +5254,30 @@ This section defines the register offsets of the SOC_AON component
 
                          or Data RAM (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280067FFF
+                         0x2BF00000 - 0x2C08FC00
 
-                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x200000000 ( M33 TCM Data RAM )
+                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x23F80000 ( M33 TCM Data RAM )
                          max window size is 128Kb (depending on the MEMSS mode)
 
-                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF00000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST4_BASESEL                                      0x02000000U
-#define SOC_AON_FWHOST4_BASESEL_M                                    0x02000000U
-#define SOC_AON_FWHOST4_BASESEL_S                                    25U
+#define SOC_AON_FWHOST4_BASESEL                                      0x04000000U
+#define SOC_AON_FWHOST4_BASESEL_M                                    0x04000000U
+#define SOC_AON_FWHOST4_BASESEL_S                                    26U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -5735,11 +5289,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5780,7 +5334,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5789,42 +5343,42 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          HOST_MCU address space: 0x00000000 - 0x2FFFFFFF / 0x41900000 - 0x4190FFFF
-                         HOST_MCU_REGION_5 is assigned to TCM DATA RAM (base_sel = 0) or M33 Data Ram (base_sel = 1)
-                         HOST_MCU_REGION_5 base address can range from:
+                         HOST_MCU_REGION_4 is assigned to TCM DATA RAM (base_sel = 0) or M33 Data Ram (base_sel = 1)
+                         HOST_MCU_REGION_4 base address can range from:
                          (base_sel = 0)
                          ##register base value##
-                         0x0 - 0x80
+                         0x0 - 0x27F
                          ##absolute equivalent value##
-                         0x200000000 - 0x20001FFFF
-                         for HOST_MCU_REGION_5 the base address for security firewalls is 0x200000000 ( TCM Data RAM )
+                         0x23F80000 - 0x2401FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM Data RAM )
                          max window size is 128Kb
                          ##################
                          (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280068000
-                         for HOST_MCU_REGION_5 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         0x2BF000000 - 0x2C08FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF000000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST5_BASE_W                                       9U
-#define SOC_AON_FWHOST5_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST5_BASE_W                                       11U
+#define SOC_AON_FWHOST5_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST5_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base len for firewall
@@ -5837,33 +5391,33 @@ This section defines the register offsets of the SOC_AON component
                          base_sel = 0
                          ##register base_len value##
                          0x0 - 0x7F
-                         base_sel = 0 --> HOST_MCU_REGION_5 the base address for security firewalls is 0x20000000 ( TCM Data RAM )
+                         base_sel = 0 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM M33 Data RAM )
                          max window size is 128Kb
                          #################
                          base_sel = 1
                          ##register base_len value##
-                         0x0 - 0x1A0
-                         base_sel = 1 --> HOST_MCU_REGION_5 the base address for security firewalls is 0x28000000 ( M33 Data RAM )
-                         max window size is 416Kb
+                         0x0 - 0x240
+                         base_sel = 1 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 (M33 Data RAM )
+                         max window size is 576Kb
                          #################
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F81504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x23F81504 --> ((0x23F81504 - 0x23F80000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST5_LEN_W                                        9U
-#define SOC_AON_FWHOST5_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST5_LEN_W                                        10U
+#define SOC_AON_FWHOST5_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST5_LEN_S                                        16U
 /*
 
         Field:           BASESEL
-        From..to bits:   25...25
+        From..to bits:   26...26
         DefaultValue:    0x0
         Access type:     read-write
         Description:     Base select for Reserved region defaulted to M33 TCM Data RAM (base_sel = 0):
@@ -5876,30 +5430,30 @@ This section defines the register offsets of the SOC_AON component
 
                          or Data RAM (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280067FFF
+                         0x2BF00000 - 0x2C08FC00
 
-                         for HOST_MCU_REGION_5 with base_sel = 0 the base address for security firewalls is 0x200000000 ( M33 TCM Data RAM )
+                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x23F80000 ( M33 TCM Data RAM )
                          max window size is 128Kb (depending on the MEMSS mode)
 
-                         for HOST_MCU_REGION_5 with base_sel = 1 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF00000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST5_BASESEL                                      0x02000000U
-#define SOC_AON_FWHOST5_BASESEL_M                                    0x02000000U
-#define SOC_AON_FWHOST5_BASESEL_S                                    25U
+#define SOC_AON_FWHOST5_BASESEL                                      0x04000000U
+#define SOC_AON_FWHOST5_BASESEL_M                                    0x04000000U
+#define SOC_AON_FWHOST5_BASESEL_S                                    26U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -5911,11 +5465,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -5956,7 +5510,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -5965,42 +5519,42 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          HOST_MCU address space: 0x00000000 - 0x2FFFFFFF / 0x41900000 - 0x4190FFFF
-                         HOST_MCU_REGION_6 is assigned to TCM DATA RAM (base_sel = 0) or M33 Data Ram (base_sel = 1)
-                         HOST_MCU_REGION_6 base address can range from:
+                         HOST_MCU_REGION_4 is assigned to TCM DATA RAM (base_sel = 0) or M33 Data Ram (base_sel = 1)
+                         HOST_MCU_REGION_4 base address can range from:
                          (base_sel = 0)
                          ##register base value##
-                         0x0 - 0x80
+                         0x0 - 0x27F
                          ##absolute equivalent value##
-                         0x200000000 - 0x20001FFFF
-                         for HOST_MCU_REGION_6 the base address for security firewalls is 0x200000000 ( TCM Data RAM )
+                         0x23F80000 - 0x2401FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM Data RAM )
                          max window size is 128Kb
                          ##################
                          (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280068000
-                         for HOST_MCU_REGION_6 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         0x2BF000000 - 0x2C08FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF000000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST6_BASE_W                                       9U
-#define SOC_AON_FWHOST6_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST6_BASE_W                                       11U
+#define SOC_AON_FWHOST6_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST6_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base len for firewall
@@ -6008,41 +5562,41 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         HOST_MCU_REGION_6 address space: 0x20000000 - 0x2FFFFFFF
-                         HOST_MCU_REGION_6 base_len can range from:
+                         HOST_MCU_REGION_4 address space: 0x20000000 - 0x2FFFFFFF
+                         HOST_MCU_REGION_4 base_len can range from:
                          base_sel = 0
                          ##register base_len value##
                          0x0 - 0x7F
-                         base_sel = 0 --> HOST_MCU_REGION_6 the base address for security firewalls is 0x20000000 ( TCM Data RAM)
+                         base_sel = 0 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM M33 Data RAM )
                          max window size is 128Kb
                          #################
                          base_sel = 1
                          ##register base_len value##
-                         0x0 - 0x1A0
-                         base_sel = 1 --> HOST_MCU_REGION_6 the base address for security firewalls is 0x28000000 ( M33 Data RAM )
-                         max window size is 416Kb
+                         0x0 - 0x240
+                         base_sel = 1 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 (M33 Data RAM )
+                         max window size is 576Kb
                          #################
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F81504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x23F81504 --> ((0x23F81504 - 0x23F80000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST6_LEN_W                                        9U
-#define SOC_AON_FWHOST6_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST6_LEN_W                                        10U
+#define SOC_AON_FWHOST6_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST6_LEN_S                                        16U
 /*
 
         Field:           BASESEL
-        From..to bits:   25...25
+        From..to bits:   26...26
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     Base select for Reserved region defaulted to M33 Data RAM (base_sel = 1):
+        Description:     Base select for Reserved region defaulted to M33 TCM Data RAM (base_sel = 0):
                          this select bit will assign this region to either
                          TCM Data  (base_sel = 0)
                          ##register base value##
@@ -6052,30 +5606,30 @@ This section defines the register offsets of the SOC_AON component
 
                          or Data RAM (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280067FFF
+                         0x2BF00000 - 0x2C08FC00
 
-                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x200000000 ( M33 TCM Data RAM )
+                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x23F80000 ( M33 TCM Data RAM )
                          max window size is 128Kb (depending on the MEMSS mode)
 
-                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF00000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST6_BASESEL                                      0x02000000U
-#define SOC_AON_FWHOST6_BASESEL_M                                    0x02000000U
-#define SOC_AON_FWHOST6_BASESEL_S                                    25U
+#define SOC_AON_FWHOST6_BASESEL                                      0x04000000U
+#define SOC_AON_FWHOST6_BASESEL_M                                    0x04000000U
+#define SOC_AON_FWHOST6_BASESEL_S                                    26U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -6087,11 +5641,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6132,7 +5686,7 @@ This section defines the register offsets of the SOC_AON component
 /*
 
         Field:           BASE
-        From..to bits:   4...12
+        From..to bits:   4...14
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base with 1K granularity :
@@ -6141,42 +5695,42 @@ This section defines the register offsets of the SOC_AON component
                          describing the beginning of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
                          HOST_MCU address space: 0x00000000 - 0x2FFFFFFF / 0x41900000 - 0x4190FFFF
-                         HOST_MCU_REGION_7 is assigned to TCM DATA RAM (base_sel = 0) or M33 Data Ram (base_sel = 1)
-                         HOST_MCU_REGION_7 base address can range from:
+                         HOST_MCU_REGION_4 is assigned to TCM DATA RAM (base_sel = 0) or M33 Data Ram (base_sel = 1)
+                         HOST_MCU_REGION_4 base address can range from:
                          (base_sel = 0)
                          ##register base value##
-                         0x0 - 0x80
+                         0x0 - 0x27F
                          ##absolute equivalent value##
-                         0x200000000 - 0x20001FFFF
-                         for HOST_MCU_REGION_7 the base address for security firewalls is 0x200000000 ( TCM Data RAM )
+                         0x23F80000 - 0x2401FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM Data RAM )
                          max window size is 128Kb
                          ##################
                          (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280068000
-                         for HOST_MCU_REGION_7 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         0x2BF000000 - 0x2C08FC00
+                         for HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF000000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST7_BASE_W                                       9U
-#define SOC_AON_FWHOST7_BASE_M                                       0x00001FF0U
+#define SOC_AON_FWHOST7_BASE_W                                       11U
+#define SOC_AON_FWHOST7_BASE_M                                       0x00007FF0U
 #define SOC_AON_FWHOST7_BASE_S                                       4U
 /*
 
         Field:           LEN
-        From..to bits:   16...24
+        From..to bits:   16...25
         DefaultValue:    0x0
         Access type:     read-write
         Description:     address base len for firewall
@@ -6184,41 +5738,41 @@ This section defines the register offsets of the SOC_AON component
                          describing the end of a firewall window that has a certain access rules (R/W Permission)
                          for each controller-id
 
-                         HOST_MCU_REGION_7 address space: 0x20000000 - 0x2FFFFFFF
-                         HOST_MCU_REGION_7 base_len can range from:
+                         HOST_MCU_REGION_4 address space: 0x20000000 - 0x2FFFFFFF
+                         HOST_MCU_REGION_4 base_len can range from:
                          base_sel = 0
                          ##register base_len value##
                          0x0 - 0x7F
-                         base_sel = 0 --> HOST_MCU_REGION_7 the base address for security firewalls is 0x20000000 (TCM Data RAM)
+                         base_sel = 0 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x23F80000 ( TCM M33 Data RAM )
                          max window size is 128Kb
                          #################
                          base_sel = 1
                          ##register base_len value##
-                         0x0 - 0x1A0
-                         base_sel = 1 --> HOST_MCU_REGION_7 the base address for security firewalls is 0x28000000 (M33 Data RAM)
-                         max window size is 416Kb
+                         0x0 - 0x240
+                         base_sel = 1 --> HOST_MCU_REGION_4 the base address for security firewalls is 0x2BF00000 (M33 Data RAM )
+                         max window size is 576Kb
                          #################
                          example:
-                         worker base address: 0x20000000
-                         current address to access: 0x20001504
+                         worker base address: 0x23F80000
+                         current address to access: 0x23F81504
                          region_base_address: 0x4
                          region_base_address_len: 0x2 --> (region_base_address + region_base_address_len) --> 0x4+0x2 -->0x6
 
-                         0x20001504 --> ((0x20001504 - 0x20000000) >> 10) -->0x4
+                         0x23F81504 --> ((0x23F81504 - 0x23F80000) >> 10) -->0x4
                          0x4 <= 0x5 < 0x6
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST7_LEN_W                                        9U
-#define SOC_AON_FWHOST7_LEN_M                                        0x01FF0000U
+#define SOC_AON_FWHOST7_LEN_W                                        10U
+#define SOC_AON_FWHOST7_LEN_M                                        0x03FF0000U
 #define SOC_AON_FWHOST7_LEN_S                                        16U
 /*
 
         Field:           BASESEL
-        From..to bits:   25...25
+        From..to bits:   26...26
         DefaultValue:    0x0
         Access type:     read-write
-        Description:     Base select for Reserved region defaulted to M33 Data RAM (base_sel = 1) :
+        Description:     Base select for Reserved region defaulted to M33 TCM Data RAM (base_sel = 0):
                          this select bit will assign this region to either
                          TCM Data  (base_sel = 0)
                          ##register base value##
@@ -6228,30 +5782,30 @@ This section defines the register offsets of the SOC_AON component
 
                          or Data RAM (base_sel = 1)
                          ##register base value##
-                         0x0 - 0x1A0
+                         0x0 - 0x63F
                          ##absolute equivalent value##
-                         0x280000000 - 0x280067FFF
+                         0x2BF00000 - 0x2C08FC00
 
-                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x200000000 ( M33 TCM Data RAM )
+                         for HOST_MCU_REGION_4 with base_sel = 0 the base address for security firewalls is 0x23F80000 ( M33 TCM Data RAM )
                          max window size is 128Kb (depending on the MEMSS mode)
 
-                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x280000000 ( M33 Data RAM )
-                         max window size is 416Kb (depending on the MEMSS mode)
+                         for HOST_MCU_REGION_4 with base_sel = 1 the base address for security firewalls is 0x2BF00000 ( M33 Data RAM )
+                         max window size is 576Kb (depending on the MEMSS mode)
 
                          example:
-                         worker base address: 0x280000000
-                         current address to access: 0x28000504
+                         worker base address: 0x2BF00000
+                         current address to access: 0x2BF00504
                          region_base_address: 0x1
                          region_base_address_len: 0x1
 
-                         0x28000504 --> ((0x28000504 - 0x280000000) >> 10) --> 0x1
+                         0x2BF00504 --> ((0x2BF00504 - 0x2BF00000) >> 10) --> 0x1
                          0x1(base) <= 0x1(current) < 0x1(base)+0x1(len)
                          that address falls on the region window and therefor obeys to that region set of access rules
 
 */
-#define SOC_AON_FWHOST7_BASESEL                                      0x02000000U
-#define SOC_AON_FWHOST7_BASESEL_M                                    0x02000000U
-#define SOC_AON_FWHOST7_BASESEL_S                                    25U
+#define SOC_AON_FWHOST7_BASESEL                                      0x04000000U
+#define SOC_AON_FWHOST7_BASESEL_M                                    0x04000000U
+#define SOC_AON_FWHOST7_BASESEL_S                                    26U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -6263,11 +5817,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6316,11 +5870,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6369,11 +5923,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6422,11 +5976,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6475,11 +6029,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6528,11 +6082,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6581,11 +6135,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6634,11 +6188,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6687,11 +6241,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6740,11 +6294,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6793,11 +6347,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6846,11 +6400,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6899,11 +6453,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -6952,11 +6506,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7005,11 +6559,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7058,11 +6612,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7111,11 +6665,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7164,11 +6718,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7217,11 +6771,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7270,11 +6824,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7323,11 +6877,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7376,11 +6930,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7429,11 +6983,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7482,11 +7036,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7535,11 +7089,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7588,11 +7142,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7641,11 +7195,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7763,11 +7317,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7884,11 +7438,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7937,11 +7491,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -7990,11 +7544,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8043,11 +7597,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8096,11 +7650,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8149,11 +7703,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8202,11 +7756,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8255,11 +7809,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8308,11 +7862,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8361,11 +7915,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8414,11 +7968,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8467,11 +8021,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8520,11 +8074,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8573,11 +8127,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8626,11 +8180,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8679,11 +8233,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8732,11 +8286,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -8777,17 +8331,2796 @@ This section defines the register offsets of the SOC_AON component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       FWSPARE0
-    Offset name:         SOC_AON_O_FWSPARE0
+    Register name:       FWSPUART2
+    Offset name:         SOC_AON_O_FWSPUART2
     Relative address:    0x288
-    Description:         Spare firewall access register.
-                        locked by HOST BOOT DONE (secgk)
-                        3 access bits - {M33NS , M33S , M3} .
-    Default Value:       0x00000001
+    Description:         UART2 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWSPUART2_M33NS                                      0x00000001U
+#define SOC_AON_FWSPUART2_M33NS_M                                    0x00000001U
+#define SOC_AON_FWSPUART2_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWSPUART2_M33S                                       0x00000002U
+#define SOC_AON_FWSPUART2_M33S_M                                     0x00000002U
+#define SOC_AON_FWSPUART2_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWSPUART2_CORENS                                     0x00000004U
+#define SOC_AON_FWSPUART2_CORENS_M                                   0x00000004U
+#define SOC_AON_FWSPUART2_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       UDMANSCTL
+    Offset name:         SOC_AON_O_UDMANSCTL
+    Relative address:    0x28C
+    Description:         uDMA Non-secured Channel Control.
+    Default Value:       0x00000000
+
+        Field:           ACCPER
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Access Permission.
+
+                         Define uDMA non-sec channel access permission to secured flash address:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_UDMANSCTL_ACCPER                                     0x00000001U
+#define SOC_AON_UDMANSCTL_ACCPER_M                                   0x00000001U
+#define SOC_AON_UDMANSCTL_ACCPER_S                                   0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD0
+    Offset name:         SOC_AON_O_FWIOPAD0
+    Relative address:    0x290
+    Description:         IOMUX_PAD_0 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD0_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD0_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD0_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD0_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD0_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD0_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD0_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD0_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD0_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD1
+    Offset name:         SOC_AON_O_FWIOPAD1
+    Relative address:    0x294
+    Description:         IOMUX_PAD_1 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD1_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD1_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD1_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD1_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD1_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD1_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD1_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD1_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD1_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD2
+    Offset name:         SOC_AON_O_FWIOPAD2
+    Relative address:    0x298
+    Description:         IOMUX_PAD_2 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD2_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD2_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD2_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD2_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD2_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD2_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD2_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD2_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD2_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD3
+    Offset name:         SOC_AON_O_FWIOPAD3
+    Relative address:    0x29C
+    Description:         IOMUX_PAD_3 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD3_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD3_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD3_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD3_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD3_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD3_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD3_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD3_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD3_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD4
+    Offset name:         SOC_AON_O_FWIOPAD4
+    Relative address:    0x2A0
+    Description:         IOMUX_PAD_4 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD4_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD4_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD4_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD4_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD4_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD4_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD4_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD4_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD4_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD5
+    Offset name:         SOC_AON_O_FWIOPAD5
+    Relative address:    0x2A4
+    Description:         IOMUX_PAD_5 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD5_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD5_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD5_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD5_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD5_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD5_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD5_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD5_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD5_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD6
+    Offset name:         SOC_AON_O_FWIOPAD6
+    Relative address:    0x2A8
+    Description:         IOMUX_PAD_6 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD6_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD6_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD6_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD6_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD6_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD6_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD6_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD6_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD6_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD7
+    Offset name:         SOC_AON_O_FWIOPAD7
+    Relative address:    0x2AC
+    Description:         IOMUX_PAD_7 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD7_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD7_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD7_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD7_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD7_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD7_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD7_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD7_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD7_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD8
+    Offset name:         SOC_AON_O_FWIOPAD8
+    Relative address:    0x2B0
+    Description:         IOMUX_PAD_8 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD8_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD8_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD8_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD8_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD8_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD8_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD8_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD8_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD8_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD9
+    Offset name:         SOC_AON_O_FWIOPAD9
+    Relative address:    0x2B4
+    Description:         IOMUX_PAD_9 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD9_M33NS                                       0x00000001U
+#define SOC_AON_FWIOPAD9_M33NS_M                                     0x00000001U
+#define SOC_AON_FWIOPAD9_M33NS_S                                     0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD9_M33S                                        0x00000002U
+#define SOC_AON_FWIOPAD9_M33S_M                                      0x00000002U
+#define SOC_AON_FWIOPAD9_M33S_S                                      1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD9_CORENS                                      0x00000004U
+#define SOC_AON_FWIOPAD9_CORENS_M                                    0x00000004U
+#define SOC_AON_FWIOPAD9_CORENS_S                                    2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD10
+    Offset name:         SOC_AON_O_FWIOPAD10
+    Relative address:    0x2B8
+    Description:         IOMUX_PAD_10 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD10_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD10_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD10_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD10_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD10_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD10_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD10_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD10_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD10_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD11
+    Offset name:         SOC_AON_O_FWIOPAD11
+    Relative address:    0x2BC
+    Description:         IOMUX_PAD_11 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD11_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD11_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD11_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD11_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD11_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD11_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD11_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD11_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD11_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD12
+    Offset name:         SOC_AON_O_FWIOPAD12
+    Relative address:    0x2C0
+    Description:         IOMUX_PAD_12 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD12_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD12_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD12_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD12_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD12_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD12_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD12_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD12_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD12_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD13
+    Offset name:         SOC_AON_O_FWIOPAD13
+    Relative address:    0x2C4
+    Description:         IOMUX_PAD_13 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD13_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD13_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD13_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD13_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD13_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD13_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD13_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD13_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD13_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD14
+    Offset name:         SOC_AON_O_FWIOPAD14
+    Relative address:    0x2C8
+    Description:         IOMUX_PAD_14 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD14_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD14_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD14_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD14_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD14_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD14_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD14_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD14_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD14_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD15
+    Offset name:         SOC_AON_O_FWIOPAD15
+    Relative address:    0x2CC
+    Description:         IOMUX_PAD_15 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD15_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD15_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD15_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD15_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD15_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD15_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD15_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD15_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD15_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD16
+    Offset name:         SOC_AON_O_FWIOPAD16
+    Relative address:    0x2D0
+    Description:         IOMUX_PAD_16 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD16_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD16_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD16_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD16_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD16_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD16_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD16_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD16_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD16_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD17
+    Offset name:         SOC_AON_O_FWIOPAD17
+    Relative address:    0x2D4
+    Description:         IOMUX_PAD_17 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD17_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD17_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD17_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD17_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD17_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD17_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD17_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD17_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD17_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD18
+    Offset name:         SOC_AON_O_FWIOPAD18
+    Relative address:    0x2D8
+    Description:         IOMUX_PAD_18 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD18_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD18_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD18_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD18_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD18_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD18_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD18_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD18_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD18_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD19
+    Offset name:         SOC_AON_O_FWIOPAD19
+    Relative address:    0x2DC
+    Description:         IOMUX_PAD_19 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD19_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD19_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD19_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD19_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD19_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD19_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD19_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD19_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD19_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD20
+    Offset name:         SOC_AON_O_FWIOPAD20
+    Relative address:    0x2E0
+    Description:         IOMUX_PAD_20 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD20_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD20_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD20_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD20_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD20_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD20_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD20_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD20_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD20_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD21
+    Offset name:         SOC_AON_O_FWIOPAD21
+    Relative address:    0x2E4
+    Description:         IOMUX_PAD_21 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD21_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD21_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD21_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD21_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD21_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD21_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD21_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD21_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD21_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD22
+    Offset name:         SOC_AON_O_FWIOPAD22
+    Relative address:    0x2E8
+    Description:         IOMUX_PAD_22 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD22_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD22_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD22_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD22_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD22_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD22_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD22_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD22_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD22_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD23
+    Offset name:         SOC_AON_O_FWIOPAD23
+    Relative address:    0x2EC
+    Description:         IOMUX_PAD_23 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD23_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD23_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD23_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD23_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD23_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD23_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD23_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD23_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD23_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD24
+    Offset name:         SOC_AON_O_FWIOPAD24
+    Relative address:    0x2F0
+    Description:         IOMUX_PAD_24 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD24_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD24_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD24_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD24_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD24_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD24_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD24_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD24_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD24_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD25
+    Offset name:         SOC_AON_O_FWIOPAD25
+    Relative address:    0x2F4
+    Description:         IOMUX_PAD_25 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD25_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD25_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD25_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD25_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD25_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD25_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD25_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD25_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD25_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD26
+    Offset name:         SOC_AON_O_FWIOPAD26
+    Relative address:    0x2F8
+    Description:         IOMUX_PAD_26 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD26_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD26_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD26_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD26_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD26_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD26_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD26_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD26_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD26_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD27
+    Offset name:         SOC_AON_O_FWIOPAD27
+    Relative address:    0x2FC
+    Description:         IOMUX_PAD_27 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD27_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD27_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD27_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD27_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD27_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD27_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD27_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD27_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD27_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD28
+    Offset name:         SOC_AON_O_FWIOPAD28
+    Relative address:    0x300
+    Description:         IOMUX_PAD_28 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD28_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD28_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD28_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD28_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD28_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD28_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD28_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD28_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD28_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD29
+    Offset name:         SOC_AON_O_FWIOPAD29
+    Relative address:    0x304
+    Description:         IOMUX_PAD_29 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD29_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD29_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD29_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD29_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD29_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD29_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD29_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD29_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD29_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD30
+    Offset name:         SOC_AON_O_FWIOPAD30
+    Relative address:    0x308
+    Description:         IOMUX_PAD_30 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD30_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD30_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD30_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD30_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD30_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD30_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD30_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD30_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD30_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD31
+    Offset name:         SOC_AON_O_FWIOPAD31
+    Relative address:    0x30C
+    Description:         IOMUX_PAD_31 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD31_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD31_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD31_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD31_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD31_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD31_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD31_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD31_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD31_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD32
+    Offset name:         SOC_AON_O_FWIOPAD32
+    Relative address:    0x310
+    Description:         IOMUX_PAD_32 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD32_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD32_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD32_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD32_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD32_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD32_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD32_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD32_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD32_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD33
+    Offset name:         SOC_AON_O_FWIOPAD33
+    Relative address:    0x314
+    Description:         IOMUX_PAD_33 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD33_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD33_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD33_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD33_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD33_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD33_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD33_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD33_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD33_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD34
+    Offset name:         SOC_AON_O_FWIOPAD34
+    Relative address:    0x318
+    Description:         IOMUX_PAD_34 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD34_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD34_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD34_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD34_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD34_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD34_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD34_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD34_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD34_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD35
+    Offset name:         SOC_AON_O_FWIOPAD35
+    Relative address:    0x31C
+    Description:         IOMUX_PAD_35 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD35_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD35_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD35_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD35_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD35_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD35_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD35_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD35_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD35_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD36
+    Offset name:         SOC_AON_O_FWIOPAD36
+    Relative address:    0x320
+    Description:         IOMUX_PAD_36 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD36_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD36_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD36_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD36_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD36_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD36_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD36_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD36_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD36_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD37
+    Offset name:         SOC_AON_O_FWIOPAD37
+    Relative address:    0x324
+    Description:         IOMUX_PAD_37 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD37_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD37_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD37_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD37_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD37_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD37_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD37_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD37_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD37_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD38
+    Offset name:         SOC_AON_O_FWIOPAD38
+    Relative address:    0x328
+    Description:         IOMUX_PAD_38 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD38_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD38_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD38_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD38_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD38_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD38_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD38_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD38_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD38_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD39
+    Offset name:         SOC_AON_O_FWIOPAD39
+    Relative address:    0x32C
+    Description:         IOMUX_PAD_39 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD39_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD39_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD39_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD39_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD39_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD39_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD39_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD39_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD39_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD40
+    Offset name:         SOC_AON_O_FWIOPAD40
+    Relative address:    0x330
+    Description:         IOMUX_PAD_40 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD40_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD40_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD40_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD40_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD40_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD40_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD40_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD40_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD40_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD41
+    Offset name:         SOC_AON_O_FWIOPAD41
+    Relative address:    0x334
+    Description:         IOMUX_PAD_41 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD41_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD41_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD41_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD41_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD41_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD41_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD41_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD41_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD41_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD42
+    Offset name:         SOC_AON_O_FWIOPAD42
+    Relative address:    0x338
+    Description:         IOMUX_PAD_42 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD42_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD42_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD42_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD42_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD42_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD42_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD42_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD42_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD42_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD43
+    Offset name:         SOC_AON_O_FWIOPAD43
+    Relative address:    0x33C
+    Description:         IOMUX_PAD_43 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD43_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD43_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD43_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD43_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD43_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD43_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD43_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD43_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD43_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD44
+    Offset name:         SOC_AON_O_FWIOPAD44
+    Relative address:    0x340
+    Description:         IOMUX_PAD_44 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD44_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD44_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD44_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD44_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD44_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD44_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD44_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD44_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD44_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD45
+    Offset name:         SOC_AON_O_FWIOPAD45
+    Relative address:    0x344
+    Description:         IOMUX_PAD_45 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD45_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD45_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD45_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD45_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD45_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD45_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD45_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD45_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD45_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD46
+    Offset name:         SOC_AON_O_FWIOPAD46
+    Relative address:    0x348
+    Description:         IOMUX_PAD_46 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD46_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD46_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD46_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD46_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD46_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD46_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD46_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD46_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD46_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD47
+    Offset name:         SOC_AON_O_FWIOPAD47
+    Relative address:    0x34C
+    Description:         IOMUX_PAD_47 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD47_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD47_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD47_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD47_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD47_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD47_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD47_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD47_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD47_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWIOPAD48
+    Offset name:         SOC_AON_O_FWIOPAD48
+    Relative address:    0x350
+    Description:         IOMUX_PAD_48 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD48_M33NS                                      0x00000001U
+#define SOC_AON_FWIOPAD48_M33NS_M                                    0x00000001U
+#define SOC_AON_FWIOPAD48_M33NS_S                                    0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD48_M33S                                       0x00000002U
+#define SOC_AON_FWIOPAD48_M33S_M                                     0x00000002U
+#define SOC_AON_FWIOPAD48_M33S_S                                     1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWIOPAD48_CORENS                                     0x00000004U
+#define SOC_AON_FWIOPAD48_CORENS_M                                   0x00000004U
+#define SOC_AON_FWIOPAD48_CORENS_S                                   2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWDMA12
+    Offset name:         SOC_AON_O_FWDMA12
+    Relative address:    0x354
+    Description:         DMA_CH_12 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWDMA12_M33NS                                        0x00000001U
+#define SOC_AON_FWDMA12_M33NS_M                                      0x00000001U
+#define SOC_AON_FWDMA12_M33NS_S                                      0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWDMA12_M33S                                         0x00000002U
+#define SOC_AON_FWDMA12_M33S_M                                       0x00000002U
+#define SOC_AON_FWDMA12_M33S_S                                       1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWDMA12_CORENS                                       0x00000004U
+#define SOC_AON_FWDMA12_CORENS_M                                     0x00000004U
+#define SOC_AON_FWDMA12_CORENS_S                                     2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWDMA13
+    Offset name:         SOC_AON_O_FWDMA13
+    Relative address:    0x358
+    Description:         DMA_CH_13 firewall access permission
+                        for 3 controller id :
+                        0 - M33 Non Secured
+                        1 - M33 Secured
+                        2 - Core (Non Secure)
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 None Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWDMA13_M33NS                                        0x00000001U
+#define SOC_AON_FWDMA13_M33NS_M                                      0x00000001U
+#define SOC_AON_FWDMA13_M33NS_S                                      0U
+/*
+
+        Field:           M33S
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller M33 Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWDMA13_M33S                                         0x00000002U
+#define SOC_AON_FWDMA13_M33S_M                                       0x00000002U
+#define SOC_AON_FWDMA13_M33S_S                                       1U
+/*
+
+        Field:           CORENS
+        From..to bits:   2...2
+        DefaultValue:    0x0
+        Access type:     read-write
+        Description:     Controller Core Non Secured:
+                         '0' - access not allowed
+                         '1' - access allowed
+
+*/
+#define SOC_AON_FWDMA13_CORENS                                       0x00000004U
+#define SOC_AON_FWDMA13_CORENS_M                                     0x00000004U
+#define SOC_AON_FWDMA13_CORENS_S                                     2U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FWSPARE0
+    Offset name:         SOC_AON_O_FWSPARE0
+    Relative address:    0x35C
+    Description:         Spare firewall access register.
+                        locked by HOST BOOT DONE (secgk)
+                        3 access bits - {M33NS , M33S , M3} .
+    Default Value:       0x00000000
+
+        Field:           M33NS
+        From..to bits:   0...0
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -9207,11 +11540,11 @@ This section defines the register offsets of the SOC_AON component
                         Mask Event.
                         '0' - CLR - Clear Interrupt Mask
                         '1' - SET - Set Interrupt Mask
-    Default Value:       0x0000FFFF
+    Default Value:       0x00000000
 
         Field:           IMASK
         From..to bits:   0...3
-        DefaultValue:    0xF
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     bit3 - doorbell 7 M3 IRQ
                          bit2 - doorbell 6 M3 IRQ
@@ -9707,6 +12040,21 @@ This section defines the register offsets of the SOC_AON component
 #define SOC_AON_FUSE_PRIVDBGREQ_W                                    3U
 #define SOC_AON_FUSE_PRIVDBGREQ_M                                    0x001C0000U
 #define SOC_AON_FUSE_PRIVDBGREQ_S                                    18U
+/*
+
+        Field:           MEMSTCK
+        From..to bits:   21...23
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     Enable watchdog timer for protecting boot:
+                         (This enable M33 watchdog second threshold to reset device when asserted).
+                         0 - Disable Boot Watchdog
+                         1 - Enable Boot Watchdog
+
+*/
+#define SOC_AON_FUSE_MEMSTCK_W                                       3U
+#define SOC_AON_FUSE_MEMSTCK_M                                       0x00E00000U
+#define SOC_AON_FUSE_MEMSTCK_S                                       21U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -10564,6 +12912,21 @@ This section defines the register offsets of the SOC_AON component
 #define SOC_AON_FUSELINE7_DISCANFD_S                                 19U
 /*
 
+        Field:           MEMSTCK
+        From..to bits:   20...22
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     Enable watchdog timer for protecting boot:
+                         (This enable M33 watchdog second threshold to reset device when asserted).
+                         0 - Disable Boot Watchdog
+                         1 - Enable Boot Watchdog
+
+*/
+#define SOC_AON_FUSELINE7_MEMSTCK_W                                  3U
+#define SOC_AON_FUSELINE7_MEMSTCK_M                                  0x00700000U
+#define SOC_AON_FUSELINE7_MEMSTCK_S                                  20U
+/*
+
         Field:           ENBOOTWDT
         From..to bits:   23...23
         DefaultValue:    NA
@@ -10786,11 +13149,12 @@ This section defines the register offsets of the SOC_AON component
     Description:         MEMSS Global Port Access Control.
 
                         Allow access to entire memss through memss global port.
-    Default Value:       0x00000001
+                        Default: Access is disabled
+    Default Value:       0x00000000
 
         Field:           ALLOW
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Access is allowed to both M33 & M3 during privilege boot and changed to M3 only (fixed firewall) after boot (controlled by soc_boot_done)
 
@@ -11067,7 +13431,7 @@ This section defines the register offsets of the SOC_AON component
         Access type:     read-write
         Description:     Below this CRAM Threshold register - Fetch/read only after 'mem_cram_write_disable_pulse'.
                          Write is allowed above this threshold regardless to S/W setting the [CRAMPROT0.WRDIS].
-                         Resolution is 1KB: (1- 1KB, 2 - 2KB, ..., 511 - 511KB). Effectively we have 384KB of Code-RAM
+                         Resolution is 1KB: (1- 1KB, 2 - 2KB, ..., 511 - 511KB). Effectively we have 76+398KB of Code-RAM
 
 */
 #define SOC_AON_CRAMPROT1_WRTH_W                                     9U
@@ -11087,7 +13451,9 @@ This section defines the register offsets of the SOC_AON component
         DefaultValue:    0x0
         Access type:     write-only
         Description:     Write Once MMR protection - Do not allow writing to CRAM (below a threshold) after this MMR is set.
+                         Before this MMR is set - write is allowed , fetch is not allowed. (for all the memory)
                          S/W pulse (WRCL) that sets an H/W F.F - cannot be cleared by S/W.
+
 
 */
 #define SOC_AON_CRAMPROT0_WRDIS                                      0x00000001U
@@ -11099,7 +13465,7 @@ This section defines the register offsets of the SOC_AON component
     Register name:       DRAMPROT1
     Offset name:         SOC_AON_O_DRAMPROT1
     Relative address:    0x2154
-    Description:         Execution RAM (CRAM) - Threshold register
+    Description:         Data RAM (DRAM) - Threshold register
     Default Value:       0x00000000
 
         Field:           FETCHTH
@@ -11129,12 +13495,34 @@ This section defines the register offsets of the SOC_AON component
         DefaultValue:    0x0
         Access type:     write-only
         Description:     Write Once MMR protection - Do not allow fetching from DRAM (below a threshold) after this MMR is set.
+                         Before this MMR is set - write is allowed , fetch is not allowed. (for all the memory)
                          S/W pulse (WRCL) that sets an H/W F.F - cannot be cleared by S/W.
 
 */
 #define SOC_AON_DRAMPROT0_FETCHDIS                                   0x00000001U
 #define SOC_AON_DRAMPROT0_FETCHDIS_M                                 0x00000001U
 #define SOC_AON_DRAMPROT0_FETCHDIS_S                                 0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       PRAMPROT0
+    Offset name:         SOC_AON_O_PRAMPROT0
+    Relative address:    0x215C
+    Description:         Packet RAM (PRAM) - Protect from fetch
+    Default Value:       0x00000100
+
+        Field:           FETCHDIS
+        From..to bits:   0...0
+        DefaultValue:    0x0
+        Access type:     write-only
+        Description:     Write Once MMR protection - Do not allow fetching from PRAM after this MMR is set.
+                         Before this MMR is set - write is allowed , fetch is not allowed.
+                         S/W pulse (WRCL) that sets an H/W F.F - cannot be cleared by S/W.
+
+*/
+#define SOC_AON_PRAMPROT0_FETCHDIS                                   0x00000001U
+#define SOC_AON_PRAMPROT0_FETCHDIS_M                                 0x00000001U
+#define SOC_AON_PRAMPROT0_FETCHDIS_S                                 0U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -11558,14 +13946,38 @@ This section defines the register offsets of the SOC_AON component
         From..to bits:   0...0
         DefaultValue:    0x0
         Access type:     write-only
-        Description:     ROM is Hidden in case ATTEST or Error or if SOP=FS, during operational
-                         otherwise, during either Operational or ATTEST Privilege (except during privilege or elevated in which This MMR applies hide)
+        Description:     ROM assets is Hidden in case ATTEST or Error or if SOP=FS.
+                         during either Operational or ATTEST Privilege:
+                         1. ROM assets is Hidden by default
+                         2. Unhide ROM assets by setting [UNHIDE] bitfield.
+                         3. After unhide ROM it could be Hidden by setting [HIDEASSETS] bitfield.
+                         4. ROM will be Hidden when privilege/elevated mode done without dependancy of [HIDEASSETS] field.
+
                          Type: Write-Clear.
 
 */
 #define SOC_AON_SECROM_HIDEASSETS                                    0x00000001U
 #define SOC_AON_SECROM_HIDEASSETS_M                                  0x00000001U
 #define SOC_AON_SECROM_HIDEASSETS_S                                  0U
+/*
+
+        Field:           UNHIDE
+        From..to bits:   1...1
+        DefaultValue:    0x0
+        Access type:     write-only
+        Description:     ROM assets is Hidden in case ATTEST or Error or if SOP=FS.
+                         during either Operational or ATTEST Privilege:
+                         1. ROM assets is Hidden by default
+                         2. Unhide ROM assets by setting [UNHIDE] bitfield.
+                         3. After unhide ROM it could be Hidden by setting [HIDEASSETS] bitfield.
+                         4. ROM will be Hidden when privilege/elevated mode done without dependancy of [HIDEASSETS] field.
+
+                         Type: Write-Clear.
+
+*/
+#define SOC_AON_SECROM_UNHIDE                                        0x00000002U
+#define SOC_AON_SECROM_UNHIDE_M                                      0x00000002U
+#define SOC_AON_SECROM_UNHIDE_S                                      1U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -11803,66 +14215,6 @@ This section defines the register offsets of the SOC_AON component
 #define SOC_AON_TOPDBG_TPSEL                                         0x80000000U
 #define SOC_AON_TOPDBG_TPSEL_M                                       0x80000000U
 #define SOC_AON_TOPDBG_TPSEL_S                                       31U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       PROTENUM
-    Offset name:         SOC_AON_O_PROTENUM
-    Relative address:    0x21BC
-    Description:         Global Protect Enumeration.
-                        define of security group:
-                        [1:0] - M33 Secure
-                        [3:2] - M33 Non Secured
-                        [5:4] - Core
-                        [6:7] - Blocked
-    Default Value:       0x00000000
-
-        Field:           M33SEC
-        From..to bits:   0...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     M33 Secured Enumeration.
-
-*/
-#define SOC_AON_PROTENUM_M33SEC_W                                    2U
-#define SOC_AON_PROTENUM_M33SEC_M                                    0x00000003U
-#define SOC_AON_PROTENUM_M33SEC_S                                    0U
-/*
-
-        Field:           M33NSEC
-        From..to bits:   2...3
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     M33 Non-Secured Enumeration.
-
-*/
-#define SOC_AON_PROTENUM_M33NSEC_W                                   2U
-#define SOC_AON_PROTENUM_M33NSEC_M                                   0x0000000CU
-#define SOC_AON_PROTENUM_M33NSEC_S                                   2U
-/*
-
-        Field:           CORE
-        From..to bits:   4...5
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Core (M3) Enumeration.
-
-*/
-#define SOC_AON_PROTENUM_CORE_W                                      2U
-#define SOC_AON_PROTENUM_CORE_M                                      0x00000030U
-#define SOC_AON_PROTENUM_CORE_S                                      4U
-/*
-
-        Field:           BLOCKED
-        From..to bits:   6...7
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     BLOCKED Enumeration.
-
-*/
-#define SOC_AON_PROTENUM_BLOCKED_W                                   2U
-#define SOC_AON_PROTENUM_BLOCKED_M                                   0x000000C0U
-#define SOC_AON_PROTENUM_BLOCKED_S                                   6U
 
 
 /*-----------------------------------REGISTER------------------------------------
@@ -12559,7 +14911,7 @@ This section defines the register offsets of the SOC_AON component
         Field:           DONE
         From..to bits:   0...0
         DefaultValue:    0x0
-        Access type:     writeOnce
+        Access type:     read-write
         Description:     locking the access to SOC security configurations
 
 */
@@ -12968,11 +15320,11 @@ This section defines the register offsets of the SOC_AON component
                         Mask Event.
                         '0' - CLR - Clear Interrupt Mask
                         '1' - SET - Set Interrupt Mask
-    Default Value:       0x0000FFFF
+    Default Value:       0x00000000
 
         Field:           IMASK
         From..to bits:   0...7
-        DefaultValue:    0xFF
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     bit7 - doorbell 7 M3 IRQ
                          bit6 - doorbell6 M3 IRQ
@@ -13219,11 +15571,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13272,11 +15624,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13325,11 +15677,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured (valid only in privilege mode)
                         1 - M33 Secured (valid only in privilege mode)
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          Controller M33 None Secured:
@@ -13379,11 +15731,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13432,11 +15784,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13485,11 +15837,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13538,11 +15890,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13591,11 +15943,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13644,11 +15996,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13697,11 +16049,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13750,11 +16102,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13803,11 +16155,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -13848,2391 +16200,6 @@ This section defines the register offsets of the SOC_AON component
 
 
 /*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD0
-    Offset name:         SOC_AON_O_FWIOPAD0
-    Relative address:    0x26B8
-    Description:         IOMUX_PAD_0 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD0_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD0_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD0_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD0_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD0_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD0_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD0_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD0_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD0_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD1
-    Offset name:         SOC_AON_O_FWIOPAD1
-    Relative address:    0x26BC
-    Description:         IOMUX_PAD_1 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD1_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD1_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD1_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD1_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD1_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD1_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD1_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD1_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD1_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD2
-    Offset name:         SOC_AON_O_FWIOPAD2
-    Relative address:    0x26C0
-    Description:         IOMUX_PAD_2 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD2_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD2_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD2_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD2_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD2_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD2_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD2_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD2_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD2_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD3
-    Offset name:         SOC_AON_O_FWIOPAD3
-    Relative address:    0x26C4
-    Description:         IOMUX_PAD_3 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD3_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD3_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD3_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD3_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD3_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD3_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD3_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD3_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD3_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD4
-    Offset name:         SOC_AON_O_FWIOPAD4
-    Relative address:    0x26C8
-    Description:         IOMUX_PAD_4 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD4_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD4_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD4_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD4_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD4_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD4_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD4_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD4_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD4_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD5
-    Offset name:         SOC_AON_O_FWIOPAD5
-    Relative address:    0x26CC
-    Description:         IOMUX_PAD_5 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD5_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD5_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD5_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD5_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD5_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD5_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD5_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD5_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD5_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD6
-    Offset name:         SOC_AON_O_FWIOPAD6
-    Relative address:    0x26D0
-    Description:         IOMUX_PAD_6 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD6_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD6_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD6_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD6_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD6_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD6_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD6_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD6_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD6_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD7
-    Offset name:         SOC_AON_O_FWIOPAD7
-    Relative address:    0x26D4
-    Description:         IOMUX_PAD_7 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD7_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD7_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD7_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD7_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD7_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD7_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD7_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD7_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD7_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD8
-    Offset name:         SOC_AON_O_FWIOPAD8
-    Relative address:    0x26D8
-    Description:         IOMUX_PAD_8 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD8_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD8_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD8_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD8_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD8_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD8_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD8_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD8_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD8_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD9
-    Offset name:         SOC_AON_O_FWIOPAD9
-    Relative address:    0x26DC
-    Description:         IOMUX_PAD_9 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD9_M33NS                                       0x00000001U
-#define SOC_AON_FWIOPAD9_M33NS_M                                     0x00000001U
-#define SOC_AON_FWIOPAD9_M33NS_S                                     0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD9_M33S                                        0x00000002U
-#define SOC_AON_FWIOPAD9_M33S_M                                      0x00000002U
-#define SOC_AON_FWIOPAD9_M33S_S                                      1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD9_CORENS                                      0x00000004U
-#define SOC_AON_FWIOPAD9_CORENS_M                                    0x00000004U
-#define SOC_AON_FWIOPAD9_CORENS_S                                    2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD10
-    Offset name:         SOC_AON_O_FWIOPAD10
-    Relative address:    0x26E0
-    Description:         IOMUX_PAD_10 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD10_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD10_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD10_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD10_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD10_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD10_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD10_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD10_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD10_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD11
-    Offset name:         SOC_AON_O_FWIOPAD11
-    Relative address:    0x26E4
-    Description:         IOMUX_PAD_11 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD11_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD11_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD11_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD11_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD11_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD11_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD11_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD11_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD11_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD12
-    Offset name:         SOC_AON_O_FWIOPAD12
-    Relative address:    0x26E8
-    Description:         IOMUX_PAD_12 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD12_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD12_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD12_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD12_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD12_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD12_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD12_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD12_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD12_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD13
-    Offset name:         SOC_AON_O_FWIOPAD13
-    Relative address:    0x26EC
-    Description:         IOMUX_PAD_13 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD13_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD13_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD13_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD13_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD13_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD13_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD13_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD13_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD13_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD14
-    Offset name:         SOC_AON_O_FWIOPAD14
-    Relative address:    0x26F0
-    Description:         IOMUX_PAD_14 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD14_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD14_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD14_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD14_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD14_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD14_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD14_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD14_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD14_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD15
-    Offset name:         SOC_AON_O_FWIOPAD15
-    Relative address:    0x26F4
-    Description:         IOMUX_PAD_15 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD15_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD15_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD15_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD15_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD15_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD15_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD15_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD15_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD15_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD16
-    Offset name:         SOC_AON_O_FWIOPAD16
-    Relative address:    0x26F8
-    Description:         IOMUX_PAD_16 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD16_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD16_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD16_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD16_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD16_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD16_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD16_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD16_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD16_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD17
-    Offset name:         SOC_AON_O_FWIOPAD17
-    Relative address:    0x26FC
-    Description:         IOMUX_PAD_17 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD17_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD17_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD17_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD17_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD17_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD17_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD17_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD17_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD17_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD18
-    Offset name:         SOC_AON_O_FWIOPAD18
-    Relative address:    0x2700
-    Description:         IOMUX_PAD_18 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD18_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD18_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD18_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD18_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD18_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD18_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD18_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD18_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD18_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD19
-    Offset name:         SOC_AON_O_FWIOPAD19
-    Relative address:    0x2704
-    Description:         IOMUX_PAD_19 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD19_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD19_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD19_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD19_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD19_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD19_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD19_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD19_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD19_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD20
-    Offset name:         SOC_AON_O_FWIOPAD20
-    Relative address:    0x2708
-    Description:         IOMUX_PAD_20 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD20_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD20_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD20_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD20_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD20_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD20_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD20_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD20_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD20_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD21
-    Offset name:         SOC_AON_O_FWIOPAD21
-    Relative address:    0x270C
-    Description:         IOMUX_PAD_21 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD21_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD21_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD21_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD21_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD21_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD21_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD21_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD21_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD21_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD22
-    Offset name:         SOC_AON_O_FWIOPAD22
-    Relative address:    0x2710
-    Description:         IOMUX_PAD_22 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD22_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD22_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD22_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD22_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD22_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD22_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD22_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD22_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD22_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD23
-    Offset name:         SOC_AON_O_FWIOPAD23
-    Relative address:    0x2714
-    Description:         IOMUX_PAD_23 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD23_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD23_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD23_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD23_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD23_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD23_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD23_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD23_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD23_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD24
-    Offset name:         SOC_AON_O_FWIOPAD24
-    Relative address:    0x2718
-    Description:         IOMUX_PAD_24 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD24_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD24_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD24_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD24_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD24_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD24_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD24_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD24_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD24_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD25
-    Offset name:         SOC_AON_O_FWIOPAD25
-    Relative address:    0x271C
-    Description:         IOMUX_PAD_25 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD25_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD25_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD25_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD25_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD25_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD25_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD25_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD25_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD25_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD26
-    Offset name:         SOC_AON_O_FWIOPAD26
-    Relative address:    0x2720
-    Description:         IOMUX_PAD_26 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD26_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD26_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD26_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD26_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD26_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD26_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD26_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD26_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD26_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD27
-    Offset name:         SOC_AON_O_FWIOPAD27
-    Relative address:    0x2724
-    Description:         IOMUX_PAD_27 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD27_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD27_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD27_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD27_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD27_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD27_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD27_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD27_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD27_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD28
-    Offset name:         SOC_AON_O_FWIOPAD28
-    Relative address:    0x2728
-    Description:         IOMUX_PAD_28 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD28_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD28_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD28_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD28_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD28_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD28_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD28_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD28_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD28_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD29
-    Offset name:         SOC_AON_O_FWIOPAD29
-    Relative address:    0x272C
-    Description:         IOMUX_PAD_29 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD29_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD29_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD29_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD29_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD29_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD29_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD29_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD29_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD29_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD30
-    Offset name:         SOC_AON_O_FWIOPAD30
-    Relative address:    0x2730
-    Description:         IOMUX_PAD_30 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD30_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD30_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD30_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD30_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD30_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD30_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD30_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD30_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD30_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD31
-    Offset name:         SOC_AON_O_FWIOPAD31
-    Relative address:    0x2734
-    Description:         IOMUX_PAD_31 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD31_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD31_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD31_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD31_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD31_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD31_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD31_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD31_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD31_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD32
-    Offset name:         SOC_AON_O_FWIOPAD32
-    Relative address:    0x2738
-    Description:         IOMUX_PAD_32 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD32_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD32_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD32_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD32_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD32_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD32_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD32_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD32_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD32_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD33
-    Offset name:         SOC_AON_O_FWIOPAD33
-    Relative address:    0x273C
-    Description:         IOMUX_PAD_33 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD33_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD33_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD33_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD33_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD33_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD33_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD33_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD33_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD33_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD34
-    Offset name:         SOC_AON_O_FWIOPAD34
-    Relative address:    0x2740
-    Description:         IOMUX_PAD_34 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD34_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD34_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD34_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD34_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD34_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD34_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD34_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD34_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD34_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD35
-    Offset name:         SOC_AON_O_FWIOPAD35
-    Relative address:    0x2744
-    Description:         IOMUX_PAD_35 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD35_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD35_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD35_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD35_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD35_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD35_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD35_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD35_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD35_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD36
-    Offset name:         SOC_AON_O_FWIOPAD36
-    Relative address:    0x2748
-    Description:         IOMUX_PAD_36 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD36_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD36_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD36_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD36_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD36_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD36_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD36_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD36_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD36_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD37
-    Offset name:         SOC_AON_O_FWIOPAD37
-    Relative address:    0x274C
-    Description:         IOMUX_PAD_37 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD37_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD37_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD37_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD37_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD37_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD37_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD37_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD37_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD37_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD38
-    Offset name:         SOC_AON_O_FWIOPAD38
-    Relative address:    0x2750
-    Description:         IOMUX_PAD_38 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD38_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD38_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD38_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD38_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD38_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD38_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD38_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD38_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD38_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD39
-    Offset name:         SOC_AON_O_FWIOPAD39
-    Relative address:    0x2754
-    Description:         IOMUX_PAD_39 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD39_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD39_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD39_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD39_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD39_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD39_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD39_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD39_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD39_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD40
-    Offset name:         SOC_AON_O_FWIOPAD40
-    Relative address:    0x2758
-    Description:         IOMUX_PAD_40 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD40_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD40_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD40_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD40_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD40_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD40_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD40_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD40_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD40_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD41
-    Offset name:         SOC_AON_O_FWIOPAD41
-    Relative address:    0x275C
-    Description:         IOMUX_PAD_41 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD41_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD41_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD41_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD41_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD41_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD41_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD41_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD41_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD41_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD42
-    Offset name:         SOC_AON_O_FWIOPAD42
-    Relative address:    0x2760
-    Description:         IOMUX_PAD_42 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD42_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD42_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD42_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD42_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD42_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD42_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD42_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD42_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD42_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD43
-    Offset name:         SOC_AON_O_FWIOPAD43
-    Relative address:    0x2764
-    Description:         IOMUX_PAD_43 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD43_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD43_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD43_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD43_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD43_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD43_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD43_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD43_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD43_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
-    Register name:       FWIOPAD44
-    Offset name:         SOC_AON_O_FWIOPAD44
-    Relative address:    0x2768
-    Description:         IOMUX_PAD_44 firewall access permission
-                        for 3 controller id :
-                        0 - M33 Non Secured
-                        1 - M33 Secured
-                        2 - Core (Non Secure)
-    Default Value:       0x00000001
-
-        Field:           M33NS
-        From..to bits:   0...0
-        DefaultValue:    0x1
-        Access type:     read-write
-        Description:     Controller M33 None Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD44_M33NS                                      0x00000001U
-#define SOC_AON_FWIOPAD44_M33NS_M                                    0x00000001U
-#define SOC_AON_FWIOPAD44_M33NS_S                                    0U
-/*
-
-        Field:           M33S
-        From..to bits:   1...1
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller M33 Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD44_M33S                                       0x00000002U
-#define SOC_AON_FWIOPAD44_M33S_M                                     0x00000002U
-#define SOC_AON_FWIOPAD44_M33S_S                                     1U
-/*
-
-        Field:           CORENS
-        From..to bits:   2...2
-        DefaultValue:    0x0
-        Access type:     read-write
-        Description:     Controller Core Non Secured:
-                         '0' - access not allowed
-                         '1' - access allowed
-
-*/
-#define SOC_AON_FWIOPAD44_CORENS                                     0x00000004U
-#define SOC_AON_FWIOPAD44_CORENS_M                                   0x00000004U
-#define SOC_AON_FWIOPAD44_CORENS_S                                   2U
-
-
-/*-----------------------------------REGISTER------------------------------------
     Register name:       FWCOREAON
     Offset name:         SOC_AON_O_FWCOREAON
     Relative address:    0x2808
@@ -16241,11 +16208,11 @@ This section defines the register offsets of the SOC_AON component
                         0 - M33 Non Secured
                         1 - M33 Secured
                         2 - Core (Non Secure)
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -16292,11 +16259,11 @@ This section defines the register offsets of the SOC_AON component
     Description:         Spare firewall access register.
                         locked by SOC BOOT DONE (secgk)
                         3 access bits - {M33NS , M33S , M3} .
-    Default Value:       0x00000001
+    Default Value:       0x00000000
 
         Field:           M33NS
         From..to bits:   0...0
-        DefaultValue:    0x1
+        DefaultValue:    0x0
         Access type:     read-write
         Description:     Controller M33 None Secured:
                          '0' - access not allowed
@@ -17203,7 +17170,7 @@ This section defines the register offsets of the SOC_AON component
         Access type:     read-only
         Description:     Hide Boot ROM.
 
-                         This bit is the status of ROM hide H/W indication. 1 - entire ROM is hidden; 0 - ROM Assets is NOT hidden.
+                         This bit is the status of ROM hide H/W indication. 1 - entire Boot ROM is hidden; 0 - Boot ROM is NOT hidden.
 
 */
 #define SOC_AON_SECSTA_BOOTROM                                       0x00800000U
@@ -17487,13 +17454,13 @@ This section defines the register offsets of the SOC_AON component
                         1. [11:8] Device Life Cycle SW Managed - as exist at [FUSELINE0.DEVLCSW]
                         2. [3:0] Device Life Cycle - based on Device Life Cycle HW Managed as exist at [FUSELINE0.DEVLCHW]
                             but with following decoding and validation logic:
-                        	if fuse data is valid- no crc/no efc ready /pattern error the Decoded value is:
-                        		0 - 1st Birthday
-                        		1 - AT TEST
-                        		2 - AT TEST Privilege
-                        		3 - Operational
-                        	otherwise, the value is
-                        		4 - fault mode -fault occurred on life cycle read
+				if fuse data is valid- no crc/no efc ready /pattern error the Decoded value is:
+					0 - 1st Birthday
+					1 - AT TEST
+					2 - AT TEST Privilege
+					3 - Operational
+				otherwise, the value is
+					4 - fault mode -fault occurred on life cycle read
     Default Value:       NA
 
         Field:           LIFECYCLE
@@ -17519,5 +17486,73 @@ This section defines the register offsets of the SOC_AON component
 #define SOC_AON_LCSTA_SWMNG_W                                        4U
 #define SOC_AON_LCSTA_SWMNG_M                                        0x00000F00U
 #define SOC_AON_LCSTA_SWMNG_S                                        8U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       DRMAST
+    Offset name:         SOC_AON_O_DRMAST
+    Relative address:    0x2960
+    Description:         DRAM_ASSET
+    Default Value:       NA
+
+        Field:           ERSDRMDN
+        From..to bits:   0...0
+        DefaultValue:    NA
+        Access type:     read-only
+        Description:     ERASE_DRAM_ASSET_DONE
+
+                         1: erase done
+                         0: erase in progress
+
+*/
+#define SOC_AON_DRMAST_ERSDRMDN                                      0x00000001U
+#define SOC_AON_DRMAST_ERSDRMDN_M                                    0x00000001U
+#define SOC_AON_DRMAST_ERSDRMDN_S                                    0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       FLASHMASK
+    Offset name:         SOC_AON_O_FLASHMASK
+    Relative address:    0x2964
+    Description:         FLASH MASK
+    Default Value:       0x00000001
+
+        Field:           FLASHMASKOV
+        From..to bits:   0...0
+        DefaultValue:    0x1
+        Access type:     read-write
+        Description:     FLASH_MASK_OVERRIDE
+                         Override flash data output masking logic ( done using flash cs ) to allow working on external flash on stacked PSRAM devices
+                         1: unmask flash lines, data visible on external pins
+                         0: flash lines are masked according to flash_cs
+
+*/
+#define SOC_AON_FLASHMASK_FLASHMASKOV                                0x00000001U
+#define SOC_AON_FLASHMASK_FLASHMASKOV_M                              0x00000001U
+#define SOC_AON_FLASHMASK_FLASHMASKOV_S                              0U
+
+
+/*-----------------------------------REGISTER------------------------------------
+    Register name:       WSOCROM
+    Offset name:         SOC_AON_O_WSOCROM
+    Relative address:    0x2968
+    Description:         WSOC ROM Unhide.
+
+                        1 lock. Write once.
+                        Asserted by FW at the end of ROM boot.
+                        Locked immediately ,
+                        cleared by core disable (or at soc aon reset or por reset)
+    Default Value:       0x00000001
+
+        Field:           UNHIDE
+        From..to bits:   0...0
+        DefaultValue:    0x1
+        Access type:     writeOnce
+        Description:     Hiding the ROM
+
+*/
+#define SOC_AON_WSOCROM_UNHIDE                                       0x00000001U
+#define SOC_AON_WSOCROM_UNHIDE_M                                     0x00000001U
+#define SOC_AON_WSOCROM_UNHIDE_S                                     0U
 
 #endif /* __HW_SOC_AON_H__*/

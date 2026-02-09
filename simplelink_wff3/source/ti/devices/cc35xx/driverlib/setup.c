@@ -37,11 +37,4 @@
 #include "watchdog.h"
 
 void SetupTrimDevice(void)
-{
-    /* A fuse bit value determines whether the timer is enabled or disabled at
-     * boot. Override this fuse bit after boot to allow the timer to be
-     * controlled by software. By default, the timer will be disabled after this
-     * override.
-     */
-    WatchdogOverrideFuseBit();
-}
+{}

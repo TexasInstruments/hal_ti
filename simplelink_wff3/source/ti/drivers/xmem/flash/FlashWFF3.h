@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2024 Texas Instruments Incorporated
+ *  Copyright (c) 2024-2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -58,6 +58,8 @@ extern "C" {
  */
 #define FLASH_STATUS_SUCCESS         0x00000000 /*!< Function completed successfully */
 #define FLASH_TIMEOUT_REACHED_ERROR  (-1300)    /*!< timeout status error */
+#define PSRAM_XIP_OFFSET             (0x100)    /*!< Offset for PSRAM XIP Configuration */
+#define DEVICE_SWITCH_ERROR          (-1)
 /*
  * Configuration values that should be passed to #XIPStartUDMATransaction()
  * as the directionMode parameter.
@@ -73,6 +75,7 @@ extern "C" {
 #define __ELSE__(x)     : (x)
 #define __ELSE_IF__(x)  : (x)
 
+#define OSPI_IDLE_XSPI_COUNTER_BEFORE_TIMEOUT 100
 /*!
  * BITMASK_x_0() returns a bit mask of "1" from Bits[x:0]
  *
@@ -116,13 +119,26 @@ typedef enum
     FLASH_UDMA_JOB_ERROR = 1  /*!< UDMA job did not completed successfully */
 } FlashUdmaJobStatus;
 
-/* Erase status */
+/* STIG status */
 typedef enum
 {
-    FLASH_ERASE_DONE    = 0, /*!< Erase command completed successfully */
-    FLASH_ERASE_TIMEOUT = 1, /*!< Erase command completed with timeout */
-    FLASH_ERASE_ERROR   = 2  /*!< Erase command did not completed successfully */
-} FlashEraseStatus;
+    FLASH_STIG_DONE    = 0, /*!< STIG command completed successfully */
+    FLASH_STIG_TIMEOUT = 1, /*!< STIG command completed with timeout */
+    FLASH_STIG_ERROR   = 2  /*!< STIG command did not completed successfully */
+} FlashStigStatus;
+
+/* STIG configuration operation types */
+#define FLASH_STIG_CONFIG_ENTER         0
+#define FLASH_STIG_CONFIG_EXIT          1
+#define FLASH_STIG_CONFIG_PRE_READ      2
+#define FLASH_STIG_CONFIG_EXECUTE_READ  3
+#define FLASH_STIG_CONFIG_POST_READ     4
+#define FLASH_STIG_CONFIG_PRE_WRITE     5
+#define FLASH_STIG_CONFIG_EXECUTE_WRITE 6
+#define FLASH_STIG_CONFIG_POST_WRITE    7
+#define FLASH_STIG_CONFIG_PRE_ERASE     8
+#define FLASH_STIG_CONFIG_EXECUTE_ERASE 9
+#define FLASH_STIG_CONFIG_POST_ERASE    10
 
 /*
  *Functions
@@ -143,6 +159,38 @@ typedef enum
 void FlashRead(uint32_t *readFromAddr, uint32_t *writeToAddr, uint32_t length);
 
 /*!
+ * @brief Read from external memory using STIG command.
+ *
+ * This function call to #FlashExecuteReadSTIGCommand() in order to
+ * Execute read Flash based on STIG command.
+ *
+ * @param[in] readFromAddr is a pointer to the external memory source data.
+ * @param[in] writeToAddr is a pointer to the internal memory destination data.
+ * @param[in] DeviceNum  Device identifier (XMEM_FLASH or XMEM_PSRAM).
+ *
+ * @return #FlashStigStatus of STIG execution command:
+ * #FLASH_STIG_DONE    - STIG command done.
+ * #FLASH_STIG_TIMEOUT - STIG command not completed, finish with timeout.
+ * #FLASH_STIG_ERROR   - STIG erase command failed.
+ */
+FlashStigStatus FlashReadSTIG(uint32_t readStartAddr, uint32_t *writeToAddr, uint8_t DeviceNum);
+
+/*!
+ * @brief Execute read of one word from Flash based on STIG write command.
+ *
+ * @param[in] srcReadAddr is the data to read from external memory.
+ *
+ * @param[in] writeToAddr is a pointer to the internal memory destination data.
+ *
+ * @return #FlashStigStatus of STIG execution command:
+ * #FLASH_STIG_DONE    - STIG command done.
+ * #FLASH_STIG_TIMEOUT - STIG command not completed, finish with timeout.
+ * #FLASH_STIG_ERROR   - STIG command failed.
+ *
+ */
+FlashStigStatus FlashExecuteReadSTIGCommand(uint32_t srcReadAddr, uint32_t *writeToAddr);
+
+/*!
  * @brief Write to external memory.
  *
  * This function call to #XIPStartUDMATransaction() in order to execute
@@ -158,6 +206,40 @@ void FlashRead(uint32_t *readFromAddr, uint32_t *writeToAddr, uint32_t length);
 void FlashWrite(uint32_t *readFromAddr, uint32_t *writeToAddr, uint32_t length);
 
 /*!
+ * @brief Write to external memory using STIG command.
+ *
+ * This function call to #FlashExecuteWriteSTIGCommand() in order to
+ * Execute write Flash based on STIG command.
+ *
+ * @param[in] readFromAddr is a pointer to the internal memory source data.
+ * @param[in] writeToAddr is a pointer to the external memory destination data.
+ * @param[in] DeviceNum  Device identifier (XMEM_FLASH or XMEM_PSRAM).
+ *
+ * @return #FlashStigStatus of STIG execution command:
+ * #FLASH_STIG_DONE    - STIG command done.
+ * #FLASH_STIG_TIMEOUT - STIG command not completed, finish with timeout.
+ * #FLASH_STIG_ERROR   - STIG erase command failed.
+ *
+ * @note Tested with flash only (did not test with PSRAM)
+ */
+FlashStigStatus FlashWriteSTIG(uint32_t *readFromAddr, uint32_t *writeToAddr, uint8_t DeviceNum);
+
+/*!
+ * @brief Execute write to Flash based on STIG write command.
+ *
+ * @param[in] srcWriteAddrPhy is the address of the external memory destination data.
+ *
+ * @param[in] srcWriteData is the data to write to external memory.
+ *
+ * @return #FlashStigStatus of STIG execution command:
+ * #FLASH_STIG_DONE    - STIG command done.
+ * #FLASH_STIG_TIMEOUT - STIG command not completed, finish with timeout.
+ * #FLASH_STIG_ERROR   - STIG command failed.
+ *
+ */
+FlashStigStatus FlashExecuteWriteSTIGCommand(uint32_t srcWriteData, uint32_t srcWriteAddrPhy);
+
+/*!
  * @brief Enable/Disable the OTFDE.
  *
  * @param[in] setState is the required state to configure #FlashOtfdeStateSet.
@@ -168,46 +250,44 @@ void FlashSetOTFDE(uint8_t setState);
  * @brief read flash status register until WIP (write in process) indication is free.
  *
  * This function can be called by nay function that execute on going process
- * such as #FlashSectorErase().
+ * such as #FlashSectorErase(), #FlashReadSTIG(), #FlashWriteSTIG().
  *
- * @param[in] timeout The maximum time in system ticks (microsecond) for the transaction
- *  to complete.
  *  If transaction will not complete before timeout reatched
  *  @return status transaction complete:
  *  #FLASH_STATUS_SUCCESS        - Trasaction successfuly completed.
  *  #FLASH_TIMEOUT_REACHED_ERROR - Timeout, transaction failed.
  */
-uint32_t FlashExecutePolling(uint32_t timeout);
+uint32_t FlashExecutePolling(void);
 
 /*!
  * @brief Execute erase Flash based on STIG command.
- *
- * @param[in] EraseOpcode is the erase command to drive on flash interface.
  *
  * @param[in] EraseAddr_en set in case the STIG command needs to use #srcEraseAddr.
  *
  * @param[in] srcEraseAddr from where to start the flash erase.
+ *
+ * @return #FlashStigStatus of STIG execution command:
+ * #FLASH_STIG_DONE    - STIG command done.
+ * #FLASH_STIG_TIMEOUT - STIG command not completed, finish with timeout.
+ * #FLASH_STIG_ERROR   - STIG command failed.
+ *
  */
-void FlashExecuteEraseSTIGCommand(uint8_t EraseOpcode, uint32_t EraseAddr_en, uint32_t srcEraseAddr);
+FlashStigStatus FlashExecuteEraseSTIGCommand(uint32_t EraseAddr_en, uint32_t srcEraseAddr);
 
 /*!
  * @brief Execute erase Flash based on STIG command.
  *
- * @param sectorEraseOpcode is the erase command to drive on flash interface.
- *
- * @param[in] sectorEraseTimeOut The maximum time (microsecond) that sector erase command
- *                               should take.
- *                               When exceeds the time, will send FLASH_ERASE_TIMEOUT status.
- *
  * @param[in] eraseStartAddr from where to start the sector erase.
  *
- * @return #FlashEraseStatus of erase execution command:
- * #FLASH_ERASE_DONE    - sector erase command done.
- * #FLASH_ERASE_TIMEOUT - sector erase command not completed, fifnish with timeout.
- * #FLASH_ERASE_ERROR   - sector erase command failed.
+ * @param[in] DeviceNum  Device identifier (XMEM_FLASH or XMEM_PSRAM).
+ *
+ * @return #FlashStigStatus of STIG execution command:
+ * #FLASH_STIG_DONE    - STIG command done.
+ * #FLASH_STIG_TIMEOUT - STIG command not completed, finish with timeout.
+ * #FLASH_STIG_ERROR   - STIG command failed.
  *
  */
-FlashEraseStatus FlashSectorErase(uint32_t eraseStartAddr, uint32_t sectorEraseOpcode, uint32_t sectorEraseTimeOut);
+FlashStigStatus FlashSectorErase(uint32_t eraseStartAddr, uint8_t DeviceNum);
 
 /*!
  * @brief Store the ClockP period internally.
@@ -217,6 +297,10 @@ FlashEraseStatus FlashSectorErase(uint32_t eraseStartAddr, uint32_t sectorEraseO
  */
 void FlashSetTickPeriod(uint32_t TickPeriod);
 
+/*!
+ * @brief xSPI (accessible) idle check before STIG execution.
+ */
+uint32_t FlashIsXspiIdle();
 /*!
  * Mark the end of the C bindings section for C++ compilers.
  */
