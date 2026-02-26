@@ -34,6 +34,14 @@ zephyr_library_link_libraries(subsys__bluetooth)
 zephyr_include_directories(controller/hci)
 zephyr_include_directories(stack_util)
 
+# ESL profile includes
+if (CONFIG_BT_ESL_TAG OR CONFIG_BT_ESL_AP)
+  zephyr_include_directories(profiles/esl/bal)
+  zephyr_include_directories(profiles/esl/core)
+  zephyr_include_directories(profiles/esl/config)
+  zephyr_include_directories(profiles/esl/pal)
+endif()
+
 # Set CTRL_CONFIG bitmask based on enabled configs
 set(ADV_NCONN_CFG     0x01)
 set(ADV_CONN_CFG      0x02)
@@ -161,8 +169,14 @@ endfunction()
 
 if(CONFIG_HAS_CC23X0_SDK)
   add_prebuilt_library(blecontroller      lib/m0p/ble_controller.a)
+  if(CONFIG_BT_ESL_TAG OR CONFIG_BT_ESL_AP)
+    add_prebuilt_library(esl_core         lib/m0p/esl_core.a)
+  endif()
 endif()
 
 if(CONFIG_HAS_CC27XX_SDK)
   add_prebuilt_library(blecontroller      lib/m33f/ble_controller.a)
+  if(CONFIG_BT_ESL_TAG OR CONFIG_BT_ESL_AP)
+    add_prebuilt_library(esl_core         lib/m33f/esl_core.a)
+  endif()
 endif()
