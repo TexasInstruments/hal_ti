@@ -50,6 +50,10 @@ if(CONFIG_HAS_CC23X0_SDK)
   endif()
 
   if(CONFIG_SOC_CC2340R5_WCSP)
+      zephyr_compile_definitions(DeviceFamily_CC23X0R5 ${COMPILER})
+  endif()
+
+  if(CONFIG_SOC_CC2340R5MODA)
     zephyr_compile_definitions(DeviceFamily_CC23X0R5 ${COMPILER})
   endif()
 
