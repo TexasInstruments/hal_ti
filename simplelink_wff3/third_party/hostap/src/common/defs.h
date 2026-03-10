@@ -50,6 +50,7 @@
 #define WPA_KEY_MGMT_DPP BIT(23)
 #define WPA_KEY_MGMT_FT_IEEE8021X_SHA384 BIT(24)
 #define WPA_KEY_MGMT_PASN BIT(25)
+#define WPA_KEY_MGMT_ENT BIT(26)
 //TI - cc33xx compilation
 /* we should not expect this value */
 #define WPA_KEY_MGMT_UNEXPECTED BIT(31)

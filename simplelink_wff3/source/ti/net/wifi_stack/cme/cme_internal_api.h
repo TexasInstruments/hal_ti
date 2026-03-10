@@ -92,6 +92,7 @@ typedef struct
     cmeScanStatus_e     status;         // scan completion result/cause
     uint8_t               padding[2];
     cmeScanSharedInfo_t *pSharedInfo;   // contains the scan results
+    Bool_e              fromTimeout;    // set if triggered by timeout
 } CmeScanDoneInfo_t;
 
 // Notify CME of scan completion.
@@ -138,10 +139,12 @@ extern int8_t gCmeLastWlanProfileIdx;
 extern uint8_t gCurrentSSID[MAXIMAL_SSID_LENGTH];
 extern size_t gCurrentSSIDLen;
 extern Bool_e  gWPSfirstDisconnect_ull;
+extern Bool_e  gWPSkickDisconnect_ull;
 extern cmeP2pSearchInfo_t  gCmeP2pInfo;
 extern Bool_e gSupplicantInitiatedScanInProgress;
 extern Bss_transition_states_e gBssTransitionState;
 extern Bool_e gSaveCurrentSupplicantProfile;
+extern Bool_e gConnectionScanEarlyTerminationEnabled;
 
 // =============================================================================
 // CME FLOWS SM definitions
@@ -224,13 +227,16 @@ typedef enum
 //Callers for Debug used by CME_ReleaseScanResults
 typedef enum
 {
-    CALLER1 = 1,
-    CALLER2,
-    CALLER3,
-    CALLER4,
-    CALLER5, 
-    CALLER6,
-    CALLER7
+                    /* Profile manager Callers */
+    CALLER1 = 1,    /* role switch */
+    CALLER2,        /* role switch CME Thread*/
+    CALLER3,        /* connection policy change */
+    CALLER4,        /* added profile */
+    CALLER5,        /* removed profile */
+    CALLER6,        /* wlan_connect */
+    CALLER7,        /* disconnection */
+    CALLER8,        /* cme scan completed */
+    CALLER9         /* wlan disconnect command */
 } Cme_callers_e;
 
 typedef void (SmEventHandler)(Cme_Users_e __user);
@@ -311,6 +317,24 @@ void cmeScanInit();
 void cmeMngInit();
 
 /* ----------------------------------------------------------------------------
+ cmeMngInitStaDB()
+      Initialization function, activated as part of STA role up process
+
+ Parameters: 	none
+ Return code:	none
+---------------------------------------------------------------------------- */
+void cmeMngInitStaDB();
+
+/* ----------------------------------------------------------------------------
+ cmeMngDeInitStaDB()
+      De-initialization function, activated as part STA role down process.
+
+ Parameters: 	none
+ Return code:	none
+---------------------------------------------------------------------------- */
+void cmeMngDeInitStaDB();
+
+/* ----------------------------------------------------------------------------
  cmeGetScanResults
       This function retrives scan results (if exist).
       If no valid results, host is expected to retry fetching the results ater
@@ -334,7 +358,7 @@ uint8_t* cmeGetScanResults(uint32_t aIndex, uint32_t aCount, uint32_t aExtraByte
                 aKeyMgmt - management type, WPA_KEY_MGMT_xxx
  Return code:   none
 ---------------------------------------------------------------------------- */
-void cmeWlanConnect(uint32_t aRoleId, CMEWlanConnectCommon_t *apCmd, void *apEapCmd, uint32_t aKeyMgmt, uint8_t profiles_connection);
+void cmeWlanConnect(uint32_t aRoleId, CMEWlanConnectCommon_t *apCmd, CMEEapWlanConnect_t *apEapCmd, uint32_t aKeyMgmt, uint8_t profiles_connection);
 
 /* ----------------------------------------------------------------------------
  cmeWlanDisconnect
@@ -368,6 +392,8 @@ int32_t prepareProfileInfo(cmeScanSharedInfo_t *apSharedInfo, EScanRequestType a
 
  Parameters:
       apCandidate - Pointer to candidate info
+ Callers: CME context events: CME_MESSAGE_ID_SCAN_PERIOD_COMPLETE
+                              CME_MESSAGE_ID_SCAN_COMPLETE 
  return 0 on success, -1 on failure
 ---------------------------------------------------------------------------- */
 int32_t addProfileIdToSupplicant(cmeScanCandidateDesc_t *apCandidate);
@@ -432,12 +458,13 @@ void cmeBlackListConnectionAttempt(uint32_t index);
 // handle fast connect storage in case connection is active, or invalidate already stored fast connection
 // evantually, call profile manager re-evaluation to see if the new policies might affect the current connection method
 //
-void cmeMngSetConnectionPolicy(int should_connect_to_any_p2p_device,
-                              int should_connect_to_open_ap,
-                              int   should_use_fast_connect,
-                              int   auto_start);
+void cmeMngSetConnectionPolicy(uint8_t should_connect_to_any_p2p_device,
+                               uint8_t should_connect_to_open_ap,
+                               uint8_t should_use_fast_connect,
+                               uint8_t auto_start,
+                               uint8_t fast_persistant);
 
-int cmeMngConnectionPolicyUpdated(int should_use_fast_connect);
+int cmeMngConnectionPolicyUpdated(uint8_t should_use_fast_connect);
 
 // cmeApRemovePeer
 // Disconnect and remove a peer from the AP
@@ -455,7 +482,8 @@ int16_t cmeGetNumStaConnected(u8 *numStaConnected);
 void CME_GetConnectionPolicy(uint8_t* pConnectOpenAp,
                          uint8_t* pUseFastConnect,
                          uint8_t* pAutoStart,
-                         uint8_t* pConnectAnyP2P);
+                         uint8_t* pConnectAnyP2P,
+                         uint8_t* pFastPersistant);
 
 //
 // cmeMarkInvalidFastConnectionData
@@ -548,7 +576,7 @@ void cmePushFast2ScanResult(cmeScanCandidateDesc_t *apFastResult);
  Parameters:    none
  Return code:   none
 ---------------------------------------------------------------------------- */
-void cmeProfileManagerConfigChange(int force_one_shot_profile_search);
+void cmeProfileManagerConfigChange(int force_one_shot_profile_search, uint8_t caller);
 //
 void cmeStartSiteSurvey(uint8_t aRoleId, CMEWlanScanCommon_t* pScanCommon);
 
@@ -561,7 +589,7 @@ void cmeStartSiteSurvey(uint8_t aRoleId, CMEWlanScanCommon_t* pScanCommon);
                 bReconnect
  Return code:   none
 ---------------------------------------------------------------------------- */
-void cmeWlanConnectDigest(CMEWlanConnectCommon_t *pConnectCmd, uint32_t keyMgmtType, uint16_t connectReq, Bool_e bReconnect);
+void cmeWlanConnectDigest(CMEWlanConnectCommon_t *pConnectCmd,CMEEapWlanConnect_t* pEapConnectCmd, uint32_t keyMgmtType, uint16_t connectReq, Bool_e bReconnect);
 
 /* ----------------------------------------------------------------------------
  CME P2P exported Functions
@@ -573,7 +601,9 @@ void cmeStartP2pFind(struct wpa_supplicant *wpa_s, uint8_t *peer_addr, uint32_t 
 void CME_P2pDevFound(uint32_t aRoleId);
 void CME_P2pNegConfirmation(uint32_t aRoleId, Bool_e isGO);
 void cmeP2pGroupRemove(void);
+void cmeP2pCancel(void);
 void cmeStopP2pFind(struct wpa_supplicant *wpa_s);
+void cmeP2pClearAll();
 
 /* ----------------------------------------------------------------------------
  cmeRemoveAllProfilesFromSupplicant
@@ -620,9 +650,9 @@ int16_t cmeAddPreferredNetwork(
                              void *pEapProfile,
                              int16_t *index_eap_profile_ptr);
 
-int   cmeDeletePreferredNetwork(int index);
-void  cmeIsCurrentlyConnectedProfileDeleted(int index);
-int   cmeGetPreferredNetwork(uint8_t Index, CMEWlanAddGetProfile_t *Args);
+int16_t cmeDeletePreferredNetwork(int index);
+void    cmeIsCurrentlyConnectedProfileDeleted(int index);
+int16_t cmeGetPreferredNetwork(uint8_t Index, CMEWlanAddGetEapProfile_t *Args);
 int16_t cmeAddWpsCredentials2PreferredNetworks(struct wpa_supplicant *wpa_s, const struct wps_credential *cred);
 
 /* ----------------------------------------------------------------------------
@@ -643,7 +673,7 @@ BOOLEAN cmeIsThisPeerInRemovalProgress(uint8_t *pMacAddr);
 BOOLEAN cmeIsLastPeerRemovedValid();
 void    cmeInvalidateLastPeerRemoved();
 
-void  cmePendingWlanConnectStor(CMEWlanConnectCommon_t *pConnectCmd,void *pConnectEapCmd,uint16_t keyMgmtType, uint8_t profiles_connection);
+void  cmePendingWlanConnectStor(CMEWlanConnectCommon_t *pConnectCmd,CMEEapWlanConnect_t *pConnectEapCmd,uint16_t keyMgmtType, uint8_t profiles_connection);
 void  cmeFreePendingWlanConnectResources();
 //
 //role activation module
@@ -749,8 +779,12 @@ extern int16_t LoadConnectionPolicy_GetFromFlash(BOOLEAN isInternal, BOOLEAN run
 
 
 
-Bool_e CMEisSameConnectParams(CMEWlanConnectCommon_t *pCmdbuffer);
-Bool_e CMEIsWPA3TransitionModeDisabled(uint32_t keyMgmt);
+Bool_e CMEisSameConnectParams(CMEWlanConnectCommon_t *pCmdbuffer, int8_t* ssidName);
+Bool_e CMEIsWPA3TransitionModeDisabled(uint32_t keyMgmt,int32_t profileId);
+int cmeCheckCurrentIsTransitionMode();
+
+void cmeAddWpaPmkCache(struct wpa_supplicant *wpa_s, const uint8_t *pmkid, uint8_t *pmk, uint8_t pmk_len, uint8_t *bssid, int key_mgmt);
+void cmeRemoveWpaPmkCache(void);
 
 extern uint8_t gCmeRoleSwitchActive;
 extern uint8_t gCmeConnectedLinksCount;
@@ -759,9 +793,12 @@ extern uint8_t gCmeConnectedLinksCount;
 const char *cmeWlanGetKeyMgmt();
 
 void CmeSetStaParams(void *staParams);
-void CmeApWpsFailureNotify(int8_t wpsFailCode);
+void CmeApExtWpsFailureNotify(int8_t wpsFailCode);
 
 /* P2P Group Notifications */
+
+void CmeStaP2pClientDeinit(Cme_Users_e __user);
+
 void CmeP2pGroupStartedNotify(struct wpa_supplicant *wpa_s, uint8_t *groupPeerAddr, Bool_e isGroupTypeGo);
 void CmeP2pGroupRemovedNotify(RoleType_e roleType);
 p2pGroupRoleType_e CmeGetP2pGroupRoleType(void); 

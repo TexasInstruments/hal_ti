@@ -150,7 +150,7 @@ void wlanLinks_Init ();
 
 uint32_t wlanLinks_AddLink(  TWlanLinkInfo *pLinkInfo, uint32_t uHlid, uint32_t uSessionId, const uint8 *pMacAddr, uint8 wps);
 uint32_t wlanLinks_RemoveLink(uint32_t uHild);
-uint32_t wlanLinks_LinkMacFind(uint8 uNetIf, uint8 *pMacAddr);
+uint32_t wlanLinks_LinkMacFind(uint8 uNetIf, const uint8 *pMacAddr);
 uint32_t wlanLinks_GetLink(uint32_t uHlid, TInternalWlanLinkInfo **pLinkInfo);
 uint8_t  wlanLinks_ModetoFwRoleId(tiwdrv_if_mode_e eIfMode);
 uint32_t wlanLinks_GetBroadcastLink();

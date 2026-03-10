@@ -29,7 +29,7 @@ struct cc33xx_conf_header {
 #define CC33XX_CONF_FW_MAJOR_VERSION 	0x0001
 #define CC33XX_CONF_FW_MINOR_VERSION 	0x0007
 #define CC33XX_CONF_FW_API_VERSION   	0x0000
-#define CC33XX_CONF_FW_BUILD_VERSION 	0x0113
+#define CC33XX_CONF_FW_BUILD_VERSION 	0x0121
 
 #define CC33XX_CONF_SP_MAJOR_VERSION	0x00
 #define CC33XX_CONF_SP_MINOR_VERSION	0x00
@@ -666,92 +666,92 @@ struct conf_coex_configuration {
 } __attribute__((__packed__));
 
 struct conf_iomux_configuration {
-    /*
-     * For any iomux pull value:
-     * 1: Pull up
-     * 2: Pull down
-     * 3: Pull disable
-     * ff: Default value set by HW
-     * ANY other value is invalid
-     */
-    uint8_t slow_clock_in_pull_val;
-    uint8_t sdio_clk_pull_val;
-    uint8_t sdio_cmd_pull_val;
-    uint8_t sdio_d0_pull_val;
-    uint8_t sdio_d1_pull_val;
-    uint8_t sdio_d2_pull_val;
-    uint8_t sdio_d3_pull_val;
-    uint8_t host_irq_wl_pull_val;
-    uint8_t uart1_tx_pull_val;
-    uint8_t uart1_rx_pull_val;
-    uint8_t uart1_cts_pull_val;
-    uint8_t uart1_rts_pull_val;
-    uint8_t coex_priority_pull_val;
-    uint8_t coex_req_pull_val;
-    uint8_t coex_grant_pull_val;
-    uint8_t host_irq_ble_pull_val;
-    uint8_t fast_clk_req_pull_val;
-    uint8_t ant_sel_pull_val;
+	/*
+	 * For any iomux pull value:
+	 * 1: Pull up
+	 * 2: Pull down
+	 * 3: Pull disable
+	 * ff: Default value set by HW
+	 * ANY other value is invalid
+	*/
+	uint8_t slow_clock_in_pull_val;
+	uint8_t sdio_clk_pull_val;
+	uint8_t sdio_cmd_pull_val;
+	uint8_t sdio_d0_pull_val;
+	uint8_t sdio_d1_pull_val;
+	uint8_t sdio_d2_pull_val;
+	uint8_t sdio_d3_pull_val;
+	uint8_t host_irq_wl_pull_val;
+	uint8_t uart1_tx_pull_val;
+	uint8_t uart1_rx_pull_val;
+	uint8_t uart1_cts_pull_val;
+	uint8_t uart1_rts_pull_val;
+	uint8_t coex_priority_pull_val;
+	uint8_t coex_req_pull_val;
+	uint8_t coex_grant_pull_val;
+	uint8_t host_irq_ble_pull_val;
+	uint8_t fast_clk_req_pull_val;
+	uint8_t ant_sel_pull_val;
 } __attribute__((__packed__));
 
 struct conf_ant_diversity {
-    /*
-     * First beacons after antenna switch. 
-     * In this window we asses our satisfaction from the new antenna.
-     */
-    uint8_t fast_switching_window;
-    /*
-     * Deltas above this threshold between the curiosity score and
-     * the average RSSI will lead to antenna switch.
-     */
-    uint8_t rssi_delta_for_switching;
-    /*
-     * Used in the first beacons after antenna switch:
-     * Deltas above this threshold between the average RSSI and
-     * the curiosity score will make us switch back the antennas.
-     */
-    uint8_t rssi_delta_for_fast_switching;
-    /*
-     * Curiosity punishment in beacon timeout after an antenna switch.
-     */
-    uint8_t curiosity_punish;
 	/*
-     * Curiosity raise in beacon timeout not after an antenna switch.
-     */
-    uint8_t curiosity_raise;
-    /*
-     * Used for the average RSSI punishment in beacon timeout
-     * not after antenna switch.
-     */
-    uint8_t consecutive_missed_beacons_threshold;
-    /*
-     * Used in the curiosity metric.
-     */
-    uint8_t compensation_log;
-    /*
-     * Used in the average RSSI metric.
-     */
-    uint8_t log_alpha;
+	 * First beacons after antenna switch. 
+	 * In this window we asses our satisfaction from the new antenna.
+	 */
+	uint8_t fast_switching_window;
 	/*
-     * Curiosity initialization score.
-     */
-    int8_t initial_curiosity;
+	 * Deltas above this threshold between the curiosity score and
+	 * the average RSSI will lead to antenna switch.
+	 */
+	uint8_t rssi_delta_for_switching;
 	/*
-     * MR configuration: should the AP follow the STA antenna or use the default antenna.
-     */
-    uint8_t ap_follows_sta;
+	 * Used in the first beacons after antenna switch:
+	 * Deltas above this threshold between the average RSSI and
+	 * the curiosity score will make us switch back the antennas.
+	 */
+	uint8_t rssi_delta_for_fast_switching;
 	/*
-     * MR configuration: should the BLE follow the STA antenna or use the default antenna.
-     */
-    uint8_t ble_follows_sta;
+	 * Curiosity punishment in beacon timeout after an antenna switch.
+	 */
+	uint8_t curiosity_punish;
 	/*
-     * The antenna to use when the diversity mechanism is not in charge.
-     */
-    uint8_t default_antenna;
+	 * Curiosity raise in beacon timeout not after an antenna switch.
+	 */
+	uint8_t curiosity_raise;
+	/*
+	 * Used for the average RSSI punishment in beacon timeout
+	 * not after antenna switch.
+	 */
+	uint8_t consecutive_missed_beacons_threshold;
+	/*
+	 * Used in the curiosity metric.
+	 */
+	uint8_t compensation_log;
+	/*
+	 * Used in the average RSSI metric.
+	 */
+	uint8_t log_alpha;
+	/*
+	 * Curiosity initialization score.
+	 */
+	int8_t initial_curiosity;
+	/*
+	 * MR configuration: should the AP follow the STA antenna or use the default antenna.
+	 */
+	uint8_t ap_follows_sta;
+	/*
+	 * MR configuration: should the BLE follow the STA antenna or use the default antenna.
+	 */
+	uint8_t ble_follows_sta;
+	/*
+	 * The antenna to use when the diversity mechanism is not in charge.
+	 */
+	uint8_t default_antenna;
 	/*
 	 * Rssi low limit
 	 */
-	uint8_t rssi_low_limit;
+	uint8_t rssi_low_limit;	
 
 	/*
 	 * Override Coex grant via SW
@@ -767,8 +767,8 @@ struct conf_ant_diversity {
 	 * Override Coex grant
 	 *
 	 * 0 - External enable
-     * 1 - BLE only enable
-     * 2 - WiFi only enable
+	 * 1 - BLE only enable
+	 * 2 - WiFi only enable
 	 */
 	uint8_t grant_override;
 
@@ -818,12 +818,12 @@ struct conf_ant_diversity {
 } __attribute__((__packed__));
 
 struct conf_thermal_thresholds {
-    int16_t high_threshold_24G;
-    int16_t low_threshold_24G;
-    int16_t high_threshold_5G;
-    int16_t low_threshold_5G;
-    int16_t high_sample_threshold;
-    uint8_t enable_value;
+	int16_t high_threshold_24G;
+	int16_t low_threshold_24G;
+	int16_t high_threshold_5G;
+	int16_t low_threshold_5G;
+	int16_t high_sample_threshold;
+	uint8_t enable_value;
 } __attribute__((__packed__));
 
 struct conf_limit105c_params {
@@ -832,19 +832,30 @@ struct conf_limit105c_params {
 	uint8_t maxOFDM;
 } __attribute__((__packed__));
 
+struct conf_gpadc_params {
+    uint8_t  overrideEn;
+    uint8_t  disable_measuring;
+    uint8_t  pmcioSlop;
+    uint16_t pmcioIntercept;
+    uint8_t  rfcioSlop;
+    uint16_t rfcioIntercept;
+    uint32_t measurePeriodUsec;
+    uint8_t  dcSlopExponent;
+} __attribute__((__packed__));
+
 struct cc33xx_core_conf {
-	uint8_t enable_5ghz;
-	uint8_t enable_ble;
-	uint8_t enable_at_test_debug; //only for at-test chips, debug mode (ignoring disable efuses)
-	uint8_t disable_beamforming_fftp; // for PG version 2.0
+	uint8_t  enable_5ghz;
+	uint8_t  enable_ble;
+	uint8_t  enable_at_test_debug; //only for at-test chips, debug mode (ignoring disable efuses)
+	uint8_t  disable_beamforming_fftp; // for PG version 2.0
 	uint32_t BleUartBaudrate;
-	uint8_t enable_FlowCtrl;
-	int8_t ble_default_tx_power;
-	uint8_t listen_interval;
-	uint8_t wake_up_event;
-	uint8_t suspend_listen_interval;
-	uint8_t suspend_wake_up_event;
-	uint8_t per_channel_power_limit[520]; // per channel power limitations
+	uint8_t  enable_FlowCtrl;
+	int8_t   ble_default_tx_power;
+	uint8_t  listen_interval;
+	uint8_t  wake_up_event;
+	uint8_t  suspend_listen_interval;
+	uint8_t  suspend_wake_up_event;
+	uint8_t  per_channel_power_limit[520]; // per channel power limitations
 	uint32_t internalSlowclk_wakeupEarlier;
 	uint32_t internalSlowclk_OpenWindowLonger;
 	uint32_t externalSlowclk_wakeupEarlier;
@@ -864,6 +875,7 @@ struct cc33xx_core_conf {
 	struct conf_iomux_configuration iomux_configuration;
 	struct conf_thermal_thresholds thermal_thresholds;
 	struct conf_limit105c_params limit105c_params;
+	struct conf_gpadc_params gpadc_params;
 } __attribute__((__packed__));
 
 struct cc33xx_mac_conf {
@@ -873,7 +885,7 @@ struct cc33xx_mac_conf {
 	uint8_t ApMaxNumStations;
 	uint8_t fw_defrag;
 	uint16_t rx_memblks_override;
-    uint8_t rts_mode; // 0: dynamic rts, 1: always on, 2: always off
+	uint8_t rts_mode; // 0: dynamic rts, 1: always on, 2: always off
 } __attribute__((__packed__));
 
 struct cc33xx_phy_conf {
@@ -893,7 +905,8 @@ struct cc33xx_phy_conf {
 	int8_t tx_psat_compensation_2_4GHz;
 	int8_t tx_psat_compensation_5GHz;
 	uint8_t Is85cDevice;
-	uint32 gpio_data[4];
+	uint32_t gpio_data[4];
+	int16_t xtalCorrAbove95C;
 } __attribute__((__packed__));
 
 struct cc33xx_host_conf {
@@ -909,6 +922,11 @@ struct cc33xx_crc_conf {
 	uint32_t userChecksum;
 } __attribute__((__packed__));
 
+struct cc33xx_extra_conf {
+    uint16_t   Product_type;           // Is used to distinguish between "product" types, like CC33xxMOD TI, or other that will come later. It's needed to apply special settings, like RF params etc 
+	int8_t   tx_psat_compensation_6GHz; // Missing in psat reserved caused misalignment
+} __attribute__((__packed__));
+
 struct cc33xx_conf_file {
 	struct cc33xx_conf_header header;
 	struct cc33xx_phy_conf phy;
@@ -916,6 +934,7 @@ struct cc33xx_conf_file {
 	struct cc33xx_core_conf core;
 	struct cc33xx_host_conf host_conf;
     struct cc33xx_crc_conf crc_conf;
+	struct cc33xx_extra_conf extra_conf;
 } __attribute__((__packed__));
 
 

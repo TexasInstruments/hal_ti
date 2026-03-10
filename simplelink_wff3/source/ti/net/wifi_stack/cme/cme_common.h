@@ -40,6 +40,7 @@
 #define CME_CME_COMMON_H_
 
 #include "wlan_if.h"
+#include "cme_defs.h"
 
 typedef struct
 {
@@ -54,11 +55,21 @@ typedef struct{
     uint16_t    SecType;
     uint8_t     SsidLen;
     uint8_t     Priority;
+    uint32_t    Hidden; //scan_ssid, (u32 - to be aligned)
     uint8_t     Bssid[6];
     uint8_t     PasswordLen;
     uint8_t     WepKeyId;
     uint8_t     FastTransition;
 } CMEWlanAddGetProfile_t;
+
+typedef struct{
+    uint8_t     UserLen;
+    uint8_t     AnonUserLen;
+    uint8_t     CertIndex;
+    uint8_t     padding;
+    uint32_t    EapBitmask;
+    CMEWlanAddGetProfile_t  CommonAddProf;
+} CMEWlanAddGetEapProfile_t;
 
 
 typedef struct{
@@ -67,9 +78,53 @@ typedef struct{
     uint8_t Bssid[6];
     uint8_t PasswordLen;
     uint8_t FastTransition;
+    uint16_t Flags;
 } CMEWlanConnectCommon_t;
 
-#define CME_MAX_SCAN_SSID 5
+
+typedef enum
+{
+    TLS,
+    TTLS,
+    PEAP0,
+    PEAP1,
+    PEAP2,
+    FAST
+}eap_phase1_val_t;
+
+//eapol param
+typedef enum
+{
+    MSCHAPV2_TYPE,
+    TLS_TYPE,
+    PSK_TYPE,
+    GTC_TYPE
+}eap_phase2_val_t;
+
+typedef struct
+{
+    eap_phase1_val_t  eap_phase1_val;
+    eap_phase2_val_t  eap_phase2_val;
+
+    const uint8_t*    pEap_client_cert;
+    uint32_t    eap_client_cert_len;
+
+    const uint8_t*    pEap_ca_cert;
+    uint32_t    eap_ca_cert_len;
+
+    const uint8_t*    pEap_private_key;
+    uint32_t    eap_private_key_len;
+
+    uint8_t  eapIdentity[MAX_USER_LEN + 1];
+    uint32_t eapIdentityLen;
+    uint8_t  eapAnonymous[MAX_ANON_LEN + 1];
+    uint32_t eapAnonUserLen;
+    CMEWlanConnectCommon_t EapCommonConnect;//CMEWlanConnectCommon_t must be located at the need of the structure!!!
+}CMEEapWlanConnect_t;
+
+
+
+#define CME_MAX_SCAN_SSID                  5
 #define CME_SSID_MAX_LENGTH               (32)
 
 typedef struct
@@ -89,8 +144,25 @@ typedef struct
 }CMEWlanScanCommon_t;
 
 
-#define SSID_STRING(pCmd)       ((int8_t *)((CMEWlanConnectCommon_t *)(pCmd) + 1))
-#define PASSWORD_STRING(pCmd)   (SSID_STRING(pCmd) + ((CMEWlanConnectCommon_t *)(pCmd))->SsidLen)
+#define SSID_STRING(conCommon)       ((int8_t *)((CMEWlanConnectCommon_t *)(conCommon) + 1))
+#define PASSWORD_STRING(conCommon)   (SSID_STRING(conCommon) + ((CMEWlanConnectCommon_t *)(conCommon))->SsidLen)
+
+
+#define PROFILE_SSID_STRING(addProfCmd)           ((int8_t *)((CMEWlanAddGetProfile_t *)(addProfCmd) + 1))
+#define PROFILE_PASSWORD_STRING(addProfCmd)       (PROFILE_SSID_STRING(addProfCmd) + ((CMEWlanAddGetProfile_t *)(addProfCmd))->SsidLen)
+
+
+#define EAP_PROFILE_SSID_STRING(pCmd)       (int8_t *)((CMEWlanAddGetEapProfile_t *)(pCmd) + 1)
+#define EAP_PROFILE_PASSWORD_STRING(pCmd)   (EAP_PROFILE_SSID_STRING(pCmd) + ((CMEWlanAddGetEapProfile_t *)(pCmd))->Common.SsidLen)
+
+#define EAP_PROFILE_USER_STRING(pCmd)       (EAP_PROFILE_PASSWORD_STRING(pCmd) + ((CMEWlanAddGetEapProfile_t *)(pCmd))->Common.PasswordLen)
+#define EAP_PROFILE_ANON_USER_STRING(pCmd)  (EAP_PROFILE_USER_STRING(pCmd) + ((CMEWlanAddGetEapProfile_t *)(pCmd))->UserLen)
+
+#define EAP_SSID_STRING(pEapCmd)             ((int8_t*)(((CMEEapWlanConnect_t*)pEapCmd) +1))
+#define EAP_PASSWORD_STRING(pEapCmd)           (EAP_SSID_STRING(pEapCmd) + ((CMEEapWlanConnect_t *)(pEapCmd))->EapCommonConnect.SsidLen)
+
+
+
 
 typedef enum
 {
@@ -103,6 +175,7 @@ typedef enum
     CME_SEC_TYPE_WPA3       = 12,
 
     CME_SEC_TYPE_WPA2_WPA3 = 16,
+    CME_SEC_TYPE_WPA_ENT = 17,
 
     CME_SEC_TYPE_WEP_SHARED
 

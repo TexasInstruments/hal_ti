@@ -666,7 +666,7 @@ struct wpa_driver_scan_params {
  */
 struct wpa_driver_auth_params {
 	int freq;
-	u8 *bssid;
+	const u8 *bssid;
 	const u8 *ssid;
 	size_t ssid_len;
 	int auth_alg;

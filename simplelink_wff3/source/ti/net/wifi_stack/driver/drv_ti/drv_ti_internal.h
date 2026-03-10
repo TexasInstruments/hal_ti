@@ -52,7 +52,7 @@
 #include <driver/drv_core.h>
 #include "public_share.h"
 #include "udata_api.h"
-
+#include "drivers/driver.h"
 
 
 // ============================================================================
@@ -134,7 +134,6 @@ typedef enum
 
 } aesBroadcastKeysArrEntry_e;
 
-typedef enum wpa_event_type  wpaEventType_e;
 
 typedef enum
 {
@@ -146,6 +145,12 @@ typedef enum
     AUTH_ALG_TYPE_AUTO
 } authType_e;
 
+typedef enum 
+{
+    P2P_GROUP_ROLE_CLIENT = 0x00,
+    P2P_GROUP_ROLE_GO     = 0x01,
+    P2P_GROUP_ROLE_NONE   = 0xFF
+} p2pGroupRole_e;
 typedef struct
 {
     // Driver sets the access parameters for 4 access categories.
@@ -172,6 +177,12 @@ typedef enum
 
 	/* caller must call send_disassoc() */
 	RX_MGMT_DISASSOC,
+
+     /* caller must call handler for unprotected deauth event */
+     RX_MGMT_UNPROT_DEAUTH,
+
+     /* caller must call handler for unprotected disassoc event */
+     RX_MGMT_UNPROT_DISASSOC,
 
 	/* caller must call send_rx_auth() */
 	RX_MGMT_AUTH,
@@ -349,6 +360,31 @@ typedef struct
 
 }mbssidData_t;
 
+typedef struct
+{
+    uint16_t    vendor_elements_length;
+    uint8_t     *vendor_elements;  //[WLAN_BEACON_MAX_SIZE];
+}vendorIEInfo_t;
+#define DENY_LIST_MAX_ENTRIES 10 // Maximum number of entries in the deny list. If compiled as 0 then the deny list feature is disabled.
+#define DENY_LIST_EN    (DENY_LIST_MAX_ENTRIES > 0)
+#define DENY_LIST_DEFAULT_EXPIRY_TIME 10*1000 // 10 seconds in milliseconds
+#define DENY_LIST_TIMER_TIMEOUT_SECONDS 5*60 // Timer timeout for clearing the deny list, in seconds. Currently 5 minutes.
+
+// Node structure
+typedef struct DenyList_Node_t
+{
+    uint32_t expiryTime;
+    struct DenyList_Node_t* next;
+    uint8_t macAddr[MAC_ADDR_LEN];
+} DenyList_Node_t;
+
+// Linked list structure
+typedef struct 
+{
+    DenyList_Node_t* head;
+    int size;
+} DenyList_LinkedList_t;
+
 // TODO - Booleans currently waste 8 bits, later on can be replaced with bitmask.
 typedef struct
 {
@@ -469,6 +505,9 @@ typedef struct
     Bool_e      p2pCapabGroupOwnerBit:1;    // if desired peer is GO
     
     RoleCommonParam_t apRate;// Relevant only for STA role, the rates supported by the connected AP combined with the rates that the STA is supporting
+    uint8_t security_key_idx_mc2;        // Key id of broadcast key in index 1 of array
+    uint8_t security_key_idx_mc1;        // Key id of broadcast key in index 0 of array
+    uint8_t broadcastNextKeyArrEntry;    // Next entry in broadcast key array to be updated
     aes_pn_tid_t broadcastPn[AES_NUM_BROADCAST_KEYS];
 
     int8_t fwMaxTxPower; // Role`s effective max TX power, as sent to FW (dBm).
@@ -476,6 +515,12 @@ typedef struct
 
     heMuEdcaAcParams_t apHeMuEdcaAcParams[NUM_ACCESS_CATEGORIES]; 
     dot11_ACParameters_t apAcParameters;
+
+    vendorIEInfo_t vendorIEInfo ;//vendor IEs
+
+    OsiTimer_t timerPeerAgingSample; //timer to sample and send event regarding peer aging
+    uint32_t peerAgingTimeout;// in Mili seconds
+    DenyList_LinkedList_t denyList; // STA's list of MAC addresses that have denied connection
 } ti_driver_ifData_t;
 
 typedef struct
@@ -524,7 +569,6 @@ typedef struct
 
 extern cc33drv_debugInfo_t gSuppDrvDebugInfo_ull;
 #endif
-
 
 // ============================================================================
 //  Driver shared data
@@ -989,6 +1033,24 @@ rxMngPackNextOperation_e ti_drv_rxAssocResponsePacket(
                            	   	    void*                 desc);
 
 /* ----------------------------------------------------------------------------
+ ti_drv_checkUnprotectedDeauthDisassocEventCriteria
+	Checks if the criteria for sending an unprotected deauthentication or 
+     disassociation event are met for the received frame. 
+     This occurs when a station receives an individually addressed unprotected 
+     deauthentication or disassociation frame with reason code 
+     WLAN_REASON_CLASS2_FRAME_FROM_NONAUTH_STA or 
+     WLAN_REASON_CLASS3_FRAME_FROM_NONASSOC_STA while PMF is enabled for the connection.
+
+ Parameters: 	apDrv - pointer to driver instance
+ 	 	 	 	apMngPack - pointer to received packet header
+
+ Return code:   TRUE if the criteria are met, FALSE otherwise
+---------------------------------------------------------------------------- */
+Bool_e ti_drv_checkUnprotectedDeauthDisassocEventCriteria(
+                                             ti_driver_ifData_t  *apDrv,
+						               struct ieee80211_mgmt *apMngPack);
+
+/* ----------------------------------------------------------------------------
  ti_drv_rxDeauthPacket
 	Parse received deauthentication packet (w/o 802.11 header).
 	Code is based on NLCP code, mlme_event_auth
@@ -1052,7 +1114,7 @@ rxMngPackNextOperation_e ti_drv_rxDisassocPacket(
  Return code:   none
 ---------------------------------------------------------------------------- */
 void drv_sendConnectTimeoutEvent(ti_driver_ifData_t  *apDrv,
-                                     wpaEventType_e        aType,
+                                     enum wpa_event_type        aType,
                                      uint8_t                 *apBssid);
 
 
@@ -1326,6 +1388,17 @@ int ti_driver_get_bssid(void *apPriv, u8 *apBssid);
 ---------------------------------------------------------------------------- */
 int ti_driver_get_ssid(void *apPriv, u8 *apSsid);
 
+/* ----------------------------------------------------------------------------
+ ti_driver_add_pmkid
+    This API serves for STA role only.
+    If STA is connected with WPA3 to the AP, it returns the PMKID.
+    Else it returns NULL
+
+ Parameters:    IN  apPriv - Pointer to driver object
+                OUT pmkid  - Pointer to current PMKID cache
+ Return code:   
+---------------------------------------------------------------------------- */
+int ti_driver_add_pmkid(void *apPriv, struct wpa_pmkid_params *pmkid);
 
 // ============================================================================
 //      AP role related APIs
@@ -1605,8 +1678,8 @@ void ti_driver_send_action_cancel_wait(void *apPriv);
 int ti_driver_cancel_remain_on_channel(void *apPriv);
 int ti_driver_remain_on_channel(void *apPriv, uint32_t aFreq, uint32_t aDuration);
 int ti_driver_stop_remain_on_channel(void *apPriv);
-int ti_driver_start_remain_on_channel(void *apPriv, uint32_t aFreq, uint32_t aDuration);
-int ti_driver_probe_req_report(void *apPriv, int32_t aReport);
+int ti_driver_start_remain_on_channel(void *apPriv, unsigned int aFreq, unsigned int aDuration);
+int ti_driver_probe_req_report(void *apPriv, int aReport);
 int ti_driver_if_add(void *apPriv, enum wpa_driver_if_type type,
                     const char *ifname, const u8 *addr, void *bss_ctx,
                     void **drv_priv, char *force_ifname, u8 *if_addr,
@@ -1618,6 +1691,12 @@ uint32_t fillBeaconTemplate(struct wpa_driver_ap_params *apParams, uint8_t *apBu
 uint32_t fillProbeRespTemplate(struct wpa_driver_ap_params *apParams, uint8_t *apBuffer);
 void* ti_driver_off_channel_device_init(void* apPriv,const char *ifname);
 uint32_t fillDeauthTemplate(uint8_t *apBuffer);
+
+int DenyList_initList(DenyList_LinkedList_t* list);
+void DenyList_clearList(DenyList_LinkedList_t* list);
+int DenyList_elementExists(DenyList_LinkedList_t* list, uint8_t macAddr[MAC_ADDR_LEN], DenyList_Node_t** node);
+int DenyList_addElement(DenyList_LinkedList_t* list, uint8_t macAddr[MAC_ADDR_LEN], uint32_t expiryTime);
+void DenyList_verifyAndRemoveExpiredElements(DenyList_LinkedList_t* list); 
 
 #endif // _DRV_SUPPLICANT_API_H_
 

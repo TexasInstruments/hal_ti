@@ -264,9 +264,9 @@ typedef enum
 #define RX_QUEUE_DEFAULT_WIN_SIZE           32
 
 /* Tx aggregation packets number limit (max packets in one aggregation) */
-#define TWD_TX_AGGREG_PKTS_LIMIT_DEF    1 //no aggragation
 #define TWD_TX_AGGREG_PKTS_LIMIT_MIN    0
-#define TWD_TX_AGGREG_PKTS_LIMIT_MAX    16
+#define TWD_TX_AGGREG_PKTS_LIMIT_DEF    1 //1 = no aggragation
+#define TWD_TX_AGGREG_PKTS_LIMIT_MAX    (TWD_TX_AGGREG_PKTS_LIMIT_DEF*2346) //max frame length mutiple num of frames
 
 /* PALAU Group Address Default Values */
 #define NUM_GROUP_ADDRESS_VALUE_DEF     0
@@ -338,8 +338,6 @@ typedef enum
 /* Rx aggregation packets number limit (max packets in one aggregation) */
 #define TWD_RX_AGGREG_PKTS_LIMIT_DEF    8//1//MAX_XFER_BUFS
 
-/* Tx aggregation packets number limit (max packets in one aggregation) */
-#define TWD_TX_AGGREG_PKTS_LIMIT_MAX    16
 
 
 #define MAX_NUM_OF_AC                   4
@@ -412,7 +410,7 @@ typedef enum
 /* Data body max length */
 #define MAX_DATA_BODY_LENGTH            4096
 
-#define CTRL_BLK_ENTRIES_NUM                             90// was 120 but memory reduction for MX is required
+#define CTRL_BLK_ENTRIES_NUM                             120// was 120 but memory reduction for MX is required
 #define CTRL_BLK_ENTRIES_FOR_DATA_NUM                    (CTRL_BLK_ENTRIES_NUM-16) //means kept for mgmt
 
 
@@ -721,6 +719,7 @@ typedef struct
     uint8_t     uAcCounteDone;       /**< The packet was dequeue and allocated for tX and AC counted                                  */
     uint32_t    uAcPendTXDataDone;        /**<frame was enqueued and it is pending TX >**/
     uint8_t     extraSpareKeyCount;/* number of keys requiring extra spare mem-blocks                           */ 
+    Bool_e      isNullDataFrame;  /**< Indicates whether the frame is a data frame with no payload              */
 } TTxPktParams;
 
 
@@ -735,7 +734,7 @@ typedef struct
  * The entry index is the descriptor-ID. It is written in the descriptor and
  * copied back into the tx-complete results
  *
- * \sa  SendPacketTranferCB_t, SendPacketDebugCB_t, TWD_txCtrlBlk_alloc, TWD_txCtrlBlk_free, TWD_txCtrlBlk_GetPointer, TWD_txXfer_sendPacket
+ * \sa  SendPacketTranferCB_t, SendPacketDebugCB_t, TWD_txCtrlBlk_alloc, TWD_txCtrlBlk_free, TWD_txCtrlBlk_GetPointer, TWD_txXfer_SendPacket
  */
 
 //---------------------------------------------------------------------------------------------//
@@ -1045,6 +1044,7 @@ TTxCtrlBlk *TWD_txCtrlBlk_GetPointer(uint32_t uIndex);
  *
  * \sa
  */
+
 ETxHwQueStatus TWD_txHwQueue_AllocResources (TTxCtrlBlk *pTxCtrlBlk, uint8_t *pBackpressureMap);
 
 /** @ingroup Data_Path
@@ -1061,6 +1061,21 @@ ETxHwQueStatus TWD_txHwQueue_AllocResources (TTxCtrlBlk *pTxCtrlBlk, uint8_t *pB
  */
 ETxnStatus TWD_txXfer_SendPacket (TTxCtrlBlk *pPktCtrlBlk);
 
+
+/** @ingroup Data_Path
+ * \brief  TX Xfer Send Packet
+ *
+ * \param  hTWD             - TWD module object handle
+ * \param  pPktCtrlBlk      - Pointer to TX Control Block Entry to Free
+ * \return see ETxnStatus
+ *
+ * \par Description
+ * Send Packet via TX Xfer , aggregation of  packet
+ *
+ * \sa
+ */
+ETxnStatus TWD_txXferAggr_SendPacket (TTxCtrlBlk *pPktCtrlBlk);
+
 /** @ingroup Data_Path
  * \brief  Indicates that current packets burst stopped
  *
@@ -1072,6 +1087,5 @@ ETxnStatus TWD_txXfer_SendPacket (TTxCtrlBlk *pPktCtrlBlk);
  *
  * \sa
  */
-void TWD_txXfer_EndOfBurst (void);
-
+void TWD_txXferAggr_EndOfBurst (void);
 #endif  /* TWDRIVER_H */

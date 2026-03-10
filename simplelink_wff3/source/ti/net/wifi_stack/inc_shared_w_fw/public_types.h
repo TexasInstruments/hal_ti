@@ -692,7 +692,7 @@ typedef struct
 #define A_5G_BAND_NUM_CHANNELS      (A_5G_BAND_MAX_CHANNEL-A_5G_BAND_MIN_CHANNEL+1)
 #define REG_DOMAIN_MAX_REG_CLASS_NUM       10
 #define NUM_OF_CHANNELS_24              14
-#define NUM_OF_CHANNELS_5               180
+#define A_BAND_CHANNEL_COUNT            26
 #define TWD_CALIBRATION_CHANNEL_2_4_MIN 1
 #define MAX_TX_POWER                    210     // 21 dBm
 #define MIN_TX_POWER                    -100    // -10 dBm

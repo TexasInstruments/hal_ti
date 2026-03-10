@@ -1330,6 +1330,7 @@ typedef enum
     RESET_DECRYPT_PACKETS_COUNT     = 29,
     ENABLE_CHANNEL_UTILIZATION_NEXT_SCAN = 30,
     SET_SEED_CFG                    = 31,
+    RESET_STATS                     = 32,
 
     LAST_CFG_VALUE                  ,
     MAX_DOT11_CFG = LAST_CFG_VALUE  ,
@@ -1362,9 +1363,9 @@ typedef enum
     PWR_PARTIAL_MODES_CFG       ,
     TRIGGER_FW_ASSERT           ,
     BURST_MODE_CFG              ,
-    LAST_DEBUG_VALUE            ,
-    MAX_DOT11_DEBUG = LAST_DEBUG_VALUE,
-
+    THERMAL_PROTECTION_CFG      ,
+    LAST_DEBUG_VALUE                  ,
+    MAX_DOT11_DEBUG = LAST_DEBUG_VALUE  ,
 } cmdDebug_e;
 
 /******************************************************************************
@@ -1916,6 +1917,28 @@ typedef struct __PACKED__
 } RtsTh_t;
 
 /******************************************************************************
+        ID:     THERMAL_PROTECTION_CFG
+        Desc:   Thermal Protection configuration
+        Type:   Configuration
+******************************************************************************/
+/**
+ * struct ThermalCbCfg_t - Command configure
+ *
+*/
+typedef struct __PACKED__
+{
+    int16_t  highThr_24G;
+    int16_t  lowThr_24G;
+    int16_t  highThr_5G;
+    int16_t  lowThr_5G;
+    int16_t  HighSampleThr;
+    uint8_t  enable_value;
+    uint8_t  padding[1];
+} ThermalCbCfg_t;
+
+
+
+/******************************************************************************
         ID:     LINK_ADAPT_CFG
         Desc:   Debug capabilities for link adaptation
         Type:   Configuration
@@ -2269,7 +2292,7 @@ typedef struct __PACKED__
 
         uint32_t decrypted_ok_broadcast_count;
         uint32_t decrypted_error_broadcast_count ;
-   }d;
+   }counters;
 
 } DecryptPacketsStatusCount_t;
 
@@ -2288,6 +2311,47 @@ typedef struct __PACKED__
     uint16_t                    channelNum;
 }  RoleCurrentChannelNumber_t;
 
+typedef struct __PACKED__
+{
+    uint32_t SleepTimeCnt;      /* Count sleep periods */
+    uint32_t SleepTimeAvg;      /* Average sleep duration */
+    uint32_t SleepCycleAvg;     /* Average sleep cycle duration (from wakeup to following wakeup) */
+    uint32_t SleepPrct;         /* (Average) Percentage of sleep time (of overall time) */
+} cc33xx_acx_power_stats_t;
+
+typedef struct __PACKED__
+{
+	cc33xx_acx_power_stats_t power;
+
+} FwStatistics_t;
+
+/******************************************************************************
+        ID:     GET_SP_VERSIONS_INTR
+        Desc:   Read the SP versions from the First patch version
+        Type:   Interrogate
+******************************************************************************/
+/**
+ * struct GetFWVersion_t - Read the SP versions from the First patch version
+ *
+ * @major_version:    major version part of SP sw version.
+ *
+ * @minor_version:    minor version part of SP sw version.
+ *
+ * @revision_version: revision version part of SP sw version.
+ *
+ * @build_version:    build version part of SP sw version.
+ *
+ * @phy_version:      phy_version.
+*/
+typedef struct __PACKED__
+{
+    uint8_t  major_version;
+    uint8_t  minor_version;
+    uint16_t revision_version;
+    uint32_t build_version;
+    uint8_t  phy_version[8];
+}SPVersions_t;
+
 /******************************************************************************
         ID:     SET_SEED_CFG
         Desc:   Set Seed
@@ -2295,12 +2359,20 @@ typedef struct __PACKED__
 ******************************************************************************/
 typedef struct __PACKED__
 {
-    uint8  data[MAX_SEED_SIZE];
+    uint8_t  data[MAX_SEED_SIZE];
 }  SeedCfg_t;
 
 
 
 /*****************************************************************************/
+typedef struct __PACKED__
+{
+    uint8_t csi_Enable; // Changes MEM_DISABLE_CSI, using ApiHandlerFunctions[MLBX_M0_CMD_CSI_MODE_EN_DIS]
+    uint8_t csi_samples_decimation;
+    uint8_t csi_phase;
+    uint8_t csi_expansion_Enable;
+    uint32_t csi_extra_params; // Saving room for future configuration
+} CsiEnableCmd_t;
 
 /******************************************************************************
         ID:     ENABLE_NOTIFY
@@ -2411,6 +2483,7 @@ typedef union
     CalibBitmapCfg_t    calibBitmapCfg;
     PwrPartialModeDebugCfg_t PwrPartialModesDebugCfg;
     BurstModeCfg_t      BurstModeCfg;
+    ThermalCbCfg_t      ThermalCbCfg;
 
 } cmdDebug_u;
 
@@ -2472,6 +2545,10 @@ typedef enum
     GET_LATEST_CHANNEL_UTILIZATION_SURVEY   = 10,
     GET_DECRYPT_PACKETS_COUNTS              = 11,
     GET_ROLE_CHANNEL_NUMBER                 = 12,
+    GET_STATISTICS                          = 13,
+    GET_SP_VERSIONS_INTR                    = 14,
+    GET_LINK_INACTIVITY                     = 15,
+    GET_DEVICE_SYSTEM_INFO                  = 16,
     LAST_INTR_VALUE                            ,
     MAX_DOT11_INTR = LAST_INTR_VALUE           ,
 
@@ -2525,6 +2602,8 @@ typedef struct __PACKED__
 	uint16_t build_version;
 
 	uint8_t phy_version[8];
+    uint8_t container_type;
+    uint8_t padding[3];
 }FWVersions_t;
 
 /******************************************************************************
@@ -2646,6 +2725,24 @@ typedef struct __PACKED__
 } Macaddress_t;
 
 /******************************************************************************
+        ID:     GET_LINK_INACTIVITY
+        Desc:   Get inactivity duration for a given link
+        Type:   Interrogate
+******************************************************************************/
+typedef struct
+{
+    int   inactivityDuration;
+    uint8 macAddress[MAC_ADDR_LEN];
+    uint8 padding[2];
+} LinkInactivity_t;
+
+typedef struct __PACKED__
+{
+    uint32_t  systemInfoIdx;
+    uint32_t  deviceSystemInfoValue;
+} DeviceSystemInfo_t;
+
+/******************************************************************************
 * ** ***                                                               *** ** *
 * ** ***                  INTERROGATE CMD                              *** ** *
 * ** ***                                                               *** ** *
@@ -2671,7 +2768,9 @@ typedef union
     ChannelUtilizationSurveyResults_t  ChannelUtilization_results[CHANNELS_COUNT];  // GET_LATEST_CHANNEL_UTILIZATION_SURVEY
     DecryptPacketsStatusCount_t        DecryptPacketsStatus;                        // GET_DECRYPT_PACKETS_COUNTS
     RoleCurrentChannelNumber_t         RoleCurrentChannel;                          // GET_ROLE_CHANNEL_NUMBER
-
+    FwStatistics_t                     Statistics;                                  // GET_STATISTICS
+    SPVersions_t                       SPVersions;                                  // GET_SP_VERSIONS_INTR
+    DeviceSystemInfo_t                 DeviceSysInfo;                               // GET_DEVICE_SYSTEM_INFO
 }Interrogate_u;
 /**
  * struct Interrogate_t -Read Interrogate command
@@ -2702,31 +2801,31 @@ typedef enum
     CONSTVALUE = 0,
     INCREAMENT = 1,
     RANDOM_VALUE = 2,
-}dataMode_e;
+} dataMode_e;
 
 typedef struct __PACKED__
 {
-    uint32_t    bitmask;
-    uint8_t     preambleType;
-    uint8_t     PhyRate;
-    int8_t      TxPower;
-    uint8_t     GI_LTF_Type;
-    uint8_t     DCM;
-    uint16_t    start_length;
-    uint16_t    end_length;
-    uint32_t    delay;
-    uint8_t     packetMode;
-    uint16_t    numberOfPackets;
-    uint8_t     dataMode;
-    uint8_t     dataConstValue;
-    uint8_t     enableCCA;
-    uint8_t     BSSColor;
-    uint16_t    SU_ER_Bandwidth;
-    uint8_t     partialAID;
-    uint8_t     src_addr[MAC_ADDR_LEN];
-    uint8_t     dst_addr[MAC_ADDR_LEN];
-    uint8_t     nominalPacketExtension;
-    uint8_t     feedbackStatus;
+    uint64_t 	bitmask;
+    uint8_t 	preambleType;
+	uint8_t 	PhyRate;
+	int8_t 	    TxPower;
+	uint8_t 	GI_LTF_Type;
+	uint8_t 	DCM;
+	uint16_t 	start_length;
+	uint16_t 	end_length;
+	uint32_t 	delay;
+	uint8_t 	packetMode;
+	uint16_t 	numberOfPackets;
+	uint8_t 	dataMode;
+	uint8_t 	dataConstValue;
+	uint8_t 	enableCCA;
+	uint8_t 	BSSColor;
+	uint16_t 	SU_ER_Bandwidth;
+	uint8_t 	partialAID;
+	uint8_t  	src_addr[MAC_ADDR_LEN];
+	uint8_t  	dst_addr[MAC_ADDR_LEN];
+	uint8_t 	nominalPacketExtension;
+	uint8_t 	feedbackStatus;
     uint16_t    aid;
     uint8_t     group_id;
     uint8_t     ltf_mode;
@@ -2740,8 +2839,11 @@ typedef struct __PACKED__
     uint8_t     disamb;
     uint8_t     eht_sig_rate;
     uint8_t     ru_80_subblock;
-    uint8_t     padding[1];//padding
-}TTestCmd_StartTX_t;
+    uint8_t     regulatory_TxPowerLimit;
+    uint8_t	    padding[2];//padding
+} TTestCmd_StartTX_t;
+
+
 
 typedef enum 
 {
@@ -2777,14 +2879,39 @@ typedef enum
     /*  0x1D   */   TB_DISAMB_MODE = 0x1D,
     /*  0x1E   */   EHT_SIG_RATE = 0x1E,
     /*  0x1F   */   RU_80_SUBBLOCK = 0x1F,
+    /*  0x20   */   REGULATORY_TX_POWER_LIMIT_MODE = 0x20,
 
 }TTestCmd_StartTX_e;
 
+#define EFUSE_TOKEN 0x73377337
+
+typedef enum 
+{
+    /*  0x0    */	MAC_ADDR = 0x0,
+    /*  0x1    */	WIFI_6 = 0x1,
+	/*  0x2    */	CONF_KEY = 0x2,
+	/*  0x3    */	ROLLBACK_PROTECTION = 0x3,
+	/*  0x4    */	WORLDWIDE_RESTRICTION = 0x4,
+	/*  0x5    */	COUNTRY_CODE = 0x5,
+	/*  0x6    */	TOKEN = 0x6,
+    /*  0x7    */	EFUSE_LOCKED = 0x7,
+    /*  0x8    */   INVALID = 0x8,
+    /*  0x9    */   ROOT_OF_TRUST_BYPASS = 0x9,
+    /*  0x9    */   ROOT_OF_TRUST = 0xA
+}TTestCmd_efuse_e;
 
 typedef struct __PACKED__
 {
     uint32_t dummy;
 }TTestCmd_StopTX_t;
+
+typedef struct __PACKED__
+{
+	uint8_t     mode;
+	int8_t      offset;
+	int8_t      output_power;
+}TTestCmd_StartTXTone_t;
+
 
 
 typedef struct __PACKED__
@@ -2821,6 +2948,23 @@ typedef struct __PACKED__
     uint8_t padding[2];
     uint32_t duration;
 } TTestCmd_ChangePowerMode_t;
+
+#define ROT_WORD_LEN    8
+typedef struct __PACKED__
+{
+	uint32_t 	bitmask;
+	uint8_t  	mac_addr[MAC_ADDR_LEN];
+	uint8_t  	wifi6_disable;
+	uint8_t  	rollback_protection_enable;
+	uint8_t  	worldwide_disable;
+	uint8_t     countey_code[2];
+	uint8_t     padding;
+	uint32_t    conf_key;
+	uint32_t    token;
+    uint32_t    bitmask_error;
+    uint32_t    root_of_trust[ROT_WORD_LEN];
+    uint8_t     root_of_trust_bypass;
+}TTestCmd_efuse_t;
 
 typedef struct __PACKED__
 {
@@ -2883,6 +3027,7 @@ typedef enum {
     /*  0x17   */   CC33XX_TEST_CMD_SET_IO_CFG = 0x17,
     /*  0x18   */   CC33XX_TEST_CMD_GET_IO_CFG = 0x18
 } TestCmdID_e;
+
 
 
 typedef struct
@@ -2990,11 +3135,12 @@ typedef struct __PACKED__
 */
 //TODO ,JIRA OSPREY_MSB-3 ,this structure is temporary solution to the alignment issue between M3 and M33
 //need to be changed when issue solved
-typedef  struct __PACKED__
+typedef struct __PACKED__
 {
-    //Command_e   cmdID;//2 bytes
-    uint32_t    cmdID;
-    uint8_t     param[MAX_MBOX_SIZE];
+    uint32_t    cmdID;                  // 2 bytes (NAB_Header.opcode)
+    //uint16_t    NAB_Length;             // 2 bytes (NAB_Header.length)
+    //uint32_t    reserved;               // 2 bytes id, 2 bytes status
+    uint8_t     param[MAX_MBOX_SIZE];   // payload
 } CommandParam_t;
 
 

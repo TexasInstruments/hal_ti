@@ -47,9 +47,12 @@
 #define HCI_EVENT_PACKET                                  0x04        //!< Event Packet
 #define HCI_EXTENDED_EVENT_PACKET                         0x05        //!< Extended Event Packet   (2 bytes length)
 #define HCI_EXTENDED_CMD_PACKET                           0x09        //!< Extended Command Packet (2 bytes length)
+#define HCI_VENDOR_EVENT_PACKET                           0xFF        //!< Vendor Event Packet
 
-//HCI Packet Length
-#define HCI_MAX_PKT_LEN                                   256
+//HCI MAX Lengths
+#define HCI_MAX_PAYLOAD_LEN                               255
+#define HCI_MAX_HEADER_LEN                                5
+#define HCI_MAX_PKT_LEN                                   HCI_MAX_HEADER_LEN + HCI_MAX_PAYLOAD_LEN
 
 //HCI Header Length
 #define HCI_EVENT_PKT_HDR_LEN                             3
@@ -148,7 +151,6 @@ THREAD FUNCTIONS
 ******************************************************************************/
 void HciThread_Entry(void* params)
 {
-    OsiReturnVal_e rc;
     uint8_t* hciPktBuf;
     uint16_t hciPktReadLen = 0;
     uint8_t  threadId;
@@ -180,14 +182,17 @@ void HciThread_Entry(void* params)
     {
         if (HciTransport_ReadHciPacket(threadId, hciPktBuf, &hciPktReadLen) == 0)
         {
-            if(g_pTransport[threadId].rx_cb != NULL)
+            if (BleIf_VendorEventHandler(hciPktBuf, hciPktReadLen) == 0)
             {
-                TransportRxCb(threadId, hciPktBuf, hciPktReadLen);
+                if(g_pTransport[threadId].rx_cb != NULL)
+                {
+                    TransportRxCb(threadId, hciPktBuf, hciPktReadLen);
+                }
             }
         }
         else
         {
-            Report("\n\rHciThread_Entry, Fail to HciTransport_ReadHciPacket");
+            Report("\n\rHci_Thread[%d]: Failed to HciTransport_ReadHciPacket", threadId);
             error_event.error_num = -1;
             error_event.module = WLAN_MODULE_BLE;
             error_event.severity = WLAN_SEVERITY_MID;
@@ -242,7 +247,7 @@ void HciThread_Destruct(uint8_t instance)
     if (OSI_OK != rc)
     {
         Report("\n\rHciThread_Destruct[%d]: ThreadDelete failed !!!", instance);
-        assert(0);
+        ASSERT_GENERAL(0);
         error_event.error_num = rc;
         error_event.module = WLAN_MODULE_BLE;
         error_event.severity = WLAN_SEVERITY_MID;
@@ -337,16 +342,17 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
 {
     uint8_t packetType = 0;
     uint16_t dataLength = 0;
-    size_t bytesRead;
 
     //check if module was previously initialized
     if (TransportInitialized(instance) == FALSE)
     {
+        Report("\n\rHciTransport_ReadHciPacket: Transport was not initialized\n");
         return -1;
     }
 
-    if( instance >= HCI_TRANSPORT_NUM_INSTANCES )
+    if (instance >= HCI_TRANSPORT_NUM_INSTANCES)
     {
+        Report("\n\rHciTransport_ReadHciPacket: Invalid transport instance %d\n", instance);
         return -1;
     }
 
@@ -359,7 +365,7 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
     //Set Packet Type
     packetType = pHciPkt[0];
 
-    if ((packetType == HCI_EVENT_PACKET) || (packetType == HCI_EXTENDED_EVENT_PACKET))
+    if ((packetType == HCI_EVENT_PACKET) || (packetType == HCI_EXTENDED_EVENT_PACKET) || (packetType == HCI_VENDOR_EVENT_PACKET))
     {
         //Read the rest of packet header
         TransportRead(instance, (pHciPkt + HCI_PKT_TYPE_BYTE), (HCI_EVENT_PKT_HDR_LEN - HCI_PKT_TYPE_BYTE));
@@ -370,9 +376,10 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
         //Read Event Parameters Data
         if (dataLength > 0)
         {
-            if (dataLength > (HCI_MAX_PKT_LEN-HCI_EVENT_HDR_DATA_BYTE))
+            if (dataLength > HCI_MAX_PAYLOAD_LEN)
             {
-                assert(0);
+                Report("\n\rHciTransport_ReadHciPacket: Packet params length %d exceeded max supported of %d\n", dataLength, HCI_MAX_PAYLOAD_LEN);
+                ASSERT_GENERAL(0);
                 return -1;
             }
             TransportRead(instance, (pHciPkt + HCI_EVENT_HDR_DATA_BYTE), dataLength);
@@ -381,7 +388,7 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
         //Set the HCI total packet length
         *hciPktLen = HCI_EVENT_PKT_HDR_LEN + dataLength;
     }
-    else if ( packetType == HCI_CMD_PACKET )
+    else if (packetType == HCI_CMD_PACKET)
     {
         //Read the rest of packet header
         TransportRead(instance, (pHciPkt + HCI_PKT_TYPE_BYTE), (HCI_CMD_PKT_HDR_LEN - HCI_PKT_TYPE_BYTE));
@@ -392,9 +399,10 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
         //Read Command Parameters Data
         if (dataLength > 0)
         {
-            if (dataLength > (HCI_MAX_PKT_LEN-HCI_CMD_HDR_DATA_BYTE))
+            if (dataLength > HCI_MAX_PAYLOAD_LEN)
             {
-                assert(0);
+                Report("\n\rHciTransport_ReadHciPacket: Packet params length %d exceeded max supported of %d\n", dataLength, HCI_MAX_PAYLOAD_LEN);
+                ASSERT_GENERAL(0);
                 return -1;
             }
             TransportRead(instance, (pHciPkt + HCI_CMD_HDR_DATA_BYTE), dataLength);
@@ -403,26 +411,28 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
         //Set the HCI total packet length
         *hciPktLen = HCI_CMD_PKT_HDR_LEN + dataLength;
     }
-    else if ( packetType == HCI_EXTENDED_CMD_PACKET )
+    else if (packetType == HCI_EXTENDED_CMD_PACKET)
     {
         //Read the rest of packet header
-         TransportRead(instance, (pHciPkt + HCI_PKT_TYPE_BYTE), (HCI_EXT_CMD_PKT_HDR_LEN - HCI_PKT_TYPE_BYTE));
+        TransportRead(instance, (pHciPkt + HCI_PKT_TYPE_BYTE), (HCI_EXT_CMD_PKT_HDR_LEN - HCI_PKT_TYPE_BYTE));
 
-         //Get Command Parameters Data Length
-         dataLength = BUILD_UINT16(pHciPkt[HCI_CMD_HDR_LEN_BYTE], pHciPkt[HCI_CMD_HDR_LEN_BYTE + 1]);
+        //Get Command Parameters Data Length
+        dataLength = BUILD_UINT16(pHciPkt[HCI_CMD_HDR_LEN_BYTE], pHciPkt[HCI_CMD_HDR_LEN_BYTE + 1]);
 
-         //Read Command Parameters Data
-         if (dataLength > 0)
-         {
-             if (dataLength > (HCI_MAX_PKT_LEN-HCI_EXT_CMD_HDR_DATA_BYTE))
-             {
-                 assert(0);
-             }
-             TransportRead(instance, (pHciPkt + HCI_EXT_CMD_HDR_DATA_BYTE), dataLength);
-         }
+        //Read Command Parameters Data
+        if (dataLength > 0)
+        {
+            if (dataLength > HCI_MAX_PAYLOAD_LEN)
+            {
+                Report("\n\rHciTransport_ReadHciPacket: Packet params length %d exceeded max supported of %d\n", dataLength, HCI_MAX_PAYLOAD_LEN);
+                ASSERT_GENERAL(0);
+                return -1;
+            }
+            TransportRead(instance, (pHciPkt + HCI_EXT_CMD_HDR_DATA_BYTE), dataLength);
+        }
 
-         //Set the HCI total packet length
-         *hciPktLen = HCI_EXT_CMD_PKT_HDR_LEN + dataLength;
+        //Set the HCI total packet length
+        *hciPktLen = HCI_EXT_CMD_PKT_HDR_LEN + dataLength;
     }
     else if (packetType == HCI_ACL_DATA_PACKET)
     {
@@ -436,9 +446,10 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
         //Read Data Total Length
         if (dataLength > 0)
         {
-            if (dataLength > (HCI_MAX_PKT_LEN-HCI_DATA_HDR_DATA_BYTE))
+            if (dataLength > HCI_MAX_PAYLOAD_LEN)
             {
-                assert(0);
+                Report("\n\rHciTransport_ReadHciPacket: Packet data length %d exceeded max supported of %d\n", dataLength, HCI_MAX_PAYLOAD_LEN);
+                ASSERT_GENERAL(0);
                 return -1;
             }
             TransportRead(instance, (pHciPkt + HCI_DATA_HDR_DATA_BYTE), dataLength);
@@ -449,7 +460,7 @@ int HciTransport_ReadHciPacket(uint8_t instance, uint8_t* pHciPkt, uint16_t* hci
     }
     else
     {
-        //ERROR
+        Report("\n\rHciTransport_ReadHciPacket: Received invalid packet type 0x%x. Discarding packet.\n", packetType);
         return -1;
     }
 

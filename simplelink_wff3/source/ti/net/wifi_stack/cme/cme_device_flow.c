@@ -216,14 +216,14 @@ void CmeDeviceROC (Cme_Users_e __user)
 
 void CmeDeviceCROC (Cme_Users_e __user)
 {
-    int32_t roleId, ret;
+    int32_t ret;
     struct wpa_supplicant *wpa_s;
     uint32_t*   pArgs;
 
     CME_PRINT_REPORT("\n\rCME :Device SM: CmeDeviceCROC \n");
 
-    roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_DEVICE);
-    wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
+    wpa_s = drv_getP2pDeviceSupplicant();
+
     if(wpa_s == NULL )
     {
         GTRACE(GRP_CME,"CME :ERROR ! DEVICE role doesn't exists");
@@ -271,6 +271,13 @@ static void supplicantRunDevice()
     // In order for this configuration to take place WPA_DRIVER_FLAGS_DEDICATED_P2P_DEVICE
     // must be set on driver capabilities flags, see driver_cc33.c, setDriverCapabilities.
     iface.p2p_mgmt = 0;
+    CME_PRINT_REPORT("\r\nCME : supplicantRunDevice: cfgGetP2pDeviceEnable = %d", cfgGetP2pDeviceEnable());
+
+    if (cfgGetP2pDeviceEnable())
+    {
+        iface.p2p_mgmt = 1;
+    }
+
 
     // only the first role that is started initializes supplicant
     if (NULL == gpSupplicantGlobals)
@@ -298,6 +305,12 @@ static void supplicantRunDevice()
     {
         pGlobal = gpSupplicantGlobals;
     }
+
+    if (TRUE == cfgGetP2pDeviceEnable())
+    {
+        pGlobal->params.conf_p2p_dev = os_strdup(NETIF_CONF_NAME(TIWLAN_DEV_NAME_P2PDEV));
+    }
+
     wpa_s = wpa_supplicant_add_iface(pGlobal, &iface, NULL);
     if (NULL == wpa_s)
     {
@@ -305,6 +318,11 @@ static void supplicantRunDevice()
     }
 
     wpa_s->auto_reconnect_disabled = 1;
+
+    if (cfgGetP2pDeviceEnable())
+    {
+        wpa_s->drv_flags |= WPA_DRIVER_FLAGS_P2P_DEDICATED_INTERFACE;
+    }     
 
     if (NULL == gpSupplicantGlobals)
     {

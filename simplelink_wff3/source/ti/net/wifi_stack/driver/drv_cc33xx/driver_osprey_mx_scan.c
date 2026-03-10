@@ -85,6 +85,8 @@
 #include "public_share.h"
 #include "rx.h"
 #include "rx_defs.h"
+#include "l2_cfg.h"
+#include "errors.h"
 
 #define CC33XX_MAX_TXPWR (21)
 
@@ -109,6 +111,8 @@ extern  void scanDigestTable_HandleResult(TScanFrameInfo*        pFrame,
 
 extern  void scanDigestTable_HandleExtendedResult(TScanFrameInfo*      pFrame,
                                                   uint32_t             score);
+
+extern  int32_t is_wlan_periodic_scan_in_progress();
 
 
 // ============================================================================
@@ -460,7 +464,8 @@ int32_t mx_driver_scan_results_process(uint32_t aRoleId, RxIfDescriptor_t *desc,
         case SCAN_REQUEST_ONE_SHOT:
             pList = pCmeScanDB->mOneShotProfiles.mpProfiles;
             numOfSSID = pCmeScanDB->mOneShotProfiles.mNumProfiles;
-            if(numOfSSID == 0 && !gSupplicantInitiatedScanInProgress)
+            if ((numOfSSID == 0) && 
+                ((!gSupplicantInitiatedScanInProgress) || (gSupplicantInitiatedScanInProgress && is_wlan_periodic_scan_in_progress())))
             {
                 //one shot and survey scan has the same TAG, the difference is the existence of the ssid list
                 if(gSetSiteSurvey == CME_SITE_SURVEY_RUNNING)
@@ -647,7 +652,17 @@ int32_t mx_driver_scan_results_process(uint32_t aRoleId, RxIfDescriptor_t *desc,
                     pList,
                     &profileId);
             }
-                        
+
+            /* Compare BSSID of the scan result and make sure it does not apear in the Deny List */
+            /* When the Deny List is searched, expired entries are removed as well */
+            if (DenyList_elementExists(&(pDrv->denyList), pParsedFrame.bssid, NULL))
+            {
+                Report("Scan results: BSSID %02x:%02x:%02x:%02x:%02x:%02x is in Deny List. Remove it from scan results",
+                       pParsedFrame.bssid[0], pParsedFrame.bssid[1], pParsedFrame.bssid[2], pParsedFrame.bssid[3], 
+                       pParsedFrame.bssid[4], pParsedFrame.bssid[5]);
+                status =-1;
+                goto out;
+            }
 
             /* Update entry in result table */
             score = scan_result_calc_weighted_score(&tScanFrameInfo, scanType);
@@ -667,7 +682,7 @@ int32_t mx_driver_scan_results_process(uint32_t aRoleId, RxIfDescriptor_t *desc,
             }
             else
             {
-                MLME_REPORT_PRINT_PARSER("Scan result, score is %d. ssid = %s \n\r", score ,tScanFrameInfo.pParsedIEs->ssid.serviceSetId);
+                CME_PRINT_SCAN_DEBUG_REPORT("\n\rScan result, score is %d. ssid = %s \n\r", score ,tScanFrameInfo.pParsedIEs->ssid.serviceSetId);
                 /* According to scan type, decide which scan result table to update (or send the frame info to the caller) */
                 if(scanType != SCAN_REQUEST_SURVEY_SCAN)
                 {
@@ -717,24 +732,27 @@ int32_t mx_driver_scan_results_process(uint32_t aRoleId, RxIfDescriptor_t *desc,
                 status = OK;
             }
 
-            // supplicant scan is not a connection scan. we want to pass the supplicant all networks
-            // that meet the request requirements.
-            if(OK == status && scanType != SCAN_REQUEST_SURVEY_SCAN && !gSupplicantInitiatedScanInProgress)
+            if (gConnectionScanEarlyTerminationEnabled)
             {
-                Bool_e early_termination = scan_result_check_early_termination(pCmeScanDB,
-                                                                (int32_t)res_rssi,
-                                                                score);
-                if (early_termination != FALSE)
+                // supplicant scan is not a connection scan. we want to pass the supplicant all networks
+                // that meet the request requirements.
+                if(OK == status && scanType != SCAN_REQUEST_SURVEY_SCAN && !gSupplicantInitiatedScanInProgress)
                 {
-                    // need to stop scan ?
-                    pCmeScanDB->ETexceeded = TRUE;
-                    if(cc3xxx_trnspt_cmd_if_send_stop_scan(aRoleId , scanType, early_termination) < 0)
+                    Bool_e early_termination = scan_result_check_early_termination(pCmeScanDB,
+                                                                    (int32_t)res_rssi,
+                                                                    score);
+                    if (early_termination != FALSE)
                     {
-                        status =-1;
-                        ASSERT_GENERAL(0);
-                    }
+                        // need to stop scan ?
+                        pCmeScanDB->ETexceeded = TRUE;
+                        if(cc3xxx_trnspt_cmd_if_send_stop_scan(aRoleId , scanType, early_termination) < 0)
+                        {
+                            status =-1;
+                            ASSERT_GENERAL(0);
+                        }
 
-                    break;
+                        break;
+                    }
                 }
             }
         }
@@ -1126,34 +1144,52 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
                                         uint8_t max_sched_scan_plans,WlanBandCfg_e Band)
 {
 
-    ChannelInfo_t           *pChannelList;
-    uint8_t                   *pNumOfPassive;
-    uint8_t                   *pNumOfDfs;
-    uint8_t                   *pNumOfActive;
-    channelCapability_t     channelCapability;
-    int32_t                   status;
-    uint8_t                   sizeOfBG;
-    uint8_t                   sizeOfA;
-    uint16_t                  localChannel[SCAN_MAX_CHANNELS_NUM] = PERIODIC_SCAN_CHANNELS_ARRAY_B_G_A_BAND; // need to check the max size if we get channels from supplicant and add #define
-    uint8_t                   passiveIdx = 0;
-    uint8_t                   numOfActiveChannels = 0;
-    ChannelInfo_t           activeScanChanInfo[SCAN_MAX_CHANNELS_A];
-    volatile uint8_t          index = 0;
-    uint8_t                   index24 = 0;
-    uint8_t                   index5 = SCAN_MAX_CHANNELS_BG;
-
-
+    ChannelInfo_t       *pChannelList;
+    uint8_t             *pNumOfPassive;
+    uint8_t             *pNumOfDfs;
+    uint8_t             *pNumOfActive;
+    channelCapability_t channelCapability;
+    int32_t             status;
+    uint8_t             sizeOfBG = 0;
+    uint8_t             sizeOfA = 0;
+    uint16_t            localChannel[SCAN_MAX_CHANNELS_NUM] = PERIODIC_SCAN_CHANNELS_ARRAY_B_G_A_BAND;
+    uint8_t             passiveIdx = 0;
+    uint8_t             numOfActiveChannels = 0;
+    ChannelInfo_t       activeScanChanInfo[SCAN_MAX_CHANNELS_A];
+    volatile uint8_t    index = 0;
+    uint8_t             index24 = 0;
+    uint8_t             index5 = SCAN_MAX_CHANNELS_BG;
+    uint8_t             ret = 0, is5GhzSupported = 0;
 
     // Check if there is channel list comes from supplicant
-    if(NULL != apSuppParams)
+    if (NULL != apSuppParams)
     {
-        if( NULL != apSuppParams->freqs)
+        if (NULL != apSuppParams->freqs)
         {
-            // when receiving a channels list from the supplicant, we are interested only in these channels, so reset the local channel list.
-            os_memset(localChannel, 0, sizeof(uint16_t)*SCAN_MAX_CHANNELS_NUM);
+            // When receiving a channels list from the supplicant,
+            // we are interested only in these channels, so reset the local channel list.
+            os_memset(localChannel, 0, sizeof(uint16_t) * SCAN_MAX_CHANNELS_NUM);
 
+            // Supplicant-supplied frequencies array is guaranteed to be zero-terminated
             for (index = 0; apSuppParams->freqs[index]; ++index)
             {
+                // Check for overflow when accessing localChannel array
+                if (index24 >= SCAN_MAX_CHANNELS_BG)
+                {
+                    GTRACE(GRP_DRIVER_MX, "build_channel_list: 2.4G index "
+                                          "out of range. index24 = %d, max = %d",
+                                          index24, SCAN_MAX_CHANNELS_BG);
+                    return -1;
+                }
+
+                if (index5 >= SCAN_MAX_CHANNELS_NUM)
+                {
+                    GTRACE(GRP_DRIVER_MX, "build_channel_list: 5G index "
+                                          "out of range. index5 = %d, max = %d",
+                                          index5, SCAN_MAX_CHANNELS_NUM);
+                    return -1;
+                }
+
 
                 if (BASE_FREQ_5_0 <= apSuppParams->freqs[index])
                 {
@@ -1164,14 +1200,15 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
                 else if (BASE_FREQ_2_4 <= apSuppParams->freqs[index])
                 {
                     localChannel[index24] = (apSuppParams->freqs[index] - BASE_FREQ_2_4)/5;
-                    GTRACE(GRP_DRIVER_MX, "[%d] channel2scan %d", index, localChannel[index24] );
+                    GTRACE(GRP_DRIVER_MX, "[%d] channel2scan %d", index, localChannel[index24]);
                     index24++;
                 }
+
             }
         }
     }
 
-    if(scanType == SCAN_REQUEST_CONNECT_PERIODIC_SCAN)
+    if (scanType == SCAN_REQUEST_CONNECT_PERIODIC_SCAN)
     {
         periodicParams_t *pPeriodicScanParams = &scanParam->u.tConnScanInfo;
 
@@ -1179,9 +1216,8 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
         pNumOfActive     = (uint8_t*)&scanParam->u.tConnScanInfo.numOfActive;
         pNumOfPassive    = (uint8_t*)&scanParam->u.tConnScanInfo.numOfPassive;
         pNumOfDfs        = (uint8_t*)&scanParam->u.tConnScanInfo.numOfDfs;
-        //---------------------------
+
         // Set scan plan
-        //---------------------------
         if ((apSuppParams->sched_scan_plans_num == 0) || (!apSuppParams->sched_scan_plans))
         {
             return -1;
@@ -1194,7 +1230,8 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
             return -1;
         }
 
-        os_memcpy(pPeriodicScanParams->sched_scan_plans, apSuppParams->sched_scan_plans, (sizeof (struct sched_scan_plan)) * apSuppParams->sched_scan_plans_num);
+        os_memcpy(pPeriodicScanParams->sched_scan_plans, apSuppParams->sched_scan_plans,
+                  (sizeof(struct sched_scan_plan) * apSuppParams->sched_scan_plans_num));
         scanParam->u.tConnScanInfo.sched_scan_plans_num = apSuppParams->sched_scan_plans_num;
     }
     else
@@ -1208,89 +1245,93 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
     /*************************/
     /* Build G band channels */
     /*************************/
-    if ((Band ==BAND_SEL_ONLY_2_4GHZ)||(Band == BAND_SEL_BOTH))
+    if ((Band == BAND_SEL_ONLY_2_4GHZ) || (Band == BAND_SEL_BOTH))
     {
-    for (index = 0 ; (localChannel[index] > 0) && (index < SCAN_MAX_CHANNELS_BG); index++)
-    {
-        status = regulatoryDomain_GetCapability( RADIO_BAND_2_4GHZ,
-                                                 localChannel[index],
-                                                &channelCapability);
-        //channel is not valid - ignore it
-        if (status == OK)
+        for (index = 0 ; (localChannel[index] > 0) && (index < SCAN_MAX_CHANNELS_BG); index++)
         {
-
-            //if channel is valid for active - put it in temporary buffer. active channels will be
-            //copied after all passive channels in this band.
-            if (TRUE == channelCapability.channelValidityActive)
+            status = regulatoryDomain_GetCapability(RADIO_BAND_2_4GHZ,
+                                                    localChannel[index],
+                                                    &channelCapability);
+            //channel is not valid - ignore it
+            if (status == OK)
             {
-                activeScanChanInfo[numOfActiveChannels].channel = localChannel[index];
-                activeScanChanInfo[numOfActiveChannels].txPowerLevelDbm = DBM_DIV_10_2_DBM(channelCapability.uMaxTxPowerDomain);
-                activeScanChanInfo[numOfActiveChannels].channelFlags = 0;
-                numOfActiveChannels++;
-                pNumOfActive[RADIO_BAND_2_4GHZ]++;
+                //if channel is valid for active - put it in temporary buffer. active channels will be
+                //copied after all passive channels in this band.
+                if (TRUE == channelCapability.channelValidityActive)
+                {
+                    activeScanChanInfo[numOfActiveChannels].channel = localChannel[index];
+                    activeScanChanInfo[numOfActiveChannels].txPowerLevelDbm = DBM_DIV_10_2_DBM(channelCapability.uMaxTxPowerDomain);
+                    activeScanChanInfo[numOfActiveChannels].channelFlags = 0;
+                    numOfActiveChannels++;
+                    pNumOfActive[RADIO_BAND_2_4GHZ]++;
 
-            }
-            else if (TRUE == channelCapability.channelValidityPassive)
-            {
-                pChannelList[passiveIdx].channel = localChannel[index];
-                pChannelList[passiveIdx].txPowerLevelDbm = DBM_DIV_10_2_DBM(channelCapability.uMaxTxPowerDomain);
-                pChannelList[passiveIdx].channelFlags = 0;
-                passiveIdx++;
-                pNumOfPassive[RADIO_BAND_2_4GHZ]++;
+                }
+                else if (TRUE == channelCapability.channelValidityPassive)
+                {
+                    pChannelList[passiveIdx].channel = localChannel[index];
+                    pChannelList[passiveIdx].txPowerLevelDbm = DBM_DIV_10_2_DBM(channelCapability.uMaxTxPowerDomain);
+                    pChannelList[passiveIdx].channelFlags = 0;
+                    passiveIdx++;
+                    pNumOfPassive[RADIO_BAND_2_4GHZ]++;
+                }
             }
         }
-    }
 
 #ifdef CME_CC3XX_PORT_LOG_REPORT
-    CME_CC3XX_PORT_PRINT("Active 2.4G ch list: ");
-    for (int i = 0; i < numOfActiveChannels; i++)
-    {
-        CME_CC3XX_PORT_PRINT("%d,", activeScanChanInfo[i].channel);
-    }
-    CME_CC3XX_PORT_PRINT("\n");
-    CME_CC3XX_PORT_PRINT("Passive 2.4G ch list: ");
-    for (int i = 0; i < passiveIdx; i++)
-    {
-        CME_CC3XX_PORT_PRINT("%d,", pChannelList[i].channel);
-    }
-    CME_CC3XX_PORT_PRINT("\n");
-    CME_CC3XX_PORT_PRINT("Total of 2.4G: Active  = %d , num of 2.4G passive= %d \n", numOfActiveChannels, passiveIdx);
+        CME_CC3XX_PORT_PRINT("Active 2.4G ch list: ");
+        for (int i = 0; i < numOfActiveChannels; i++)
+        {
+            CME_CC3XX_PORT_PRINT("%d,", activeScanChanInfo[i].channel);
+        }
+        CME_CC3XX_PORT_PRINT("\n");
+        CME_CC3XX_PORT_PRINT("Passive 2.4G ch list: ");
+        for (int i = 0; i < passiveIdx; i++)
+        {
+            CME_CC3XX_PORT_PRINT("%d,", pChannelList[i].channel);
+        }
+        CME_CC3XX_PORT_PRINT("\n");
+        CME_CC3XX_PORT_PRINT("Total of 2.4G: Active  = %d , num of 2.4G passive= %d \n", numOfActiveChannels, passiveIdx);
 #endif//CME_CC3XX_PORT_LOG_REPORT
 
-    //copy active channels right after passive channels
-    memcpy( (void*)(&pChannelList[passiveIdx]),
-            (void*)activeScanChanInfo,
-            sizeof(ChannelInfo_t)*numOfActiveChannels);
+        // Copy active channels right after passive channels
+        os_memcpy((void*)(&pChannelList[passiveIdx]),
+                  (void*)activeScanChanInfo,
+                  sizeof(ChannelInfo_t)*numOfActiveChannels);
 
-    sizeOfBG = numOfActiveChannels + passiveIdx;
+        sizeOfBG = numOfActiveChannels + passiveIdx;
     }
     /*************************/
     /* Build A band channels */
     /*************************/
-    if ((Band == BAND_SEL_ONLY_5GHZ)||(Band == BAND_SEL_BOTH))
+    is5GhzSupported = (uint8_t)l2_cfg_is5GhzSupported();
+
+    numOfActiveChannels = 0;
+    if (((Band == BAND_SEL_ONLY_5GHZ) || (Band == BAND_SEL_BOTH)) &&
+        (is5GhzSupported))
     {
         /* Build A band channels*/
-        // TODO need to impelment ZeroMem
-        //ZeroMem(activeScanChanInfo, sizeof(ChannelInfo_t)*SCAN_MAX_CHANNELS_A);
         os_memset(activeScanChanInfo, 0x00, sizeof(ChannelInfo_t)*SCAN_MAX_CHANNELS_A);
 
-        numOfActiveChannels = 0;
         passiveIdx = SCAN_MAX_CHANNELS_BG;
 
-        for (index = SCAN_MAX_CHANNELS_BG; (localChannel[index] < A_5G_BAND_MAX_CHANNEL) && (localChannel[index] >= A_5G_BAND_MIN_CHANNEL) && (index < SCAN_MAX_CHANNELS_NUM); index++)
+        for (index = SCAN_MAX_CHANNELS_BG;
+             (localChannel[index] < A_5G_BAND_MAX_CHANNEL) &&
+             (localChannel[index] >= A_5G_BAND_MIN_CHANNEL) &&
+             (index < SCAN_MAX_CHANNELS_NUM);
+             index++)
         {
             status = regulatoryDomain_GetCapability(RADIO_BAND_5GHZ,
                                                     localChannel[index],
                                                     &channelCapability);
-            //channel is not valid - ignore it
-            if(OK == status)
+            // Channel is not valid - ignore it
+            if (OK == status)
             {
                 /********************************************/
                 /* A band: construct passive channels first */
                 /********************************************/
-                if((FALSE == channelCapability.channelValidityActive)
-                    && (TRUE  == channelCapability.channelValidityPassive)
-                    && ( (channelCapability.uFlags & TIW_REG_DOMAIN_DFS) == 0))
+                if ((FALSE == channelCapability.channelValidityActive) &&
+                    (TRUE  == channelCapability.channelValidityPassive) &&
+                    ((channelCapability.uFlags & TIW_REG_DOMAIN_DFS) == 0))
                 {
                     pChannelList[passiveIdx].channelFlags = 0;
                     pChannelList[passiveIdx].channel = localChannel[index];
@@ -1301,11 +1342,11 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
                 /****************************************************************************/
                 /* A Band: construct DFS channels next. they are put after passive channels */
                 /****************************************************************************/
-                else if((FALSE == channelCapability.channelValidityActive)
-                        && (TRUE  == channelCapability.channelValidityPassive)
-                        && (channelCapability.uFlags & TIW_REG_DOMAIN_DFS))
+                else if ((FALSE == channelCapability.channelValidityActive) &&
+                         (TRUE  == channelCapability.channelValidityPassive) &&
+                         (channelCapability.uFlags & TIW_REG_DOMAIN_DFS))
                 {
-                    pChannelList[passiveIdx].channelFlags = 1;
+                    pChannelList[passiveIdx].channelFlags = TIW_REG_DOMAIN_DFS;
                     pChannelList[passiveIdx].channel = localChannel[index];
                     pChannelList[passiveIdx].txPowerLevelDbm = DBM_DIV_10_2_DBM(channelCapability.uMaxTxPowerDomain);
                     passiveIdx++;
@@ -1315,8 +1356,8 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
                 /******************************************/
                 /* A Band: construct active channels last */
                 /******************************************/
-                else if((TRUE == channelCapability.channelValidityActive)
-                        && ((channelCapability.uFlags & TIW_REG_DOMAIN_DFS) == 0))
+                else if ((TRUE == channelCapability.channelValidityActive) &&
+                         ((channelCapability.uFlags & TIW_REG_DOMAIN_DFS) == 0))
                 {
                     activeScanChanInfo[numOfActiveChannels].channelFlags = 0;
                     activeScanChanInfo[numOfActiveChannels].channel = localChannel[index];
@@ -1328,29 +1369,41 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
         }
 
 #ifdef CME_CC3XX_PORT_LOG_REPORT
-    CME_CC3XX_PORT_PRINT("Passive/dfs 5G ch list:");
-    for (int i = SCAN_MAX_CHANNELS_BG; i < passiveIdx; i++)
-    {
-        CME_CC3XX_PORT_PRINT("%d,", pChannelList[i].channel);
-    }
-    CME_CC3XX_PORT_PRINT("\n");
-    CME_CC3XX_PORT_PRINT("Active 5G ch list:");
-    for (int i = 0; i < numOfActiveChannels; i++)
-    {
-        CME_CC3XX_PORT_PRINT("%d,", activeScanChanInfo[i].channel);
-    }
-    CME_CC3XX_PORT_PRINT("\n");
+        CME_CC3XX_PORT_PRINT("Passive/dfs 5G ch list:");
+        for (int i = SCAN_MAX_CHANNELS_BG; i < passiveIdx; i++)
+        {
+            CME_CC3XX_PORT_PRINT("%d,", pChannelList[i].channel);
+        }
+        CME_CC3XX_PORT_PRINT("\n");
+        CME_CC3XX_PORT_PRINT("Active 5G ch list:");
+        for (int i = 0; i < numOfActiveChannels; i++)
+        {
+            CME_CC3XX_PORT_PRINT("%d,", activeScanChanInfo[i].channel);
+        }
+        CME_CC3XX_PORT_PRINT("\n");
 
-    CME_CC3XX_PORT_PRINT("Total num of 5G Active  = %d,num of 5G passive/dfs  = %d \n", numOfActiveChannels, pNumOfDfs[0]);
-#endif//CME_CC3XX_PORT_LOG_REPORT
+        CME_CC3XX_PORT_PRINT("Total num of 5G Active  = %d,num of 5G passive/dfs  = %d \n", numOfActiveChannels, pNumOfDfs[0]);
+#endif //CME_CC3XX_PORT_LOG_REPORT
 
-    //copy active channels right after passive channels
-    memcpy(
-          (void*)(&pChannelList[passiveIdx]),
-          (void*)activeScanChanInfo,
-          sizeof(ChannelInfo_t)*numOfActiveChannels);
+        // Copy active channels right after passive channels
+        if (passiveIdx + numOfActiveChannels >= CONN_SCAN_MAX_CHANNELS_ALL_BANDS)
+        {
+            return WlanError(WLAN_ERROR_SEVERITY__HIGH,
+                            WLAN_ERROR_MODULE__COMMANDS,
+                            WLAN_ERROR_TYPE__CMD_GENERAL);
+        }
+        else
+        {
+            os_memcpy((void*)(&pChannelList[passiveIdx]),
+                      (void*)activeScanChanInfo,
+                      sizeof(ChannelInfo_t) * numOfActiveChannels);
+        }
     }
-    sizeOfA = numOfActiveChannels + passiveIdx - SCAN_MAX_CHANNELS_BG;
+
+    if (numOfActiveChannels + passiveIdx > SCAN_MAX_CHANNELS_BG)
+    {
+        sizeOfA = numOfActiveChannels + passiveIdx - SCAN_MAX_CHANNELS_BG;
+    }
 
     GTRACE(GRP_DRIVER_MX, "Finish build channel list: num of BG channel %d, num of A channel %d",
            sizeOfBG,
@@ -1359,6 +1412,7 @@ int8_t trnspt_cmd_build_scan_channel_list(ScanParams_t *scanParam,
            sizeOfBG,
            sizeOfA);
     CME_CC3XX_PORT_PRINT("Finish build channel list: numOf5G_ActiveChannels=%d , Total Passive (2.4+5G)= %d , num_of_dfs = %d\n",numOfActiveChannels,passiveIdx,pNumOfDfs[0]);
+
     HOOK(HOOK_IN_DRIVER_OSPREY_MX_SCAN);
 
     return 0;

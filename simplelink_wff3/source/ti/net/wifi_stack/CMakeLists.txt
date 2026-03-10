@@ -20,6 +20,7 @@ zephyr_library_sources(
   driver/data_path/twd/tw_driver/tw_driver_tx.c
   driver/data_path/twd/fw_transfer/txResult.c
   driver/data_path/twd/fw_transfer/txXfer.c
+  driver/data_path/twd/fw_transfer/txXfer_aggr.c
   driver/data_path/udata/Tx_data_clsfr.c
   driver/data_path/udata/rx_queue.c
   driver/data_path/udata/rx_stack.c
@@ -50,10 +51,6 @@ zephyr_library_sources(
   driver/drv_ti/uwd/src/services/regulatory_domain.c
   driver/drv_ti/uwd/src/services/scan_result_table.c
   fw_control_cmd/control_cmd_fw.c
-
-  # CRYPTO_MBEDTLS
-  driver/tls_mbedtls.c
-  driver/crypto_mbedtls.c
 )
 
 zephyr_include_directories(

@@ -268,7 +268,7 @@ typedef enum
 /******************************************************************************
                             CMD_BLE_COMMANDS
 ******************************************************************************/
-#define MAX_BLE_PKT_LEN     (256)
+#define MAX_BLE_PKT_LEN     (300)
 
 /******************************************************************************
                             CMD_SET_SEED
@@ -292,8 +292,8 @@ typedef enum
 {
     RADIO_BAND_2_4GHZ = 0,  /* 2.4 Ghz band */
     RADIO_BAND_5GHZ = 1,    /* 5 Ghz band */
-    RADIO_BAND_JAPAN_4_9_GHZ = 2,
-    RADIO_BAND_6GHZ = 3,
+    RADIO_BAND_6GHZ = 2,    /* 6 Ghz band */
+    RADIO_BAND_JAPAN_4_9_GHZ = 3,
     DEFAULT_BAND = RADIO_BAND_2_4GHZ,
     INVALID_BAND = 0x7E,
     MAX_RADIO_BANDS = 0x7F
@@ -724,6 +724,8 @@ typedef enum
 #define A_5G_BAND_MIN_CHANNEL       34
 #define A_5G_BAND_MAX_CHANNEL       180
 #define A_5G_BAND_NUM_CHANNELS      (A_5G_BAND_MAX_CHANNEL-A_5G_BAND_MIN_CHANNEL+1)
+#define E6GHZ_BAND_MIN_CHANNEL      (1)//6GHZ
+#define E6GHZ_BAND_MAX_CHANNEL      (233)//6GHZ
 #define REG_DOMAIN_MAX_REG_CLASS_NUM       10
 #define NUM_OF_CHANNELS_24              14
 #define NUM_OF_CHANNELS_5               180

@@ -12,73 +12,64 @@
 
  *****************************************************************************/
 #include "ble_if.h"
-#if defined(CONFIG_TI_BLE_TRANSPORT_SHARED)
 #include "ble_transport.h"
-#endif
-#if defined(CONFIG_TI_BLE_TRANSPORT_SERIAL)
 #include "hci_transport.h"
-#endif
 #include "uart_hci.h"
 #include "osi_type.h"
 #include "osi_kernel.h"
 #include "control_cmd_fw.h"
-
+#ifdef CC35XX
+#include <third_party/psa_crypto/include/psa/crypto.h>
+#include <third_party/psa_crypto/include/psa/crypto_types.h>
+#include <third_party/psa_crypto/include/psa/crypto_values.h>
+#endif
 
 /*****************************************************************************/
 /* DEFINITIONS & GLOBALS                                                     */
 /*****************************************************************************/
 ble_if_cb_t bleIfCb;
-
+OsiSyncObj_t bleInitEventSyncObj;
+#define HCI_VE_EVENT_CODE 0xFF
+#define HCI_VE_BLE_INIT_DONE 0x042A
 
 /*****************************************************************************/
 /* IMPLEMENTATION                                                            */
 /*****************************************************************************/
-int BleIf_OpenTransport(ble_if_transport_e transport)
+int BleIf_OpenTransport()
 {
-#if defined(CONFIG_TI_BLE_TRANSPORT_SERIAL)
-    if (transport == BLE_IF_TRANSPORT_SERIAL)
+#ifdef CC33XX
+    if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_BLE) == FALSE)
     {
-        if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_BLE) == FALSE)
-        {
-            //Open the UART for HCI
-            UartHciOpen();
+        //Open the UART for HCI
+        UartHciOpen();
 
-            //Initialize the HCI transport
-            HciTransport_Init(HCI_TRANSPORT_UART_BLE, &uartForHci);
-        }
-
-        //Register callbacks
-        bleIfCb.cmd_cb = HciTransport_WriteHciPacketToCtrl;
-        bleIfCb.event_cb_reg = HciTransport_HciRxCallbackbRegister;
-
-        Report("\n\rBLE Serial transport opened\r\n");
-
-	return 0;
+        //Initialize the HCI transport
+        HciTransport_Init(HCI_TRANSPORT_UART_BLE, &uartForHci);
     }
+
+    //Register callbacks
+    bleIfCb.cmd_cb = HciTransport_WriteHciPacketToCtrl;
+    bleIfCb.event_cb_reg = HciTransport_HciRxCallbackbRegister;
+
+    Report("\n\rBLE Serial transport opened\r\n");
 #endif
-#if defined(CONFIG_TI_BLE_TRANSPORT_SHARED)
-    if (transport == BLE_IF_TRANSPORT_SHARED)
-    {
-        //Note: shared transport was previously opened when WLAN started
-        //It will not be opened here
+#ifdef CC35XX
+    //Note: shared transport was previously opened when WLAN started
+    //It will not be opened here
 
-        //Register callbacks
-        bleIfCb.cmd_cb = BleTransport_SendCommand;
-        bleIfCb.event_cb_reg = BleTransport_EventCallbackbRegister;
+    //Register callbacks
+    bleIfCb.cmd_cb = BleTransport_SendCommand;
+    bleIfCb.event_cb_reg = BleTransport_EventCallbackbRegister;
 
-        Report("\n\rBLE Shared transport opened\r\n");
-
-	return 0;
-    }
+    Report("\n\rBLE Shared transport opened\r\n");
 #endif
 
-    Report("\n\rUnsupported BLE transport method\r\n");
-    return -1;
+    return 0;
 }
 
 int BleIf_CloseTransport()
 {
-#if defined(CONFIG_TI_BLE_TRANSPORT_SERIAL)
+#ifdef CC33XX
     if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_BLE) == TRUE)
     {
         //Close the UART for HCI
@@ -88,8 +79,13 @@ int BleIf_CloseTransport()
         HciTransport_Release(HCI_TRANSPORT_UART_BLE);
     }
 #endif
+
     //Note: shared transport was previously opened when WLAN started
     //It will not be closed here
+
+    //Clear registered callbacks
+    bleIfCb.cmd_cb = NULL;
+    bleIfCb.event_cb_reg = NULL;
 
     return 0;
 }
@@ -110,37 +106,76 @@ int BleIf_EventCbRegister(ble_event_cb_t cb)
     return 0;
 }
 
+int BleIf_VendorEventHandler(uint8_t* data, uint16_t len)
+{
+    uint8_t eventCode = data[1];
+    uint16_t eventOpcode = (data[3] << 8) | data[4];
+
+    if (eventCode == HCI_VE_EVENT_CODE)
+    {
+        switch(eventOpcode)
+        {
+            case HCI_VE_BLE_INIT_DONE:
+                osi_SyncObjSignal(&bleInitEventSyncObj);
+                return TRUE;
+                break;
+            default:
+                break;
+        }
+    }
+
+    return FALSE;
+}
+
 int BleIf_EnableBLE()
 {
     int ret = 0;
+    int status = 0;
+
+    ret = osi_SyncObjCreate(&bleInitEventSyncObj);
+    if(ret != 0)
+    {
+        Report("\n\rBleIf_EnableBLE: Failed to create sync object. error number %d", ret);
+        ASSERT_GENERAL(0);
+    }
 
 #ifdef CC35XX
-    //Get new seed from HSM
-    uint8_t seed[MAX_SEED_SIZE];
-    os_memset(seed, 0x55, MAX_SEED_SIZE);
-
-    //Send set initial seed to the controller
-    ret = ctrlCmdFw_SetSeedCmd(seed, MAX_SEED_SIZE);
-
-    if (OSI_OK != ret)
+    ret = BleIf_SetSeed(MAX_SEED_SIZE);
+    if (ret < 0)
     {
-        Report("\n\r BleIf_EnableBLE: Failed to set initial seed. error number: %d", ret);
+        Report("\n\rBleIf_EnableBLE: Failed to set initial seed. error number: %d", ret);
+        ASSERT_GENERAL(0);
     }
 #endif
 
     //Send BLE enable command to the controller
     ret = ctrlCmdFw_EnableBLECmd();
 
+    if (ret < 0)
+    {
+        Report("\n\rBleIf_EnableBLE: Failed to enable BLE. error number: %d", ret);
+        ASSERT_GENERAL(0);
+    }
+
+    //Wait for the controller to be enabled before starting host
+    Report("\n\r-------------- Wait for BLE Controller");
+
+    ret = osi_SyncObjWait(&bleInitEventSyncObj, OSI_WAIT_FOR_SECOND);
     if (OSI_OK != ret)
     {
-        Report("\n\r BleIf_EnableBLE: Failed to enable BLE. error number: %d", ret);
+        Report("\n\rBleIf_EnableBLE: Failed to receive BLE Init Done. error number %d", ret);
+        Report("\n\rBleIf_EnableBLE: Check if BLE is supported and enabled in INI file and try again.");
+        status = -1;
     }
-    //Wait for the controller to be enabled before starting host
-    //Currently use sleep. TODO: Wait for FW ready massage
-    Report("\n\r-------------- Wait for BLE Controller");
-    osi_Sleep(2);
 
-    return ret;
+    ret = osi_SyncObjDelete(&bleInitEventSyncObj);
+    if (OSI_OK != ret)
+    {
+        Report("\n\rBleIf_EnableBLE: Failed to delete sync object. error number %d", ret);
+        ASSERT_GENERAL(0);
+    }
+
+    return status;
 }
 
 int BleIf_SetBdAddr(const unsigned char *pBdAddr)
@@ -148,7 +183,34 @@ int BleIf_SetBdAddr(const unsigned char *pBdAddr)
     return ctrlCmdFw_SetBdAddrCmd(pBdAddr);
 }
 
-int BleIf_SetSeed(uint8_t *pSeed, uint8_t size)
+int BleIf_SetSeed(uint8_t size)
 {
-    return ctrlCmdFw_SetSeedCmd(pSeed, size);
+    int ret = -1;
+    uint8_t seed[MAX_SEED_SIZE] = {0};
+
+    //Validate seed size
+    if (size > MAX_SEED_SIZE)
+    {
+        Report("\n\rBleIf_SetSeed: seed size exceeded");
+        return ret;
+    }
+
+#ifdef CC35XX
+    //Check crypto engine status
+    psa_status_t status  = psa_crypto_init();
+    if (status != PSA_SUCCESS) {
+        Report("\n\rBleIf_SetSeed: Crypto is not initialized: %d", status);
+        return ret;
+    }
+
+    //Get new seed from HSM
+    status = psa_generate_random(seed, size);
+    if (status != PSA_SUCCESS) {
+        Report("\n\rBleIf_SetSeed: Failed to get initial seed. error number: %d", status);
+        return ret;
+    }
+#endif
+
+    //Send set initial seed to the controller
+    return ctrlCmdFw_SetSeedCmd(seed, size);
 }

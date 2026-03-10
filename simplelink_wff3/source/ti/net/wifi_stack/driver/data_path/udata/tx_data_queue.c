@@ -167,26 +167,6 @@ int32_t sendPacket(uint32_t uHlid, uint32_t uQueId)
 
     if (eXmitStatus == STATUS_XMIT_SUCCESS)
     {
-        /* Update current AC and Link busy state (change may only be from not busy to busy) */
-        if (uBackpressureMap & TX_HW_CURRENT_AC_STOP)
-        {
-            SET_BIT_BY_IDX(pTxDataQ->uAcBusyBitmap, uQueId);
-            pLinkQ->aQueueCounters[uQueId].uAcStopped++;
-        }
-        if (uBackpressureMap & TX_HW_CURRENT_LINK_STOP)
-        {
-            SET_BIT_BY_IDX(pTxDataQ->uLinkBusyBitmap, uHlid);
-            pLinkQ->aQueueCounters[uQueId].uLinkStopped++;
-        }
-
-        /* Update current Link priority (change may only be from high to low priority upon sending packet) */
-        if ((uBackpressureMap & TX_HW_CURRENT_LINK_HIGH) == 0)
-        {
-            CLEAR_BIT_BY_IDX(pTxDataQ->uLinkPriorityBitmap, uHlid);
-        }
-
-        pLinkQ->aQueueCounters[uQueId].uXmittedPacket++;
-
         /* If packet sent to FW successfully return TRUE */
         return FRAME_SEND_SUCCESFULY;
     }
@@ -200,11 +180,6 @@ int32_t sendPacket(uint32_t uHlid, uint32_t uQueId)
 #endif
         TX_FRAME_FLOW_CNTRL_PRINT_MUST("\n\rData frame: requeue\r\n");
 
-        /* Requeue the packet in a critical section */
-        //trnspt_lockTxQueue ();
-        //eQueStatus = que_Requeue (pLinkQ->aQueues[uQueId], (void *)pPktCtrlBlk);
-        //trnspt_unlockTxQueue ();
-
         if (eQueStatus == OK)
         {
             trnspt_RequestSchedule (pTxDataQ->uContextId, FALSE);
@@ -213,7 +188,7 @@ int32_t sendPacket(uint32_t uHlid, uint32_t uQueId)
         }
         else
         {
-            //Report("\r\n dbg_tx. warning !!! failed to send frame,eXmitStatus == STATUS_XMIT_BUSY !!!!!");//dbg_tx
+            //Report("\n\r dbg_tx. warning !!! failed to send frame,eXmitStatus == STATUS_XMIT_BUSY !!!!!");//dbg_tx
             TX_FRAME_FLOW_CNTRL_PRINT_MUST("\n\rERROR! Data frame: dropped\r\n");
             /* If the packet can't be queued drop it */
             /* Note: may happen only if this thread was preempted between the
@@ -670,7 +645,7 @@ uint32_t txDataQ_InsertPacket(TTxCtrlBlk *pPktCtrlBlk, uint8_t uPacketDtag)
         return NOK;
     }
 
-    //Report("\r\n dbg_tx. que_Enqueue, uHlid:%d, uQueId:%d", uHlid , uQueId);
+    //Report("\n\r dbg_tx. que_Enqueue, uHlid:%d, uQueId:%d", uHlid , uQueId);
 
     /* Enqueue the packet in the appropriate Queue */
     eStatus = que_Enqueue (pLinkQ->aQueues[uQueId], (void *)pPktCtrlBlk);
@@ -836,7 +811,7 @@ void txDataQ_WakeAll (void)
     /* Enable the data Tx port */
     pTxDataQ->bDataPortEnable = TRUE;
 
-    //Report("\r\n dbg_tx. txDataQ_WakeAll, txDataQ_ReqToRunTxScheduler");
+    //Report("\n\r dbg_tx. txDataQ_WakeAll, txDataQ_ReqToRunTxScheduler");
 
     /* Run the scheduler */
     txDataQ_ReqToRunTxScheduler();
@@ -858,7 +833,7 @@ void txDataQ_ReqToRunTxScheduler (void)
     TTxDataQ *pTxDataQ = gTxDataQCB;
 
     /* Run the scheduler */
-    //Report("\r\n dbg_tx. txDataQ_ReqToRunTxScheduler: Called\r\n");
+    //Report("\n\r dbg_tx. txDataQ_ReqToRunTxScheduler: Called\r\n");
     trnspt_RequestSchedule(pTxDataQ->uContextId, FALSE);
 }
 
@@ -935,7 +910,7 @@ void txDataQ_EnableLink (uint32_t uHlid)
 
     //Report(REPORT_SEVERITY_INFORMATION, "txDataQ_EnableLink: link=%d\r\n", uHlid);
 
-    //Report("\r\n dbg_tx. txDataQ_EnableLink, txDataQ_ReqToRunTxScheduler uHlid:%d uMaxEnabledHlid:%d", uHlid,pTxDataQ->uMaxEnabledHlid);
+    //Report("\n\r dbg_tx. txDataQ_EnableLink, txDataQ_ReqToRunTxScheduler uHlid:%d uMaxEnabledHlid:%d", uHlid,pTxDataQ->uMaxEnabledHlid);
     /* Run the scheduler */
     txDataQ_ReqToRunTxScheduler();
 }
@@ -1165,7 +1140,7 @@ void txDataQ_FreeResources (TTxCtrlBlk *pPktCtrlBlk)
     /* Free TxData resources only if previous allocated by txDataQ_AllocCheckResources */
     if (!IS_TX_CTRL_FLAG_RSRC_ALLOCATED(pPktCtrlBlk))
     {
-        //Report("\r\n dbg_tx. txDataQ_FreeResources, resources were not allocate");//dbg_tx
+        //Report("\n\r dbg_tx. txDataQ_FreeResources, resources were not allocate");//dbg_tx
         trnspt_unlockTxQueue();
         return;
     }
@@ -1232,7 +1207,7 @@ void txDataQ_FreeFwAllocated (TTxCtrlBlk *pPktCtrlBlk)
     /* new packet, decrement packet in use counters */
     if(pPktCtrlBlk->tTxPktParams.uAcPendTXDataDone )
     {
-        //Report("\r\n dbg_tx. txDataQ_FreeFwAllocated, txDataQ_ReqToRunTxScheduler uAc:%d uPktPendTXDataPerAc:%d", uAc, pDataRsrc->uPktPendTXDataPerAc[uAc]);;
+        //Report("\n\r dbg_tx. txDataQ_FreeFwAllocated, txDataQ_ReqToRunTxScheduler uAc:%d uPktPendTXDataPerAc:%d", uAc, pDataRsrc->uPktPendTXDataPerAc[uAc]);
         pDataRsrc->uPktPendTXDataPerAc[uAc]--;
         pDataRsrc->uPktPendTXData--;
         pPktCtrlBlk->tTxPktParams.uAcPendTXDataDone =0;
@@ -1241,7 +1216,7 @@ void txDataQ_FreeFwAllocated (TTxCtrlBlk *pPktCtrlBlk)
     if (pDataRsrc->uPktPendTXDataPerAc[uAc] < 0)
     {
         TX_PRINT_ERROR("\n\rError: uPktPendTXDataPerAc < 0");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
     /* Leave critical section */
     trnspt_unlockTxQueue();
@@ -1544,7 +1519,7 @@ static void txDataQ_RunScheduler (void* hCbHndl)
      
     i = 0;
 
-    //Report("\r\n dbg_tx. uScheduleCount:%d PendCount:%d",uScheduleCount, uTxDataPendCount);
+    //Report("\n\r dbg_tx. uScheduleCount:%d PendCount:%d",uScheduleCount, uTxDataPendCount);
     while((i < uScheduleCount) && (gTxDataQCB->uTxDataReqScheduleCount>0))
     {
 
@@ -1571,12 +1546,12 @@ static void txDataQ_RunScheduler (void* hCbHndl)
             uTxDataPendCount = txDataQ_GetCountPendTXData();
             trnspt_unlockTxQueue();
             txDataQ_removeHlidFromScheduler();
-            //Report("\r\n dbg_tx. link removed,uScheduleCount:%d ",uScheduleCount);
+            //Report("\n\r dbg_tx. link removed,uScheduleCount:%d ",uScheduleCount);
 
         }
     }
 
-    //Report("\r\n dbg_tx. exit from the loop watchDogcount:%d CountPendTXData:%d",watchDogcount, txDataQ_GetCountPendTXData());
+    //Report("\n\r dbg_tx. exit from the loop watchDogcount:%d CountPendTXData:%d",watchDogcount, txDataQ_GetCountPendTXData());
 
 #ifdef DEBUG_TX_QUEUE_TABLE
     gDebugTxQ[gDebugIndex].uExitFrameSentCount = i;
@@ -1589,7 +1564,6 @@ static void txDataQ_RunScheduler (void* hCbHndl)
 #ifdef AC_DEBUG_REPORT 
     Report("\n\rAc Debug ,Run scheduler: schedCount=%d | exit count=%d", uScheduleCount, i);
 #endif
-    TWD_txXfer_EndOfBurst();
 }
 
 const static EAcTrfcType getAcQueueTable[MAX_NUM_OF_AC] = {QOS_AC_VO, QOS_AC_VI, QOS_AC_BE, QOS_AC_BK};
@@ -1619,7 +1593,7 @@ static int txDataQ_SelectAc(void)
             ac, TxAcPktsCount, chosendAc, pDataRsrc->uPktPendTXDataPerAc[ac], min_pkts);
 #endif
 
-        //Report("\r\n dbg_tx. , selectAC::: check for ac=%d, TxAcPktsCount=%d chosendAc=%d, pDataRsrc->uPktInUsePerAc[ac]=%d, min_pkts=%d", ac, TxAcPktsCount, chosendAc, pDataRsrc->uPktPendTXDataPerAc[ac], min_pkts);
+        //Report("\n\r dbg_tx. , selectAC::: check for ac=%d, TxAcPktsCount=%d chosendAc=%d, pDataRsrc->uPktInUsePerAc[ac]=%d, min_pkts=%d", ac, TxAcPktsCount, chosendAc, pDataRsrc->uPktPendTXDataPerAc[ac], min_pkts);
 
 		if ((pDataRsrc->uPktPendTXDataPerAc[ac]) && //driver has data frames allocated on this ac
 		    (TxAcPktsCount < min_pkts))
@@ -1724,11 +1698,11 @@ static void scheduleQueuesPerPriority(uint32_t uScheduleCount, int32_t *pCountTx
         uAcId = txDataQ_SelectAc();
         if (uAcId < 0)
         {
-            //Report("\r\n dbg_tx. scheduleQueuesPerPriority,select AC failed ,uHlid:%d ,exit func", uHlid, txDataQ_GetCountPendTXData());
+            //Report("\n\r dbg_tx. scheduleQueuesPerPriority,select AC failed ,uHlid:%d ,exit func", uHlid, txDataQ_GetCountPendTXData());
             return;
         }
 
-        //Report("\r\n dbg_tx. scheduleQueuesPerPriority, start loop, uHlid for start :%d chosen uAcId:%d", uHlid, uAcId);
+        //Report("\n\r dbg_tx. scheduleQueuesPerPriority, start loop, uHlid for start :%d chosen uAcId:%d", uHlid, uAcId);
 
         do
         {
@@ -1782,21 +1756,21 @@ static void scheduleQueuesPerPriority(uint32_t uScheduleCount, int32_t *pCountTx
 #endif
                     uLastServedHlid = uHlid;
                     packetsHandled++;
-                    //Report("\r\n dbg_tx. packet was send uHlid:%d uAcId:%d", uHlid,uAcId );
+                    //Report("\n\r dbg_tx. packet was send uHlid:%d uAcId:%d", uHlid,uAcId );
                 }
                 else
                 {
                     if( ret == NO_FRAMES_IN_QUEUE)
                     {
                         uLastServedHlid = uHlid;
-                        //Report("\r\n dbg_tx. no more frames on queue  uHlid:%d uAcId:%d", uHlid,uAcId );
+                        //Report("\n\r dbg_tx. no more frames on queue  uHlid:%d uAcId:%d", uHlid,uAcId );
                         break;//continue to next Hlid
                     }
                     else
                     {
                         uLastServedHlid = uHlid;
                         packetsHandled++;
-                        //Report("\r\n dbg_tx. packet send error!  uHlid:%d uAcId:%d", uHlid,uAcId );
+                        //Report("\n\r dbg_tx. packet send error!  uHlid:%d uAcId:%d", uHlid,uAcId );
 
                     }
                 }
@@ -1807,13 +1781,13 @@ static void scheduleQueuesPerPriority(uint32_t uScheduleCount, int32_t *pCountTx
 				{
 	                packetsHandled = -1;
 	                uLastServedHlid = uHlid;//for the fairness lets move on on next call to the schedule to the next link
-	                //Report("\r\n dbg_tx. debug !!! packet send was not called due to low FW mem blocks uHlid:%d bEnabled:%d  GetHwBlocksRequireForAvgFrame:%d GetHwBlocks:%d", uHlid, pLinkQ->bEnabled,txHwQueue_GetHwBlocksRequireForAvgFrame(),txHwQueue_GetHwBlocks());
+	                //Report("\n\r dbg_tx. debug !!! packet send was not called due to low FW mem blocks uHlid:%d bEnabled:%d  GetHwBlocksRequireForAvgFrame:%d GetHwBlocks:%d", uHlid, pLinkQ->bEnabled,txHwQueue_GetHwBlocksRequireForAvgFrame(),txHwQueue_GetHwBlocks());
 	                break;
 				}
 				else
 				{
 				    //link disabled continue to next link
-				    //Report("\r\n dbg_tx. link is disabled uHlid:%d",uHlid);
+				    //Report("\n\r dbg_tx. link is disabled uHlid:%d",uHlid);
 				    uLastServedHlid = uHlid;
 					packetsHandled++;
 					break;
@@ -1840,7 +1814,7 @@ static void scheduleQueuesPerPriority(uint32_t uScheduleCount, int32_t *pCountTx
         }
         while (uHlid != pTxDataQ->uNextToServeLink);
 
-        //Report("\r\n dbg_tx. scheduleQueuesPerPriority, end loop uMaxEnabledHlid:%d packetsHandled:%d uLastServedHlid:%d",pTxDataQ->uMaxEnabledHlid,packetsHandled,uLastServedHlid);
+        //Report("\n\r dbg_tx. scheduleQueuesPerPriority, end loop uMaxEnabledHlid:%d packetsHandled:%d uLastServedHlid:%d",pTxDataQ->uMaxEnabledHlid,packetsHandled,uLastServedHlid);
 
         /* Update the NextToServeHlid*/
         pTxDataQ->uNextToServeLink = uLastServedHlid + 1;

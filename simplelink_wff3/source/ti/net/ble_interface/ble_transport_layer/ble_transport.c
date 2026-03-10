@@ -30,6 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "ble_transport.h"
+#include "ble_if.h"
 #include "nab.h"
 #include "control_cmd_fw.h"
 #include "commands.h"
@@ -73,7 +74,7 @@ int BleTransport_SendCommand(uint8_t* pBleCommand, uint16_t bleCmdLen)
     if (NULL == cmd)
     {
         Report("\n\rCouldn't allocate memory for BLE command\n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
         return -1;
     }
 
@@ -101,6 +102,11 @@ int BleTransport_BleEventHandler(void *pBleFwEvent)
     {
         Report("\n\rERROR [BLE FW EVENT HANDLER] error pBleFwEvent is NULL\n\r");
         return (-1);
+    }
+
+    if (BleIf_VendorEventHandler(pEvent->bleEvent.data, pEvent->bleEvent.dataLen))
+    {
+        return (0);
     }
 
     if (NULL == event_cb)

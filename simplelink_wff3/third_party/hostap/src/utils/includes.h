@@ -15,6 +15,7 @@
 
 /* Include possible build time configuration before including anything else */
 #include "build_config.h"
+#include "ti_config/build_configs.h"
 
 //TI cc33xx
 #include <stdlib.h>

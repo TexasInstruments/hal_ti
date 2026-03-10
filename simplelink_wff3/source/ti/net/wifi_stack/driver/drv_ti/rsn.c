@@ -223,7 +223,32 @@ void rsn_setCryptoParams(uint32_t aRoleId, uint32_t aPairwiseSuite, uint32_t aGr
             break;
 
         case WPA_CIPHER_GCMP:
+            gRsnDB.unicastSuite = CIPHER_SUITE_GCMP128;
+            break;
+
+        case WPA_CIPHER_BIP_CMAC_256:
+            gRsnDB.unicastSuite = CIPHER_BIP_CMAC_256;
+            break;
+
+        case WPA_CIPHER_BIP_GMAC_128:
+            gRsnDB.unicastSuite = CIPHER_BIP_GMAC_128;
+            break;
+
+        case WPA_CIPHER_BIP_GMAC_256:
+            gRsnDB.unicastSuite = CIPHER_BIP_GMAC_256;
+            break;
+
+        case WPA_CIPHER_GCMP_256:
+            gRsnDB.unicastSuite = CIPHER_SUITE_GCMP256;
+            break;
+
+        case WPA_CIPHER_CCMP_256:
+            gRsnDB.unicastSuite = CIPHER_SUITE_CCMP256;
+            break;
+
+
         default:
+            CME_PRINT_REPORT_ERROR("\n\rrsn_setCryptoParams unsupported PairwiseSuite %d",aPairwiseSuite) ;
             // TODO - not supported in MCP
             ASSERT_GENERAL(0);
             break;
@@ -252,9 +277,28 @@ void rsn_setCryptoParams(uint32_t aRoleId, uint32_t aPairwiseSuite, uint32_t aGr
             gRsnDB.broadcastSuite = CIPHER_SUITE_AES;
             break;
 
+        case WPA_CIPHER_BIP_CMAC_256:
+            gRsnDB.broadcastSuite = CIPHER_BIP_CMAC_256;
+            break;
+        case WPA_CIPHER_BIP_GMAC_128:
+            gRsnDB.broadcastSuite = CIPHER_BIP_GMAC_128;
+            break;
+        case WPA_CIPHER_BIP_GMAC_256:
+            gRsnDB.broadcastSuite = CIPHER_BIP_GMAC_256;
+            break;
+        case WPA_CIPHER_GCMP_256:
+            gRsnDB.broadcastSuite = CIPHER_SUITE_GCMP256;
+            break;
+        case WPA_CIPHER_CCMP_256:
+            gRsnDB.broadcastSuite = CIPHER_SUITE_CCMP256;
+            break;
         case WPA_CIPHER_GCMP:
+            gRsnDB.broadcastSuite = CIPHER_SUITE_GCMP128;
+            break;
         default:
-            // TODO - not supported in MCP
+
+            CME_PRINT_REPORT_ERROR("\n\rrsn_setCryptoParams unsupported GroupSuite %d",aGroupSuite) ;
+
             ASSERT_GENERAL(0);
             break;
     }
@@ -324,13 +368,6 @@ int rsn_rsnWpaIe2SecurityInfo(dot11_RSN_t *rsnIe, uint8_t rsnIeLen, uint16_t *se
         *securityType |= ((RSN_WLAN_SECURITY_TYPE_BITMAP_WPA & RSN_WLAN_SCAN_RESULT_SEC_TYPE_MASK) << RSN_WLAN_SCAN_RESULT_SEC_TYPE_POSITION);
         DRV_PRINT_REPORT("\n\r WPA_PROTO_WPA securityType:0x%x", *securityType);
     }
-    else if ((parsedSec.proto & WPA_PROTO_RSN) && parsedSec.key_mgmt == WPA_KEY_MGMT_SAE)
-    {
-        // WPA3 - SAE
-        checkPmf = true;
-        *securityType |= ((RSN_WLAN_SECURITY_TYPE_BITMAP_WPA3 & RSN_WLAN_SCAN_RESULT_SEC_TYPE_MASK) << RSN_WLAN_SCAN_RESULT_SEC_TYPE_POSITION);
-        DRV_PRINT_REPORT("\n\r WPA3 - SAE securityType:0x%x", *securityType);
-    }
     else if ((parsedSec.proto & WPA_PROTO_RSN) && ((parsedSec.key_mgmt == (WPA_KEY_MGMT_SAE | WPA_KEY_MGMT_PSK)) || (parsedSec.key_mgmt == (WPA_KEY_MGMT_SAE | WPA_KEY_MGMT_PSK_SHA256))))
     {
         // WPA2/3
@@ -338,6 +375,13 @@ int rsn_rsnWpaIe2SecurityInfo(dot11_RSN_t *rsnIe, uint8_t rsnIeLen, uint16_t *se
         *securityType |= (((RSN_WLAN_SECURITY_TYPE_BITMAP_WPA3) & RSN_WLAN_SCAN_RESULT_SEC_TYPE_MASK) << RSN_WLAN_SCAN_RESULT_SEC_TYPE_POSITION);
         *securityType |= ((RSN_WLAN_SECURITY_TYPE_BITMAP_WPA2 & RSN_WLAN_SCAN_RESULT_SEC_TYPE_MASK) << RSN_WLAN_SCAN_RESULT_SEC_TYPE_POSITION);
         DRV_PRINT_REPORT("\n\r WPA2/3 - securityType:0x%x", *securityType);
+    }
+    else if ((parsedSec.proto & WPA_PROTO_RSN) && (parsedSec.key_mgmt & (WPA_KEY_MGMT_SAE | WPA_KEY_MGMT_FT_SAE)))
+    {
+        // WPA3 - SAE
+        checkPmf = true;
+        *securityType |= ((RSN_WLAN_SECURITY_TYPE_BITMAP_WPA3 & RSN_WLAN_SCAN_RESULT_SEC_TYPE_MASK) << RSN_WLAN_SCAN_RESULT_SEC_TYPE_POSITION);
+        DRV_PRINT_REPORT("\n\r WPA3 - SAE securityType:0x%x", *securityType);
     }
     else if (parsedSec.proto & WPA_PROTO_RSN)
     {
@@ -390,7 +434,7 @@ int rsn_rsnWpaIe2SecurityInfo(dot11_RSN_t *rsnIe, uint8_t rsnIeLen, uint16_t *se
 
 
 /*
- * Parse the payload for RSN ie and WPA IE and return the security type (SL_SEC_TYPE_OPEN / SL_SEC_TYPE_WEP / SL_SEC_TYPE_WPA_WPA2 / SL_SEC_TYPE_WPA_ENT)
+ * Parse the payload for RSN ie and WPA IE and return the security type (SL_SEC_TYPE_OPEN / SL_SEC_TYPE_WEP / SL_SEC_TYPE_WPA_WPA2 / CME_SEC_TYPE_WPA_ENT)
  * The payload should be at the beginning of the IE, regardless of the type of packet beacon/probe response/ association response.
  *
  * Params: uint16_t dot11CapabilityInfo
@@ -442,7 +486,7 @@ int rsn_getSecurityType(uint16_t dot11CapabilityInfo, dot11_RSN_t *pDotRsn, dot1
 }
 
 /*
- * Check key management & ciphers in WPA_IE or RSN_IE and return security type (SL_SEC_TYPE_OPEN / SL_SEC_TYPE_WEP / SL_SEC_TYPE_WPA_WPA2 / SL_SEC_TYPE_WPA_ENT)
+ * Check key management & ciphers in WPA_IE or RSN_IE and return security type (SL_SEC_TYPE_OPEN / SL_SEC_TYPE_WEP / SL_SEC_TYPE_WPA_WPA2 / CME_SEC_TYPE_WPA_ENT)
  *
  * Params: dot11_RSN_t *pDotRsn
  *         uint8_t *secType [out] - returned security type
@@ -451,6 +495,9 @@ int rsn_getSecurityType(uint16_t dot11CapabilityInfo, dot11_RSN_t *pDotRsn, dot1
 void rsn_getSecurityTypeFrom_IE(dot11_RSN_t *pDotRsn, uint8_t *secType)
 {
     struct wpa_ie_data parsedSec;
+    struct wpa_ie_data parsedSec_wpa;
+    uint8_t parseDescRet = 0;
+
 
     //TODO: for now, Supplicant code (wpa_parse_wpa_ie) does not check for WEP ciphers in the RSN IE or WPA IE. Add in future.
 
@@ -461,7 +508,16 @@ void rsn_getSecurityTypeFrom_IE(dot11_RSN_t *pDotRsn, uint8_t *secType)
         return;
     }
 
-    if (wpa_key_mgmt_wpa_psk(parsedSec.key_mgmt))
+    parseDescRet =wpa_parse_wpa_ie_wpa( (u8 *) pDotRsn, (pDotRsn->hdr.eleLen) + 2 , &parsedSec_wpa);
+
+    if ( (wpa_key_mgmt_wpa_ieee8021x (parsedSec.key_mgmt)) ||
+            ((parseDescRet>=0) && wpa_key_mgmt_wpa_ieee8021x(parsedSec_wpa.key_mgmt)))
+
+    {
+        //Security type Enterprise
+        *secType = CME_SEC_TYPE_WPA_ENT;
+    }
+    else if (wpa_key_mgmt_wpa_psk(parsedSec.key_mgmt))
     {
         Bool_e sae_only = (parsedSec.key_mgmt & (WPA_KEY_MGMT_PSK |
                                                  WPA_KEY_MGMT_FT_PSK |
@@ -487,13 +543,6 @@ void rsn_getSecurityTypeFrom_IE(dot11_RSN_t *pDotRsn, uint8_t *secType)
             *secType = CME_SEC_TYPE_WPA2_WPA3;
         }
     }
-#if 0
-    else if (wpa_key_mgmt_wpa_ieee8021x (parsedSec.key_mgmt))
-    {
-        //Security type Enterprise
-        *secType = SL_SEC_TYPE_WPA_ENT;
-    }
-#endif
     else if ((parsedSec.pairwise_cipher & (WPA_CIPHER_WEP40 | WPA_CIPHER_WEP104)) &&
              (parsedSec.group_cipher & (WPA_CIPHER_WEP40 | WPA_CIPHER_WEP104)))
     {
@@ -1252,9 +1301,6 @@ void rsn_addKey(securityKeys_t *apSecurityKey,const char *ifname)
 
     GTRACE(GRP_DRIVER_CC33_DEBUG, "RSN: add key KeyIndex 0x%x, keyLength=%d keyType %d",
                                    keyIndex, apSecurityKey->encLen, apSecurityKey->keyType);
-
-    if (MAX_KEYS_NUM <= keyIndex)
-        return;
 
     // Remove the key when the length is 0, or the type is not set
     if ( (WPA_ALG_NONE == apSecurityKey->keyType) || (0 == apSecurityKey->encLen) )
@@ -2074,7 +2120,13 @@ static void setKey(KeyAction_e aAction, securityKeys_t *apSecurityKey, const cha
             isPmfEnable = TRUE;
             break;
 
+        case WPA_ALG_GCMP_256:
+            setKeyCfg.cipher_type = CIPHER_SUITE_GCMP256;
+            isPmfEnable = TRUE;
+            break;
+
         default:
+            CME_PRINT_REPORT_ERROR("\n\r setKey wrong cipher keyType:%d", apSecurityKey->keyType);
             ASSERT_GENERAL(0);
             return;
     }
@@ -2097,7 +2149,7 @@ static void setKey(KeyAction_e aAction, securityKeys_t *apSecurityKey, const cha
         Bool_e bEncrypt = FALSE, bDropBcast;
 
 
-        if(apSecurityKey->keyType > WPA_ALG_IGTK)
+        if(apSecurityKey->keyType > WPA_ALG_BIP_CMAC_256)
         {
             ASSERT_GENERAL(0);
         }
@@ -2123,11 +2175,31 @@ static void setKey(KeyAction_e aAction, securityKeys_t *apSecurityKey, const cha
             {
                 wlanLinks_SetLinkPn(apSecurityKey->lid, setKeyCfg.keyId, setKeyCfg.AcSeqNum16, setKeyCfg.AcSeqNum32);
             }
-            else if ((apSecurityKey->lidKeyType == KEY_TYPE_BROADCAST) && (setKeyCfg.keyId <= 2))
+            else if (apSecurityKey->lidKeyType == KEY_TYPE_BROADCAST)
             {
-                wlanLinks_SetBroadcastPn((AESKey_rxPN_Tid_t *)&pDrv->broadcastPn[setKeyCfg.keyId - 1],
+                uint8 keyIndex = pDrv->broadcastNextKeyArrEntry;
+                if ((AES_BROADCAST2_ENTRY == keyIndex) && (setKeyCfg.keyId == pDrv->security_key_idx_mc1))
+                {
+                    keyIndex = AES_BROADCAST1_ENTRY;
+                }
+                else if ((AES_BROADCAST1_ENTRY == keyIndex) && (setKeyCfg.keyId == pDrv->security_key_idx_mc2))
+                {
+                    keyIndex = AES_BROADCAST2_ENTRY;
+                }
+                wlanLinks_SetBroadcastPn((AESKey_rxPN_Tid_t *)&pDrv->broadcastPn[keyIndex],
                                          setKeyCfg.AcSeqNum16,
                                          setKeyCfg.AcSeqNum32);
+
+                if (keyIndex == AES_BROADCAST1_ENTRY)
+                {
+                    pDrv->security_key_idx_mc1 = setKeyCfg.keyId;
+                    pDrv->broadcastNextKeyArrEntry = AES_BROADCAST2_ENTRY;
+                }
+                else // AES_BROADCAST2_IDX
+                {
+                    pDrv->security_key_idx_mc2 = setKeyCfg.keyId;
+                    pDrv->broadcastNextKeyArrEntry = AES_BROADCAST1_ENTRY;
+                }
             }
         }
         
@@ -2136,7 +2208,14 @@ static void setKey(KeyAction_e aAction, securityKeys_t *apSecurityKey, const cha
         GTRACE(GRP_DRIVER_CC33,"Setting pmf for lid :%d pmf :%d", apSecurityKey->lid, isPmfEnable);
         wlanLinks_UpdateLinkPMFEnabled(apSecurityKey->lid, isPmfEnable);
         udata_SetDataEncryption(apSecurityKey->lid, bEncrypt, bDropBcast, bEncrypt);
-        udata_SetMgmtEncryption(apSecurityKey->lid, isPmfEnable);
+
+        // MGMT encryption for sta based role and ap role brodcast only
+        // have ap based and lidkeytype is broadcast
+        if ( ROLE_IS_TYPE_STA_BASED(pDrv->roleType) || ((apSecurityKey->lidKeyType == KEY_TYPE_BROADCAST) && ROLE_IS_TYPE_AP_BASED(pDrv->roleType)) )
+        {
+            udata_SetMgmtEncryption(apSecurityKey->lid, isPmfEnable);
+        }
+        
         udata_SetEncryptionType(apSecurityKey->lid, keyType);
     }
 

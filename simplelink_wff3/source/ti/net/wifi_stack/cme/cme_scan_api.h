@@ -73,7 +73,7 @@
 
 // List of BG & A channels, to be used for scan in case supplicant hasn't set scan channels.
 // Scan always starts from social channels.
-#define PERIODIC_SCAN_CHANNELS_ARRAY_B_G_BAND               {1,6,11,2,3,4,5,7,8,9,10,12,13,14}
+#define PERIODIC_SCAN_CHANNELS_ARRAY_B_G_BAND               {1,6,11,2,3,4,5,7,8,9,10,12,13}
 #define PERIODIC_SCAN_CHANNELS_ARRAY_A_BAND                 {36,40,44,48,52,56,60,64,100,104,\
                                                              108,112,116,120,124,128,132,136,\
                                                              140,144,149,153,157,161,165}
@@ -152,6 +152,9 @@ typedef struct
     uint16_t      mSecurityType;
     uint8_t       mChannel;
 }cmeNetworkEntryResult_t;
+
+
+
 
 typedef struct
 {
@@ -279,6 +282,7 @@ typedef struct
     cmeScanProfilesParams_t mPeriodicProfiles;//relevant for periodic scan only (connection scan)
 
     uint16_t                  mIsOpenProfileSupported;    //1 = supported
+    uint8_t                   mIsProfileListExist;        //1 = profile list exist
 
     //CC33XX - add rssi/score thresholds
     int32_t mRssiEarlyTermThreshold; //if RSSI  value is >= this threshold, early terminate scan. 0 means dont care
@@ -376,14 +380,17 @@ int32_t CmeScan_SetProfilesAndResultsMem(cmeScanSharedInfo_t *apSharedInfo,
       IN apSharedInfo - pointer to a structure allocatrd by scan concentrator;
                         filled by CME to be used for handling scan results.
       IN aStatus      - indicate how scan was ended (normally, stopped, by error)
+      IN fromIntr     - indicates if called from interrupt context
+      IN fromTimeout  - indicates if the scan ended due to a timeout
  Return code:	0 - in success, -1 - memory allocation failed
 
  ---------------------------------------------------------------------------- */
 int32_t CmeScan_ScanDone(EScanRequestType aScanReqType,
                        uint32_t           aNetIf,
                        cmeScanSharedInfo_t *apSharedInfo,
-                       cmeScanStatus_e  aStatus);
-
+                       cmeScanStatus_e  aStatus,
+                       uint8_t   fromIntr,
+                       uint8_t   fromTimeout);
 
 /* ----------------------------------------------------------------------------
     CmeScan_ScanPeriodDone
@@ -429,5 +436,16 @@ void CmeScan_GetExtraIes(uint32_t aRoleId,
 /* ---------------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------------- */
 
+
+/* ----------------------------------------------------------------------------
+    cmeScan_store_scan_dwell_times
+    This function is used to store the scan dwell times in the cme_scan module 
+
+ Parameters:
+      IN WlanScanDwellTime_t            - dwellTimeParams , scan dwell times
+ Return code:   none
+
+ ---------------------------------------------------------------------------- */
+void cmeScan_store_scan_dwell_times(WlanScanDwellTime_t dwellTimeParams);
 
 #endif // _CME_SCAN_API_H_

@@ -28,15 +28,14 @@ int NpiIf_OpenNpi()
 {
     if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_NPI) == FALSE)
     {
+        Report("\n\rBLE Serial NPI opened\r\n");
+
         //Open the UART for NPI
         UartNpiOpen();
 
         //Initialize the NPI transport
         HciTransport_Init(HCI_TRANSPORT_UART_NPI, &uartForNpi);
     }
-
-
-    Report("\n\rBLE Serial NPI opened\r\n");
 
     return 0;
 }
@@ -45,6 +44,8 @@ int NpiIf_CloseNpi()
 {
     if (HciTransport_IsInitialized(HCI_TRANSPORT_UART_NPI) == TRUE)
     {
+        Report("\n\rBLE Serial NPI closed\r\n");
+
         //Close the UART for NPI
         UartNpiClose();
 

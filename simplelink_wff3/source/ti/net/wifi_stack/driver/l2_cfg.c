@@ -47,6 +47,8 @@
 #include "l2_cfg.h"
 
 #include "common.h"
+#include "cc3xxx_public_commands.h"
+#include "errors.h"
 
 // ============================================================================
 //		Modules private definitions
@@ -88,10 +90,8 @@
 // BIT3: Tx Unequal Modulation Supported
 #define TX_MCS_SETTINGS_BM          (1)     // TX MCS set is defined & equals the RX set
 
-
-#define        PHY_CFG_BAND_ONLY_2_4GHZ  (0)
-#define        PHY_CFG_BAND_ONLY_5GHZ    (1) 
-#define        PHY_CFG_BAND_BOTH         (2)
+#define        PHY_CFG_WIFI_PROTOCOL_AUTO    (0) // WiFi 1 to 6
+#define        PHY_CFG_WIFI_PROTOCOL_LEGACY  (1) // WiFi 1 to 4
 
 // ============================================================================
 //		Modules data base
@@ -99,8 +99,8 @@
 #define IEEE80211_VHT_CAP_MAX_MPDU_LENGTH_7991			0x00000001
 #define IEEE80211_VHT_CAP_MAX_A_MPDU_LENGTH_EXPONENT_SHIFT	23
 
-// Static default configurations
-const l2CfgCommon_t gL2CommonCfg =
+// default configurations
+l2CfgCommon_t gL2CommonCfg =
 {
     .supportedBandsBM = BIT_x(RADIO_BAND_2_4GHZ)| BIT_x(RADIO_BAND_5GHZ) ,       // A band isn't supported
     .band40MHzEnabled = FALSE,                          // No 40MHz support
@@ -221,7 +221,7 @@ const l2CfgCommon_t gL2CommonCfg =
     .heCapabilities.hePhyCapabilities.stbcRxSmallerEqu80MHz                             = 0,
     .heCapabilities.hePhyCapabilities.dopplerTx                                         = 0,
     .heCapabilities.hePhyCapabilities.dopplerRx                                         = 0,
-    .heCapabilities.hePhyCapabilities.fullBandwidthULmuMIMO                             = 0,
+    .heCapabilities.hePhyCapabilities.fullBandwidthULmuMIMO                             = 1,
     .heCapabilities.hePhyCapabilities.partialBandwidthULmuMIMO                          = 0,
     .heCapabilities.hePhyCapabilities.dcmMaxConstellationTx                             = 0,
     .heCapabilities.hePhyCapabilities.dcmMaxNSStx                                       = 0,
@@ -279,6 +279,11 @@ const l2CfgCommon_t gL2CommonCfg =
 };
 
 l2CfgCommon_t *gpL2CommonCfg  ;
+
+Bool32 gL2SupportHe = FALSE;
+Bool32 gL2Support5Ghz = FALSE;
+
+uint8_t gCfgApSaeAntiCloggingThreshold = SAE_ANTI_CLOGGING_DEFAULT;
 
 const cfgSta_t gL2StaBasedCfg =
 {
@@ -363,7 +368,8 @@ l2DynamicCfg_t gL2DynamicCfg     =
 //        .psMode = PS_SCHEME_LEGACY, // PS_SCHEME_UPSD_TRIGGER //TODO: for AP?
         .maxSpLen         = QOS_MAX_SP_LEN_DEF,
         .ApMaxNumStations = AP_DEFAULT_MAX_NUM_OF_STATIONS,
-        .selectedBand     =  PHY_CFG_BAND_BOTH
+        .selectedBand     =  L2_CFG_BAND_BOTH,
+        .wirelessProtocol = PHY_CFG_WIFI_PROTOCOL_AUTO
 };
 
 
@@ -412,7 +418,6 @@ P2pSupplicantCfg_t *gpP2pSupplicantCfg = NULL;
 // ============================================================================
 //		Local Functions declarations
 // ============================================================================
-
 
 // ============================================================================
 //		Exported Functions
@@ -469,6 +474,37 @@ void l2_cfg_Dynamic_set(l2DynamicCfgParamId_e paramIndex, uint8_t *paramValue)
 }
 
 
+int l2_cfg_GetStaHeSupport()
+{
+    int ret_status = 0;
+    uint8 iniHeEnabled = gpL2CommonCfg->heSupport;
+    uint8 fuseHeDisabled;
+    DeviceSystemInfo_t deviceSystemInfoParams;
+    deviceSystemInfoParams.systemInfoIdx = SYSTEM_INFO_WIFI6_DISABLE_IDX;
+    
+    ret_status = Wlan_Get(WLAN_GET_SYSINFO, (void *)&deviceSystemInfoParams);
+    
+    if (ret_status < 0)
+    {
+        Report("\n\rl2_cfg.c, l2_cfg_isStaHeEnabled return status failed!");
+        return WlanError(WLAN_ERROR_SEVERITY__HIGH,
+                         WLAN_ERROR_MODULE__FW_RESPONSE,
+                         WLAN_ERROR_TYPE__CMD_GENERAL);
+    }
+    
+    fuseHeDisabled = deviceSystemInfoParams.deviceSystemInfoValue;
+    
+    if ((fuseHeDisabled == 0) && (iniHeEnabled == 1))
+    {
+        gL2SupportHe = TRUE;
+    }
+    else
+    {
+        gL2SupportHe = FALSE;
+    }
+
+    return 0;
+}
 
 /* ----------------------------------------------------------------------------
  l2_cfg_isStaHeEnabled
@@ -481,8 +517,7 @@ void l2_cfg_Dynamic_set(l2DynamicCfgParamId_e paramIndex, uint8_t *paramValue)
 ---------------------------------------------------------------------------- */
 Bool32 l2_cfg_isStaHeEnabled(void)
 {
-    return gpL2CommonCfg->heSupport;
-
+    return gL2SupportHe;
 }
 
 
@@ -711,6 +746,24 @@ uint32_t l2_cfgBuildHeCapabilitiesIe(uint32_t aRoleId, uint8_t *apHeCapsIE)
     return (DOT11_HE_CAPABILITIES_MIN_TOTAL_LEN + sizeof(dot11_eleHdr_t));
 }
 
+void l2_StoreWirelessProto(uint8_t proto)
+{
+    /*
+        DOT11_PROTOCOL_AUTO = 0
+        DOT11_PROTOCOL_LEGACY = 1
+    */
+   gL2DynamicCfg.wirelessProtocol = proto;
+}
+
+uint8_t l2_GetWirelessProto()
+{
+    /*
+        DOT11_PROTOCOL_AUTO = 0
+        DOT11_PROTOCOL_LEGACY = 1
+    */
+   return gL2DynamicCfg.wirelessProtocol;
+}
+
 void l2_StorePhyConfig(uint8_t band_cfg)
 {
     /*
@@ -855,44 +908,58 @@ uint16_t cfgGetFragThreshold()
     return gpL2CommonCfg->fragThreshold;
 }
 
-/* ----------------------------------------------------------------------------
- cfgGetSupportedBands
- This function returns a bit mask of supported bands (based on RadioBand_e)
-
- Parameters:
- none
-
- return: bit mask of supported bands
- ---------------------------------------------------------------------------- */
-uint32_t cfgGetSupportedBands()
+Bool32 l2_cfg_is5GhzSupported(void)
 {
-    return gpL2CommonCfg->supportedBandsBM;
+    return gL2Support5Ghz;
 }
 
-/* ----------------------------------------------------------------------------
- cfgIsAbandSupported, cfgIsBGbandSupported
- This function checks whether A/BG band are supported by device HW
-
- Parameters:
- none
-
- return: TRUE if band is supported by HW
- ---------------------------------------------------------------------------- */
-Bool32 cfgIsAbandSupported()
+int8_t l2_cfg_get5GhzSupport(uint8_t *is5GhzSupported)
 {
-    return (0 != (gpL2CommonCfg->supportedBandsBM & BIT_x(RADIO_BAND_5GHZ)));
+    int8_t ret = 0;
+    DeviceSystemInfo_t deviceSystemInfoParams;
+    deviceSystemInfoParams.systemInfoIdx = SYSTEM_INFO_PAPER_SPIN_DISABLE_5GHZ_IDX;
+    uint32_t fuse5GhzSupport = 0;
+
+    ret = Wlan_Get(WLAN_GET_SYSINFO, (void *)&deviceSystemInfoParams);
+    if (ret != 0)
+    {
+        return WlanError(WLAN_ERROR_SEVERITY__HIGH,
+                         WLAN_ERROR_MODULE__FW_RESPONSE,
+                         WLAN_ERROR_TYPE__CMD_GENERAL);
+    }
+
+    if (is5GhzSupported != NULL)
+    {
+        *is5GhzSupported = !deviceSystemInfoParams.deviceSystemInfoValue;
+        gL2Support5Ghz = deviceSystemInfoParams.deviceSystemInfoValue?FALSE:TRUE;
+    }
+    else
+    {
+        return WlanError(WLAN_ERROR_SEVERITY__HIGH,
+                         WLAN_ERROR_MODULE__L2_CFG,
+                         WLAN_ERROR_TYPE__NULL_BUF);
+    }
+
+    return 0;
 }
 
-Bool32 cfgIsBGbandSupported()
+// ----------------------------------------------------------------------------
+void cfgSetApSaeAntiCloggingThreshold(uint8_t apSaeAntiCloggingThreshold)
 {
-    return (0 != (gpL2CommonCfg->supportedBandsBM & BIT_x(RADIO_BAND_2_4GHZ)));
+
+    if ((apSaeAntiCloggingThreshold == SAE_ANTI_CLOGGING_ALWAYS) ||
+        (apSaeAntiCloggingThreshold == SAE_ANTI_CLOGGING_LOW) || 
+        (apSaeAntiCloggingThreshold == SAE_ANTI_CLOGGING_DEFAULT))
+    {
+        gCfgApSaeAntiCloggingThreshold = apSaeAntiCloggingThreshold;
+    }
+       
 }
 
-Bool32 cfgIsJbandSupported()
+// ----------------------------------------------------------------------------
+uint8_t cfgGetApSaeAntiCloggingThreshold(void)
 {
-    return (0
-            != (gpL2CommonCfg->supportedBandsBM
-                    & BIT_x(RADIO_BAND_JAPAN_4_9_GHZ)));
+    return gCfgApSaeAntiCloggingThreshold;
 }
 
 // ============================================================================
@@ -1309,34 +1376,15 @@ void cfgSetP2pParameters(const P2pParams_t *params)
     P2pParameters_t *setParams = gpP2pSupplicantCfg->p2pParams;
     
     //set p2p listen channen & reg class
-    if (params->listenReg)
-    {
-        setParams->p2pListenRegClass = params->listenReg;
-    }
-
-    if (params->listenChannel)
-    {
-        setParams->p2pListenChannel = params->listenChannel;
-    }
+    setParams->p2pListenRegClass = params->listenReg;
+    setParams->p2pListenChannel = params->listenChannel;
+    
     //set p2p operational channen & reg class
-    if (params->operReg)
-    {
-        setParams->p2pOperRegClass = params->operReg;
-    }
-
-    if (params->operChannel)
-    {
-        setParams->p2pOperChannel = params->operChannel;
-    }
-
+    setParams->p2pOperRegClass = params->operReg;
+    setParams->p2pOperChannel = params->operChannel;
+    
     //set go intent value
-    //TODO - validate that values are in range [0 - 15]
-    if (params->goIntent)
-    {
-        setParams->p2pGoIntent = params->goIntent;
-    }
-    //TBD - other params
-
+    setParams->p2pGoIntent = params->goIntent;
 }
 /* ----------------------------------------------------------------------------
  cfgSetP2pDevice

@@ -929,7 +929,6 @@ ETxnStatus txHwQueue_UpdateFreeResources(FwStatus_t *pFwStatus, uint32_t uNumPck
     /* Notify RunScheduler when some frames where freed*/
     if (uLinkInfoChanged)
     {
-        //txMgmtQ_ReqToRunTxScheduler(); // it may that link that was suspended is now cleared
         txDataQ_ReqToRunTxScheduler();
     }
 #endif

@@ -44,7 +44,7 @@ static void hostapd_handle_lci_report(struct hostapd_data *hapd, u8 token,
 	eloop_cancel_timeout(hostapd_lci_rep_timeout_handler, hapd, NULL);
 //TI cc33xx compilation
 	//wpa_printf(MSG_DEBUG, "LCI report token %u len %d", token, len);
-	wpa_printf(MSG_DEBUG, "LCI report token %u len %lu", token, len);
+	wpa_printf(MSG_DEBUG, "LCI report token %u len %zu", token, len);
 }
 
 
@@ -71,7 +71,7 @@ static void hostapd_handle_range_report(struct hostapd_data *hapd, u8 token,
 	eloop_cancel_timeout(hostapd_range_rep_timeout_handler, hapd, NULL);
 	//TI cc33xx compilation
 	//wpa_printf(MSG_DEBUG, "Range report token %u len %d", token, len);
-	wpa_printf(MSG_DEBUG, "Range report token %u len %lu", token, len);
+	wpa_printf(MSG_DEBUG, "Range report token %u len %zu", token, len);
 }
 
 

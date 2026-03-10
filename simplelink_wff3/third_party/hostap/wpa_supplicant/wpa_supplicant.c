@@ -5611,7 +5611,6 @@ wpa_supplicant_alloc(struct wpa_supplicant *parent)
 	dl_list_init(&wpa_s->drv_signal_override);
 #endif /* CONFIG_TESTING_OPTIONS */
 	dl_list_init(&wpa_s->active_scs_ids);
-
 	return wpa_s;
 }
 

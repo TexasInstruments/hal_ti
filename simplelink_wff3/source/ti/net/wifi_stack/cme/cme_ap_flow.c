@@ -67,6 +67,9 @@ extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t * args, uint16_t arg
 void CmeApInit             (Cme_Users_e __user);
 void CmeApDeactivateReq    (Cme_Users_e __user);
 void CmeApStopRole         (Cme_Users_e __user);
+extern int32_t CME_peerAgingSampleTime();
+static void CME_peer_aging_timeout();
+
 
 extern void drv_ti_ap_init(void);
 
@@ -173,7 +176,6 @@ int CmeAPFlowSM(Cme_AP_events_e event)
         {
             gCmeApFlowSM[event].pSmEventHandler(CME_STA_NONE_USER);
         }
-
     }
     else
     {
@@ -181,6 +183,7 @@ int CmeAPFlowSM(Cme_AP_events_e event)
                                    gCmeApFlowState_ull, event);
         rc = -1;
     }
+
     return rc;
 }
 
@@ -226,27 +229,28 @@ int CmeApAnyConnectedLinks()
 
 void CmeApInit(Cme_Users_e __user)
 {
+    int32_t ret = 0;
 #if 0 //RazB: need to implement
     CME_PrivateIeAndBwListCreate();
 #endif
+
     CME_generalSemaphoreCreate();
-    if(supplicantRunAP()< 0 )
+
+    ret = supplicantRunAP();
+    if (ret < 0)
     {
-        g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status= CME_SIGNAL_ROLE_CHNGE_STATUS_FAILED;
+        g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status = CME_SIGNAL_ROLE_CHNGE_STATUS_FAILED;
         CME_PRINT_REPORT("\n\rCME ERROR! CmeApInit failed");
     }
     else
     {
-        //update state to up
+        // Update state to up
         gCmeApFlowState_ull = CME_AP_UP_STATE;
 
         // Clear connections bit mask
         gCmeConnectedLinksCount = 0;
     }
 }
-
-
-
 
 void CmeApStopRole(Cme_Users_e __user)
 {
@@ -256,7 +260,7 @@ void CmeApStopRole(Cme_Users_e __user)
     gCmeApFlowState_ull = CME_AP_DISABLED_STATE;
 }
 
-int32_t setApSecurityParams (WlanSecParams_t*  pWlanSecConfig, struct wpa_ssid *pCmeSsid)
+int32_t setApSecurityParams (WlanSecParams_t*  pWlanSecConfig, int saePwe, struct wpa_ssid *pCmeSsid)
 {
     HOOK(HOOK_IN_CME_AP_FLOW);
 
@@ -329,12 +333,13 @@ int32_t setApSecurityParams (WlanSecParams_t*  pWlanSecConfig, struct wpa_ssid *
                 pCmeSsid->passphrase = os_zalloc (pWlanSecConfig->KeyLen + 1);
                 os_memcpy(pCmeSsid->passphrase, pWlanSecConfig->Key, pWlanSecConfig->KeyLen);
             }
-
             pCmeSsid->key_mgmt = WPA_KEY_MGMT_SAE;
-            pCmeSsid->auth_alg = WPA_AUTH_ALG_SAE;
+            //pCmeSsid->auth_alg = WPA_AUTH_ALG_SAE;
+            pCmeSsid->auth_alg = WPA_AUTH_ALG_OPEN;
             pCmeSsid->pairwise_cipher = CME_AP_WPA_DEFAULT_CIPHER;
             pCmeSsid->group_cipher = CME_AP_WPA_DEFAULT_CIPHER;
-            pCmeSsid->sae_pwe = CME_AP_WPA_SAE_PWE_H2E_AND_HUNTING_AND_PECKING;
+            //pCmeSsid->sae_pwe = CME_AP_WPA_SAE_PWE_H2E_AND_HUNTING_AND_PECKING;
+            pCmeSsid->sae_pwe = saePwe;
             pCmeSsid->ieee80211w = MGMT_FRAME_PROTECTION_REQUIRED;
             pCmeSsid->proto = WPA_PROTO_RSN;
             pCmeSsid->group_mgmt_cipher = WPA_CIPHER_AES_128_CMAC;
@@ -349,11 +354,11 @@ int32_t setApSecurityParams (WlanSecParams_t*  pWlanSecConfig, struct wpa_ssid *
                 os_memcpy(pCmeSsid->passphrase, pWlanSecConfig->Key, pWlanSecConfig->KeyLen);
             }
 
-            pCmeSsid->key_mgmt = WPA_KEY_MGMT_SAE | WPA_KEY_MGMT_PSK | WPA_KEY_MGMT_PSK_SHA256;
+            pCmeSsid->key_mgmt = WPA_KEY_MGMT_SAE | WPA_KEY_MGMT_PSK;
             pCmeSsid->auth_alg = WPA_AUTH_ALG_OPEN;
             pCmeSsid->pairwise_cipher = CME_AP_WPA_DEFAULT_CIPHER;
             pCmeSsid->group_cipher = CME_AP_WPA_DEFAULT_CIPHER;
-            //pCmeSsid->sae_pwe = CME_AP_WPA_SAE_PWE_H2E_AND_HUNTING_AND_PECKING;
+            pCmeSsid->sae_pwe = CME_AP_WPA_SAE_PWE_H2E_AND_HUNTING_AND_PECKING;
             pCmeSsid->ieee80211w = MGMT_FRAME_PROTECTION_OPTIONAL;
             pCmeSsid->proto = WPA_PROTO_RSN;
             pCmeSsid->group_mgmt_cipher = WPA_CIPHER_AES_128_CMAC;
@@ -374,6 +379,7 @@ void CmeSetApParams(void *apParams)
 {
     RoleUpApCmd_t *pParams = (RoleUpApCmd_t *)apParams;
     int freq;
+    int sae_pwe;
 
     const cfgAp_t *apCfg = cfgGetApCfg();
 
@@ -427,10 +433,28 @@ void CmeSetApParams(void *apParams)
         gCmeSsid.wps_disabled = 0;
         cfgSetWpsParameters(&(pParams->wpsParams));
     }
+
+    //Set AP SAE related configurations
     
+    if ((pParams->sae_pwe != 0) && (pParams->sae_pwe != 1) && (pParams->sae_pwe != 2))
+    {
+        sae_pwe = CME_AP_WPA_SAE_PWE_H2E_AND_HUNTING_AND_PECKING;
+    }
+    else
+    {
+        sae_pwe = pParams->sae_pwe;
+    }
+
+    gCmeSsid.transition_disable = !!pParams->transitionDisable;
+
+    CME_PRINT_REPORT("\n\r Transition_disable=%d sae_anticlogging_threshold=%d\n\r",
+                        gCmeSsid.transition_disable, 
+                        pParams->sae_anticlogging_threshold);
+
+    cfgSetApSaeAntiCloggingThreshold(pParams->sae_anticlogging_threshold);
 
     // Set security Params
-    if(setApSecurityParams(&pParams->secParams, &gCmeSsid) < 0)
+    if(setApSecurityParams(&pParams->secParams, sae_pwe, &gCmeSsid) < 0)
     {
         ASSERT_GENERAL(0);
     }
@@ -438,8 +462,46 @@ void CmeSetApParams(void *apParams)
     HOOK(HOOK_IN_CME_AP_FLOW);
 }
 
+void freeApParams()
+{
+    // Now that AP is completely down, free SSID string memory and passphrase, if exists
+    if (gCmeSsid.ssid != NULL)
+    {
+        os_free(gCmeSsid.ssid);
+        gCmeSsid.ssid = NULL;
+    }
+    if (gCmeSsid.passphrase != NULL)
+    {
+        os_free(gCmeSsid.passphrase);
+        gCmeSsid.passphrase = NULL;
+    }
+
+    CME_generalSemaphoreDestroy();
+}
+
+void supplicantDeinitAP(struct wpa_global *pGlobal, struct wpa_supplicant *wpa_s, uint8_t destroyGlobal)
+{
+    if (wpa_supplicant_remove_iface(pGlobal, wpa_s, 0) < 0)
+    {
+        CME_PRINT_REPORT_ERROR("\n\rAP interface, "
+                                "wpa_supplicant_remove_iface failed");
+    }
+    else
+    {
+        CME_PRINT_REPORT("\n\rAP interface, "
+                            "wpa_supplicant_remove_iface success");
+    }
+
+    if (destroyGlobal)
+    {
+        wpa_supplicant_deinit(pGlobal);
+    }
+    freeApParams();
+}
+
 int32_t supplicantRunAP()
 {
+    int32_t ret = 0;
     HOOK(HOOK_IN_CME_AP_FLOW);
 
 #ifdef CONFIG_AP
@@ -449,13 +511,12 @@ int32_t supplicantRunAP()
     struct wpa_supplicant *wpa_s;
     ti_driver_ifData_t *pDevDrv = drv_getDriverData(NETIF_NAME(TIWLAN_DEV_NAME_P2PDEV));
 
-    
     //request to enable role AP for P2P Go  may come from p2p negotioation completion or from user
 
     if ((pDevDrv == NULL)
         ||  (pDevDrv->p2pConnectionStarted == 0)) 
     {
-        if(NULL == gCmeSsid.ssid)
+        if (NULL == gCmeSsid.ssid)
         {
             ASSERT_GENERAL(0);
         }
@@ -470,14 +531,6 @@ int32_t supplicantRunAP()
         GTRACE(GRP_CME, "AP cfg: Key management type: %d, Frequency %d beacon int. %d dtim %d ",
             gCmeSsid.key_mgmt, gCmeSsid.frequency, gCmeSsid.beacon_int, gCmeSsid.dtim_period);
     }
-
-    // Initialize the interface - allocate memory and set role type
-//    iface = os_zalloc(sizeof(struct wpa_interface));
-//    if (NULL == iface)
-//    {
-//        GTRACE(GRP_CME,"failed to allocate memory for wpa interface");
-//        return;
-//    }
 
     // only the first role that is started initializes supplicant
     if (NULL == gpSupplicantGlobals)
@@ -496,6 +549,12 @@ int32_t supplicantRunAP()
 #endif
         params.wpa_debug_show_keys = 0;
         pGlobal = wpa_supplicant_init(&params);
+        if (pGlobal == NULL)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rwpa_supplicant_init() failed");
+            freeApParams();
+            return -1;
+        }
 
         pGlobal->p2p_disabled = 1;
         pGlobal->p2p = 0;
@@ -535,9 +594,9 @@ int32_t supplicantRunAP()
     wpa_s = wpa_supplicant_add_iface(pGlobal, &iface, NULL);
     if (NULL == wpa_s)
     {
+        freeApParams();
         return -1;
     }
-
 
     // Set scan interval for normal scan to 1 sec (3 first scans before moving to sched scan).
     // For now; there is no field in wpa_config.
@@ -548,16 +607,31 @@ int32_t supplicantRunAP()
     if ((pDevDrv == NULL)
         ||  (pDevDrv->p2pConnectionStarted == 0)) 
     {
-        wpa_supplicant_create_ap(wpa_s, &gCmeSsid);
+        ret = wpa_supplicant_create_ap(wpa_s, &gCmeSsid);
+        if (ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rwpa_supplicant_create_ap() failed");
+            supplicantDeinitAP(pGlobal, wpa_s,
+                               gpSupplicantGlobals == NULL ? 1 : 0);
+            return ret;
+        }
     }
-
 
     if (NULL == gpSupplicantGlobals)
     {
-        wpa_supplicant_run(pGlobal);
+        ret = wpa_supplicant_run(pGlobal);
+        // In case wpa_supplicant_run() fails something is
+        // wrong with the global. It's the first try to run
+        // supplicant so we wish to destroy the global context
+        if (ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rwpa_supplicant_run() failed");
+            supplicantDeinitAP(pGlobal, wpa_s, 1);
+            return ret;
+        }
 
-        // Store a pointer to the supplicant interface, to be used for every
-        // activation of supplicant API.
+        // In case of success, store a pointer to the
+        // supplicant interface, activation of supplicant API.
         gpSupplicantGlobals = pGlobal;
     }
 
@@ -573,35 +647,34 @@ int32_t supplicantRunAP()
 // Temp, till CME SM supports AP
 void CmeApDeInit()
 {
+    int32 ret;
     HOOK(HOOK_IN_CME_AP_FLOW);
 
     struct wpa_supplicant *pApInterface;
 
     GTRACE(GRP_CME,"Removing AP interface");
+    CME_PRINT_REPORT("\n\r Removing AP interface");
 
     uint32_t roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_AP);
     pApInterface = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
 
     if (pApInterface!=NULL)
     {
-        wpa_supplicant_remove_iface(gpSupplicantGlobals,
+        ret = wpa_supplicant_remove_iface(gpSupplicantGlobals,
                                     pApInterface,
                                     1 /* enable print */);
+        if(ret<0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\r AP interface ,wpa_supplicant_remove_iface failed");
+
+        }
+        else
+        {
+            CME_PRINT_REPORT_ERROR("\n\r AP interface ,wpa_supplicant_remove_iface success");
+        }
     }
 
-    // Now that AP is completely down, free SSID string memory and passphrase, if exists
-    if (gCmeSsid.ssid != NULL)
-    {
-        os_free(gCmeSsid.ssid);
-        gCmeSsid.ssid = NULL;
-    }
-    if (gCmeSsid.passphrase != NULL)
-    {
-        os_free(gCmeSsid.passphrase);
-        gCmeSsid.passphrase = NULL;
-    }
-
-    CME_generalSemaphoreDestroy();
+    freeApParams();
 
     HOOK(HOOK_IN_CME_AP_FLOW);
 
@@ -610,7 +683,7 @@ void CmeApDeInit()
 #endif
 }
 
-void CmeApWpsFailureNotify(int8_t wpsFailCode)
+void CmeApExtWpsFailureNotify(int8_t wpsFailCode)
 {
     wlanDispatcherSendEvent(WLAN_EVENT_AP_EXT_WPS_SETTING_FAILED, (void*)(&wpsFailCode), sizeof(int8_t));
 }
@@ -768,6 +841,9 @@ void CmeP2pGroupRemovedNotify(RoleType_e roleType)
         case ROLE_P2P_GO:
             pArgs->RoleType = WLAN_ROLE_P2P_GO;
             break;
+        case ROLE_DEVICE:
+            pArgs->RoleType = WLAN_ROLE_DEVICE;
+            break;
         default:
             pArgs->RoleType = WLAN_ROLE_P2P_CL;
             break;
@@ -777,5 +853,53 @@ void CmeP2pGroupRemovedNotify(RoleType_e roleType)
     wlanDispatcherSendEvent(WLAN_EVENT_P2P_GROUP_REMOVED, (void*)pArgs, sizeof(WlanEventGroupRemoved_t));
                              
     os_free(pArgs);
+
+}
+////////////////////////////////////////////////////////////////////////////////////
+////   aging timer
+/////////////////////////////////////////////////////////////////////////////////
+void CME_start_peer_aging_timer(OsiTimer_t* osTimer, uint32_t timeout)
+{
+    int32_t ret;
+    if( osTimer->osTimerHandler == NULL)
+    {
+        osi_TimerCreate(osTimer, "peerAgingTimer", CME_peer_aging_timeout, NULL);
+    }
+    ret = osi_TimerStart(osTimer, timeout  , FALSE);
+    if(ret < 0)
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: Aging timer start failed");
+    }
+    else
+    {
+        //CME_PRINT_REPORT("\n\rCME: Aging timer started !!!");
+    }
+
+}
+
+void CME_peer_aging_timeout()
+{
+    //CME_PRINT_REPORT("\n\rCME: CME_peer_aging_timeout function !!");
+    //push event to CME to verify aging
+    CME_peerAgingSampleTime();
+}
+
+void CME_peer_aging_timer_stop(OsiTimer_t* osTimer)
+{
+    int32_t ret;
+    if(osTimer->osTimerHandler != NULL)
+    {
+        ret = osi_TimerStop(osTimer);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: aging timer stop failed");
+        }
+        osi_TimerDelete(osTimer);
+    }
+    else
+    {
+        CME_PRINT_REPORT("\n\rCME: aging timer was not stated");
+    }
+    osTimer->osTimerHandler = NULL;
 
 }

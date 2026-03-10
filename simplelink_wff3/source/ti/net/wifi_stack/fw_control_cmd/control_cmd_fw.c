@@ -58,6 +58,7 @@
 #include "drv_ti_internal.h"
 #include "cme_supplicant_api.h"
 #include "cme_dispatcher_api.h"
+#include "init_host_if.h"
 
 /*this is the NAB address for MX cmd APP2NAB_ADDR, it is not used on MX, because the SDIO wrapper is not there
  * so for passing the validation on twIf_Transact function, it is set the same as in LX */
@@ -115,7 +116,7 @@ int WLSendFW_CfgOrDebugCommand(uint16_t opcode, uint32_t id, void *cmd, uint32_t
     return ret;
 }
 
-int WLSendFWGetDeviceInfoCommand( void *out,uint32_t outLen)
+int WLSendFWGetDeviceInfoCommand(void *out, uint32_t outLen)
 {
     cmd_download_t cmd_dnld;
     cmd_download_t* cmd = &cmd_dnld;
@@ -443,6 +444,8 @@ Bool_e isCalibratorPowerNeeded(CalibratorAction_e calibratorAction)
         case (CALIBRATOR_ACTION_SET_TRANSMIT_OMI):
         case (CALIBRATOR_ACTION_BA_SESSION):
         case (CALIBRATOR_ACTION_LINK_ADAPT):
+        case (CALIBRATOR_ACTION_MANUAL_CALIBRATION):
+        case (CALIBRATOR_ACTION_THERMAL_PROTECTION):
             needed = FALSE;
             break;
         default:
@@ -519,6 +522,29 @@ int ctrlCmdFw_CalibratorCommand(CalibratorAction_e calibratorAction, void *calib
                                0);
     }
         break;
+    case (CALIBRATOR_ACTION_TX_TONE_START):
+    {
+        CalibratorStartTxToneParams_t *txToneParams;
+        cmd_test_start_tx_tone_t cmdStartTxTone;
+
+        if (NULL == calibratorCmdParams)
+        {
+            return -1;
+        }
+        txToneParams = (CalibratorStartTxToneParams_t *)calibratorCmdParams;
+
+        os_memcpy(&cmdStartTxTone.startTxToneParams, txToneParams, sizeof(CalibratorStartTxToneParams_t));
+
+        cmdStartTxTone.cmdTestHeader.cmdTestId = CC33XX_TEST_CMD_TX_TONE_START;
+
+        ret = WLSendFW_Command(CMD_TEST,
+                               CMD_TEST,
+                               &cmdStartTxTone,
+                               sizeof(cmd_test_start_tx_tone_t),
+                               NULL,
+                               0);
+    }
+        break;    
     case (CALIBRATOR_ACTION_SET_TX_PARAMS):
     case (CALIBRATOR_ACTION_SET_TB_TX_PARAMS):
     {
@@ -627,6 +653,29 @@ int ctrlCmdFw_CalibratorCommand(CalibratorAction_e calibratorAction, void *calib
         os_memcpy(getRxParams, cmdComplete.info.param, sizeof(TransceiverRxStatCounters_t));
     }
         break;
+    case(CALIBRATOR_ACTION_MANUAL_CALIBRATION):
+    {
+        uint16_t* pCalibration_bitmap;
+        cmd_test_set_manual_calib_t cmdManualCalib;
+
+        if (NULL == calibratorCmdParams)
+        {
+            return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CMD_CTRL, WLAN_ERROR_TYPE__INVALID_PARAM_CALIBRATOR);
+        }
+        pCalibration_bitmap = (uint16_t*)(calibratorCmdParams);
+
+        os_memcpy(&cmdManualCalib.calibration_bitmap, pCalibration_bitmap, sizeof(uint16_t));
+        cmdManualCalib.cmdTestHeader.cmdTestId = CC33XX_TEST_CMD_MANUAL_CALIBRATION;
+
+        ret = WLSendFW_Command(CMD_TEST,
+                               CMD_TEST,
+                               &cmdManualCalib,
+                               sizeof(cmd_test_set_manual_calib_t),
+                               NULL,
+                               0);
+
+    }
+    break;
     case (CALIBRATOR_ACTION_RATE_OVERRIDE):
     {
         CalibratorRateOverrideParams_t *rateOverrideParams;
@@ -864,7 +913,27 @@ int ctrlCmdFw_CalibratorCommand(CalibratorAction_e calibratorAction, void *calib
 
         ret = WLSendFW_DebugCommand(LINK_ADAPT_CFG,
                                     &cmdLinkAdapt,
-                                    sizeof(LinkAdaptDebugCfg_t),
+                                    sizeof(cmd_link_adapt_debug_t),
+                                    NULL,
+                                    0);
+    }
+        break;
+    case (CALIBRATOR_ACTION_THERMAL_PROTECTION):
+    {
+        CalibratorThermalParams_t *thermalParams;
+        cmd_debug_thermal_cfg_t cmdThermalCfg;
+
+        if (NULL == calibratorCmdParams)
+        {
+            return -1;
+        }
+        thermalParams = (CalibratorThermalParams_t *)calibratorCmdParams;
+
+        os_memcpy(&cmdThermalCfg.thermalCbParams, thermalParams, sizeof(ThermalCbCfg_t));
+
+        ret = WLSendFW_DebugCommand(THERMAL_PROTECTION_CFG,
+                                    &cmdThermalCfg,
+                                    sizeof(cmd_debug_thermal_cfg_t),
                                     NULL,
                                     0);
     }
@@ -873,6 +942,7 @@ int ctrlCmdFw_CalibratorCommand(CalibratorAction_e calibratorAction, void *calib
         Report("\r\nUnknown calibrator action requested.");
         break;
     }
+
     return ret;
 }
 
@@ -891,7 +961,7 @@ Bool_e FindCalibrationData(uint8_t *mac, FILE *fileHandle, uint32_t *offset, uin
     if (NULL == headerBuffer)
     {
         Report("\n\rCouldn't allocate memory for entry header\n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
     do {
@@ -976,7 +1046,7 @@ int SendCalibrationCmd(FILE *calibrationFile, uint32_t offset, uint16_t payloadL
     if (NULL == cmd)
     {
         Report("\n\rCouldn't allocate memory for calibration command\n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
     
     osi_fread(fileHeaderBuffer, CALIBRATION_FILE_HEADER_SIZE, 0, calibrationFile);
@@ -1048,9 +1118,10 @@ int ctrlCmdFw_DownloadIniParams()
     cmd_ini_params_download_t *cmd = NULL;
     uint32_t cmdIniSize;
     uint32_t cmdSizeForIni = CMD_MAX_SIZE;
-    int ret=0;
+    FILE *iniFileHandle = NULL;
+    int ret = 0;
 
-    if(CMD_INI_FILE_SIZE > CMD_MAX_SIZE)
+    if (CMD_INI_FILE_SIZE > CMD_MAX_SIZE)
     {
         cmdSizeForIni = CMD_INI_FILE_SIZE;
     }
@@ -1066,30 +1137,35 @@ int ctrlCmdFw_DownloadIniParams()
     if (NULL == cmd)
     {
         Report("\n\rCouldn't allocate memory for configuration command\n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
-    FILE *IniFileHandle = osi_fopen("cc33xx-conf", "rb");
-
-
-    if(!IniFileHandle)
+    iniFileHandle = osi_fopen("cc35xx-conf", "rb");
+    if (!iniFileHandle)
     {
-        Report("\n\rERROR: Cant Open/Find cc35xx-conf.bin file\n\r");
-        assert(0);
+        Report("\n\rERROR: Can't open/find cc35xx-conf.bin file\n\r");
+        ASSERT_GENERAL(0);
     }
     else
     {
-        osi_fread((cmd->payload), CC33X_CONF_SIZE, 0, IniFileHandle);
+        size_t bytesRead = 0;
+        bytesRead = osi_fread((cmd->payload), CC33X_CONF_SIZE, 0, iniFileHandle);
+        if (bytesRead != CC33X_CONF_SIZE)
+        {
+            Report("\n\rERROR: Failed to read complete configuration file");
+            ASSERT_GENERAL(0);
+        }
         cmd->length = CC33X_CONF_SIZE;
-        osi_fclose(IniFileHandle);
+        osi_fclose(iniFileHandle);
     }
-
 
     ctrlCmdFw_LockHostDriver();
 
     WLSendFW_Command(CMD_DOWNLOAD_INI_PARAMS, CMD_DOWNLOAD_INI_PARAMS, cmd, cmdIniSize, NULL, 0);
 
     ctrlCmdFw_UnlockHostDriver();
+
+    InitIniParamsHost(cmd);
 
     os_free(cmd);
 
@@ -1104,6 +1180,75 @@ int ctrlCmdFw_DownloadIniParams()
 
 }
 
+int ctrlCmdFw_FirstCommand()
+{
+    // Send cmd to FW
+    cmd_first_params_download_t *cmd = NULL;
+    uint32_t cmdSize;
+    uint32_t cmdSizeForCommand = CMD_MAX_SIZE;
+    int ret = 0;
+
+    cmd_SetBufferSize(cmdSizeForCommand);
+
+    cmdSize = sizeof(cmd_first_params_download_t);
+    
+    cmdSize = ALIGNN_TO_4(cmdSize);
+
+    if (cmdSize > CMD_MAX_SIZE)
+    {
+        Report("\n\rERROR: Cmd size (%d) exceeds the max size (%d)!\n\r", cmdSize, CMD_MAX_SIZE);
+        ASSERT_GENERAL(0);
+    }
+    if (cmdSize != sizeof(cmd_first_params_download_t))
+    {
+        Report("\n\rCmd size is not 4 byte aligned!!! %d (%d)\n\r", cmdSize, sizeof(cmd_first_params_download_t));
+    }
+
+    cmd = os_malloc(cmdSize);
+
+    //Set Core status address
+    cmd->core_status.header.type = CMD_FIRST_TYPE_CORE_ADDR; 
+    cmd->core_status.header.length = sizeof(cmd->core_status.addr);
+    cmd->core_status.addr = 0x41C40000;
+
+    cmd->data.header.type = 0x01; // Reserved
+    cmd->data.header.length = 254;
+
+    os_memset(cmd->data.data, 5, 254); // Initialize data to zero
+
+    //must be last command
+    cmd->end_of_cmd.type = CMD_FIRST_TYPE_END; // End of command
+    cmd->end_of_cmd.length = 0x00; // Length of the value (0 bytes for end of command)
+
+
+    if (NULL == cmd)
+    {
+        Report("\n\rCouldn't allocate memory for calibration command\n\r");
+        ASSERT_GENERAL(0);
+        return OSI_MEMORY_ALLOCATION_FAILURE;
+    }
+
+    ctrlCmdFw_LockHostDriver();
+
+    WLSendFW_Command(CMD_DOWNLOAD_FIRST_CMD, CMD_DOWNLOAD_FIRST_CMD, cmd, cmdSize, NULL, 0);
+
+    ctrlCmdFw_UnlockHostDriver();
+
+    os_free(cmd);
+
+    //return cmd buffer to default buffer with buffer size = CMD_MAX_SIZE
+    ret = cmd_SetBufferSize(0);
+    if(ret < 0)
+    {
+        Report("Failed to Allocate Memory for cmd Buffer");
+        ASSERT_GENERAL(0);
+        return OSI_MEMORY_ALLOCATION_FAILURE;
+    }
+
+    return ret;
+}
+
+
 int ctrlCmdFw_EnableBLECmd()
 {
     // Send cmd to FW
@@ -1116,7 +1261,7 @@ int ctrlCmdFw_EnableBLECmd()
     if (NULL == cmd)
     {
         Report("\n\rCouldn't allocate memory for BLE enable command\n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
     ctrlCmdFw_LockHostDriver();
@@ -1235,6 +1380,27 @@ int ctrlCmdFw_GetFwVersion(FWVersions_t* FwVersion)
 
 
     os_memcpy(FwVersion, cmdComplete.info.param, sizeof(FWVersions_t));
+    return ret;
+}
+
+int ctrlCmdFw_GetSpVersion(SPVersions_t* SpVersion)
+{
+    cmd_interrogate_get_spversion_t cmdGetSpVersion;
+    CommandComplete_t cmdComplete;
+    int ret;
+
+    cmdGetSpVersion.cmdInterrogateHeader.id = GET_SP_VERSIONS_INTR;
+
+    ret = WLSendFW_InterrogateCommand(GET_SP_VERSIONS_INTR,
+                                      &cmdGetSpVersion,
+                                      sizeof(cmdGetSpVersion),
+                                      &cmdComplete,
+                                      sizeof(uint16_t)/*sizeof(Command_e)*/ + \
+                                      sizeof(uint16_t)/*sizeof(CommandStatus_e)*/ + \
+                                      sizeof(SPVersions_t));
+
+
+    os_memcpy(SpVersion, cmdComplete.info.param, sizeof(SPVersions_t));
     return ret;
 }
 
@@ -1463,6 +1629,26 @@ int ctrlCmdFw_EnableChannelUtilization()
                                      0);
 }
 
+int ctrlCmdFw_GetSysInfo(DeviceSystemInfo_t* SysInfo)
+{
+    // Return value of fuse from gSystemInfo
+    cmd_interrogate_get_sysinfo_t cmdGetSysInfo;
+    CommandComplete_t cmdComplete;
+    int ret;
+
+    cmdGetSysInfo.cmdInterrogateHeader.id = GET_DEVICE_SYSTEM_INFO;
+    cmdGetSysInfo.SysInfo.systemInfoIdx = SysInfo->systemInfoIdx;
+    ret = WLSendFW_InterrogateCommand(GET_DEVICE_SYSTEM_INFO,
+                                      &cmdGetSysInfo,
+                                      sizeof(cmdGetSysInfo),
+                                      &cmdComplete,
+                                      sizeof(uint16_t)/*sizeof(Command_e)*/ + \
+                                      sizeof(uint16_t)/*sizeof(CommandStatus_e)*/ + \
+                                      sizeof(DeviceSystemInfo_t));
+    os_memcpy(SysInfo, cmdComplete.info.param, sizeof(DeviceSystemInfo_t));
+    return ret;
+}
+
 int ctrlCmdFw_SetRoleMaxTxPower(RoleID_t roleId, int8_t max_tx_power)
 {
     int ret = 0;
@@ -1538,6 +1724,28 @@ int ctrlCmdFw_GetMacAddress(Macaddress_t* macaddress)
                                       sizeof(uint16_t) + sizeof(uint16_t) + sizeof(Macaddress_t));
 
     os_memcpy(macaddress, cmdComplete.info.param, sizeof(Macaddress_t));
+    return ret;
+}
+
+int ctrlCmdFw_GetLinkInactivity(LinkInactivity_t *linkInactivity)
+{
+    cmd_interrogate_get_LinkInactivity_t cmdGetLinkInactivity;
+    CommandComplete_t cmdComplete;
+    int ret = 0;
+
+    cmdGetLinkInactivity.cmdInterrogateHeader.id = GET_LINK_INACTIVITY;
+    os_memcpy(&cmdGetLinkInactivity.linkInactivity, linkInactivity, sizeof(LinkInactivity_t));
+
+    ret = WLSendFW_InterrogateCommand(GET_LINK_INACTIVITY,
+                                      &cmdGetLinkInactivity,
+                                      sizeof(cmdGetLinkInactivity),
+                                      &cmdComplete,
+                                      sizeof(uint16_t)/*sizeof(Command_e)*/ + \
+                                      sizeof(uint16_t)/*sizeof(CommandStatus_e)*/ + \
+                                      sizeof(LinkInactivity_t));
+
+
+    os_memcpy(linkInactivity, cmdComplete.info.param, sizeof(LinkInactivity_t));
     return ret;
 }
 
@@ -1669,7 +1877,7 @@ void eventEntryThread(void *params)
             {
                 if ((event->len == 2) && (*((uint8_t *)(event->message)) =0xFF) && (*(((uint8_t *)(event->message))+1)= 0xFF))
                 {
-                    Report("\n\r receive event to deinit event thread");
+                    Report("\n\r receive event to deinit event thread\r\n");
                     //this message means that the thread is requested to stop run
                     eventThrdRunning = 0;
                 }

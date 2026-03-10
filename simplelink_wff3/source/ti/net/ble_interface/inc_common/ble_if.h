@@ -50,17 +50,13 @@ typedef struct
     ble_event_cb_reg_t event_cb_reg;
 } ble_if_cb_t;
 
-typedef enum {
-    BLE_IF_TRANSPORT_SERIAL = 0,
-    BLE_IF_TRANSPORT_SHARED = 1
-}ble_if_transport_e;
-
-int BleIf_OpenTransport(ble_if_transport_e transport);
+int BleIf_OpenTransport();
 int BleIf_CloseTransport();
 int BleIf_SendCommand(uint8_t* cmd, uint16_t cmdLen);
 int BleIf_EventCbRegister(ble_event_cb_t cb);
+int BleIf_VendorEventHandler(uint8_t* data, uint16_t len);
 int BleIf_EnableBLE();
 int BleIf_SetBdAddr(const unsigned char *pBdAddr);
-int BleIf_SetSeed(uint8_t *pSeed, uint8_t size);
+int BleIf_SetSeed(uint8_t size);
 
 #endif /* BLE_IF_C_ */

@@ -60,10 +60,6 @@
 #define REG_DOMAIN_PRINT_REPORT_ERROR Report
 #endif
 
-#define TIW_REG_DOMAIN_DFS 0x00000001
-#define TIW_REG_DOMAIN_HT40PLUS 0x00000002
-#define TIW_REG_DOMAIN_HT40MINUS 0x00000004
-
 
 #define BG_24G_BAND_CHANNEL_HOPS    1
 #define BG_24G_BAND_MIN_CHANNEL     1
@@ -72,6 +68,9 @@
 
 #define REG_DOMAIN_MAX_ROWS_IN_COUNTRY	7
 
+#define REG_DOMAIN_MAX_CUSTOM_ENTRIES   7
+
+extern uint8_t gCountryDomainStr[DOT11_COUNTRY_STRING_LEN];
 
 /* Added for the 802.11k support  - Start*/
 typedef enum
@@ -82,16 +81,6 @@ typedef enum
     REGULATORY_ZONE_NONE,
     REGULATORY_ZONE_MAX
 } RegulatoryZone_e;
-
-typedef volatile enum
-{
-  REG_DOMAIN_FCC_REGION =       0, 
-  REG_DOMAIN_TELEC_REGION =     1,
-  REG_DOMAIN_WORLDWIDE_REGION = 2, // minimum of all 3 regions will be used
-  REG_DOMAIN_ETSI_REGION =      3,
-  REG_DOMAIN_NOLIMIT_REGION =   4, // no reg limit : only ieee specs will be met
-  REG_DOMAIN_MAX_REGION =       5
-} RegDomainRegion_e;
 
 typedef struct
 {
@@ -114,33 +103,9 @@ typedef struct
 
 typedef struct
 {
-	char             CountryStr[DOT11_COUNTRY_STRING_LEN];
-    RegDomainChan_t  DomainReg[REG_DOMAIN_MAX_ROWS_IN_COUNTRY];
+	char             countryStr[DOT11_COUNTRY_STRING_LEN];
+    RegDomainChan_t  domainReg[REG_DOMAIN_MAX_ROWS_IN_COUNTRY];
 }RegDomainCountryInfo_t;
-
-
-/* A per-role context for using the regulatoryDomain module */
-typedef struct
-{
-    /* if id associated with this context, for destroy */
-    uint8_t uNetifId;
-
-    /* Desired Temp Tx Power */
-    uint8_t                            uDesiredTemporaryTxPower;
-    /* Actual Temp Tx Power */
-    uint8_t                            uTemporaryTxPower;
-    /* User configuration for max Tx power */
-    uint8_t                            uUserMaxTxPower;
-    /* Tx Power Control adjustment flag on=TI_TRUE\off=TI_FALSE */
-    Bool32                             bTemporaryTxPowerEnable;
-    /* Power Constraint IE 32 in DBM/10, valid only when 802.11h is enabled  */
-    uint8_t                            uPowerConstraint;
-    /* External TX Power Control in DBM/10, valid only when 802.11h is disabled */
-    uint8_t                            uExternTxPowerPreferred;
-
-    /* role provided callbacks */
-    regulatoryDomainCallbacks_t         callbacks;
-} regulatoryDomainRole_t;
 
 typedef struct 
 {
@@ -152,17 +117,10 @@ typedef struct
 {
     /* Variables read from registry */
     /********************************/   
-    /* 802.11h enabled or disabled */
-    Bool32                            	spectrumManagementEnabled;
-
 	Bool32                            	japanChannelsEnabled;
-    
-    /* default values for Tx power before override by the role */
-    uint8_t                            defDesiredTxPower;
-    uint8_t                            defTemporaryTxPower;
 
     RegulatoryZone_e                    countryZone;
-    RegDomainRegion_e                   countryDomain;
+    uint8_t                             countryDomain;
 
 	RegDomainCountryInfo_t				*pRegDomainTable;
 	uint32_t							uNumOfCountriesInTable;
@@ -178,28 +136,13 @@ typedef struct
     channelCapability_t             	supportedChannels_band_2_4[NUM_OF_CHANNELS_24];
 
     /* set the size of the array to max of B_G & A, so that the array doesnt overflow. +3 for word alignment */
-	uint8_t                        	pDefaultChannels[A_5G_BAND_NUM_CHANNELS+3];
+	uint8_t                        	    pDefaultChannels[A_5G_BAND_NUM_CHANNELS+3];
     
 	RegDomainChannelConfigBitField_t	fwRegDomainChannelBitField;
 
-    /* handler to the CB function when the TWD_OWN_DFS_CHANNELS_CONFIG_COMPLETE event is sent */
-//    TRegDomainConfigCompleteCb          regDomainConfigCompleteCb;
-    void *                           hRegDomainConfigComplete;
+    uint8_t                             is2_4GHzBandSupported;
+    uint8_t                             is5GHzBandSupported;
 
-    /* Handles to other objects */
-    void *                       	hTWD;
-    void *                       	hReport;
-    void *                       	hOs;
-    void *                       	hRolesMngr;
-	void *                       	hEvHandler;
-    void *                           hTimer;
-    void *                           hConfigTimer;
-    void *                           hHealthMonitor;
-
-	void *               			hRegDomainTimer;
-
-    /* A mapping between if id and regulatoryDomainRole_t */
-//    void * ifaces[TIWDRV_NETIF_NUM];
 } RegulatoryDomain_t;
 
 

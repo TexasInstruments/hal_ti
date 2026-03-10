@@ -153,8 +153,6 @@ typedef enum
 
 } externalAuthMode_e;
 
-// Typedef supplicant key types
-typedef enum wpa_key_mgmt wpa_key_mgmt_e;
 
 // Used for Get/Set RSN/WPA/WPS IE
 #define RSN_GENERIC_IE_MAX_LEN  (255)
@@ -345,7 +343,7 @@ int rsn_rsnWpaIe2SecurityInfo(dot11_RSN_t *rsnIe, uint8_t rsnIeLen, uint16_t *se
 
 void rsn_findSecurityIEs(uint8_t * payload, uint16_t payloadLen, dot11_RSN_t **pDotRsn, dot11_RSN_t **pDotWpa);
 /*
- * Parse the payload for RSN ie and WPA IE and return the security type (SL_SEC_TYPE_OPEN / SL_SEC_TYPE_WEP / SL_SEC_TYPE_WPA_WPA2 / SL_SEC_TYPE_WPA_ENT)
+ * Parse the payload for RSN ie and WPA IE and return the security type (SL_SEC_TYPE_OPEN / SL_SEC_TYPE_WEP / SL_SEC_TYPE_WPA_WPA2 / CME_SEC_TYPE_WPA_ENT)
  *
  *
  * Params: uint16_t dot11CapabilityInfo

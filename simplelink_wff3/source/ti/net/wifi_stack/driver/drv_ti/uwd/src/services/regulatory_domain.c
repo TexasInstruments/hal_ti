@@ -49,7 +49,6 @@
 #include "regulatory_domain.h"
 #include "regulatory_domain_api.h"
 
-
 #include <public_types.h>
 #include "gtrace.h"
 #include "string.h"
@@ -59,6 +58,7 @@
 #include "control_cmd_fw.h"
 
 #include "macro_utils.h"
+#include "errors.h"
 
 #define CHANNEL_VALIDITY_TS_THRESHOLD   10000 /* 10 sec */
 
@@ -72,17 +72,27 @@
 
 #define REG_DOMAIN_TIMEOUT_MSEC 5000 /* 5 sec*/
 
-#define REG_DOMAIN_MAX_REGION 5
+#define BASIC_RULES_COUNT 12
+#define CUSTOM_RULES_COUNT 7
+
+/* Custom entries starting from number 12 in "rom_gConfigChanPatternsTable" */
+#define REG_DOMAIN_CUSTOM_ENTRY_BASE (BASIC_RULES_COUNT)
+
+#define REG_DOMAIN_FCC_REGION		0
+#define REG_DOMAIN_TELEC_REGION		1
+#define REG_DOMAIN_WORLDWIDE_REGION	2
+#define REG_DOMAIN_CUSTOM_REGION	3
+#define REG_DOMAIN_NUM_OF_REGIONS	4
 
 typedef struct
 {
     uint8_t  band;
-	uint8_t  txPowerPerRegion[REG_DOMAIN_MAX_REGION];
-    uint8_t  DfsChannel;
+	uint8_t  txPowerPerRegion[REG_DOMAIN_NUM_OF_REGIONS];
+    uint8_t  dfsChannel;
     uint16_t minChannel;
     uint16_t maxChannel;
     uint8_t  numOfChannels;
-    uint32_t chanBitmap; // bitmap instead of table of Channel[REG_DOMAIN_MAX_CHAN_NUM];
+    uint32_t chanBitmap;
 } ConfigChanPattern_t;
 
 typedef struct
@@ -93,52 +103,61 @@ typedef struct
 
 typedef struct
 {
-    uint8_t CountryStr[REG_DOMAIN_COUNTRY_STR_LEN];
-    uint8_t Region;
+    uint8_t countryStr[REG_DOMAIN_COUNTRY_STR_LEN];
+    uint8_t region;
 } ConfigCountryCompressed_t;
 
-const ConfigChanPattern_t rom_gConfigChanPatternsTable[] = {
-   //Bnd Tx(US  JP  WW  EU NoLimit  Dfs minCh MaxCh NumCh chanBitmap 		     Index Count      Bnd Tx   Dfs Num Channels:  
-    { 0,  { 30, 0 , 20, 0 , 0},     0,   1,    11,    11, 0x000007ff }, 	//   0,    20 	    { 0,  20,  0,  11, 1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  0,  0,  0,  0,   },
-    { 0,  { 0 , 20, 20, 20, 0},     1,   12,   13,    2,  0x00001800 }, 	//   1,     1 	    { 0,  20,  1,  2,  12,  13,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 0,  { 0 , 20, 20, 0 , 0},     1,   14,   14,    1,  0x00002000 }, 	//   2,     1 	    { 0,  20,  1,  1,  14,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 1,  { 23, 20, 20, 20, 0},     1,   36,   48,    4,  0x0000000f }, 	//   3,     1 	    { 1,  20,  1,  4,  36,  40,  44,  48,  0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 1,  { 23, 20, 20, 20, 0},     1,   52,   64,    4,  0x000000f0 }, 	//   4,   160 	    { 1,  20,  1,  4,  52,  56,  60,  64,  0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 1,  { 23, 23, 20, 27, 0},     1,   100,  144,   12, 0x000fff00 }, 	//   5,   127 	    { 1,  20,  1,  11, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144,0,  0,  0,   },
-    { 1,  { 30, 23, 20, 0 , 0},     1,   149,  161,   4,  0x00f00000 }, 	//   6,     1 	    { 1,  20,  1,  4,  149, 153, 157, 161, 0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 0,  { 0 , 20, 20, 20, 0},     0,   1,    13,    13, 0x00001fff }, 	//   7,   156 	    { 0,  20,  0,  13, 1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12, 13, 0,  0,   },
-    { 1,  { 23, 20, 20, 20, 0},     0,   36,   48,    4,  0x0000000f }, 	//   8,   160 	    { 1,  20,  0,  4,  36,  40,  44,  48,  0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 1,  { 30, 0 , 20, 0 , 0},     0,   149,  161,   4,  0x00f00000 }, 	//   9,    85 	    { 1,  20,  0,  4,  149, 153, 157, 161, 0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 1,  { 30, 20, 20, 0 , 0},     0,   165,  165,   1,  0x01000000 }, 	//  10,     1 	    { 1,  20,  0,  1,  165, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
-    { 2,  { 23, 20, 20, 20, 0},     0,   184,  196,   4,  0x3c000000 }, 	//  11,     1 	    { 2,  20,  0,  4,  184, 188, 192, 196, 0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+ConfigChanPattern_t rom_gConfigChanPatternsTable[BASIC_RULES_COUNT + CUSTOM_RULES_COUNT] = {
+   //Bnd Tx(US  JP  WW  CS  Dfs minCh MaxCh NumCh chanBitmap 		 Index Count   Bnd Tx   Dfs Num Channels:  
+    { 0,  { 30, 0 , 20, 0}, 0,   1,    11,    11, 0x000007ff }, //   0,    20 	 { 0,  20,  0,  11, 1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  0,  0,  0,  0,   },
+    { 0,  { 0 , 20, 20, 0}, 1,   12,   13,    2,  0x00001800 }, //   1,     1 	 { 0,  20,  1,  2,  12,  13,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 0,  { 0 , 20, 20, 0}, 1,   14,   14,    1,  0x00002000 }, //   2,     1 	 { 0,  20,  1,  1,  14,  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 1,  { 23, 20, 20, 0}, 1,   36,   48,    4,  0x0000000f }, //   3,     1 	 { 1,  20,  1,  4,  36,  40,  44,  48,  0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 1,  { 23, 20, 20, 0}, 1,   52,   64,    4,  0x000000f0 }, //   4,   160 	 { 1,  20,  1,  4,  52,  56,  60,  64,  0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 1,  { 23, 23, 20, 0}, 1,   100,  144,   12, 0x000fff00 }, //   5,   127 	 { 1,  20,  1,  11, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144,0,  0,  0,   },
+    { 1,  { 30, 23, 20, 0}, 1,   149,  161,   4,  0x00f00000 }, //   6,     1 	 { 1,  20,  1,  4,  149, 153, 157, 161, 0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 0,  { 0 , 20, 20, 0}, 0,   1,    13,    13, 0x00001fff }, //   7,   156 	 { 0,  20,  0,  13, 1,   2,   3,   4,   5,   6,   7,   8,   9,   10,  11,  12, 13, 0,  0,   },
+    { 1,  { 23, 20, 20, 0}, 0,   36,   48,    4,  0x0000000f }, //   8,   160 	 { 1,  20,  0,  4,  36,  40,  44,  48,  0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 1,  { 30, 0 , 20, 0}, 0,   149,  161,   4,  0x00f00000 }, //   9,    85 	 { 1,  20,  0,  4,  149, 153, 157, 161, 0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 1,  { 30, 20, 20, 0}, 0,   165,  165,   1,  0x01000000 }, //  10,     1 	 { 1,  20,  0,  1,  165, 0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+    { 2,  { 23, 20, 20, 0}, 0,   184,  196,   4,  0x3c000000 }, //  11,     1 	 { 2,  20,  0,  4,  184, 188, 192, 196, 0,   0,   0,   0,   0,   0,   0,   0,  0,  0,  0,   },
+	{ 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  12,     0    { ************************************** CUSTOM *****************************************  },
+    { 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  13,     0    { ************************************** CUSTOM *****************************************  },
+    { 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  14,     0    { ************************************** CUSTOM *****************************************  },
+    { 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  15,     0    { ************************************** CUSTOM *****************************************  },
+    { 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  16,     0    { ************************************** CUSTOM *****************************************  },
+    { 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  17,     0    { ************************************** CUSTOM *****************************************  },
+    { 0,  { 0 , 0 , 0 , 0}, 0,   0,    0,     0,  0x00000000 }, //  18,     0    { ************************************** CUSTOM *****************************************  },
 };
 
 const ConfigGroupChanPatterns_t rom_gConfigGroupChanPatternsTable[] = {
-    /*Index  Count   Num of channels Channels:*/
-    /*    0,    6 */    { 6, {  0,  8,  4,  5,  9,  10 } },
-    /*    1,    6 */    { 6, {  7,  8,  4,  5,  6,  10 } },
-    /*    2,    5 */    { 5, {  0,  8,  4,  5,  6 } },
-    /*    3,    5 */    { 5, {  7,  8,  4,  5,  6 } }
+    /*    Index Count     Num of channels 	  Channels: */
+    /*    0,    6 */    { 6, 				  {  0,  8,  4,  5,  9,  10 } },
+    /*    1,    6 */    { 4, 				  {  7,  8,  4,  5 } },
+    /*    2,    6 */    { 6, 				  {  0,  8,  4,  5,  6,  10 } },
+	/*    3,    7 */    { CUSTOM_RULES_COUNT, {  12, 13, 14, 15, 16, 17, 18} },
 };
 
-const ConfigCountryCompressed_t rom_gConfigCountryCompressedTable[] = {
-      //       Country   Rgn:
-    { /* US */ 		'U','S',0}, // FCC - min of FCC/IC/Taiwan
-    { /* JP */ 		'J','P',1}, // ROW(rest of the world) - Min of JP/EU
-    { /* WW_SAFE*/  '0','0',2}, // WWS(worldwide safe) - Min of FCC&ROW
-    { /* ID */ 		'I','D',3}  // Indonesia 
-
+ConfigCountryCompressed_t rom_gConfigCountryCompressedTable[REG_DOMAIN_NUM_OF_REGIONS] = {
+      /*       		Country   Rgn: */
+    { /* US */ 		'U', 'S', REG_DOMAIN_FCC_REGION }, 		 // FCC - min of FCC/IC/Taiwan
+    { /* JP */ 		'J', 'P', REG_DOMAIN_TELEC_REGION }, 	 // ROW (rest of the world) - Min of JP/EU
+    { /* WW_SAFE */ '0', '0', REG_DOMAIN_WORLDWIDE_REGION }, // WWS (worldwide safe) - Min of FCC&ROW
+	{ /* CS */ 		'C', 'S', REG_DOMAIN_CUSTOM_REGION }, 	 // CS - Custom regulatory domain, set by API
 };
 
 int                        gNumCompressedCountries       = sizeof(rom_gConfigCountryCompressedTable)/sizeof(ConfigCountryCompressed_t);
 ConfigChanPattern_t       *gConfigChanPatternsTable      = (ConfigChanPattern_t *)rom_gConfigChanPatternsTable;
 ConfigGroupChanPatterns_t *gConfigGroupChanPatternsTable = (ConfigGroupChanPatterns_t *)rom_gConfigGroupChanPatternsTable;
 ConfigCountryCompressed_t *gConfigCountryCompressedTable = (ConfigCountryCompressed_t *)rom_gConfigCountryCompressedTable;
-uint8_t                    gCountryDomainStr[3] = {0};//options are {0} as default {"US"} {"JP"} {"EU"} {"00"}
 
+uint8_t gCountryDomainStr[DOT11_COUNTRY_STRING_LEN] = {0};
 
-char rom_dot11g_channels[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 };
-char rom_dot11a_channels[] = { 36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161,165};//, 165, 169, 184, 188, 192, 196, 254, 255 };
+const char rom_dot11g_channels[NUM_OF_CHANNELS_24] = { 1, 2, 3, 4, 5, 6,
+													   7, 8, 9, 10, 11, 12, 13, 14 };
+const char rom_dot11a_channels[A_BAND_CHANNEL_COUNT] = { 36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108,
+														 112, 116, 120, 124, 128, 132, 136, 140, 144, 149,
+														 153, 157, 161, 165, 169 }; //, 184, 188, 192, 196, 254, 255 };
 
 
 const uint8_t DefaultGBandChannels[NUM_OF_CHANNELS_24] = {1,1,1,1,1,1,1,1,1,1,1,1,1,0};//removed ch14 not supported
@@ -146,6 +165,7 @@ const uint8_t DefaultABandChannels[A_5G_BAND_NUM_CHANNELS] = {0,0,1,0,0,0,1,0,0,
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,
 	0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // channel 144,165 are now supported
 const uint16_t JapanABandChannels[] = {34, 38, 42, 46, 0};
+const uint8_t p2pSocialChannels[] = { 1, 6, 11 };
 //
 ///*************************** Static Table for Regulatory Class **********************/
 //
@@ -200,468 +220,190 @@ const uint16_t JapanABandChannels[] = {34, 38, 42, 46, 0};
 //
 
 
-RegulatoryDomain_t          RegulatoryDomain;
+RegulatoryDomain_t RegulatoryDomain;
+
 
 ///********************************************************************************/
 ///*						Internal functions prototypes.							*/
 ///********************************************************************************/
-//static int32_t setSupportedChannelsAccording2confCountry(RegulatoryDomain_t *pRegulatoryDomain,
-//														   uint8_t *pCountryString);
 static void setWorldWideDomainSupportedChannels();
-//static void getPowerTableMinMax (RegulatoryDomain_t *pRegulatoryDomain,
-//                                                  powerCapability_t  *pPowerCapability);
-//static void RegDomainConfigSentToFw(void * handle, uint16_t uMboxStatus, Bool32 *pSuspendRequired);
-//static void RegDomainTmrExpiry(void * hRegDomain, Bool32 bTwdInitOccured);
 static void sendRegDomainCmdToFw();
 static void verifyDfsChannelValidity(channelCapability_t *pSupportedChannels, uint8_t channelIndex);
-//static uint32_t readNumOfConfiguredCountries(RegulatoryDomain_t *pRegulatoryDomain, uint8_t *pBuf,
-//											  uint32_t uBuffLen, uint16_t idxTLV);
 static int32_t getCountryIdInTable(uint8_t *pCountryStr, uint32_t *pCountryID);
 static Bool32 isDfsChannelInCountry(uint32_t cntrId, uint32_t uChannel);
 static Bool32 setChannelAsFwBitmap(uint16_t channelNumber, Bool32 band_2_4, Bool32 shouldSet);
 static int8_t getChannelIndexTranslation(uint16_t chNumber, Bool32 band_2_4);
-
 static int8_t setSupportedChannelsAccording2Domain(void);
+static uint8_t isCountryCodeValid(uint8_t *pCountryStr);
 
 
 ///********************************************************************************/
-///*						Interface functions Implementation.						*/
+///*						Interface functions Implementation.					  */
 ///********************************************************************************/
-//
-///************************************************************************
-// *                        regulatoryDomain_create						*
-// ************************************************************************
-//DESCRIPTION: regulatoryDomain module creation function, called by the config mgr in creation phase
-//				performs the following:
-//				-	Allocate the regulatoryDomain handle
-//
-//INPUT:      hOs -			Handle to OS
-//
-//
-//OUTPUT:
-//
-//RETURN:     Handle to the regulatoryDomain module on success, NULL otherwise
-//
-//************************************************************************/
-//void * regulatoryDomain_create()
-//{
-//	RegulatoryDomain_t			*pRegulatoryDomain = NULL;
-//
-//	/* allocating the regulatoryDomain object */
-//	pRegulatoryDomain = os_memoryAlloc(hOs,sizeof(RegulatoryDomain_t));
-//
-//	if (pRegulatoryDomain == NULL)
-//		return NULL;
-//
-//    os_memoryZero(hOs, pRegulatoryDomain, sizeof(RegulatoryDomain_t));
-//
-//	return(pRegulatoryDomain);
-//}
-
 
 ///************************************************************************
-// *                        regulatoryDomain_init							*
+// *                     areSocialChannelsSupported						  *
 // ************************************************************************
-//DESCRIPTION: Module init function, Called by the DrvMain in init phase
-//				performs the following:
-//				-	Reset & initializes local variables
-//				-	Init the handles to be used by the module
-//
-//INPUT:      pStadHandles - List of handles to be used by the module
-//
-//OUTPUT:
-//
-//RETURN:     void
-//************************************************************************/
-void regulatoryDomain_init (/*TModuleHandleTable *pStadHandles*/)
-{
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
-
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)(pStadHandles->hRegulatoryDomain);
-//    int i;
-//
-//    /* Init handlers */
-//    pRegulatoryDomain->hTWD	          = pStadHandles->hTWD;
-//	pRegulatoryDomain->hReport	      = pStadHandles->hReport;
-//	pRegulatoryDomain->hOs	          = pStadHandles->hOs;
-//    pRegulatoryDomain->hEvHandler     = pStadHandles->hEvHandler;
-//	pRegulatoryDomain->hTimer		  = pStadHandles->hTimer;
-//    pRegulatoryDomain->hHealthMonitor = pStadHandles->hHealthMonitor;
-//
-//    for (i = 0; i < DRIVER_ROLE_ID_NUM; i++)
-//        pRegulatoryDomain->ifaces[i] = NULL;
-
-    // TODO: need to implement ZeroMem??
-    //ZeroMem(&RegulatoryDomain, sizeof(RegulatoryDomain_t));
-    os_memset(&RegulatoryDomain, 0x00, sizeof(RegulatoryDomain_t));
-
-    regulatoryDomain_SetChannels();
-}
-
-
-///************************************************************************
-// *                        regulatoryDomain_SetChannels					*
-// ************************************************************************
-//DESCRIPTION: regulatoryDomain module configuration function, called by the config mgr in configuration phase
-//				performs the following:
-//				-	Reset & initializes local variables
-//				-	Init the handles to be used by the module
-//
-//INPUT:      hRegulatoryDomain	-	regulatoryDomain handle
-//			List of handles to be used by the module
-//			pRegulatoryDomainInitParams	-	Init table of the module.
-//
-//
-//OUTPUT:
-//
-//RETURN:     OK on success,-1 otherwise
-//
-//************************************************************************/
-void regulatoryDomain_SetChannels (/*void * 	hRegulatoryDomain,
-                                        regulatoryDomainInitParams_t *pRegulatoryDomainInitParams*/)
-{
-    RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
-
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
-	
-//    pRegulatoryDomain->japanChannelsEnabled = pRegulatoryDomainInitParams->japanChannelsEnabled;
-
-    if (gCountryDomainStr[0] == '\0')
-    {
-        REG_DOMAIN_PRINT_REPORT("CountryDomainStr[0] is NULL set worldwide reg domain\n ");
-        setWorldWideDomainSupportedChannels();
-        pRegulatoryDomain->countryZone = REGULATORY_ZONE_USA;
-    }
-    else
-    {
-        REG_DOMAIN_PRINT_REPORT("CountryDomainStr[0] has value \n");
-        setSupportedChannelsAccording2Domain();
-        pRegulatoryDomain->uNumOfCountriesInTable = REG_DOMAIN_MAX_REGION;
-    }
-
-
-
-//    pRegulatoryDomain->defDesiredTxPower = pRegulatoryDomainInitParams->desiredTxPower;
-//    pRegulatoryDomain->defTemporaryTxPower = pRegulatoryDomainInitParams->uTemporaryTxPower;
-
-	/* allocate OS timer memory */
-//	pRegulatoryDomain->hRegDomainTimer = tmr_CreateTimer(pRegulatoryDomain->hTimer);
-//	if (pRegulatoryDomain->hRegDomainTimer == NULL)
-//	{
-//		TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_SetChannels(): Failed to create hRegDomainTimer!\n");
-//		regulatoryDomain_destroy(hRegulatoryDomain);
-//		return-1;
-//	}
-
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INIT, ".....Regulatory domain configured successfully\n");
-}
-
-
-///************************************************************************
-// *                        regulatoryDomain_ConfigFw                     *
-// ************************************************************************
-//DESCRIPTION: regulatoryDomain module fw configuration function,
-//
+//DESCRIPTION:  Check if social channels for P2P are currently supported
+//				by reg domain.
 //
 //INPUT:
 //
+//OUTPUT:
+//
+//RETURN:       TRUE if supported, FALSE otherwise
+//************************************************************************/
+Bool_e areSocialChannelsSupported()
+{
+	uint8_t i = 0;
+
+	for (i = 0; i < sizeof(p2pSocialChannels); i++)
+	{
+		if (!regulatoryDomain_IsChannelSupported(p2pSocialChannels[i], NULL))
+		{
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+///************************************************************************
+// *                        regulatoryDomain_Init						  *
+// ************************************************************************
+//DESCRIPTION:  Module init function.
+//
+//INPUT:        pCountryCode - Role country code
+//				roleType 	 - Role type
+//				channel 	 - Necessary only for AP/DEVICE role
+//							   (use 0 for STA)
 //
 //OUTPUT:
 //
-//RETURN:     OK on success,-1 otherwise
-//*/
-//int32_t regulatoryDomain_ConfigFw(void * hRegDomain,TRegDomainConfigCompleteCb regDomainConfigCompleteCb,
-//									 void * hRegDomainConfigCompleteCb)
-//{
-//    RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, " - regulatoryDomain register Called\n");
-//
-//    pRegulatoryDomain->regDomainConfigCompleteCb = regDomainConfigCompleteCb;
-//    pRegulatoryDomain->hRegDomainConfigComplete = hRegDomainConfigCompleteCb;
-//
-//    TWD_RegisterEvent(pRegulatoryDomain->hTWD,
-//					  TWD_OWN_REG_DOMAIN_CONFIG_COMPLETE,
-//					  regulatoryDomain_FwConfigurationCompleted,
-//					  hRegDomain,
-//					  ROLE_NONE);
-//
-//    /* Update the FW with current regulatory domain values*/
-//	if (TWD_SendCmd(pRegulatoryDomain->hTWD,
-//					CMD_REG_DOMAIN_CHANNEL_CONFIG,
-//					(void *)&pRegulatoryDomain->fwRegDomainChannelBitField,
-//					sizeof(RegDomainChannelConfigBitField_t),
-//					NULL, NULL) != OK)
-//    {
-//       TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR ,
-//              "regulatoryDomain_ConfigFw(): Failed to configure REG domain channels to the FW\n");
-//       return-1;
-//    }
-//
-//    return OK;
-//}
-//
-//
-//void regulatoryDomain_FwConfigurationCompleted(void * hRegDomain, TI_CHAR* str , uint32_t strLen, uint32_t uEventId)
-//{
-//    RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, " - regulatoryDomain_ConfigFwCompleted: Called\n");
-//
-//    /* Reg domain configuration to FW completed - stop the timer*/
-//	if (pRegulatoryDomain->hRegDomainTimer)
-//		tmr_StopTimer(pRegulatoryDomain->hRegDomainTimer);
-//
-//    if (pRegulatoryDomain->regDomainConfigCompleteCb != NULL)
-//    {
-//		/* If CB was registered, this is init time - mbox not suspended*/
-//		pRegulatoryDomain->regDomainConfigCompleteCb(pRegulatoryDomain->hRegDomainConfigComplete ,1);
-//		pRegulatoryDomain->regDomainConfigCompleteCb = NULL;
-//		pRegulatoryDomain->hRegDomainConfigComplete = NULL;
-//    }
-//	else
-//	{
-//        /* CB not registered - this is not init - resume the MBOX operation*/
-//        TWD_ResumeCmdQueue(pRegulatoryDomain->hTWD);
-//	}
-//}
-//
-//
-//int32_t regulatoryDomain_RoleInit(void * hRegDomain, uint8_t netifId,
-//                                    regulatoryDomainCallbacks_t *callbacks,
-//                                    void * *phRegDomainRoleHandle)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//    regulatoryDomainRole_t *pRegDomRole = NULL;
-//
-//    if (pRegulatoryDomain->ifaces[netifId] != NULL) {
-//        GTRACE(GRP_GENERAL_ERROR,
-//               "regulatoryDomain_RoleInit, ifaces %d is taken", netifId);
-//        return-1;
-//    }
-//
-//    /* check all the callbacks are implemented */
-//    if (!callbacks->getConnectionStatus || !callbacks->setTxPower || !callbacks->getCurrentChannel) {
-//        GTRACE(GRP_GENERAL_ERROR,
-//               "regulatoryDomain_RoleInit - all role callbacks must be valid");
-//        return-1;
-//    }
+//RETURN:       void
+//************************************************************************/
+int32_t regulatoryDomain_Init(WlanRole_e roleType, uint8_t *pCountryCode, uint8_t channel)
+{
+	int32_t ret = 0;
+	Bool32 isDfsChannel = FALSE;
 
-//    pRegDomRole = os_memoryAlloc(pRegulatoryDomain->hOs, sizeof(regulatoryDomainRole_t));
-//    if (!pRegDomRole) {
-//        GTRACE(GRP_GENERAL_ERROR,
-//               "could not allocate memory for role specific regdomain context");
-//        return-1;
-//    }
-//
-//    pRegulatoryDomain->ifaces[netifId] = (void *)pRegDomRole;
-//    pRegDomRole->uNetifId = netifId;
-//    memcpy(&pRegDomRole->callbacks, callbacks,
-//                  sizeof(regulatoryDomainCallbacks_t));
-//
-//	/* User max Tx power for all channels */
-//	pRegDomRole->uUserMaxTxPower = pRegulatoryDomain->defDesiredTxPower;
-//
-//    /* Temporary Tx Power control to be used */
-//    pRegDomRole->uTemporaryTxPower = pRegulatoryDomain->defTemporaryTxPower;
-//    pRegDomRole->uDesiredTemporaryTxPower = pRegulatoryDomain->defTemporaryTxPower;
-//
-//	pRegDomRole->uExternTxPowerPreferred	= MAX_TX_POWER;	/* i.e. no restriction */
-//	pRegDomRole->uPowerConstraint			= MIN_TX_POWER;	/* i.e. no restriction */
-//
-//    *phRegDomainRoleHandle = (void *)pRegDomRole;
-//    return OK;
-//}
-//
-//
-//void regulatoryDomain_RoleDestroy(void * hRegDomain, void * hRegDomainRoleHandle)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//	regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t *)hRegDomainRoleHandle;
-//
-//    if(pRegDomRole->uNetifId < TIWDRV_NETIF_NUM)
-//    {
-//        pRegulatoryDomain->ifaces[pRegDomRole->uNetifId] = NULL;
-//        os_memoryFree(pRegulatoryDomain->hOs, (void *)hRegDomainRoleHandle,
-//                      sizeof(regulatoryDomainRole_t));
-//    }
-//    else
-//    {
-//        TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_RoleDestroy() invalid netif id %d\n", pRegDomRole->uNetifId);
-//    }
-//}
-//
-//
-//void * regulatoryDomain_GetRoleHandle(void * hRegDomain, uint8_t netifId)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//
-//    return (netifId < TIWDRV_NETIF_NUM ? pRegulatoryDomain->ifaces[netifId] : NULL);
-//}
-//
-//
-//int32_t regulatoryDomain_setParam(void * hRegulatoryDomain,
-//									paramInfo_t	*pParam)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//
-//    switch(pParam->paramType)
-//	{
-//		case TI_PARAM_CURRENT_TX_POWER_IN_DBM:
-//		{
-//			regulatoryDomainRole_t *pRegDomRole;
-//
-//            pRegDomRole = (void *)regulatoryDomain_GetRoleHandle(hRegulatoryDomain,
-//																 pParam->content.txPowerParams.uNetIfId);
-//			if (pRegDomRole == NULL)
-//			{
-//				TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR,
-//					  "regulatoryDomain_setParam - TX power - invalid regdom context "
-//                       "interface %d\n", pParam->content.txPowerParams.uNetIfId);
-//                return-1;
-//            }
-//
-//			/* This case is called when the desired Tx Power Level in Dbm is changed by the user */
-//            if(pRegDomRole->uUserMaxTxPower != pParam->content.txPowerParams.desiredTxPower)
-//            {
-//				pRegDomRole->uUserMaxTxPower = pParam->content.txPowerParams.desiredTxPower;
-//
-//				/* Set new Tx power to TWD - only if needed ! */
-//                return regulatoryDomain_UpdateCurrTxPower(hRegulatoryDomain,
-//														  (void *)pRegDomRole);
-//            }
-//            break;
-//        }
-//
-//		case TI_PARAM_COUNTRY:
-//            /* Configuring country internally affects both bands */
-//			TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, "REGULATORY_DOMAIN_COUNTRY_PARAM - %c%c\n",
-//				  pParam->content.pCountryString[0],pParam->content.pCountryString[1]);
-//
-//            /* Update the channels according to the new country*/
-//			return setSupportedChannelsAccording2confCountry(pRegulatoryDomain, pParam->content.pCountryString);
-//
-//        default:
-//			TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "Set param, Params is not supported, %d\n\n", pParam->paramType);
-//			return PARAM_NOT_SUPPORTED;
-//	}
-//
-//	return OK;
-//}
-//
-//
-//int32_t regulatoryDomain_getParam(void * hRegulatoryDomain,
-//									paramInfo_t	*pParam)
-//{
-//	RegulatoryDomain_t	*pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//
-//	switch(pParam->paramType)
-//	{
-//
-//	case TI_PARAM_TX_POWER_LEVEL_TABLE:
-//        {
-//            TFwInfo *pFwInfo = TWD_GetFWInfo (pRegulatoryDomain->hTWD);
-//
-//            os_memoryCopy(pRegulatoryDomain->hOs,
-//                          (void *)&pParam->content.powerLevelTable,
-//                          (void *)pFwInfo->txPowerTable,
-//                          sizeof(pFwInfo->txPowerTable));
-//        }
-//		break;
-//
-//    case TI_PARAM_CURRENT_TX_POWER_IN_DBM:
-//        {
-//            regulatoryDomainRole_t *pRegDomRole;
-//
-//            pRegDomRole = (void *)regulatoryDomain_GetRoleHandle(hRegulatoryDomain,
-//                                                                 pParam->content.txPowerParams.uNetIfId);
-//            if (pRegDomRole == NULL) {
-//                TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR,
-//                       "regulatoryDomain_getParam - TX power - invalid regdom context "
-//                       "interface %d\n", pParam->content.txPowerParams.uNetIfId);
-//                return-1;
-//            }
-//
-//            /* Get last configured Tx power from TWD */
-//            TWD_GetTxPower(pRegulatoryDomain->hTWD, pRegDomRole->uNetifId,
-//                           &pParam->content.txPowerParams.desiredTxPower);
-//
-//            TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION,
-//                   "regulatoryDomain_getParam, CURRENT_TX_POWER_IN_DBM  = %d\n",
-//                   pParam->content.txPowerParams.desiredTxPower);
-//        break;
-//        }
-//
-//    case TI_PARAM_COUNTRY:
-//
-//        if (!pRegulatoryDomain->country24.hdr[HDR_LENGTH_FIELD])
-//			/*Countery was not set yet - report back the deafult domain (world-wide)*/
-//            os_memoryCopy(pRegulatoryDomain->hOs, (void*)pParam->content.pCountryString, (void*)"WW ", 3);
-//		else
-//			/* Countery was set - report it back*/
-//			os_memoryCopy(pRegulatoryDomain->hOs, (void*)pParam->content.pCountryString, (void*)pRegulatoryDomain->country24.countryIE.CountryString, DOT11_COUNTRY_STRING_LEN);
-//
-//		if (!pRegulatoryDomain->country5.hdr[HDR_LENGTH_FIELD])
-//			/*Countery was not set yet - report back the deafult domain (world-wide)*/
-//			os_memoryCopy(pRegulatoryDomain->hOs, (void*)&pParam->content.pCountryString[DOT11_COUNTRY_STRING_LEN], (void*)"WW ", 3);
-//		else
-//			/* Countery was set - report it back*/
-//			os_memoryCopy(pRegulatoryDomain->hOs, (void*)&pParam->content.pCountryString[DOT11_COUNTRY_STRING_LEN], (void*)pRegulatoryDomain->country5.countryIE.CountryString, DOT11_COUNTRY_STRING_LEN);
-//
-//		break;
-//
-//	case TI_PARAM_GET_HW_CAP:
-//			regulatoryDomain_GetActiveChannels(pRegulatoryDomain, &pParam->content.hwChannelInfo);
-//			break;
-//
-//   	default:
-//		TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "Get param, Params is not supported, %d\n\n", pParam->paramType);
-//		return PARAM_NOT_SUPPORTED;
-//	}
-//
-//	return OK;
-//}
-//
-//
+    HOOK(HOOK_IN_REGULATORY_DOMAIN);
+
+	os_memset(&RegulatoryDomain, 0x00, sizeof(RegulatoryDomain_t));
+
+	if (pCountryCode[0] == '\0')
+	{
+		CME_PRINT_REPORT_ERROR("\r\nregulatoryDomain_Init: Input country code "
+							   "is NULL, using WW country code (00)");
+		pCountryCode[0] = '0';
+		pCountryCode[1] = '0';
+		pCountryCode[2] = '\0';
+	}
+
+	ret = regulatoryDomain_SetCountry(pCountryCode);
+	if (ret < 0)
+	{
+		CME_PRINT_REPORT_ERROR("\r\nregulatoryDomain_Init: Faulty country code");
+		return ret;
+	}
+
+	regulatoryDomain_SetChannels();
+
+	if (ROLE_IS_TYPE_AP_BASED(roleType))
+	{
+		ret = regulatoryDomain_IsChannelSupported(channel, &isDfsChannel);
+		if (ret == 0)
+		{
+			ret = WlanError(WLAN_ERROR_SEVERITY__LOW,
+							WLAN_ERROR_MODULE__COMMANDS,
+							WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+			return ret;
+		}
+
+		if (isDfsChannel)
+		{
+			CME_PRINT_REPORT_ERROR("\r\nAP in DFS channels isn't supported");
+			ret = WlanError(WLAN_ERROR_SEVERITY__LOW,
+							WLAN_ERROR_MODULE__COMMANDS,
+							WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+			return ret;
+		}
+	}
+	else if (ROLE_IS_TYPE_DEVICE(roleType))
+	{
+		/* Device role must support social channels */
+		if (!areSocialChannelsSupported())
+		{
+			CME_PRINT_REPORT_ERROR("\r\nP2P device role up failed: "
+								   "device must support all social "
+								   "channels, regulatory-wise");
+			return WlanError(WLAN_ERROR_SEVERITY__LOW,
+							 WLAN_ERROR_MODULE__COMMANDS,
+							 WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+		}
+
+		/* channel 0 for P2P operating channel means auto-selection by 
+		 * supplicant. The channels that supplicant is aware of that we
+		 * support are set by the current reg domain.
+		 */
+		if (channel != 0)
+		{
+			ret = regulatoryDomain_IsChannelSupported(channel, &isDfsChannel);
+			if (ret == 0)
+			{
+				CME_PRINT_REPORT_ERROR("\r\nP2P device role up failed: "
+									   "operating channel not "
+									   "supported");
+				return WlanError(WLAN_ERROR_SEVERITY__LOW,
+								 WLAN_ERROR_MODULE__COMMANDS,
+								 WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+			}
+	
+			if (isDfsChannel)
+			{
+				CME_PRINT_REPORT_ERROR("\r\nP2P device role up failed: "
+									   "Operating channel must "
+									   "not be a DFS channel");
+				return WlanError(WLAN_ERROR_SEVERITY__LOW,
+								 WLAN_ERROR_MODULE__COMMANDS,
+								 WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+			}
+		}
+	}
+
+	return ret;
+}
+
+
 ///************************************************************************
-// *                        regulatoryDomain_destroy						*
+// *                        regulatoryDomain_SetChannels				  *
 // ************************************************************************
-//DESCRIPTION: regulatoryDomain module destroy function, called by the config mgr in the destroy phase
+//DESCRIPTION:  regulatoryDomain module configuration function,
+//  			called by the config mgr in configuration phase
 //				performs the following:
-//				-	Free all memory allocated by the module
+//				-	Reset & initializes local variables
+//				-	Init the handles to be used by the module
 //
-//INPUT:      hRegulatoryDomain	-	regulatoryDomain handle.
-//
+//INPUT:     
 //
 //OUTPUT:
 //
 //RETURN:     OK on success,-1 otherwise
 //
 //************************************************************************/
-//int32_t regulatoryDomain_destroy(void * hRegulatoryDomain)
-//{
-//	RegulatoryDomain_t	*pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//
-//	if (pRegulatoryDomain == NULL)
-//		return OK;
-//
-//    /* Release the reg domain timer*/
-//	if (pRegulatoryDomain->hRegDomainTimer)
-//		tmr_DestroyTimer(pRegulatoryDomain->hRegDomainTimer);
-//
-//    /* Release the reg domain table*/
-//	if (pRegulatoryDomain->pRegDomainTable)
-//		os_memoryFree(pRegulatoryDomain->hOs, pRegulatoryDomain->pRegDomainTable, sizeof(pRegulatoryDomain->pRegDomainTable));
-//
-//    os_memoryFree(pRegulatoryDomain->hOs, pRegulatoryDomain, sizeof(RegulatoryDomain_t));
-//
-//	return OK;
-//}
-//
-//
+void regulatoryDomain_SetChannels()
+{
+    RegulatoryDomain_t *pRegulatoryDomain = &RegulatoryDomain;
+
+    HOOK(HOOK_IN_REGULATORY_DOMAIN);
+
+	setSupportedChannelsAccording2Domain();
+
+	pRegulatoryDomain->uNumOfCountriesInTable = REG_DOMAIN_NUM_OF_REGIONS;
+}
+
 void regulatoryDomain_UpdateChannelValidity(uint8_t uChannel, Bool32 updateFw)
 {
-
 	uint8_t	             channelIndex;
 	channelCapability_t *pSupportedChannels;
 	RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
@@ -694,477 +436,104 @@ void regulatoryDomain_UpdateChannelValidity(uint8_t uChannel, Bool32 updateFw)
 		}
 	}
 }
-//
-//
-///* Temporary Tx Power control */
-//void regulatoryDomain_SetTempTxPower(void * hRegulatoryDomain, void * hRegDomRole, Bool32 bTempTxPowerEnable)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t *)hRegDomRole;
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, "regulatoryDomain_SetTempTxPower: Temporary Tx power enable = %d, \n", bTempTxPowerEnable);
-//	pRegDomRole->bTemporaryTxPowerEnable = bTempTxPowerEnable;
-//
-//	regulatoryDomain_UpdateCurrTxPower(pRegulatoryDomain, hRegDomRole);
-//}
 
-
-//void regulatoryDomain_SetExternTxPowerPreferred(void * hRegulatoryDomain, void * hRegDomRole, uint8_t uExternTxPowerPreferred)
-//{
-//    RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t *)hRegDomRole;
-//
-//    /* Convert to RegDomain units */
-//    uint8_t uNewTPC = DBM2DBMDIV10(uExternTxPowerPreferred);
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION,
-//           "REGULATORY_DOMAIN_EXTERN_TX_POWER_PREFERRED Old= %d New = %d\n",
-//           pRegDomRole->uExternTxPowerPreferred, uNewTPC);
-//
-//    if ( uNewTPC != pRegDomRole->uExternTxPowerPreferred )
-//    {
-//        pRegDomRole->uExternTxPowerPreferred = uNewTPC;
-//        /* Set new Tx power to TWD - only if needed ! */
-//        regulatoryDomain_UpdateCurrTxPower(pRegulatoryDomain, hRegDomRole);
-//    }
-//
-//}
-
-
-void regulatoryDomain_SetDisconnect(void * hRegulatoryDomain, void * hRegDomRole)
+void regulatoryDomain_GetPowerCapability(powerCapability_t *pPowerCapability,
+										 uint8_t channel)
 {
-	regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t *)hRegDomRole;
+    uint8_t maxTxPower = 0;
 
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
+	pPowerCapability->minTxPower = DBM_DIV_10_2_DBM(MIN_TX_POWER);
 
-    GTRACE(GRP_REG_DOMAIN, "regulatoryDomain_SetDisconnect");
-
-	pRegDomRole->uExternTxPowerPreferred = MAX_TX_POWER;	/* i.e. no restriction */
-	pRegDomRole->uPowerConstraint = MIN_TX_POWER;           /* i.e. no restriction */
+	if (TRUE == regulatoryDomain_getChMaxPower(channel, &maxTxPower))
+	{
+		pPowerCapability->maxTxPower = maxTxPower;
+	}
+	else
+	{
+		pPowerCapability->maxTxPower = DBM_DIV_10_2_DBM(MAX_TX_POWER);
+	}
 }
 
-
 /***********************************************************************
- *              regulatoryDomain_updateCurrTxPower					   *
+ *                 regulatoryDomain_isChannelSupprted		   		   *
  ***********************************************************************
-DESCRIPTION: Called when new Tx power should be calculated and configured.
-			 Check if we are already joined to BSS/IBSS, calculate
-			 new Tx power and configure it to TWD.
+DESCRIPTION: The function checks if the input channel is supported.
 
-INPUT:		pRegulatoryDomain	- regulatoryDomain pointer.
-
-RETURN:     OK - New value was configured to TWD,-1 - Can't configure value
-			TX_POWER_SET_SAME_VALUE - Same value was already configured.
-
-************************************************************************/
-//int32_t regulatoryDomain_UpdateCurrTxPower(void * hRegulatoryDomain, void * hRegDomRole)
-//{
-//	RegulatoryDomain_t  *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t *)hRegDomRole;
-//	int32_t			eStatus;
-//	uint8_t			uCurrChannel, uNewTxPower;
-//	uint8_t/*RadioBand_e*/			eRadioBand;
-//	uint8_t			uTxPower;
-//
-//	TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, "regulatoryDomain_UpdateCurrTxPower\n");
-//
-//    eStatus = pRegDomRole->callbacks.getCurrentChannel(pRegDomRole->callbacks.hRoleContext,
-//                                                       &uCurrChannel, &eRadioBand);
-//	if ( eStatus != OK )
-//	{
-//		/* We are not joined yet - no meaning for new Tx power */
-//        TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION,
-//               "regulatoryDomain_updateCurrTxPower, No site selected yet\n");
-//		return-1;
-//	}
-//
-//	/* Calculate maximum Tx power for the serving channel */
-//	uNewTxPower = regulatoryDomain_getMaxPowerAllowed((void *)pRegulatoryDomain, hRegDomRole,
-//                                                      uCurrChannel, eRadioBand, TRUE);
-//
-//	/* Verify that the Temporary TX Power Control doesn't violate the TX Power Constraint */
-//	pRegDomRole->uTemporaryTxPower = TI_MIN(pRegDomRole->uDesiredTemporaryTxPower, uNewTxPower);
-//
-//    /* set TWD according to Temporary Tx Power Enable flag */
-//    if (TRUE == pRegDomRole->bTemporaryTxPowerEnable)
-//    {
-//        uTxPower = pRegDomRole->uTemporaryTxPower;
-//    }
-//    else
-//    {
-//    	uTxPower = uNewTxPower;
-//    }
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, "regulatoryDomain_updateCurrTxPower, Write to TWD TxPower = %d, channel=%d, bTemporaryTxPowerEnable = %d\n", uNewTxPower, uCurrChannel, pRegDomRole->bTemporaryTxPowerEnable);
-//    if (pRegDomRole->callbacks.setTxPower)
-//    {
-//        return pRegDomRole->callbacks.setTxPower(uTxPower, pRegDomRole->callbacks.hRoleContext);
-//    }
-//    else
-//    {
-//        TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_updateCurrTxPower, callbacks.setTxPower not initialized!\n", uNewTxPower, uCurrChannel, pRegDomRole->bTemporaryTxPowerEnable);
-//		return-1;
-//    }
-//}
-
-
-int32_t regulatoryDomain_GetPowerCapability(powerCapability_t *pPowerCapability)
-{
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
-
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//
-//    getPowerTableMinMax (pRegulatoryDomain, pPowerCapability);
-	return 0;
-}
-
-
-//void regulatoryDomain_SetPowerConstraint(void * hRegulatoryDomain, void * hRegDomRole, uint8_t uPowerConstraint)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//    regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t*)hRegDomRole;
-//
-//    /* Convert to RegDomain units */
-//	uint8_t uNewPowerConstraint = DBM2DBMDIV10(uPowerConstraint);
-//
-//	TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION,
-//		  "regulatoryDomain_SetPowerConstraint: Old= %d New = %d (Only if bigger...)\n",
-//		  pRegDomRole->uPowerConstraint, uNewPowerConstraint);
-//
-//	/* Update powerConstraint */
-//	if ( pRegDomRole->uPowerConstraint != uNewPowerConstraint )
-//	{
-//		pRegDomRole->uPowerConstraint = uNewPowerConstraint;
-//		/* Set new Tx power to TWD - only if needed ! */
-//		regulatoryDomain_UpdateCurrTxPower(hRegulatoryDomain, hRegDomRole);
-//	}
-//}
-
-
-/***********************************************************************
- *                        regulatoryDomain_isChannelSupprted		   *
- ***********************************************************************
-DESCRIPTION:	The function checks if the input channel is supported.
-
-INPUT:      pRegulatoryDomain	-	RegulatoryDomain pointer.
-			channel				-	Channel number.
-
+INPUT:       isDfsChannel		-	Optional. Get DFS info.
+			 channel			-	Channel number.
 
 OUTPUT:
 
-RETURN:     OK if channel is supported,-1 otherwise.
+RETURN:      Value higher than zero if channel is supported, zero
+			 if not supported, negative value on error.
 
 ************************************************************************/
-Bool32 regulatoryDomain_IsChannelSupported(uint8_t uChannel, Bool32 *isDfsChannel)
+int32_t regulatoryDomain_IsChannelSupported(uint8_t channel, Bool32 *isDfsChannel)
 {
-
-
-	uint8_t	             channelIndex;
+	uint8_t	            channelIndex = 0;
 	channelCapability_t *pSupportedChannels;
     RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
-
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
-
-	if (pRegulatoryDomain==NULL)
-	{
-		return FALSE;
-	}
-
-    if ((uChannel<BG_24G_BAND_MIN_CHANNEL) || (uChannel>A_5G_BAND_MAX_CHANNEL))
-	{
-		return FALSE;
-	}
-	if (uChannel>=A_5G_BAND_MIN_CHANNEL)
-	{
-		channelIndex = (uChannel-A_5G_BAND_MIN_CHANNEL);
-		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_5;
-	}
-	else
-	{
-		channelIndex = (uChannel-BG_24G_BAND_MIN_CHANNEL);
-		if (channelIndex >= NUM_OF_CHANNELS_24)
-		{
-			GTRACE(GRP_GENERAL_ERROR, "ERROR: regulatoryDomain_isChannelSupprted(): 2.4G invalid channel # %u", uChannel );
-			return FALSE;
-		}
-		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_2_4;
-	}
-
-	if (pSupportedChannels[channelIndex].uFlags & TIW_REG_DOMAIN_DFS)
-	{
-		*isDfsChannel = TRUE;
-		verifyDfsChannelValidity(pSupportedChannels, channelIndex);
-	}
-	else
-	{
-		*isDfsChannel = FALSE;
-	}
-
-	return pSupportedChannels[channelIndex].channelValidityActive;
-}
-
-
-/************************************************************************
- *                        regulatoryDomain_setChannelValidity			*
- ************************************************************************/
-/*
-*
-*
-* \b Description:
-*
-* This function sets a channel as invalid or valid in the internal Regulatory Domain
- * database.
-*
-* \b ARGS:
-*
-*  I   - pData - pointer to the regDoamin SM context  \n
-*  I   - channelNum - the invalid/valid channel number
-*  I   - channelValidity - TRUE if channel is valid, FALSE channel is invalid
-*
-* \b RETURNS:
-*
-*  None.
-*
-*
-*************************************************************************/
-void regulatoryDomain_SetChannelValidity(channelValidity_t *pChannelValidity)
-{
-    RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
-	channelCapability_t	*pSupportedChannels;
-	uint8_t              channelIndex;
+	uint8_t				arrayLen = 0;
 
     HOOK(HOOK_IN_REGULATORY_DOMAIN);
 
 	if (pRegulatoryDomain == NULL)
 	{
-		return;
+		GTRACE(GRP_GENERAL_ERROR, "ERROR: Regulatory Domain DB is NULL");
+		return -1;
 	}
 
-    if ((pChannelValidity->channelNum == 0) || (pChannelValidity->channelNum > A_5G_BAND_MAX_CHANNEL))
+    if ((channel < BG_24G_BAND_MIN_CHANNEL) ||
+		(channel > A_5G_BAND_MAX_CHANNEL))
 	{
-		GTRACE(GRP_GENERAL_ERROR, "ERROR: regulatoryDomain_SetChannelValidity, invalid channelNum=%d", pChannelValidity->channelNum);
-		return;
+		GTRACE(GRP_GENERAL_ERROR, "ERROR: channel #%u is invalid", channel);
+		return -1;
 	}
 
-	/* Validity can be changed for DFS channels only */
-	if ((pChannelValidity->channelNum >= A_5G_BAND_MIN_CHANNEL) && (pChannelValidity->channelNum < A_5G_BAND_MAX_CHANNEL))
+	if (channel >= A_5G_BAND_MIN_CHANNEL)
 	{
+		channelIndex = (channel - A_5G_BAND_MIN_CHANNEL);
 		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_5;
-		channelIndex = (pChannelValidity->channelNum - A_5G_BAND_MIN_CHANNEL);
+		arrayLen = sizeof(pRegulatoryDomain->supportedChannels_band_5) /
+					sizeof(pRegulatoryDomain->supportedChannels_band_5[0]);
+	}
+	else if (channel <= NUM_OF_CHANNELS_24)
+	{
+		channelIndex = (channel - BG_24G_BAND_MIN_CHANNEL);
+		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_2_4;
+		arrayLen = sizeof(pRegulatoryDomain->supportedChannels_band_2_4) /
+					sizeof(pRegulatoryDomain->supportedChannels_band_2_4[0]);
 	}
 	else
-		return;
-
-	if (!(pSupportedChannels[channelIndex].uFlags & TIW_REG_DOMAIN_DFS))
 	{
-		GTRACE(GRP_REG_DOMAIN, "regulatoryDomain_SetChannelValidity: channelNum = %d isn't supported as DFS channel in the Country", pChannelValidity->channelNum);
-		return;
+		GTRACE(GRP_GENERAL_ERROR, "ERROR: only 2.4 and 5 GHz "
+								  "bands are supported", channel);
+		return -1;
 	}
 
-    /* If the validity change is allowed - update FW*/
-    if (pChannelValidity->channelValidity != pSupportedChannels[channelIndex].channelValidityActive)
+	if (channelIndex >= arrayLen)
 	{
-		/* Note for the future!!!!: Must not close a serving channel of AP/GO when DFS master is implemented*/
-		GTRACE(GRP_REG_DOMAIN, "regulatoryDomain_SetChannelValidity: channelNum=%d, validity=%d", pChannelValidity->channelNum, pChannelValidity->channelValidity);
-		pSupportedChannels[channelIndex].channelValidityActive = pChannelValidity->channelValidity;
-		pSupportedChannels[channelIndex].timestamp = osi_GetTimeMS();     //os_timeStampMs(pRegulatoryDomain->hOs);
-		if (setChannelAsFwBitmap(pChannelValidity->channelNum, FALSE, pChannelValidity->channelValidity))
-			sendRegDomainCmdToFw();
+		GTRACE(GRP_GENERAL_ERROR,
+			   "ERROR: regulatoryDomain_isChannelSupprted(): "
+			   "invalid channel #%u", channel);
+		return -1;
 	}
 
+	if (isDfsChannel != NULL)
+	{
+		if (pSupportedChannels[channelIndex].uFlags & TIW_REG_DOMAIN_DFS)
+		{
+			*isDfsChannel = TRUE;
+			// verifyDfsChannelValidity(pSupportedChannels, channelIndex);
+		}
+		else
+		{
+			*isDfsChannel = FALSE;
+		}
+	}
+
+	return pSupportedChannels[channelIndex].channelValidityActive;
 }
-
-
-///***********************************************************************
-//*                        regulatoryDomain_getChannelCapability		   *
-//************************************************************************
-//DESCRIPTION:	This function returns the channel capability information
-//
-//INPUT:      pRegulatoryDomain		-	RegulatoryDomain pointer.
-//			channelCapabilityReq	-	Channels parameters
-//
-//
-//OUTPUT:		channelCapabilityRet	-   Channel capability information
-//
-//RETURN:     OK if information was retrieved,-1 otherwise.
-//
-//************************************************************************/
-//int32_t regulatoryDomain_GetChannelCapability(void * hRegulatoryDomain,
-//                                                void * hRegDomRole,
-//                                                channelCapabilityReq_t *pChannelCapabilityReq,
-//												channelCapabilityRet_t *pChannelCapabilityRet)
-//{
-//	channelCapability_t		*pSupportedChannels;
-//	uint8_t				channelIndex;
-//    Bool32                 bServingChannel= FALSE;
-//    RegulatoryDomain_t      *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//    regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t*)hRegDomRole;
-//
-//	if ((pRegulatoryDomain == NULL) || (pChannelCapabilityRet == NULL))
-//	{
-//		return-1;
-//	}
-//
-//    pChannelCapabilityRet->channelValidity = FALSE;
-//	pChannelCapabilityRet->maxTxPowerDbm = 0;
-//	if ((pChannelCapabilityReq->channelNum==0 ) || (pChannelCapabilityReq->channelNum > A_5G_BAND_MAX_CHANNEL))
-//	{
-//        TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_getChannelCapability, invalid channelNum=%d \n", pChannelCapabilityReq->channelNum);
-//		return-1;
-//	}
-//
-//	if (pChannelCapabilityReq->band==RADIO_BAND_2_4GHZ)
-//	{
-//		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_2_4;
-//		channelIndex = (pChannelCapabilityReq->channelNum - BG_24G_BAND_MIN_CHANNEL);
-//		if (channelIndex >= NUM_OF_CHANNELS_24)
-//		{
-//			TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_getChannelCapability(): 2.4G invalid channel # %u\n", pChannelCapabilityReq->channelNum );
-//			return-1;
-//		}
-//	}
-//	else if (pChannelCapabilityReq->band==RADIO_BAND_5_0GHZ)
-//	{
-//		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_5;
-//		channelIndex = (pChannelCapabilityReq->channelNum - A_5G_BAND_MIN_CHANNEL);
-//		if (channelIndex >= A_5G_BAND_NUM_CHANNELS)
-//		{
-//			TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_getChannelCapability(): 5G invalid channel # %u\n", pChannelCapabilityReq->channelNum);
-//			return-1;
-//		}
-//
-//        verifyDfsChannelValidity(pRegulatoryDomain, pSupportedChannels, channelIndex);
-//	}
-//	else
-//	{
-//		TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_getChannelCapability, invalid band=%d \n", pChannelCapabilityReq->band);
-//		return-1;
-//	}
-//
-//
-//   	/*
-//	 * Set channelValidity according to ScanTable and whether 11d is enabled
-//	 */
-//	if (pChannelCapabilityReq->scanOption == ACTIVE_SCANNING)
-//	{
-//        uint8_t currentChannel;
-//        int32_t eStatus;
-//
-//        pChannelCapabilityRet->channelValidity = pSupportedChannels[channelIndex].channelValidityActive;
-//
-//        /*
-//         * Set Maximum Tx power for the channel - only for active scanning
-//         */
-//
-//        eStatus = pRegDomRole->callbacks.getCurrentChannel(pRegDomRole->callbacks.hRoleContext,
-//                                                           &currentChannel, NULL);
-//
-//        if (eStatus != OK)
-//            bServingChannel = FALSE;
-//        else
-//            bServingChannel = ( currentChannel == pChannelCapabilityReq->channelNum ?
-//                                TRUE : FALSE );
-//
-//        pChannelCapabilityRet->maxTxPowerDbm = regulatoryDomain_getMaxPowerAllowed((void *)pRegulatoryDomain,
-//                                                                                   hRegDomRole,
-//                                                                                   pChannelCapabilityReq->channelNum,
-//                                                                                   pChannelCapabilityReq->band,
-//                                                                                   bServingChannel);
-//
-//		if (bServingChannel)
-//			pChannelCapabilityRet->channelValidity = TRUE;
-//
-//
-//    }
-//	else	/* Passive scanning */
-//	{
-//        pChannelCapabilityRet->channelValidity = pSupportedChannels[channelIndex].channelValidityPassive;
-//	}
-//
-//    if (pSupportedChannels[channelIndex].uFlags & TIW_REG_DOMAIN_DFS)
-//		pChannelCapabilityRet->dfsChannel = TRUE;
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, " Channel num= %d, scan option=%d validity = %d, TX power = %d \n", pChannelCapabilityReq->channelNum, pChannelCapabilityReq->scanOption, pChannelCapabilityRet->channelValidity, pChannelCapabilityRet->maxTxPowerDbm);
-//	return OK;
-//
-//}
-
-
-/* being used for the neighbor report response frame */
-//int32_t regulatoryDomain_GetRadioBandByRegClass(void * hRegulatoryDomain, uint8_t uRegClass, BandType_e *pBandType)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	BandType_e         bandType = BAND_TYPE_NONE;
-//    RegDomainCalssesInfo_t    *pRegDomainInfo = &RegClassTbl[pRegulatoryDomain->countryZone];
-//    uint8_t           i = 0;
-//
-//    for (i=0; i< REG_DOMAIN_MAX_REG_CLASS_NUM ; i++)
-//    {
-//        if ((uRegClass >= pRegDomainInfo->DomainReg[i].MinClass) && (uRegClass <= pRegDomainInfo->DomainReg[i].MaxClass))
-//        {/* The channel set for this regulatory class and Zone was found */
-//            bandType = pRegDomainInfo->DomainReg[i].band;
-//            break;
-//        }
-//    }
-//
-//    *pBandType = bandType;
-//
-//    return OK;
-//}
-
-
-//int32_t regulatoryDomain_GetChannelsByRegClass(void * hRegulatoryDomain, uint8_t uRegClass,
-//                                                        RegClassChannelList_t *pChannelList)
-//{
-//    RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	RegDomainCalssesInfo_t    *pRegDomainInfo = &RegClassTbl[pRegulatoryDomain->countryZone];
-//    uint8_t           i = 0, j=0;
-//
-//    for (i=0; i< REG_DOMAIN_MAX_REG_CLASS_NUM ; i++)
-//    {
-//        if ((uRegClass >= pRegDomainInfo->DomainReg[i].MinClass) && (uRegClass <= pRegDomainInfo->DomainReg[i].MaxClass))
-//        {/* The channel set for this regulatory class and Zone was found */
-//            pChannelList->band = pRegDomainInfo->DomainReg[i].band;
-//
-//            for (j=0; j< REG_DOMAIN_MAX_CHAN_NUM ; j++)
-//            {
-//                pChannelList->Channel[j] = pRegDomainInfo->DomainReg[i].Channel[j];
-//            }
-//
-//            break;
-//        }
-//    }
-//
-//    if (i == REG_DOMAIN_MAX_REG_CLASS_NUM)
-//    {
-//        TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "regulatoryDomain_getChannelsByRegClass: Channels set for zone=%d, regClass=%d has not found!!!! \n", uRegClass, pRegulatoryDomain->countryZone);
-//
-//        return-1;
-//    }
-//    return OK;
-//}
-
-
-//uint8_t regulatoryDomain_GetRegClassByChannelAndBand(void * hRegulatoryDomain, BandType_e eBand, uint8_t uChannel)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	uint8_t           i=0, j=0;
-//    RegDomainCalssesInfo_t    *pRegDomainInfo = &RegClassTbl[pRegulatoryDomain->countryZone];
-//
-//    for (i=0; i< REG_DOMAIN_MAX_REG_CLASS_NUM ; i++)
-//    {
-//        for (j=0; j< REG_DOMAIN_MAX_CHAN_NUM ; j++)
-//        {
-//            if ((uChannel == pRegDomainInfo->DomainReg[i].Channel[j]) && (eBand == pRegDomainInfo->DomainReg[i].band))
-//            {
-//                return pRegDomainInfo->DomainReg[i].MinClass;
-//            }
-//        }
-//    }
-//
-//    return 0;
-//}
-
 
 /* Note!
  * For now the following function is deprecated.
@@ -1393,148 +762,7 @@ int32_t regulatoryDomain_setSupportedChannelsAccording2CountryIe(dot11_COUNTRY_t
 	return OK;
 }
 
-
-/**********************************************************************
-*              regulatoryDomain_getMaxPowerAllowed					  *
-***********************************************************************
-DESCRIPTION: Get the maximum tx power allowed for the given channel.
-				The final value is constructed by:
-				1) User max value
-				2) Domain restriction - 11d country code IE
-				3) 11h power constraint - only on serving channel
-				4) CCX TPC - only on serving channel
-
-              If we get a NULL hRegDomRole context, we use the default
-              parameters.
-
-
-RETURN:     Max power in Dbm/10 for the given channel
-
-************************************************************************/
-//uint8_t regulatoryDomain_getMaxPowerAllowed(void * hRegulatoryDomain,
-//                                             void * hRegDomRole,
-//                                             uint8_t uChannel,
-//                                             RadioBand_e eBand,
-//                                             Bool32 bServingChannel)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t*)hRegulatoryDomain;
-//    regulatoryDomainRole_t *pRegDomRole = (regulatoryDomainRole_t*)hRegDomRole;
-//
-//	channelCapability_t	*pSupportedChannels;
-//	uint8_t				 uChannelIndex, uTxPower;
-//
-//    if( eBand == RADIO_BAND_2_4GHZ)
-//	{
-//		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_2_4;
-//		uChannelIndex = uChannel - BG_24G_BAND_MIN_CHANNEL;
-//	}
-//	else
-//	{
-//		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_5;
-//		uChannelIndex = uChannel - A_5G_BAND_MIN_CHANNEL;
-//	}
-//
-//	/* We'll start with the "Domain restriction - 11d country code IE" */
-//	uTxPower = pSupportedChannels[uChannelIndex].uMaxTxPowerDomain;
-//
-//	if (pRegDomRole && bServingChannel)
-//	{
-//		if (pRegDomRole->uPowerConstraint < uTxPower)
-//		{
-//			/* When 802.11h is disabled, uPowerConstraint is 0 anyway */
-//			uTxPower -= pRegDomRole->uPowerConstraint;
-//		}
-//
-//        /* Take CCX limitation too */
-//        uTxPower = TI_MIN(uTxPower, pRegDomRole->uExternTxPowerPreferred);
-//
-//	}
-//
-//	/* Now make sure we are not exceeding the user maximum */
-//    if (pRegDomRole)
-//		uTxPower = TI_MIN(uTxPower, pRegDomRole->uUserMaxTxPower);
-//	else
-//		uTxPower = TI_MIN(uTxPower, pRegulatoryDomain->defDesiredTxPower);
-//
-//	TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_INFORMATION, " uChannel = %d bServingChannel = %d uTxPower = %d \n", uChannel, bServingChannel, uTxPower);
-//
-//	return uTxPower;
-//}
-
-
-/* for debug */
-//void regulatoryDomain_PrintValidTables(void * hRegulatoryDomain)
-//{
-//	RegulatoryDomain_t  *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//	uint16_t channelIndex;
-//
-//	for (channelIndex=0; channelIndex<NUM_OF_CHANNELS_24; channelIndex++)
-//	{
-//		if (pRegulatoryDomain->supportedChannels_band_2_4[channelIndex].channelValidityPassive)
-//			WLAN_OS_REPORT(("channel num =%d is valid for passive \n", channelIndex+1));
-//		if (pRegulatoryDomain->supportedChannels_band_2_4[channelIndex].channelValidityActive)
-//		{
-//			WLAN_OS_REPORT(("channel =%d is valid for active TX power=%d\n",
-//							channelIndex+1, pRegulatoryDomain->supportedChannels_band_2_4[channelIndex].uMaxTxPowerDomain));
-//		}
-//	}
-//
-//	for (channelIndex=0; channelIndex<A_5G_BAND_NUM_CHANNELS; channelIndex++)
-//    {
-//		uint8_t	channelNum;
-//		channelNum = channelIndex+A_5G_BAND_MIN_CHANNEL;
-//		if (pRegulatoryDomain->supportedChannels_band_5[channelIndex].channelValidityPassive)
-//			WLAN_OS_REPORT(("channel =%d is valid for passive \n", channelNum));
-//		if (pRegulatoryDomain->supportedChannels_band_5[channelIndex].channelValidityActive)
-//		{
-//			WLAN_OS_REPORT(("channel =%d is valid for active TX power=%d\n",
-//							channelNum,pRegulatoryDomain->supportedChannels_band_5[channelIndex].uMaxTxPowerDomain));
-//		}
-//	}
-//
-//}
-
-
-//void regulatoryDomain_GetActiveChannels(void * hRegulatoryDomain, tiwdrv_ap_chan_hw_info_t *pChanInfo)
-//{
-//	RegulatoryDomain_t  *pRegulatoryDomain = (RegulatoryDomain_t *)hRegulatoryDomain;
-//    int16_t i,index=0;
-//
-//	pChanInfo->mode = TIW_DRV_AP_DOT11_DUAL_MODE;
-//
-//    /* Get 2.4G active channels */
-//	for (i=0; i<NUM_OF_CHANNELS_24; i++)
-//	{
-//		if (pRegulatoryDomain->supportedChannels_band_2_4[i].channelValidityActive)
-//		{
-//			pChanInfo->chan24List[index].chan = i + 1;
-//			pChanInfo->chan24List[index].max_tx_power = DBM_DIV_10_2_DBM(pRegulatoryDomain->supportedChannels_band_2_4[i].uMaxTxPowerDomain);
-//			pChanInfo->chan24List[index].flags = pRegulatoryDomain->supportedChannels_band_2_4[i].uFlags;
-//			index++;
-//		}
-//	}
-//    pChanInfo->numOfGChan = index;
-//    pChanInfo->numOfBChan = index;
-//
-//
-//	/* Get 5G active channels */
-//	index = 0;
-//    for (i=0; i<A_5G_BAND_NUM_CHANNELS; i++)
-//    {
-//		if (pRegulatoryDomain->supportedChannels_band_5[i].channelValidityActive &&
-//			!(pRegulatoryDomain->supportedChannels_band_5[i].uFlags & TIW_REG_DOMAIN_DFS))
-//		{
-//            pChanInfo->chan5List[index].chan = i + A_5G_BAND_MIN_CHANNEL;
-//			pChanInfo->chan5List[index].max_tx_power = DBM_DIV_10_2_DBM(pRegulatoryDomain->supportedChannels_band_5[i].uMaxTxPowerDomain);
-//			pChanInfo->chan5List[index].flags = pRegulatoryDomain->supportedChannels_band_5[i].uFlags;
-//			index++;
-//		}
-//	}
-//	pChanInfo->numOfAChan = index;
-//}
-
-
-int32_t regulatoryDomain_GetCapability(RadioBand_e band ,uint16_t channel,channelCapability_t *ChannelCapability)
+int32_t regulatoryDomain_GetCapability(RadioBand_e band, uint16_t channel, channelCapability_t *ChannelCapability)
 {
     RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
 	uint16_t channelIndex;
@@ -1544,11 +772,11 @@ int32_t regulatoryDomain_GetCapability(RadioBand_e band ,uint16_t channel,channe
 
     if (band == RADIO_BAND_5GHZ)
 	{
-		channelIndex = (channel-A_5G_BAND_MIN_CHANNEL);
+		channelIndex = (channel - A_5G_BAND_MIN_CHANNEL);
 		if (channelIndex > A_5G_BAND_NUM_CHANNELS)
 		{
 			GTRACE(GRP_GENERAL_ERROR, "ERROR: regulatoryDomain_GetCapability: channelIndex = %d", channelIndex);
-			return-1;
+			return -1;
 		}
 		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_5;
 	}
@@ -1558,12 +786,12 @@ int32_t regulatoryDomain_GetCapability(RadioBand_e band ,uint16_t channel,channe
 		if (channelIndex > NUM_OF_CHANNELS_24)
 		{
 			GTRACE(GRP_GENERAL_ERROR, "ERROR: regulatoryDomain_GetCapability: channelIndex = %d", channelIndex);
-			return-1;
+			return -1;
 		}
 		pSupportedChannels = pRegulatoryDomain->supportedChannels_band_2_4;
 	}
 
-	verifyDfsChannelValidity(pSupportedChannels, channelIndex);
+	//verifyDfsChannelValidity(pSupportedChannels, channelIndex);
 
 	ChannelCapability->uFlags = pSupportedChannels[channelIndex].uFlags;
 	ChannelCapability->channelValidityActive = pSupportedChannels[channelIndex].channelValidityActive;
@@ -1571,6 +799,7 @@ int32_t regulatoryDomain_GetCapability(RadioBand_e band ,uint16_t channel,channe
 	ChannelCapability->timestamp = pSupportedChannels[channelIndex].timestamp;
 	ChannelCapability->uMaxTxPowerDomain = pSupportedChannels[channelIndex].uMaxTxPowerDomain;
 	//REG_DOMAIN_PRINT_REPORT("capability on 2.4/5G channel uFlags= %d,validityActive=%d,validityPassive=%d,timestamp=%d,MAxTx=%d\n",ChannelCapability->uFlags,ChannelCapability->channelValidityActive,ChannelCapability->channelValidityPassive ,ChannelCapability->timestamp,ChannelCapability->uMaxTxPowerDomain);
+	
 	return OK;
 }
 
@@ -1605,26 +834,28 @@ void regulatoryDomain_GetCahnnelOnBand(RadioBand_e band, supportedChannels_t *su
 
 /*****************************************************************************
  * Module:    	regulatoryDomain module, 
- * API:         _FindCountry, _GetCountryData
+ * API:         
  *
  * Description: decompress the rom/patch compressed country data tables
  * Callers:     
- * Input:       
- * Return: 
+ * Input: pCountryString - Country code string
+ * Return: Country index to the country data tables on sucess, -1 otherwise
  ****************************************************************************/
-uint16_t regulatoryDomain_GetCountryRegion(uint8_t *pCountryString)
+int16_t regulatoryDomain_GetCountryRegion(uint8_t *pCountryString)
 {
-    int countryIndex =0;//set country index defualt to 0 otherwise it will send out of range index.
-	int i;
+    int8_t countryIndex = -1;
+	int8_t i, foundMatch = 0;
    
     HOOK(HOOK_IN_REGULATORY_DOMAIN);
     
-    /* Find the country in internal table */
-    for (i=0; i < gNumCompressedCountries; i++)
+    for (i = 0; i < REG_DOMAIN_NUM_OF_REGIONS; i++)
     {
-        if (!os_memcmp((unsigned char *)gConfigCountryCompressedTable[i].CountryStr, (unsigned char *)pCountryString, REG_DOMAIN_COUNTRY_STR_LEN))
+		foundMatch = !os_memcmp(gConfigCountryCompressedTable[i].countryStr,
+					   			pCountryString,
+					   			REG_DOMAIN_COUNTRY_STR_LEN);
+        if (foundMatch)
         {
-            countryIndex = gConfigCountryCompressedTable[i].Region;
+            countryIndex = gConfigCountryCompressedTable[i].region;
             break;
         }
     }
@@ -1634,253 +865,44 @@ uint16_t regulatoryDomain_GetCountryRegion(uint8_t *pCountryString)
 
 int32_t regulatoryDomain_SetCountry(uint8_t *pCountryStr)
 {
+	int16_t countryIndex = 0;
 
-    if (regulatoryDomain_GetCountryRegion(pCountryStr) < 0)
+	countryIndex = regulatoryDomain_GetCountryRegion(pCountryStr);
+
+    if (countryIndex < 0)
     {
-        /* country not found in internal DB - Keep pervious country*/
-		GTRACE(GRP_GENERAL_ERROR, "ERROR: Trying to set country %c%c, but country not supported. Country wasn't saved",  pCountryStr[0],  pCountryStr[1]);
-		GTRACE(GRP_GENERAL_ERROR, "ERROR: Add the country to tiwlanRegDomain.ini");
-        return-1;
+        /* Country not found in internal DB - Keep in custom domain*/
+		GTRACE(GRP_REG_DOMAIN, "regulatoryDomain_SetCountry: Country code %c%c "
+							   "not found in DB. Setting it to custom entry",
+							   pCountryStr[0],  pCountryStr[1]);
+
+		if (!isCountryCodeValid(pCountryStr))
+		{
+			GTRACE(GRP_GENERAL_ERROR, "regulatoryDomain_SetCountry: "
+							   		  "Country code %c%c not valid.",
+							   		  pCountryStr[0],  pCountryStr[1]);
+
+			return WlanError(WLAN_ERROR_SEVERITY__LOW,
+							 WLAN_ERROR_MODULE__COMMANDS,
+							 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+		}
+
+		/* Copy country code to the DB at the custom entry */
+		countryIndex = REG_DOMAIN_CUSTOM_REGION;
+		os_memcpy(gConfigCountryCompressedTable[countryIndex].countryStr,
+				  pCountryStr,
+				  REG_DOMAIN_COUNTRY_STR_LEN);	
 	}
-    memcpy(gCountryDomainStr, pCountryStr, DOT11_COUNTRY_STRING_LEN);
+
+	/* Set country code as current country code */
+    os_memcpy(gCountryDomainStr, pCountryStr, REG_DOMAIN_COUNTRY_STR_LEN);
+
     return OK;
-
 }
-
-
-
-//int32_t regulatoryDomain_ConfigRegulatoryTables(void * hRegDomain, uint8_t *pBuf, uint32_t uLength)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//	RegDomainCountryInfo_t *pRegDomainTable;
-//    uint16_t idxTLV = 0;
-//	uint16_t paramKey = 0;
-//	uint16_t fieldLength = 0;
-//	uint32_t i, j;
-//
-//    /* Read the driver version string and make sure it matches current version */
-//	while (pBuf[idxTLV] != '\0')
-//	{
-//		idxTLV++;
-//	}
-//
-//    if (idxTLV == 0 || os_memoryCompare(pRegulatoryDomain->hOs, pBuf, SW_VERSION_STR, idxTLV) != 0)
-//	{
-//		WLAN_OS_REPORT(("\n %s: Error!! Driver Version string in TLV (%s)  \n does not match the driver kernel version: %s \n",
-//						__FUNCTION__, pBuf, SW_VERSION_STR));
-//		return-1;
-//	}
-//	idxTLV++; /* skip the string termination char '\0' */
-//
-//    /* Read the number of countries conifigured in the input buffer*/
-//	pRegulatoryDomain->uNumOfCountriesInTable = readNumOfConfiguredCountries(pRegulatoryDomain, pBuf, uLength, idxTLV);
-//	if (!pRegulatoryDomain->uNumOfCountriesInTable)
-//		return OK;
-//
-//    /* Allocate required memory for RegDomain table*/
-//    pRegulatoryDomain->pRegDomainTable = os_memoryAlloc(pRegulatoryDomain->hOs, sizeof(RegDomainCountryInfo_t)*pRegulatoryDomain->uNumOfCountriesInTable);
-//    if (NULL == pRegulatoryDomain->pRegDomainTable)
-//    {
-//        TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_FATAL_ERROR, "regulatoryDomain_ConfigRegulatoryTables(): Allocation for pInitTable has failed!\n");
-//        return-1;
-//    }
-//    os_memoryZero(pRegulatoryDomain->hOs, pRegulatoryDomain->pRegDomainTable, sizeof(RegDomainCountryInfo_t)*pRegulatoryDomain->uNumOfCountriesInTable);
-//	pRegDomainTable = pRegulatoryDomain->pRegDomainTable;
-//
-//    /* Read configuration from the TLV format buffer into the table*/
-//	while(idxTLV < uLength)
-//	{
-//		i=0;
-//
-//		/* read the key param index */
-//		os_memoryCopy(pRegulatoryDomain->hOs, &paramKey, &pBuf[idxTLV], sizeof(uint16_t));
-//		idxTLV += 2;
-//		os_memoryCopy(pRegulatoryDomain->hOs, &fieldLength, &pBuf[idxTLV], sizeof(uint16_t));
-//		idxTLV += 2;
-//
-//		if (paramKey == REG_DOMAIN_KEY_COUNTRY_CONFIG)
-//		{
-//            while(pRegDomainTable[i].CountryStr[0] && pRegDomainTable[i].CountryStr[1])
-//			{
-//				if (!os_memoryCompare(pRegulatoryDomain->hOs, pRegDomainTable[i].CountryStr, &pBuf[idxTLV], REG_DOMAIN_COUNTRY_STR_LEN))
-//					break;
-//
-//				i++;
-//			}
-//
-//            if (i < pRegulatoryDomain->uNumOfCountriesInTable)
-//			{
-//                /*Save country code*/
-//				os_memoryCopy(pRegulatoryDomain->hOs, pRegDomainTable[i].CountryStr, &pBuf[idxTLV], REG_DOMAIN_COUNTRY_STR_LEN);
-//				pRegDomainTable[i].CountryStr[REG_DOMAIN_COUNTRY_STR_LEN] = 32;
-//
-//				/*Find first empty row in the country and copy the value*/
-//				for(j=0; j<REG_DOMAIN_MAX_ROWS_IN_COUNTRY; j++)
-//				{
-//					if(!pRegDomainTable[i].DomainReg[j].NumOfChannels)
-//					{
-//                        os_memoryCopy(pRegulatoryDomain->hOs,
-//									  &pRegDomainTable[i].DomainReg[j],
-//									  &pBuf[idxTLV + REG_DOMAIN_COUNTRY_STR_LEN],
-//									  fieldLength - REG_DOMAIN_COUNTRY_STR_LEN);
-//						break;
-//					}
-//				}
-//			}
-//		}
-//
-//		idxTLV += fieldLength;
-//	}
-//
-//	return OK;
-//}
-
-
-//void regulatoryDomain_ClearExternalConfig(void * hRegDomain)
-//{
-//	RegulatoryDomain_t *pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//
-//    pRegulatoryDomain->uDontOverride--;
-//}
 
 /********************************************************************************/
 /*						Internal functions implementation.						*/
 /********************************************************************************/
-// SL_CC33XX_MODIFY_START
-#ifdef COMPILE_DEAD_FUNC
-static int32_t setSupportedChannelsAccording2confCountry(uint8_t *pCountryString)
-{
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
-
-    RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
-	RegDomainCountryInfo_t *pCurrCountry = NULL;
-	channelCapability_t	*pSupportedChannels;
-	uint32_t i, j;
-	uint8_t minChannelNumber;
-	uint32_t minClassFreq, maxClassFreq, baseFreq;
-
-    if (pRegulatoryDomain->uDontOverride)
-	{
-		if (!memcmp(pRegulatoryDomain->country24.countryIE.CountryString, pCountryString, REG_DOMAIN_COUNTRY_STR_LEN))
-		{
-			pRegulatoryDomain->uDontOverride++;
-			return OK;
-		}
-		return-1;
-	}
-
-    /* Find the country in internal table*/
-	for (i=0; i < pRegulatoryDomain->uNumOfCountriesInTable; i++)
-	{
-		if (!memcmp(pRegulatoryDomain->pRegDomainTable[i].CountryStr, pCountryString, REG_DOMAIN_COUNTRY_STR_LEN))
-		{
-            pCurrCountry = &pRegulatoryDomain->pRegDomainTable[i];
-            break;
-		}
-	}
-	if (!pCurrCountry)
-		return-1;
-
-    /*Country found in internal tables - configure new country parameters*/
-	memcpy(pRegulatoryDomain->country24.countryIE.CountryString, pCountryString, DOT11_COUNTRY_STRING_LEN);
-	memcpy(pRegulatoryDomain->country5.countryIE.CountryString, pCountryString, DOT11_COUNTRY_STRING_LEN);
-	pRegulatoryDomain->country24.hdr.eleLen = DOT11_COUNTRY_STRING_LEN;
-	pRegulatoryDomain->country5.hdr.eleLen = DOT11_COUNTRY_STRING_LEN;
-
-	/* Zero FW channel configuration bitmap */
-	os_memset(&pRegulatoryDomain->fwRegDomainChannelBitField, 0, sizeof(RegDomainChannelConfigBitField_t));
-
-    /* Clear the validity of all channels */
-	os_memset(&pRegulatoryDomain->supportedChannels_band_2_4, 0, sizeof(pRegulatoryDomain->supportedChannels_band_2_4));
-	os_memset(&pRegulatoryDomain->supportedChannels_band_5, 0, sizeof(pRegulatoryDomain->supportedChannels_band_5));
-
-	/* 802.11k changes (to be used during the RRM) */
-    if ((pCountryString[0] == 'U') && (pCountryString[1] == 'S'))
-    {
-        pRegulatoryDomain->countryZone = REGULATORY_ZONE_USA;
-    }
-    else if ((pCountryString[0] == 'J') && (pCountryString[1] == 'P'))
-    {
-        pRegulatoryDomain->countryZone = REGULATORY_ZONE_JAPAN;
-    }
-    else
-	{
-        pRegulatoryDomain->countryZone = REGULATORY_ZONE_RST;
-    }
-
-    /* Configure the supported channels of the new country for both bands*/
-	for (i=0; i<REG_DOMAIN_MAX_ROWS_IN_COUNTRY; i++)
-	{
-		if (pCurrCountry->DomainReg[i].NumOfChannels)
-		{
-			if (pCurrCountry->DomainReg[i].band == RADIO_BAND_2_4GHZ)
-			{
-				pSupportedChannels = pRegulatoryDomain->supportedChannels_band_2_4;
-				minChannelNumber = BG_24G_BAND_MIN_CHANNEL;
-				baseFreq = BASE_FREQ_2_4;
-			}
-			else if (pCurrCountry->DomainReg[i].band == RADIO_BAND_5GHZ)
-			{
-				pSupportedChannels = pRegulatoryDomain->supportedChannels_band_5;
-				minChannelNumber = A_5G_BAND_MIN_CHANNEL;
-				baseFreq = BASE_FREQ_5_0;
-			}
-			else
-				continue;
-
-			minClassFreq = pCurrCountry->DomainReg[i].Channel[0]*5 + baseFreq - 10;
-			maxClassFreq = pCurrCountry->DomainReg[i].Channel[pCurrCountry->DomainReg[i].NumOfChannels - 1]*5 + baseFreq + 10;
-
-            for (j=0; j<pCurrCountry->DomainReg[i].NumOfChannels; j++)
-			{
-				uint8_t channelIndex = pCurrCountry->DomainReg[i].Channel[j] - minChannelNumber;
-				uint32_t channelFreq = pCurrCountry->DomainReg[i].Channel[j]*5 + baseFreq;
-
-				pSupportedChannels[channelIndex].channelValidityPassive = TRUE;
-                /*Set DFS attribute for the channel*/
-				if (pCurrCountry->DomainReg[i].DfsChannel)
-					pSupportedChannels[channelIndex].uFlags |= TIW_REG_DOMAIN_DFS;
-
-				/*Set HT40 attributes for the channel*/
-				if (pCurrCountry->DomainReg[i].Channel[j] != 14)
-				{
-                    if (channelFreq - 30 >= minClassFreq && channelFreq - 10 <= maxClassFreq)
-						pSupportedChannels[channelIndex].uFlags |= TIW_REG_DOMAIN_HT40MINUS;
-					if (channelFreq + 10 >= minClassFreq && channelFreq + 30 <= maxClassFreq)
-						pSupportedChannels[channelIndex].uFlags |= TIW_REG_DOMAIN_HT40PLUS;
-				}
-
-				/* If this is a DFS channel it is not valid for active yet */
-				if (!pCurrCountry->DomainReg[i].DfsChannel)
-				{
-					pSupportedChannels[channelIndex].channelValidityActive = TRUE;
-					setChannelAsFwBitmap(pCurrCountry->DomainReg[i].Channel[j],
-										 pCurrCountry->DomainReg[i].band == RADIO_BAND_2_4GHZ ? TRUE : FALSE,
-										 TRUE);
-				}
-
-				/* set the TX power in DBM/10 units */
-				pSupportedChannels[channelIndex].uMaxTxPowerDomain =
-					DBM2DBMDIV10(pCurrCountry->DomainReg[i].TxPower);
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	pRegulatoryDomain->uDontOverride++;
-
-    /* Update FW with the new configuration*/
-	sendRegDomainCmdToFw();
-
-    HOOK(HOOK_IN_REGULATORY_DOMAIN);
-
-    return OK;
-}
-#endif // COMPILE_DEAD_FUNC
-// SL_CC33XX_MODIFY_END
 
 ///************************************************************************
 // *      setSupportedChannelsAccording2ScanControlTable 					*
@@ -1905,7 +927,6 @@ static int32_t setSupportedChannelsAccording2confCountry(uint8_t *pCountryString
 //*************************************************************************/
 static void setWorldWideDomainSupportedChannels()
 {
-
     RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
 	uint8_t 	channelIndex = 0;
 
@@ -1976,82 +997,9 @@ static void setWorldWideDomainSupportedChannels()
 
 }
 
-/**********************************************************************
-*              regulatoryDomain_getPowerTableMinMax					  *
-***********************************************************************
-DESCRIPTION: Find the Tx-power-level table min & max values.
-			 The table is made of 4 power levels and 5 bands/sub-bands.
-
-RETURN:     void
-************************************************************************/
-//static void getPowerTableMinMax (RegulatoryDomain_t *pRegulatoryDomain,
-//								 powerCapability_t  *pPowerCapability)
-//{
-//    TFwInfo  *pFwInfo = TWD_GetFWInfo (pRegulatoryDomain->hTWD);
-//	uint8_t	i;
-//
-//    /* Init the min (max) to the opposite edge so the table values are below (above) this edge */
-//	pPowerCapability->minTxPower = MAX_TX_POWER;
-//	pPowerCapability->maxTxPower = MIN_TX_POWER;
-//
-//	/* Find Min and Max values of the table */
-//	for (i = 0; i < NUMBER_OF_SUB_BANDS_E; i++)
-//	{
-//		pPowerCapability->minTxPower = TI_MIN (pPowerCapability->minTxPower,
-//											   pFwInfo->txPowerTable[i][NUM_OF_POWER_LEVEL-1]);
-//		pPowerCapability->maxTxPower = TI_MAX (pPowerCapability->maxTxPower,
-//											   pFwInfo->txPowerTable[i][0]);
-//	}
-//}
-
-
-//static void RegDomainConfigSentToFw(void * handle, uint16_t uMboxStatus, Bool32 *pSuspendRequired)
-//{
-//	/*Configuration was sent to FW - suspend the cmd queue operation
-//	untill event complete received back from the FW*/
-//
-//    if (pSuspendRequired)
-//		*pSuspendRequired = TRUE;
-//}
-
-
-//static void RegDomainTmrExpiry(void * hRegDomain, Bool32 bTwdInitOccured)
-//{
-//    RegulatoryDomain_t	*pRegulatoryDomain = (RegulatoryDomain_t *)hRegDomain;
-//
-//    TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR, "RegDomainTmrExpiry\n");
-//
-//    if (!bTwdInitOccured)
-//    {
-//        healthMonitor_sendFailureEvent(pRegulatoryDomain->hHealthMonitor, REG_DOMAIN_TIMEOUT);
-//    }
-//}
-
-
 static void sendRegDomainCmdToFw()
 {
     HOOK(HOOK_IN_REGULATORY_DOMAIN);
-
-//    RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
-//	pRegulatoryDomain->bFwUpdateRequired = FALSE;
-//
-//    /* Update applications on a channel list change*/
-//    evHandler_HandleEvent(pRegulatoryDomain->hEvHandler, TIWDRV_NETIF_NUM, TIW_DRV_EV_CHANNEL_LIST_CHANGED, NULL, 0);
-//
-//    /* Update FW with the new channels configuration*/
-//	if (TWD_SendCmd(pRegulatoryDomain->hTWD,
-//					CMD_REG_DOMAIN_CHANNEL_CONFIG,
-//					(void *)&pRegulatoryDomain->fwRegDomainChannelBitField,
-//					sizeof(RegDomainChannelConfigBitField_t),
-//					RegDomainConfigSentToFw,
-//					(void *)pRegulatoryDomain) != OK)
-//    {
-//		TRACE(pRegulatoryDomain->hReport, REPORT_SEVERITY_ERROR , "Failed to configure REG domain channels to the FW\n");
-//		return ;
-//    }
-//
-//	/* Start complete timer */
-//    tmr_StartTimer(pRegulatoryDomain->hRegDomainTimer, RegDomainTmrExpiry, pRegulatoryDomain, REG_DOMAIN_TIMEOUT_MSEC, FALSE);
 }
 
 
@@ -2072,33 +1020,6 @@ static void verifyDfsChannelValidity(channelCapability_t *pSupportedChannels, ui
 	}
 }
 
-
-//static uint32_t readNumOfConfiguredCountries(RegulatoryDomain_t *pRegulatoryDomain, uint8_t *pBuf, uint32_t uBuffLen, uint16_t idxTLV)
-//{
-//	uint16_t 	paramKey = 0;
-//	uint16_t 	fieldLength = 0;
-//	uint32_t	numOfCountries=0;
-//
-//	while(idxTLV < uBuffLen)
-//	{
-//		/* read the key param index */
-//		os_memoryCopy(pRegulatoryDomain->hOs, &paramKey, &pBuf[idxTLV], sizeof(uint16_t));
-//		idxTLV += 2;
-//		os_memoryCopy(pRegulatoryDomain->hOs, &fieldLength, &pBuf[idxTLV], sizeof(uint16_t));
-//		idxTLV += 2;
-//
-//		if (paramKey == REG_DOMAIN_KEY_NUM_OF_COUNTRIES)
-//		{
-//			os_memoryCopy(pRegulatoryDomain->hOs, &numOfCountries, &pBuf[idxTLV] , fieldLength); /* copy the field data */
-//			break;
-//		}
-//		idxTLV += fieldLength;
-//	}
-//
-//	return numOfCountries;
-//}
-
-
 static int32_t getCountryIdInTable(uint8_t *pCountryStr, uint32_t *pCountryID)
 {
 
@@ -2109,7 +1030,7 @@ static int32_t getCountryIdInTable(uint8_t *pCountryStr, uint32_t *pCountryID)
 
     for (cntrId =0; cntrId < pRegulatoryDomain->uNumOfCountriesInTable; cntrId++)
 	{
-        if (!memcmp(pRegulatoryDomain->pRegDomainTable[cntrId].CountryStr, pCountryStr, REG_DOMAIN_COUNTRY_STR_LEN))
+        if (!memcmp(pRegulatoryDomain->pRegDomainTable[cntrId].countryStr, pCountryStr, REG_DOMAIN_COUNTRY_STR_LEN))
 		{
 			*pCountryID = cntrId;
 			return OK;
@@ -2137,8 +1058,8 @@ static Bool32 isDfsChannelInCountry(uint32_t cntrId, uint32_t uChannel)
 	{
 		for (channel=0; channel<REG_DOMAIN_MAX_CHAN_NUM; channel++)
 		{
-			if (pRegDomainTable->DomainReg[group].Channel[channel] == uChannel)
-				return pRegDomainTable->DomainReg[group].DfsChannel;
+			if (pRegDomainTable->domainReg[group].Channel[channel] == uChannel)
+				return pRegDomainTable->domainReg[group].DfsChannel;
 		}
 	}
 	return FALSE;
@@ -2201,48 +1122,11 @@ static Bool32 setChannelAsFwBitmap(uint16_t channelNumber, Bool32 band_2_4, Bool
     return FALSE;
 }
 
-
-/* Table that PHY uses for bitmap translation (all channels are divided into 9 Sub Bands)
-        Bit#  chBitMap1                   chBitMap2
-              channel, band , sub band
-        0     {1,  API_BAND_2_4G,  0},    {64,  API_BAND_5G,    4},
-        1     {2,  API_BAND_2_4G,  0},    {100, API_BAND_5G,   5},
-        2     {3,  API_BAND_2_4G,  0},    {104, API_BAND_5G,   5},
-        3     {4,  API_BAND_2_4G,  0},    {108, API_BAND_5G,   5},
-        4     {5,  API_BAND_2_4G,  0},    {112, API_BAND_5G,   5},
-        5     {6,  API_BAND_2_4G,  0},    {116, API_BAND_5G,   5},
-        6     {7,  API_BAND_2_4G,  0},    {120, API_BAND_5G,   6},
-        7     {8,  API_BAND_2_4G,  0},    {124, API_BAND_5G,   6},
-        8     {9,  API_BAND_2_4G,  0},    {128, API_BAND_5G,   6},
-        9     {10, API_BAND_2_4G,  0},    {132, API_BAND_5G,   6},
-        10    {11, API_BAND_2_4G,  0},    {136, API_BAND_5G,   6},
-        11    {12, API_BAND_2_4G,  0},    {140, API_BAND_5G,   6},
-        12    {13, API_BAND_2_4G,  0},    {149, API_BAND_5G,   7},
-        13    {14, API_BAND_2_4G,  0},    {153, API_BAND_5G,   7},
-        14    {16, API_BAND_4_9G,  1},    {157, API_BAND_5G,   7},
-        15    {12, API_BAND_4_9G,  1},    {161, API_BAND_5G,   7},
-        16    {8,  API_BAND_4_9G,  1},    {165, API_BAND_5G,   7},
-        17    {4,  API_BAND_4_9G,  1},    {171, API_BAND_5G,   8},
-        18    {8,  API_BAND_5G,    2},    {172, API_BAND_5G,   8},
-        19    {12, API_BAND_5G,    2},    {173, API_BAND_5G,   8},
-        20    {16, API_BAND_5G,    2},    {174, API_BAND_5G,   8},
-        21    {34, API_BAND_5G,    3},    {175, API_BAND_5G,   8},
-        22    {36, API_BAND_5G,    3},    {176, API_BAND_5G,   8},
-        23    {38, API_BAND_5G,    3},    {177, API_BAND_5G,   8},
-        24    {40, API_BAND_5G,    3},    {178, API_BAND_5G,   8},
-        25    {42, API_BAND_5G,    3},    {179, API_BAND_5G,   8},
-        26    {44, API_BAND_5G,    3},    {180, API_BAND_5G,   8},
-        27    {46, API_BAND_5G,    3},    {181, API_BAND_5G,   8},
-        28    {48, API_BAND_5G,    3},    {182, API_BAND_5G,   8},
-        29    {52, API_BAND_5G,    4},    {183, API_BAND_5G,   8},
-        30    {56, API_BAND_5G,    4},    {184, API_BAND_5G,   8}
-        31    {60, API_BAND_5G,    4},
-*/
 /***********************************************************************
  *                       getChannelIndexTranslation
  ***********************************************************************
 DESCRIPTION:    Returns the bit index values according to the FW-values.
-                  See full table above.
+                See full table above.
 INPUT:
             channelNumber       -  desired channel
             band_2_4            - boolean - True if band is 2.4G
@@ -2337,10 +1221,9 @@ static int8_t getChannelIndexTranslation(uint16_t chNumber, Bool32 band_2_4)
 }
 
 
-static int16_t getIndexChannelTranslation( uint8_t chIndex, uint8_t  band)
+static int16_t getIndexChannelTranslation(uint8_t chIndex, uint8_t band)
 {
-
-    uint16_t channel = -1;
+    int16_t channel = -1;
 
     HOOK(HOOK_IN_REGULATORY_DOMAIN);
 
@@ -2358,7 +1241,7 @@ static int16_t getIndexChannelTranslation( uint8_t chIndex, uint8_t  band)
     }
     else
     {
-        if (chIndex >= 0 && chIndex <= 24)
+        if (chIndex >= 0 && chIndex < A_BAND_CHANNEL_COUNT)
         {
             /* rom_dot11a_channels holds the channel numbers for 5Ghz */
             channel = rom_dot11a_channels[chIndex];
@@ -2374,7 +1257,6 @@ static int16_t getIndexChannelTranslation( uint8_t chIndex, uint8_t  band)
 
 static int8_t setSupportedChannelsAccording2Domain(void)
 {
-   
     RegulatoryDomain_t  *pRegulatoryDomain = &RegulatoryDomain;
 	channelCapability_t *pSupportedChannels;
 	uint8_t              channelIndex = 0;
@@ -2454,8 +1336,8 @@ static int8_t setSupportedChannelsAccording2Domain(void)
 
         while (channelBitmask > 0)
         {
-            channelIndex = 0;//reset channel index so before entering the first bitfield  - i also removed the else later only one is necessary to pervent overwrite of pSupportedChannels[channelIndex] in case bitmap is not active according to regualtory domain bitfields.
-            if (channelBitmask & 1)
+            channelIndex = 0;
+			if (channelBitmask & 1)
             {
                 channel = getIndexChannelTranslation(channelbit, pChanPattern->band);
                 channelFreq = channel*5 + baseFreq;
@@ -2463,52 +1345,31 @@ static int8_t setSupportedChannelsAccording2Domain(void)
                 if (pChanPattern->band == RADIO_BAND_5GHZ)
                 {
                     channelIndex = channel - A_5G_BAND_MIN_CHANNEL;
+					pRegulatoryDomain->is5GHzBandSupported = TRUE;
                 }
                 else
                 {
                     channelIndex = channel - BG_24G_BAND_MIN_CHANNEL;
+					pRegulatoryDomain->is2_4GHzBandSupported = TRUE;
                 }
 
                 pSupportedChannels[channelIndex].uFlags = 0;
                 pSupportedChannels[channelIndex].channelValidityPassive = TRUE;
 
-                /*Set DFS attribute for the channel*/
-                if (pChanPattern->DfsChannel)
+                /* Set DFS attribute for the channel */
+                if (pChanPattern->dfsChannel)
                 {
                     pSupportedChannels[channelIndex].channelValidityActive = FALSE;
                     pSupportedChannels[channelIndex].uFlags |= TIW_REG_DOMAIN_DFS;
                 }
-
-                #if 0//we dont support HT40
-				/*Set HT40 attributes for the channel*/
-				if ( (channelIndex + 1) != 14) // Channel for 2.4GHz is channel index plus 1
-				{
-                    if (channelFreq - 30 >= minClassFreq && channelFreq - 10 <= maxClassFreq)
-						pSupportedChannels[channelIndex].uFlags |= TIW_REG_DOMAIN_HT40MINUS;
-					if (channelFreq + 10 >= minClassFreq && channelFreq + 30 <= maxClassFreq)
-						pSupportedChannels[channelIndex].uFlags |= TIW_REG_DOMAIN_HT40PLUS;
-				}
-                #endif
-
-                /* If this is a DFS channel it is not valid for active yet */
-                if (!pChanPattern->DfsChannel)
+                else
                 {
                     pSupportedChannels[channelIndex].channelValidityActive = TRUE;
-					setChannelAsFwBitmap(channel, pChanPattern->band == RADIO_BAND_2_4GHZ ? TRUE : FALSE,
-					 TRUE);
+					setChannelAsFwBitmap(channel, pChanPattern->band == RADIO_BAND_2_4GHZ ? TRUE : FALSE, TRUE);
                 }
                 /* set the TX power in DBM/10 units */
                 pSupportedChannels[channelIndex].uMaxTxPowerDomain = DBM2DBMDIV10(pChanPattern->txPowerPerRegion[groupPatternIndex]);
-
             }
-            /*else	// this else cause bug before entering the valid channelBitmask bitfield. Luckily, we zero
-					// this array for both bands earlier in this function, so this else-case isn't necessary and buggy.
-            {
-                pSupportedChannels[channelIndex].channelValidityPassive = FALSE;
-                pSupportedChannels[channelIndex].channelValidityActive = FALSE;
-                pSupportedChannels[channelIndex].uFlags = 0;
-                pSupportedChannels[channelIndex].uMaxTxPowerDomain = DBM2DBMDIV10(MIN_TX_POWER);
-            }*/
             channelBitmask>>=1;
             channelbit++;
         }
@@ -2563,6 +1424,30 @@ Bool_e regulatoryDomain_getChMaxPower(uint16_t channel, uint8_t *max_tx_power)
     }
 }
 
+static uint8_t isCountryCodeValid(uint8_t *pCountryStr)
+{
+	if (pCountryStr == NULL)
+	{
+		return 0;
+	}
+
+	if ((pCountryStr[0] >= 'A') && (pCountryStr[0] <= 'Z') &&
+		(pCountryStr[1] >= 'A')&&(pCountryStr[1] <= 'Z') && 
+		((pCountryStr[2] == '\0') || (pCountryStr[2] == 'I') ||
+		 (pCountryStr[2] == '0')))
+	{
+		return 1;
+	}
+	else if ((pCountryStr[0] == '0') && (pCountryStr[1] == '0') &&
+			 ((pCountryStr[2] == '\0') || (pCountryStr[2] == 'I') ||
+			  (pCountryStr[2] == '0')))
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
 
 /**********************************************************************
 *              regulatoryDomain_getCountryString                   	  *
@@ -2571,30 +1456,34 @@ DESCRIPTION: return the country code
 
 RETURN:     void
 ************************************************************************/
-
 int32_t regulatoryDomain_getCountryString(uint8_t *pCountryStr)
 {
-        if ((pCountryStr != NULL) && 
-			(gCountryDomainStr[0] >= 'A') && (gCountryDomainStr[0] <= 'Z') &&
-			(gCountryDomainStr[1] >= 'A')&&(gCountryDomainStr[1] <= 'Z') && 
-			((gCountryDomainStr[2] == '\0') || (gCountryDomainStr[2] == 'I')))
-        {
-            memcpy(pCountryStr, gCountryDomainStr, 3);
-            return OK;
-        }
-		else if ((pCountryStr != NULL) && 
-				 (gCountryDomainStr[0] == '0') && (gCountryDomainStr[1] == '0') &&
-				 ((gCountryDomainStr[2] == '\0') || (gCountryDomainStr[2] == 'I')))
-		{
-			pCountryStr[0] = '0';
-			pCountryStr[1] = '0';
-			pCountryStr[2] = gCountryDomainStr[2];
-		}
-        else
-        {
-            return -1;
-        }
-        return 0;
+	if (isCountryCodeValid(gCountryDomainStr))
+	{
+		os_memcpy(pCountryStr, gCountryDomainStr, DOT11_COUNTRY_STRING_LEN);
+		return OK;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+uint8_t regulatoryDomain_isBandSupported(RadioBand_e band)
+{
+	RegulatoryDomain_t *pRegulatoryDomain = &RegulatoryDomain;
+	if (band == RADIO_BAND_2_4GHZ)
+	{
+		return pRegulatoryDomain->is2_4GHzBandSupported;
+	}
+	else if (band == RADIO_BAND_5GHZ)
+	{
+		return pRegulatoryDomain->is5GHzBandSupported;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 /***********************************************************************
@@ -2849,7 +1738,7 @@ void regulatoryDomain_handlePowerConstraint(ti_driver_ifData_t *pDrv,
             return;
         }
 
-        GTRACE(GRP_DRIVER_CC33, "Limiting TX power to %d (%d - %d) "
+        GTRACE(GRP_REG_DOMAIN, "Limiting TX power to %d (%d - %d) "
 							    "as advertised by " MACSTR " (attenuating to "
 							    "max of device`s power 21dBm, if necessary)",
 							    apPowerLevel,
@@ -2866,7 +1755,7 @@ void regulatoryDomain_handlePowerConstraint(ti_driver_ifData_t *pDrv,
             return;
         }
 
-        GTRACE(GRP_DRIVER_CC33, "Limiting TX power to %d dBm "
+        GTRACE(GRP_REG_DOMAIN, "Limiting TX power to %d dBm "
 							    "as advertised by " MACSTR " (DTPC) "
 							    "(attenuating to max of device`s power 21dBm, "
 								"if necessary)",
@@ -2892,4 +1781,216 @@ void regulatoryDomain_handlePowerConstraint(ti_driver_ifData_t *pDrv,
     {
         regulatoryDomain_setRoleMaxTxPower(pDrv, newMaxPowerLevel);
     }
+}
+
+int32_t checkCustomDomainEntryValidity(WlanSetRegDomainCustomEntry_t *entryParams)
+{
+	uint8_t minChannelAllowed = 0, maxChannelAllowed = 0;
+	uint8_t bitsSetCount = 0;
+
+	switch (entryParams->band)
+	{
+		case RADIO_BAND_2_4GHZ:
+			minChannelAllowed = CHANNEL_1;
+			maxChannelAllowed = CHANNEL_14;
+			break;
+
+		case RADIO_BAND_5GHZ:
+			minChannelAllowed = CHANNEL_36;
+			maxChannelAllowed = CHANNEL_169;
+			break;
+
+		default:
+		{
+			GTRACE(GRP_REG_DOMAIN,
+				   "Invalid band used for custom regulatory domain entry");
+			return WlanError(WLAN_ERROR_SEVERITY__LOW,
+							 WLAN_ERROR_MODULE__COMMANDS,
+							 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+		}
+	}
+
+	if ((entryParams->minChannel < minChannelAllowed) ||
+		(entryParams->minChannel > maxChannelAllowed) ||
+		(entryParams->maxChannel < minChannelAllowed) ||
+		(entryParams->maxChannel > maxChannelAllowed) ||
+		(entryParams->minChannel > entryParams->maxChannel))
+	{
+		GTRACE(GRP_REG_DOMAIN,
+			   "Requested invalid channels combination");
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+	}
+
+	if (entryParams->numOfChannels > NUM_BITS_IN_WORD)
+	{
+		GTRACE(GRP_REG_DOMAIN,
+			   "Invalid channel amount for reg domain rule. "
+			   "maximum is 32.");
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+	}
+
+	bitsSetCount = popcount32(entryParams->chanBitmap);
+	if (bitsSetCount != entryParams->numOfChannels)
+	{
+		GTRACE(GRP_REG_DOMAIN,
+			   "Incosistency between number of channels set and bitmask. "
+			   "bitmap number of channels: %d, suggested number: %d",
+			   bitsSetCount, entryParams->numOfChannels);
+
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+	}
+
+	if (entryParams->MaxTxPower > DBM_DIV_10_2_DBM(MAX_TX_POWER))
+	{
+		GTRACE(GRP_REG_DOMAIN,
+			   "Invalid TX power for reg domain rule. "
+			   "max is %d dBm", DBM_DIV_10_2_DBM(MAX_TX_POWER));
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+	}
+
+	return 0;
+}
+
+/***********************************************************************
+ *                regulatoryDomain_SetCustomDomainEntry                *
+ ***********************************************************************
+DESCRIPTION: This function sets an entry in the
+			 "gConfigChanPatternsTable".
+             The entry is dedicated to the custom entries
+			 (The last entries in the table that are initialized to 0).
+
+INPUT:       entryParams - pointer to a user input custom reg domain rule
+
+RETURN:      0 on sucess, -1 otherwise
+************************************************************************/
+int32_t regulatoryDomain_SetCustomDomainEntry(WlanSetRegDomainCustomEntry_t *entryParams)
+{
+	int32_t ret = 0;
+	uint8_t tableEntryIndex = 0;
+	ConfigChanPattern_t *pTableEntry = NULL;
+	int8_t minChannelBit = 0, maxChannelBit = 0;
+
+	if (!entryParams)
+	{
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__FW_RESPONSE_NULL_BUF);
+	}
+
+	if ((entryParams->customIndex < 0) ||
+		(entryParams->customIndex >=
+			gConfigGroupChanPatternsTable[REG_DOMAIN_CUSTOM_REGION].chanAmount))
+	{
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+	}
+
+	tableEntryIndex = REG_DOMAIN_CUSTOM_ENTRY_BASE + entryParams->customIndex;
+	pTableEntry = &(gConfigChanPatternsTable[tableEntryIndex]);
+
+	if (entryParams->resetEntry)
+	{
+		os_memset(pTableEntry, 0x0, sizeof(ConfigChanPattern_t));
+		return 0;
+	}
+
+	minChannelBit = FIND_LOWEST_BIT_SET(entryParams->chanBitmap);
+	if (minChannelBit < 0)
+	{
+		GTRACE(GRP_REG_DOMAIN, "No bit is set in custom "
+							   "reg domain entry bitmask!");
+	}
+
+	/* We don't care if highest == lowest bit. We only care about the edge 
+	 * case in which no bit is set.
+	 */
+	maxChannelBit = FIND_HIGHEST_BIT_SET(entryParams->chanBitmap);
+
+	/* Return values in case of error for the two following calls will
+	 * be checked in the entry validity checking function
+	 */
+	entryParams->minChannel = getIndexChannelTranslation(minChannelBit,
+														 entryParams->band);
+	entryParams->maxChannel = getIndexChannelTranslation(maxChannelBit,
+														 entryParams->band);
+	ret = checkCustomDomainEntryValidity(entryParams);
+	if (ret < 0)
+	{
+		return ret;
+	}
+
+	pTableEntry->minChannel = entryParams->minChannel;
+	pTableEntry->maxChannel = entryParams->maxChannel;
+	pTableEntry->dfsChannel = entryParams->IsDfsChannel;
+	pTableEntry->band = entryParams->band;
+	pTableEntry->numOfChannels = entryParams->numOfChannels;
+	pTableEntry->txPowerPerRegion[REG_DOMAIN_CUSTOM_REGION] = entryParams->MaxTxPower;
+	pTableEntry->chanBitmap = entryParams->chanBitmap;
+
+	GTRACE(GRP_REG_DOMAIN,
+		   "Entry index %d was added to table with the following parameters: "
+		   "IsDfsChannel:%d, MaxTxPower:%d, band:%d, chanBitmap:0x%08x "
+		   "minChannel:%d, maxChannel: %d, numOfChannels:%d",
+		   entryParams->customIndex, entryParams->IsDfsChannel,
+		   entryParams->MaxTxPower, entryParams->band,
+		   entryParams->chanBitmap, entryParams->minChannel,
+		   entryParams->maxChannel, entryParams->numOfChannels);
+
+    return 0;
+}
+
+/***********************************************************************
+ *                regulatoryDomain_GetCustomDomainEntry                *
+ ***********************************************************************
+DESCRIPTION: This function gets an entry from the
+			 "gConfigChanPatternsTable".
+             The entry is dedicated to the custom entries
+			 (The last entries in the table that are initialized to 0).
+
+INPUT:       entryParams - pointer to a user output custom reg domain rule
+
+RETURN:      0 on sucess, -1 otherwise
+************************************************************************/
+int32_t regulatoryDomain_GetCustomDomainEntry(WlanSetRegDomainCustomEntry_t *entryParams)
+{
+	uint8_t tableEntryIndex = 0;
+	ConfigChanPattern_t *pTableEntry = NULL;
+
+	if (!entryParams)
+	{
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__FW_RESPONSE_NULL_BUF);
+	}
+	
+	if ((entryParams->customIndex < 0) ||
+		(entryParams->customIndex >=
+			gConfigGroupChanPatternsTable[REG_DOMAIN_CUSTOM_REGION].chanAmount))
+	{
+		return WlanError(WLAN_ERROR_SEVERITY__LOW,
+						 WLAN_ERROR_MODULE__COMMANDS,
+						 WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+	}
+
+	tableEntryIndex = REG_DOMAIN_CUSTOM_ENTRY_BASE + entryParams->customIndex;
+	pTableEntry = &(gConfigChanPatternsTable[tableEntryIndex]);
+
+	entryParams->IsDfsChannel = pTableEntry->dfsChannel;
+	entryParams->band = pTableEntry->band;
+	entryParams->maxChannel = pTableEntry->maxChannel;
+	entryParams->minChannel = pTableEntry->minChannel;
+	entryParams->numOfChannels = pTableEntry->numOfChannels;
+	entryParams->MaxTxPower = pTableEntry->txPowerPerRegion[REG_DOMAIN_CUSTOM_REGION];
+	entryParams->chanBitmap = pTableEntry->chanBitmap;
+
+	return 0;
 }

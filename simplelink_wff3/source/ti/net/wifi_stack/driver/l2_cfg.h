@@ -66,7 +66,6 @@
 #define  L2_CFG_BAND_ONLY_5GHZ   (1)
 #define  L2_CFG_BAND_BOTH        (2)
 
-
 typedef struct
 {
    unsigned int     reserved              :8;  // Reserved for future debugs
@@ -159,6 +158,46 @@ typedef enum
     MAX_MPDU_65535_OCTETS,                  // 65535
     MAX_MPDU_MAX_VALUE = MAX_MPDU_65535_OCTETS
 } AMPDUMaxSize_e;
+
+//-----------------------------------------------------------------------------//
+// Mx PG2 SystemInfo indexes: gSystemInfo index definitions, used for get/set values
+//-----------------------------------------------------------------------------//
+typedef enum
+{
+    SYSTEM_INFO_PAPER_SPIN_DISABLE_5GHZ_IDX                = 0,
+    SYSTEM_INFO_PAPER_SPIN_DISABLE_6GHZ_IDX                = 1,
+    SYSTEM_INFO_PAPER_SPIN_DISABLE_BLE_IDX                 = 2,
+    SYSTEM_INFO_PAPER_SPIN_DISABLE_BLE_M0PLUS_IDX          = 3,
+    SYSTEM_INFO_PAPER_SPIN_DISABLE_M33_IDX                 = 4,
+    SYSTEM_INFO_SUPPORTED_TEMPERATURE_IDX                  = 5,
+    SYSTEM_INFO_PG_VERSION_IDX                             = 6,
+    SYSTEM_INFO_METAL_VERSION_IDX                          = 7,
+    SYSTEM_INFO_BOOT_ROM_VERSION_IDX                       = 8,
+    SYSTEM_INFO_TI_FUSE_ROM_STRUCTURE_VERSION_IDX          = 9,
+    SYSTEM_INFO_MAC_ADDRESS_LOW_IDX                        = 10,
+    SYSTEM_INFO_MAC_ADDRESS_HIGH_IDX                       = 11,
+    SYSTEM_INFO_PART_NUMBER_IDX                            = 12,
+    SYSTEM_INFO_PACKAGE_TYPE_IDX                           = 13,
+    SYSTEM_INFO_GPADC_OFFSET_IDX                           = 14,
+    SYSTEM_INFO_OTP_STRUCTURE_VERSION_IDX                  = 15,
+    SYSTEM_INFO_VENDOR_RESTRICTED_INI_IDX                  = 16,
+    SYSTEM_INFO_CRDA_CODE_IDX                              = 17,
+    SYSTEM_INFO_CRDA_CODE_ENABLE_IDX                       = 18,
+    SYSTEM_INFO_MAC_ADDRESS_OV_LOW_IDX                     = 19,
+    SYSTEM_INFO_MAC_ADDRESS_OV_HIGH_IDX                    = 20,
+    SYSTEM_INFO_WIFI6_DISABLE_IDX                          = 21,
+    SYSTEM_INFO_CONF_KEY_IDX                               = 22,
+    SYSTEM_INFO_WORLDWIDE_RESTRICTION                      = 23,
+    SYSTEM_INFO_COUNTRY_CODE                               = 24,
+    SYSTEM_INFO_PMCIO_TEMPERATURE_SENSOR_1ST_INSERTION_IDX = 25,
+    SYSTEM_INFO_PMCIO_TEMPERATURE_SENSOR_2ND_INSERTION_IDX = 26,
+    SYSTEM_INFO_RFCIO_TEMPERATURE_SENSOR_1ST_INSERTION_IDX = 27,
+    SYSTEM_INFO_RFCIO_TEMPERATURE_SENSOR_2ND_INSERTION_IDX = 28,
+    SYSTEM_INFO_PA_LDO_IN_MONITOR_IDX                      = 29,
+
+    SYSTEM_INFO_MAX_IDX                                    = 62
+
+}SystemInfoIdx_e;
 
 #define RX_MCS_BITMASK_SIZE                      (10)
 #define RX_HIGHEST_SUPP_DATA_RATE_BM_SIZE        (2)
@@ -495,7 +534,7 @@ typedef struct
     uint8_t  ApMaxNumStations;        // Maximum number of stations supported on this AP
 
     uint8_t selectedBand;             // Selected Band for PHY config
-
+    uint8_t wirelessProtocol;
 } l2DynamicCfg_t;
 
 
@@ -508,6 +547,8 @@ extern l2cfgAp_t     *gpL2ApBasedCfg;
 extern l2DynamicCfg_t gL2DynamicCfg;
 
 void l2_cfg_Init();
+
+int l2_cfg_GetStaHeSupport();
 
 Bool32 l2_cfg_isStaHeEnabled(void);
 Bool32 l2_cfgIsStaWmeEnabled(void);
@@ -703,32 +744,18 @@ void cfgSetFragThreshold(uint16_t aFragThreshold);
 uint16_t cfgGetFragThreshold();
 
 
-/* ----------------------------------------------------------------------------
- cfgGetSupportedBands
-      This function returns a bit mask of supported bands (based on RadioBand_e)
+/*----------------------------------------------------------------------------
+ * l2_cfg_is5GhzSupported
+ *      This function checks whether the device supports 5GHz band.
 
- Parameters:
-     none
+ * Parameters:
+ *     none
 
- return: bit mask of supported bands
+ * return: TRUE if device supports the band, FALSE otherwise
+
 ---------------------------------------------------------------------------- */
-uint32_t cfgGetSupportedBands();
 
-/* ----------------------------------------------------------------------------
- cfgIsAbandSupported, cfgIsBGbandSupported
-      This function checks whether A/BG band are supported by device HW
-
- Parameters:
-     none
-
- return: TRUE if band is supported by HW
----------------------------------------------------------------------------- */
-Bool32 cfgIsAbandSupported();
-
-Bool32 cfgIsBGbandSupported();
-
-
-Bool32 cfgIsJbandSupported();
+Bool32 l2_cfg_is5GhzSupported(void);
 
 // ============================================================================
 //      The APIs below are used for fetching STA based configurations
@@ -973,6 +1000,25 @@ Return: oper channel
 ---------------------------------------------------------------------------- */
 uint8_t cfgGetP2pOperRegClass();
 
+/* ----------------------------------------------------------------------------
+ l2_StoreWirelessProto
+      Stores HP selected Wireless Protocol
+
+ Parameters: proto
+
+Return: 
+---------------------------------------------------------------------------- */
+void l2_StoreWirelessProto(uint8_t proto);
+
+/* ----------------------------------------------------------------------------
+ l2_GetWirelessProto
+      Gets HP selected Wireless Protocol
+
+ Parameters: none
+
+Return: wireless protocol
+---------------------------------------------------------------------------- */
+uint8_t l2_GetWirelessProto();
 
 /* ----------------------------------------------------------------------------
  l2_StorePhyConfig
@@ -994,4 +1040,30 @@ Return: band_cfg
 ---------------------------------------------------------------------------- */
 uint8_t l2_GetPhyConfig();
 
+/* ----------------------------------------------------------------------------
+ l2_cfg_get5GhzSupport
+      Gets 5GHz support status
+
+ Parameters: is5GhzSupported - Input buffer to return status
+
+Return: negative value on error, 0 otherwise
+---------------------------------------------------------------------------- */
+int8_t l2_cfg_get5GhzSupport(uint8_t *is5GhzSupported);
+
+
+/* ----------------------------------------------------------------------------
+ cfgSetApSaeAntiCloggingThreshold
+      Sets AP SAE anti-clogging threshold
+
+Return: none
+---------------------------------------------------------------------------- */
+void cfgSetApSaeAntiCloggingThreshold(uint8_t apSaeAntiCloggingThreshold);
+
+/* ----------------------------------------------------------------------------
+ cfgGetApSaeAntiCloggingThreshold
+      Gets AP SAE anti-clogging threshold
+
+Return: AP SAE anti-clogging threshold
+---------------------------------------------------------------------------- */
+uint8_t cfgGetApSaeAntiCloggingThreshold(void);
 #endif // _L2_CFG_H_

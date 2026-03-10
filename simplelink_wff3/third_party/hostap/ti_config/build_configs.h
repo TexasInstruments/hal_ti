@@ -72,8 +72,6 @@
 #define ALWAYS_FORCE_EXCHANGE
 // Temp. until PMAC RX HW supports STA PSD.
 #define PMAC_RX_PSD_PATCH
-// temp. Until HW rate mng will be fixed. every bitmap should be shifted.
-#define RATE_MNG_OFST 1
 
 
 #define INCLUDE_BGET_STATS
@@ -129,18 +127,20 @@
 #define CC33XX_NO_FLOW_CONTROL
 
 
-// Enable HOSTAP/WPA_SUPPLICANT and CME debug messages, uncomment the define below
+//Enable HOSTAP/WPA_SUPPLICANT and CME debug messages, uncomment the define below
 //#define HOSTAP_AND_CME_ENABLE_DEBUG
 #ifndef HOSTAP_AND_CME_ENABLE_DEBUG
+//in case HOSTAP_AND_CME_ENABLE_DEBUG is enabled, you will need to reduce the code size
+//by temporarily remove unused functionality
 #define CONFIG_NO_STDOUT_DEBUG
 #else
 #define CONFIG_DEBUG_SYSLOG
 
 // Determine the HOSTAP log level, e.g. MSG_EXCESSIVE for full logs
-#define WPA_DEBUG_LEVEL MSG_INFO // MSG_DEBUG //MSG_EXCESSIVE /MSG_INFO
+#define WPA_DEBUG_LEVEL MSG_DEBUG // MSG_DEBUG //MSG_EXCESSIVE /MSG_INFO
 
 // Enable GTRACE for CME debug messages
-#define GTRACE_ENABLE
+//#define GTRACE_ENABLE
 #endif
 
 /*********** DISABLE IPv6 - Eran Harary ******************************/
@@ -434,12 +434,25 @@
 //#define EAP_SERVER
 #define IEEE8021X_EAPOL
 #define EAP_WSC
-//#define EAP_TLS
-//#define EAP_TTLS
-//#define EAP_PEAP
-//#define EAP_MSCHAPv2
+#define EAP_TLS
+#define EAP_TTLS
+#define EAP_GTC
+#define EAP_MSCHAPv2
+//#define EAP_PSK
+#define EAP_PEAP
 //#define EAP_FAST
+//#define EAP_GPSK
+//#define EAP_GPSK_SHA256
+
+
 #define CONFIG_SHA256
+#define CONFIG_SHA384
+#define CONFIG_DES
+#define CONFIG_SUITEB
+#define CONFIG_SUITEB192
+
+#undef CONFIG_NO_CONFIG_BLOBS
+#undef CONFIG_BACKEND_FILE
 
 //management frame protection
 #define CONFIG_IEEE80211W

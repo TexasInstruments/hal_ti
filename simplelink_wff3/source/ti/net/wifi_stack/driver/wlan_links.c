@@ -211,7 +211,7 @@ uint32_t wlanLinks_GetLink(uint32_t uHlid, TInternalWlanLinkInfo **pLinkInfo)
     return OK;
 }
 
-uint32_t wlanLinks_LinkMacFind(uint8 uNetIf, uint8 *pMacAddr)
+uint32_t wlanLinks_LinkMacFind(uint8 uNetIf, const uint8 *pMacAddr)
 {
     TWlanLinks *pWlanLinks = ghWlanLinks;
     TInternalWlanLinkInfo  *pLinks = pWlanLinks->aLinks;
@@ -264,6 +264,38 @@ uint32_t wlanLinks_GetBroadcastLink()
 
     return INVALID_LINK; /* invalid */
 }
+
+void wlanLinks_getPeerList(int32_t* numOfPeers, uint8_t** mac_addr_peer_list)
+{
+    int i=0, link = 0;
+    TWlanLinks *pWlanLinks = ghWlanLinks;
+    uint8_t *p_mac_addr_peer_list = NULL;//[MAX_NUM_OF_AP_UNICAST_LINKS][6];
+
+    *numOfPeers = 0;
+    p_mac_addr_peer_list = os_malloc(WLANLINKS_MAX_LINKS * MAC_ADDR_LEN);
+    if (p_mac_addr_peer_list == NULL)
+    {
+        Report("\n\rERROR !! allocation for addr_peer_list failed\n\r");
+        *mac_addr_peer_list = NULL;
+        return;
+    }
+
+    for (link = 0; link < WLANLINKS_MAX_LINKS; link++)
+    {
+        if ((pWlanLinks->aLinks[link].info.eState == WLANLINK_STATE_IDLE) &&
+            (pWlanLinks->aLinks[link].info.eIfMode == TIWDRV_IF_MODE_SAP) &&
+            (pWlanLinks->aLinks[link].info.uNetIfId == TIWDRV_NETIF_ID_SAP) &&
+            (pWlanLinks->aLinks[link].info.eType == WLANLINK_TYPE_SPECIFIC ))
+        {
+            MAC_COPY((uint8_t*)&p_mac_addr_peer_list[i], pWlanLinks->aLinks[link].info.tMacAddr);
+
+            i += MAC_ADDR_LEN;
+            (*numOfPeers)++;
+        }
+    }
+    *mac_addr_peer_list = p_mac_addr_peer_list;
+}
+
 #ifdef WLANLINKS_ALLOCATE_NEW
 /**
  * \fn     wlanLinks_AllocateNew

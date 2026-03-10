@@ -47,7 +47,7 @@
 #include "macro_utils.h"
 
 #define MSG_QUEUE_SIZE (4)
-#define EVENT_STACK_SIZE (1024)
+#define EVENT_STACK_SIZE (1200)
 #define EVENT_TRANSPORT_THRD_PRIORITY (8)
 
 
@@ -171,6 +171,14 @@ typedef struct __attribute__((packed))
     cmd_header_generic_t cmdHeader;
     cmd_test_header_t cmdTestHeader;
 
+    TTestCmd_StartTXTone_t startTxToneParams;
+}cmd_test_start_tx_tone_t;
+
+typedef struct __attribute__((packed))
+{
+    cmd_header_generic_t cmdHeader;
+    cmd_test_header_t cmdTestHeader;
+
     TTestCmd_channelTune_t tuneParams;
 }cmd_test_channel_tune_t;
 
@@ -232,6 +240,13 @@ typedef struct
     uint32_t length;
     uint8_t payload[0];
 }cmd_download_t;
+
+typedef struct __attribute__((packed)){
+    cmd_header_generic_t cmdHeader;
+    cmd_test_header_t cmdTestHeader;
+    uint16_t calibration_bitmap;
+    uint8_t padding[2];
+}cmd_test_set_manual_calib_t;
 
 
 typedef struct
@@ -335,6 +350,12 @@ typedef struct __attribute__((packed))
 typedef struct __attribute__((packed))
 {
     cmd_debug_header_t cmdDebugHeader;
+    ThermalCbCfg_t thermalCbParams;
+}cmd_debug_thermal_cfg_t;
+
+typedef struct __attribute__((packed))
+{
+    cmd_debug_header_t cmdDebugHeader;
     BASessionCfg_t BASessionParams;
 }cmd_ba_session_debug_t;
 
@@ -391,8 +412,26 @@ typedef struct __attribute__((packed))
 typedef struct __attribute__((packed))
 {
     cmd_interrogate_header_t    cmdInterrogateHeader;
+    SPVersions_t                SPVersions;
+}cmd_interrogate_get_spversion_t;
+
+typedef struct __attribute__((packed))
+{
+    cmd_interrogate_header_t    cmdInterrogateHeader;
+    DeviceSystemInfo_t                SysInfo;
+}cmd_interrogate_get_sysinfo_t;
+
+typedef struct __attribute__((packed))
+{
+    cmd_interrogate_header_t    cmdInterrogateHeader;
     BeaconRssi_t                BeaconRssi;
 }cmd_interrogate_get_rssi_t;
+
+typedef struct __attribute__((packed))
+{
+    cmd_interrogate_header_t    cmdInterrogateHeader;
+    LinkInactivity_t            linkInactivity;
+}cmd_interrogate_get_LinkInactivity_t;
 
 typedef struct __attribute__((packed))
 {
@@ -517,8 +556,40 @@ typedef struct
     uint8_t                 seed[MAX_SEED_SIZE];
 }cmd_cfg_seed_t;
 
+#define   CMD_FIRST_TYPE_CORE_ADDR     0x00
+#define   CMD_FIRST_TYPE_END           0xFF
+
+typedef struct __attribute__((packed))
+{
+    uint8_t  type;
+    uint8_t length;
+}generic_header_t;
+
+typedef struct __attribute__((packed))
+{
+    generic_header_t header;
+    uint32_t addr;
+}first_cmd_core_status_addr_t;
+
+typedef struct __attribute__((packed))
+{
+    generic_header_t header;
+    uint8_t data[254];
+}first_cmd_reserved_t;
+
+typedef struct __attribute__((packed))
+{
+    cmd_header_generic_t header;
+    first_cmd_core_status_addr_t core_status;
+    first_cmd_reserved_t data;
+    //must be last
+    generic_header_t end_of_cmd;
+}cmd_first_params_download_t;
+
+
 int  ctrlCmdFw_DownloadStaticCalibration();
 int  ctrlCmdFw_DownloadIniParams();
+int  ctrlCmdFw_FirstCommand();
 void ctrlCmdFw_LockHostDriver();
 void ctrlCmdFw_UnlockHostDriver();
 void ctrlCmdFw_CreateMsgQueue();
@@ -543,6 +614,9 @@ int  ctrlCmdFw_SetVendorIE(wlanSetVendorInfo_t *beacon_info);
 int  ctrlCmdFw_GetRssi(BeaconRssi_t* rssi);
 int  ctrlCmdFw_GetMemMap(MemoryMap_t *mem_map);
 int  ctrlCmdFw_GetFwVersion(FWVersions_t* FwVersion);
+int  ctrlCmdFw_GetSpVersion(SPVersions_t* SpVersion);
+int  ctrlCmdFw_GetSysInfo(DeviceSystemInfo_t* SpVersion);
+int  ctrlCmdFw_GetLinkInactivity(LinkInactivity_t *linkInactivity);
 int  cmdChannelSwitchStart(RoleID_t roleId, uint8_t channel, uint8_t count, Bool_e block_tx);
 int  ctrlCmdFw_SetSleepAuth(WlanPowerManagement_e sleep_auth);
 int  ctrlCmdFw_SetLSI(WlanLongSleepInterval lsi_param);

@@ -1582,16 +1582,16 @@ static void extWpsConfigureNetwork(struct wpa_supplicant *wpa_s, struct wpa_ssid
     char *phase1 = !is_pin ? phase1_pbc : phase1_pin;
 
     network->eap.phase1 = os_strdup(phase1);
-    assert((uint32_t)network->eap.phase1);
+    ASSERT_GENERAL((uint32_t)network->eap.phase1);
 
     network->eap.identity = os_memdup(WSC_ID_ENROLLEE, WSC_ID_ENROLLEE_LEN);
-    assert((uint32_t)network->eap.identity);
+    ASSERT_GENERAL((uint32_t)network->eap.identity);
     network->eap.identity_len = WSC_ID_ENROLLEE_LEN;
 
     if (ssid && ssidLen)
     {
         network->ssid = os_memdup(ssid, ssidLen);
-        assert((uint32_t)network->ssid);
+        ASSERT_GENERAL((uint32_t)network->ssid);
         network->ssid_len = ssidLen;
     }
 

@@ -232,7 +232,10 @@ struct hostapd_config * hostapd_config_defaults(void)
 	hostapd_config_defaults_bss(bss);
 
 	// TI - cc33xx compilation - set anti clogging threshold to 0
-	bss->anti_clogging_threshold = 0;
+	//bss->anti_clogging_threshold = 0;
+
+	// TI - cc33xx compilation - set sae require mfp to 1
+	bss->sae_require_mfp = 1;
 
 	conf->num_bss = 1;
 
@@ -1137,12 +1140,12 @@ const u8 * hostapd_get_psk(const struct hostapd_bss_config *conf,
 	    // cast it to uint32.
 		wpa_printf(MSG_DEBUG, "Searching a PSK for " MACSTR
 			   " p2p_dev_addr=" MACSTR " prev_psk=%p",
-			   MAC2STR(addr), MAC2STR(p2p_dev_addr), (uint32)prev_psk);
+			   MAC2STR(addr), MAC2STR(p2p_dev_addr), prev_psk);
 		addr = NULL; /* Use P2P Device Address for matching */
 	} else {
 		wpa_printf(MSG_DEBUG, "Searching a PSK for " MACSTR
 			   " prev_psk=%p",
-			   MAC2STR(addr), (uint32)prev_psk);
+			   MAC2STR(addr), prev_psk);
 	}
 
 	for (psk = conf->ssid.wpa_psk; psk != NULL; psk = psk->next) {

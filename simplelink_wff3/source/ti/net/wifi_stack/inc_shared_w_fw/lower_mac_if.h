@@ -34,6 +34,7 @@
 
 
 #include "public_types.h"
+#include <stdarg.h>
 
 // ============================================================================
 //		UPPER MAC VERSION

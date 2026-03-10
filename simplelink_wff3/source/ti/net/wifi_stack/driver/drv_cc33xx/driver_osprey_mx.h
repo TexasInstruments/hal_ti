@@ -43,14 +43,6 @@
 #define CONN_SCAN_MAX_BAND                          (2)
 #define CONN_SCAN_MAX_CHANNELS_ALL_BANDS            (46)
 
-
-#define SCAN_MAX_DWELL_TIME_PASSIVE_MSEC            (110)
-#define SCAN_MIN_DWELL_TIME_PASSIVE_MSEC            (110)
-#define SCAN_MAX_DWELL_TIME_ACTIVE_MSEC             (60)
-#define SCAN_MIN_DWELL_TIME_ACTIVE_MSEC             (25)
-
-#define SCAN_DFS_DWELL_TIME_PASSIVE_MSEC            (150)
-
 // Maximum number of supported scan plans for scheduled scan, supported by the driver
 #define SCAN_MAX_SCHED_SCAN_PLANS           (12)
 

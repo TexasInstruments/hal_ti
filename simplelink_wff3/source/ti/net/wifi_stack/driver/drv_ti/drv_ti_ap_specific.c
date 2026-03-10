@@ -52,6 +52,7 @@
 #include "mlme_parser.h" //for logs
 #include "regulatory_domain_api.h"
 #include "cme_defs.h"
+#include "control_cmd_fw.h"
 #ifdef CONFIG_AP
 
 
@@ -138,7 +139,7 @@ int ti_driver_set_ap(void *apPriv, struct wpa_driver_ap_params *apParams)
 
     HOOK(HOOK_DRV_TI_AP_SPECIFIC);
 
-    CME_PRINT_REPORT("\n\r enter ti_driver_set_ap");
+    CME_CC3XX_PORT_PRINT("\n\r enter ti_driver_set_ap");
 
     if ( (NULL == apParams) || (NULL == apParams->head) || (NULL == apParams->tail) || (NULL == hapd) )
     {
@@ -146,9 +147,24 @@ int ti_driver_set_ap(void *apPriv, struct wpa_driver_ap_params *apParams)
        return -1;
     }
 
+    // set here anti-clogging threshold
+    // since at this point hapd->conf is allocated and set with supplicants' default bss values
+    // overwrite here if it is not the same
+    if (wpa_key_mgmt_sae(apParams->key_mgmt_suites))
+    {
+        uint8_t antiCloggingThreshold = cfgGetApSaeAntiCloggingThreshold();
+        CME_CC3XX_PORT_PRINT("\n\rti_driver_set_ap: anticlogging threshold=%d, new threashold=%d",
+            hapd->conf->anti_clogging_threshold, antiCloggingThreshold);
+        if (antiCloggingThreshold != hapd->conf->anti_clogging_threshold)
+        {
+            hapd->conf->anti_clogging_threshold = antiCloggingThreshold;
+        }
+    
+    }
+
     //Prepare the ap params and beacon on the global gApRoleParams
 
-    CME_PRINT_REPORT("\n\r ti_driver_set_ap: setApRates");
+    CME_CC3XX_PORT_PRINT("\n\r ti_driver_set_ap: setApRates");
     // Handle rates
     // MCP sets rates based on supplicant commnad. The rates in the command are
     // taken from hapd->iface which is set by CME. Since we set rates internally
@@ -166,13 +182,13 @@ int ti_driver_set_ap(void *apPriv, struct wpa_driver_ap_params *apParams)
 
     GTRACE(GRP_DRIVER_CC33, "Set AP: beacon int %d dtim %d WMM %d",
                apParams->beacon_int, apParams->dtim_period, gApRoleParams.WMM);
-    CME_PRINT_REPORT("\r\nti_driver_set_ap: Set AP: beacon int %d dtim %d WMM %d",
+    CME_CC3XX_PORT_PRINT("\r\nti_driver_set_ap: Set AP: beacon int %d dtim %d WMM %d",
                apParams->beacon_int, apParams->dtim_period, gApRoleParams.WMM);
 
     gApRoleParams.beaconInterval = apParams->beacon_int;
     gApRoleParams.dtimInterval   = apParams->dtim_period;
 
-    CME_PRINT_REPORT("\n\r ti_driver_set_ap: set_ap_template");
+    CME_CC3XX_PORT_PRINT("\n\r ti_driver_set_ap: set_ap_template");
     ret = pDrv->ops->set_ap_template(pDrv->roleId, apParams);
 
     if (ret < 0)
@@ -505,16 +521,12 @@ int ti_driver_sta_remove(void *apPriv, const u8 *apAddr)
  Parameters:    priv - pointer to private driver DB
                 addr - peer MAC address
 
- Return code:   0 - parameters OK, -1 - error indication
+ Return code:   Number of seconds station has been inactive, -1 on failure
 ---------------------------------------------------------------------------- */
-#define TIW_DRV_AP_STA_MAX_INACTIVITY       1000000
 int ti_driver_inact_sec(void *priv, const u8 *addr)
 {
     HOOK(HOOK_DRV_TI_AP_SPECIFIC);
 
-    //TODO: need to wlanLinks_GetLinkInactivity??
-    return TIW_DRV_AP_STA_MAX_INACTIVITY / 1000000;
-#if 0
     char macStr[MAC_STR_LEN];
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)priv;
     uint32_t lid;
@@ -532,17 +544,64 @@ int ti_driver_inact_sec(void *priv, const u8 *addr)
     GET_MAC_STR(addr, macStr);
     GTRACE(GRP_DRIVER_CC33_DEBUG, "Get inactivity time for STA %s", macStr);
 
-    lid = MAT_SearchPeerId(addr);
+    LinkInactivity_t linkInactivity;
+    os_memset(&linkInactivity, 0, sizeof(LinkInactivity_t));
+    os_memcpy(linkInactivity.macAddress, addr, MAC_ADDR_LEN);
+    ctrlCmdFw_GetLinkInactivity(&linkInactivity);
 
-    if (INVALID_LINK == lid)
+    if (linkInactivity.inactivityDuration == -1)
     {
-        GTRACE(GRP_DRIVER_CC33, "NOTIFY: Can't find link ID for peer %s", macStr);
         return -1;
     }
 
-    return (Links_getInactivityPeriod(lid) / 1000000);
-#endif
-    return 0;
+    return linkInactivity.inactivityDuration / 1000000;
+}
+
+/* ----------------------------------------------------------------------------
+ ti_driver_inact_sec
+      AP only: This function returns the inactivity duration for a specific sta (in seconds).
+
+ Parameters:    priv - pointer to private driver DB
+                addr - peer MAC address
+
+ Return code:   Number of seconds station has been inactive, -1 on failure
+---------------------------------------------------------------------------- */
+int ti_driver_inact_mili(void *priv, const u8 *addr)
+{
+    HOOK(HOOK_DRV_TI_AP_SPECIFIC);
+
+    char macStr[MAC_STR_LEN];
+    ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)priv;
+    uint32_t lid;
+    LinkInactivity_t linkInactivity;
+
+    if (NULL == addr)
+    {
+        CME_PRINT_REPORT_ERROR("\n\r[ti_driver] ti_driver_inact_mili, null mac adder");
+        return -1;
+    }
+
+    if (NULL == pDrv)
+    {
+        CME_PRINT_REPORT_ERROR("\n\r[ti_driver] ERROR: NULL driver pointer");
+        GTRACE(GRP_DRIVER_CC33, "ERROR: NULL driver pointer");
+        ASSERT_GENERAL(0);
+        return -1;
+    }
+
+    GET_MAC_STR(addr, macStr);
+    GTRACE(GRP_DRIVER_CC33_DEBUG, "Get inactivity time for STA %s", macStr);
+
+    os_memset(&linkInactivity, 0, sizeof(LinkInactivity_t));
+    os_memcpy(linkInactivity.macAddress, addr, MAC_ADDR_LEN);
+    ctrlCmdFw_GetLinkInactivity(&linkInactivity);
+
+    if (linkInactivity.inactivityDuration == -1)
+    {
+        return -1;
+    }
+
+    return linkInactivity.inactivityDuration / 1000;
 }
 
 
@@ -611,6 +670,7 @@ int ti_driver_sta_deauth(void *apPriv,   const u8 *own_addr,
     GET_MAC_STR(apAddr, peerMacStr);
     GTRACE(GRP_DRIVER_CC33, "Deauth STA: peer %s reason %d", peerMacStr, reason);
 
+    CME_PRINT_REPORT("\r\n ti driver : ti_driver_sta_deauth:%s", peerMacStr);
 
     if(FALSE == pDrv->roleStarted)
     {
@@ -711,12 +771,14 @@ int ti_driver_deinit_ap(void *apPriv)
     }
 
     GTRACE(GRP_DRIVER_CC33, "Deinit ap role");
+    CME_ROLE_PRINT_REPORT("\n\rDeinit ap role");
 
     if (ROLE_IS_TYPE_AP_BASED(pDrv->roleType))
     {
         if (TRUE == pDrv->roleStarted)
         {
             pDrv->ops->stop_role(pDrv);
+            CME_PRINT_REPORT("\r\n ti driver :ti_driver_deinit_ap");
             pDrv->beacon_set = 0;
         }
         else
@@ -792,7 +854,7 @@ uint32_t fillBeaconTemplate(struct wpa_driver_ap_params *apParams, uint8_t *apBu
     HOOK(HOOK_DRV_TI_AP_SPECIFIC);
 
     GTRACE(GRP_DRIVER_CC33, "before copy header len %d, tail len %d buffer 0x%x", apParams->head_len, apParams->tail_len, (uint32_t)apBuffer);
-    CME_PRINT_REPORT("\n\r fillBeaconTemplate ,before copy header len %d, tail len %d buffer 0x%x", apParams->head_len, apParams->tail_len, (uint32_t)apBuffer);
+    CME_CC3XX_PORT_PRINT("\n\r fillBeaconTemplate ,before copy header len %d, tail len %d buffer 0x%x", apParams->head_len, apParams->tail_len, (uint32_t)apBuffer);
 #ifndef CC33xx
     GTRACE(GRP_DRIVER_CC33, "dump head");
     utilsDumpHex(apParams->head, apParams->head_len);

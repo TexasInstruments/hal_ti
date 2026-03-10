@@ -115,6 +115,9 @@
 #define SCAN_RESULT_WEIGHT_PROFILE_PRIORITY   ( 100 )
 
 
+#define SCORE_BOOST_5G (12)
+
+
 typedef uint32_t (*P_SCAN_RESULT_CALC_PARAMETER_SCORE_VAL_FUNC)(TScanFrameInfo* scanInfo, EScanRequestType  eScanReqType);
 
 uint32_t scan_result_get_score_rssi(TScanFrameInfo* scanInfo, EScanRequestType  eScanReqType);
@@ -2445,6 +2448,11 @@ uint32_t scan_result_get_score_rssi(TScanFrameInfo* scanInfo, EScanRequestType  
         }
     }
 
+    if ((eScanReqType != SCAN_REQUEST_SURVEY_SCAN ) && (scanInfo->uChannel > A_5G_BAND_MIN_CHANNEL))
+    {
+        score += SCORE_BOOST_5G;
+    }
+
     GTRACE(GRP_SCAN_RESULT, "rssi = -%d, score = %d", CONVERT_SIGN(rssi), score);
 
     return  score;
@@ -2840,14 +2848,16 @@ Bool_e scan_result_ssid_match(dot11_SSID_t*        apSsidIe,
    //go over ssid list and check if input ssid is found inside the list
    for (ssidIndex = 0; ssidIndex < numOfSSID; ssidIndex++)
    {
-       Bool_e isWep; //Match in WEP security
+       Bool_e isWep = FALSE; //Match in WEP security
        Bool_e isWPA2 = FALSE; // Match in WPA2 and WPA2 PLUS
-       GTRACE(GRP_DRIVER_MX, "filter scan results: index (%d) rcv ssid_len %d, list ssid len %d, security type ENUM(CMESecType_e, %d)" MACSTR,
+       Bool_e isENT = FALSE;
+       GTRACE(GRP_DRIVER_MX, "verify scan_result_ssid_match : index (%d) rcv ssid_len %d, list ssid len %d, security type ENUM(CMESecType_e, %d) ssid:" MACSTR " Bssid:" MACSTR ,
                                 ssidIndex,
                                 //apSsidIe->serviceSetId,
                                 apSsidIe->hdr.eleLen,
                                 (uint32_t)pList[ssidIndex].ssid.mSsidLen,
                                 (CMESecType_e) pList[ssidIndex].secType,
+                                MAC2STR(pList[ssidIndex].mSSID),
                                 MAC2STR(pList[ssidIndex].mBssid));
 
        //In case of wep - since can not know at this stage if the remote AP uses open or shared, we pass in either case.
@@ -2872,15 +2882,24 @@ Bool_e scan_result_ssid_match(dot11_SSID_t*        apSsidIe,
                 break;
         }
 
+        isENT = (securityType == CME_SEC_TYPE_WPA_ENT);
        // compare security type
        // Should be enhanced with key management compare as in wpa_supplicant_ssid_bss_match
 
        //Filter the result in case the security does not match and we also don't have a match in wep type.
        //In any other case, we have a match and we don't filter the result, we go on and check the ssid or bssid.
-       if ((securityType != pList[ssidIndex].secType) && (!isWep) && (!isWPA2) && (!isWPA2WPA3))
+      if ((pList[ssidIndex].secType == CME_SEC_TYPE_OPEN) && (securityType != CME_SEC_TYPE_OPEN))
+      {
+          GTRACE(GRP_DRIVER_MX, "filter scan results:security OPEN  AP security type: ENUM(CMESecType_e, %d), profile security type: ENUM(CMESecType_e, %d), dropping this one",
+                                   (CMESecType_e) securityType, (CMESecType_e) pList[ssidIndex].secType);
+
+          continue;
+      }
+       if ((securityType != pList[ssidIndex].secType) && (!isWep) && (!isWPA2) && (!isWPA2WPA3) && (!isENT))
        {
            GTRACE(GRP_DRIVER_MX, "filter scan results: AP security type: ENUM(CMESecType_e, %d), profile security type: ENUM(CMESecType_e, %d), dropping this one",
                                     (CMESecType_e) securityType, (CMESecType_e) pList[ssidIndex].secType);
+
            continue;
        }
 
@@ -2888,9 +2907,9 @@ Bool_e scan_result_ssid_match(dot11_SSID_t*        apSsidIe,
        if (apSsidIe->hdr.eleLen == pList[ssidIndex].ssid.mSsidLen)
        {
            //if SSID is the same AND BSSID is the same or should be ignored
-           if (    (memcmp(apSsidIe->serviceSetId, &(pList[ssidIndex].mSSID[0]), apSsidIe->hdr.eleLen) == 0)
-                && (    (IRQ_UtilCompareMacAddress (apBssid, pList[ssidIndex].mBssid) ) //MAC is equal
-                     || (IRQ_UtilCompareMacAddress (macZero,pList[ssidIndex].mBssid) ) //MAC is not relevant
+           if (    (os_memcmp(apSsidIe->serviceSetId, &(pList[ssidIndex].mSSID[0]), apSsidIe->hdr.eleLen) == 0)
+                 && (  (IRQ_UtilCompareMacAddress (macZero,pList[ssidIndex].mBssid) ) ||//MAC is not relevant
+                         (IRQ_UtilCompareMacAddress (apBssid, pList[ssidIndex].mBssid) ) //MAC is equal
                    )
               )
            {
@@ -2901,8 +2920,8 @@ Bool_e scan_result_ssid_match(dot11_SSID_t*        apSsidIe,
        }
        // For WPS / connect to BSSID
        else if (    (0 == pList[ssidIndex].ssid.mSsidLen)
-                 && (    (IRQ_UtilCompareMacAddress (apBssid, pList[ssidIndex].mBssid) ) //MAC is equal
-                      || (IRQ_UtilCompareMacAddress (macZero,pList[ssidIndex].mBssid) ) //MAC is not relevant
+                 && (  (IRQ_UtilCompareMacAddress (macZero,pList[ssidIndex].mBssid) ) ||//MAC is not relevant
+                         (IRQ_UtilCompareMacAddress (apBssid, pList[ssidIndex].mBssid) ) //MAC is equal
                     )
                )
        {

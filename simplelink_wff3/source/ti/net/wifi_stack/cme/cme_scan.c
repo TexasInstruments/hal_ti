@@ -83,8 +83,36 @@ cmeConnectionCandidates_t   gCandidatesInfo ;
 // parameters for scan module
 cmeSiteSurveyState_t gSetSiteSurvey; //MEM_REGION_GLX, site survey does not go to sleep
 
+// Timer which waits for survey scan complete
+OsiTimer_t gTimerSiteSurveyComplete = {0};
+#define CME_SURVEY_SCAN_TIMEOUT    (20000) //Mili, 20 sec
+
+// Timer which waits for one shot scan complete
+OsiTimer_t gTimerOneShotScanComplete = {0};
+#define CME_ONE_SHOT_SCAN_TIMEOUT    (30000) //Mili, 30 sec
+
+// Timer which waits for periodic scan complete
+OsiTimer_t gTimerPeriodicScanComplete = {0};
+#define CME_PERIODIC_SCAN_TIMEOUT    (40000) //Mili, 40 sec
+
+
 //P2P Info related flags
 cmeP2pSearchInfo_t  gCmeP2pInfo;
+
+#define SCAN_MAX_DWELL_TIME_PASSIVE_MSEC            (110)
+#define SCAN_MIN_DWELL_TIME_PASSIVE_MSEC            (110)
+#define SCAN_MAX_DWELL_TIME_ACTIVE_MSEC             (60)
+#define SCAN_MIN_DWELL_TIME_ACTIVE_MSEC             (25)
+
+#define SCAN_DFS_DWELL_TIME_PASSIVE_MSEC            (150)
+
+WlanScanDwellTime_t scanDwellTimeParams = {
+    .max_dwell_time_passive_msec = SCAN_MAX_DWELL_TIME_PASSIVE_MSEC,
+    .min_dwell_time_passive_msec = SCAN_MIN_DWELL_TIME_PASSIVE_MSEC,
+    .max_dwell_time_active_msec  = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC,
+    .min_dwell_time_active_msec  = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC,
+    .dwell_time_dfs_passive_msec = SCAN_DFS_DWELL_TIME_PASSIVE_MSEC
+};
 
 // Points to wpa_supplicant interfaces
 extern struct wpa_global *gpSupplicantGlobals;
@@ -106,10 +134,27 @@ extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t * args, uint16_t arg
 extern void set_finish_wlan_periodic_scan();
 extern void set_finish_wlan_one_shot_scan();
 
+
 // ============================================================================
 //      Local Functions declarations
 // ============================================================================
+void CME_start_survey_scan_timer();
+void CME_survey_scan_timeout();
+void CME_survey_scan_timer_stop();
 
+void CME_start_one_shot_scan_timer();
+void CME_one_shot_scan_timeout();
+void CME_one_shot_scan_timer_stop();
+
+void CME_start_periodic_scan_timer();
+void CME_periodic_scan_timeout();
+void CME_periodic_scan_timer_stop();
+
+
+void cmeScan_store_scan_dwell_times(WlanScanDwellTime_t dwellTimeParams)
+{
+    os_memcpy(&scanDwellTimeParams,&dwellTimeParams,sizeof(WlanScanDwellTime_t));
+}
 // ============================================================================
 //      Exported Functions Code section
 // ============================================================================
@@ -256,37 +301,37 @@ void cmeScanEarlyTermThresholdSet(cmeScanSharedInfo_t *apSharedInfo, int shouldU
 {
     HOOK(HOOK_IN_CME_SCAN);
 
-   if (shouldUseFastConnect != 0)
-   {
+    if (shouldUseFastConnect != 0)
+    {
        //
        //if fast connect policy is set, and scan frame didnt succeed
        //then we wish to connect to the first reasonable RSSI candidate we encounter
        //
-       apSharedInfo->mRssiEarlyTermThreshold    = scan_result_get_good_rssi();
-   }
-   else
-   {
+        apSharedInfo->mRssiEarlyTermThreshold    = scan_result_get_good_rssi();
+    }
+    else
+    {
 
-       //if fast connect policy is not set, we can early terminate the scan
-       if (profile_priority != -1)
-       {
+        //if fast connect policy is not set, we can early terminate the scan
+        if (profile_priority != -1)
+        {
            //PROFILE CONNECTION case
            //only if we see one of the results in the best score available, then there is no use on continuing the scan
-           apSharedInfo->mScoreEarlyTermThreshold = scan_result_calc_highest_score_for_profile_priority(profile_priority,secured_profile);
-       }
-       else
-       {
+            apSharedInfo->mScoreEarlyTermThreshold = scan_result_calc_highest_score_for_profile_priority(profile_priority,secured_profile);
+        }
+        else
+        {
            //AD HOC CONNECTION case
            //only if we see the result in the best RSSI, then there is no use on continuing the scan
-           apSharedInfo->mRssiEarlyTermThreshold = scan_result_get_best_rssi();
-       }
-   }
+            apSharedInfo->mRssiEarlyTermThreshold = scan_result_get_best_rssi();
+        }
+    }
 
-   GTRACE(GRP_CME,"cmeScanEarlyTermThresholdSet: secured_profile %d, profile_priority %d, mScoreEarlyTermThreshol=%d, mRssiEarlyTermThreshol=%d",
-          secured_profile,profile_priority,apSharedInfo->mScoreEarlyTermThreshold,apSharedInfo->mRssiEarlyTermThreshold);
+    GTRACE(GRP_CME,"cmeScanEarlyTermThresholdSet: secured_profile %d, profile_priority %d, mScoreEarlyTermThreshol=%d, mRssiEarlyTermThreshol=%d",
+        secured_profile,profile_priority,apSharedInfo->mScoreEarlyTermThreshold,apSharedInfo->mRssiEarlyTermThreshold);
 
-   //CME_CON_PRINT("\n\rcmeScanEarlyTermThresholdSet: secured_profile %d, profile_priority %d, mScoreEarlyTermThreshol=%d, mRssiEarlyTermThreshol=%d",
-   //       secured_profile,profile_priority,apSharedInfo->mScoreEarlyTermThreshold,apSharedInfo->mRssiEarlyTermThreshold);
+   CME_CON_PRINT("\n\rcmeScanEarlyTermThresholdSet: secured_profile %d, profile_priority %d, mScoreEarlyTermThreshol=%d, mRssiEarlyTermThreshol=%d",
+        secured_profile,profile_priority,apSharedInfo->mScoreEarlyTermThreshold,apSharedInfo->mRssiEarlyTermThreshold);
 
     HOOK(HOOK_IN_CME_SCAN);
 }
@@ -446,12 +491,12 @@ int32_t cmeSetScanCmeInfo(cmeScanSharedInfo_t *apSharedInfo,
     if (0 == rc)
     {
         GTRACE(GRP_CME, "Scan information allocation ready for ENUM(EScanRequestType, %d)", aScanType);
-        CME_CON_PRINT("\n\rcmeSetScanCmeInfo:Scan alloc ready for scan type :ENUM(EScanRequestType, %d)", aScanType);
+        CME_CON_PRINT("\n\rcmeSetScanCmeInfo:Scan alloc ready for scan type :ENUM(EScanRequestType, %d)\n\r", aScanType);
     }
     else
     {
         GTRACE(GRP_CME, "Scan information could not be fully allocated, scan should not start");
-        CME_CON_PRINT("\n\rScan information could not be fully allocated, scan should not start");
+        CME_CON_PRINT("\n\rScan information could not be fully allocated, scan should not start\n\r");
     }
 
     // Give the sync object to scan module anyway, otherwise system remains stuck for good.
@@ -465,7 +510,6 @@ static void cmeScanDoneSendScanDigest(uint32_t aRoleId, CmeScanDoneInfo_t *apSca
 {
     struct wpa_supplicant *wpa_s = NULL;
 
-    if (CME_SCAN_STATUS_COMPLETE == apScanInfo->status)
     {
         // Mark site survey has stopped
         gSetSiteSurvey = CME_SITE_SURVEY_IDLE;
@@ -532,11 +576,6 @@ static void cmeScanDoneSendScanDigest(uint32_t aRoleId, CmeScanDoneInfo_t *apSca
             os_free(pBuff2SendExtended);
         }
     }
-    else
-    {
-        GTRACE(GRP_CME, "Error in site survey scan response %d", apScanInfo->status);
-        ASSERT_GENERAL(0);
-    }
 free:
     if (gSiteSurveyInfo.pSiteNetworks != NULL)
     {
@@ -570,6 +609,8 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
         //      o Update number of valid networks & scan timestamp
         //        (No need to copy results, they are directly written to CME
         //         allocated memory)
+        CME_PRINT_SCAN_REPORT("\r\nCME_MESSAGE_ID_SCAN_COMPLETE, stopping survey scan timer");
+        CME_survey_scan_timer_stop();
         cmeScanDoneSendScanDigest(aRoleId, apScanInfo);
     }
     else if ( SCAN_REQUEST_CONNECT_PERIODIC_SCAN == apScanInfo->scanType
@@ -579,6 +620,7 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
         wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, aRoleId);
 
         GTRACE(GRP_CME, "CME: ScanType=%d, Roletype=%d", apScanInfo->scanType, roleType);
+        CME_PRINT_SCAN_REPORT("\n\rcmeScanComplete: ScanType=%d, Roletype=%d", apScanInfo->scanType, roleType);
 
         curretnState = CmeStationFlow_GetCurrentState();
 
@@ -588,11 +630,25 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
             // wpa_supplicant code clears this indication only upon receiving EVENT_SCHED_SCAN_STOPPED,
             // which does not seem to be raised in current implementation.
             wpa_s->sched_scanning = 0;
+            CME_periodic_scan_timer_stop();
             set_finish_wlan_periodic_scan();
         }
         else
         {
+            CME_PRINT_SCAN_REPORT("\r\nCME_MESSAGE_ID_SCAN_COMPLETE, stopping one shot scan timer");
+            CME_one_shot_scan_timer_stop();
             set_finish_wlan_one_shot_scan();
+        }
+
+        // When scan complete arrive in stop scan flow
+        // In P2P Scenario - scan complete can arrive as part of stop scan (i.e client negotiation failure).
+        // In some cases supplicant also removes interface and the scan complete
+        // can arrive after the interface is removed.
+        // In this case we don't want to handle the scan results 
+        if ((wpa_s == NULL) || (roleType == ROLE_TYPE_NONE))
+        {
+            CME_PRINT_SCAN_REPORT_ERROR("\r\nCME_MESSAGE_ID_SCAN_COMPLETE: driver interface doesn't exist!");
+            return -1;
         }
 
         // External WPS: Perform a different state validation.
@@ -682,7 +738,7 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
                     pDrv->p2pFindReportScanResults, gCmeP2pInfo.p2pFindStopping,
                     pDrv->p2pConnectionStarted, gCmeP2pInfo.p2pConnectPending);
 
-                Report("\n\rCompleted p2pFindReportScanResults=%d gP2pSearchStopping=%d,p2pConnectionStarted=%d p2pConnectPending=%d",
+                CME_PRINT_SCAN_REPORT("\n\rCompleted p2pFindReportScanResults=%d gP2pSearchStopping=%d,p2pConnectionStarted=%d p2pConnectPending=%d",
                     pDrv->p2pFindReportScanResults, gCmeP2pInfo.p2pFindStopping,
                     pDrv->p2pConnectionStarted, gCmeP2pInfo.p2pConnectPending);
 
@@ -701,27 +757,28 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
                 //as part of stop find - we report last complete scan 
                 //and mark that no more reports are pending
                 if ((gCmeP2pInfo.p2pFindStopping != FALSE) 
-                    && (pDrv->p2pConnectionStarted == FALSE))
+                    && (pDrv->p2pConnectionStarted == FALSE)
+                    && (pDrv->p2pFindReportScanResults != FALSE))
                 {
                     pDrv->p2pFindReportScanResults = FALSE;
-                    gCmeP2pInfo.p2pFindStopping = FALSE;
 
                     //When stopping p2p find we are expecting for scan complete
                     //to send SCAN_COMPLETE handle event to host
                     //and release sync obj
                     GTRACE(GRP_CME, "Notify host that scan completed for device role");
+                    CME_PRINT_SCAN_REPORT("\n\rNotify host that scan completed for device role");
                     wlanDispatcherSendEvent(WLAN_EVENT_P2P_SCAN_COMPLETED, (void*)NULL, 0);
-                    return rc;
                 }
             }
 
             // scan is completed - clear indication of supplicant scan if set.
             gSupplicantInitiatedScanInProgress = FALSE;
-
-            // Notify driver_cc33 of scan completion
+            
+            // Notify driver_cc33(supplicant) of scan completion
             drv_handleScanCompleteEvent(wpa_s->drv_priv,
-                                            apScanInfo->scanType,
-                                            gCandidatesInfo.numCandidates);
+                                        apScanInfo->scanType,
+                                        gCandidatesInfo.numCandidates);
+            
 
             // During external WPS scanning the site survery digest table is also populated
             // Send the digest table results to the SCAN RESULTS handler
@@ -731,12 +788,14 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
             }
  
         } // (CME_SCAN_STATUS_COMPLETE == apScanInfo->status)
-        else if (CME_SCAN_STATUS_STOPPED == apScanInfo->status)
+        else if ((CME_SCAN_STATUS_STOPPED == apScanInfo->status) || (CME_SCAN_STATUS_FAILED == apScanInfo->status))
         {
+
+            CME_PRINT_REPORT("\r\nStopping scan due to failure, status:%d",apScanInfo->status);
+
             // scan is completed - clear indication of supplicant scan if set.
             gSupplicantInitiatedScanInProgress = FALSE;
 
-            rc = 1;//connection scan was STOPPED
             if(SCAN_REQUEST_CONNECT_PERIODIC_SCAN == apScanInfo->scanType)
             {
                 drv_handleScanStoppedEvent(wpa_s->drv_priv);
@@ -747,6 +806,7 @@ int cmeScanComplete(uint32_t aRoleId, CmeScanDoneInfo_t *apScanInfo)
                 drv_handleOneShotScanStoppedEvent(wpa_s,apScanInfo->scanType);
 
             }
+            //the ret value is 0, there is no need to call wlan_stop
         }
 
         // Clear external WPS scanning
@@ -772,14 +832,16 @@ void cmePushFast2ScanResult(cmeScanCandidateDesc_t *apFastResult)
     if (NULL == gCandidatesInfo.pCandidateScanResults)
     {
         GTRACE(GRP_GENERAL_ERROR, "ERROR, failed to allocated memory for duplicating fast candidate");
+        CME_PRINT_REPORT_ERROR("\n\rCME: failed to allocated memory for duplicating fast candidate");
         return;
     }
 
-    memcpy(gCandidatesInfo.pCandidateScanResults, apFastResult, sizeof(cmeScanCandidateDesc_t));
+    os_memcpy(gCandidatesInfo.pCandidateScanResults, apFastResult, sizeof(cmeScanCandidateDesc_t));
     gCandidatesInfo.numCandidates = 1;
     gCandidatesInfo.numAllocatedResults = 1;
 
     GTRACE(GRP_CME, "Fast candidated was successfully duplicated");
+    //CME_PRINT_PROFILE_REPORT("\r\nFast candidated was successfully duplicated");
 
     HOOK(HOOK_IN_CME_SCAN);
 }
@@ -788,6 +850,7 @@ void cmePushFast2ScanResult(cmeScanCandidateDesc_t *apFastResult)
 void cmeStartSiteSurvey(uint8_t aRoleId, CMEWlanScanCommon_t* pScanCommon)
 {
     HOOK(HOOK_IN_CME_SCAN);
+    cmeScanSharedInfo_t *pCmeScanDB = scanResultTable_GetCmeScanDbPointer();
 
     if (CME_SITE_SURVEY_IDLE != gSetSiteSurvey)
     {
@@ -801,7 +864,16 @@ void cmeStartSiteSurvey(uint8_t aRoleId, CMEWlanScanCommon_t* pScanCommon)
     GTRACE(GRP_CME,"cmeStartSiteSurvey: CME_SITE_SURVEY_TRIGGERED");
 
     //direct device driver survey scan call, supplicant independent
-    device_cmd_ops[0]->site_survey(aRoleId, pScanCommon);
+    if(device_cmd_ops[0]->site_survey(aRoleId, pScanCommon) == 0)
+    {
+        CME_start_survey_scan_timer();
+    }
+    else
+    {
+        //make sure the scan is stopped
+        CmeScan_ScanDone(SCAN_REQUEST_SURVEY_SCAN, aRoleId, pCmeScanDB, CME_SCAN_STATUS_FAILED, 0, 0);
+    }
+
 
     HOOK(HOOK_IN_CME_SCAN);
 }
@@ -979,6 +1051,8 @@ void CME_ReleaseScanResults(uint32_t aCaller)
 
     GTRACE(GRP_CME_DEBUG,"CME_ReleaseScanResults, gCandidatesInfo.pCandidateScanResults=0x%x (caller=%d)",
                             (uint32_t)gCandidatesInfo.pCandidateScanResults, aCaller);
+//    Report("\n\r CME_ReleaseScanResults, gCandidatesInfo.pCandidateScanResults=0x%x (caller=%d)",
+//                           (uint32_t)gCandidatesInfo.pCandidateScanResults, aCaller);
     if (gCandidatesInfo.pCandidateScanResults != NULL)
     {
         os_free(gCandidatesInfo.pCandidateScanResults);
@@ -1023,3 +1097,150 @@ cmeScanCandidateDesc_t * CME_FindBssidInCandidatesScanTable (const uint8_t *bssi
 
     return (pCandidateDesc);
 }
+
+////   Survey  scan
+
+void CME_start_survey_scan_timer()
+{
+    int32_t ret;
+    if( gTimerSiteSurveyComplete.osTimerHandler == NULL)
+    {
+        osi_TimerCreate(&gTimerSiteSurveyComplete, "Survey scan complete timeout", CME_survey_scan_timeout, NULL);
+        ret = osi_TimerStart(&gTimerSiteSurveyComplete, CME_SURVEY_SCAN_TIMEOUT  , FALSE);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: survey scan timer started failed");
+        }
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: error survey scan timer already started !!!");
+    }
+
+}
+
+void CME_survey_scan_timeout()
+{
+    cmeScanSharedInfo_t *pCmeScanDB = scanResultTable_GetCmeScanDbPointer();
+    //CME_PRINT_REPORT_ERROR("\n\rCME: timeout for survey scan !!");
+    CmeScan_ScanDone(SCAN_REQUEST_SURVEY_SCAN, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_FAILED, 1, 1);
+}
+
+void CME_survey_scan_timer_stop()
+{
+    int32_t ret;
+    if(gTimerSiteSurveyComplete.osTimerHandler != NULL)
+    {
+        ret = osi_TimerStop(&gTimerSiteSurveyComplete);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: survey scan timer stop failed");
+        }
+        osi_TimerDelete(&gTimerSiteSurveyComplete);
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: survey scan timer was not started");
+    }
+    gTimerSiteSurveyComplete.osTimerHandler = NULL;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+////   one shot connection  scan
+/////////////////////////////////////////////////////////////////////////////////
+void CME_start_one_shot_scan_timer()
+{
+    int32_t ret;
+    if( gTimerOneShotScanComplete.osTimerHandler == NULL)
+    {
+        osi_TimerCreate(&gTimerOneShotScanComplete, "One shot scan complete timeout", CME_one_shot_scan_timeout, NULL);
+        ret = osi_TimerStart(&gTimerOneShotScanComplete, CME_ONE_SHOT_SCAN_TIMEOUT  , FALSE);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: one shot scan timer started failed");
+        }
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: error one shot scan timer already started !!!");
+    }
+
+}
+
+void CME_one_shot_scan_timeout()
+{
+    cmeScanSharedInfo_t *pCmeScanDB = scanResultTable_GetCmeScanDbPointer();
+    //CME_PRINT_REPORT_ERROR("\n\rCME: timeout for one shot scan !!");
+    CmeScan_ScanDone(SCAN_REQUEST_ONE_SHOT, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_FAILED, 1, 1);
+}
+
+void CME_one_shot_scan_timer_stop()
+{
+    int32_t ret;
+    if(gTimerOneShotScanComplete.osTimerHandler != NULL)
+    {
+        ret = osi_TimerStop(&gTimerOneShotScanComplete);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: one shot scan timer stop failed");
+        }
+        osi_TimerDelete(&gTimerOneShotScanComplete);
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: one shot scan timer was not stated");
+    }
+    gTimerOneShotScanComplete.osTimerHandler = NULL;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+////   periodic connection  scan
+/////////////////////////////////////////////////////////////////////////////////
+void CME_start_periodic_scan_timer()
+{
+    int32_t ret;
+    if( gTimerPeriodicScanComplete.osTimerHandler == NULL)
+    {
+        osi_TimerCreate(&gTimerPeriodicScanComplete, "Periodic scan complete timeout", CME_periodic_scan_timeout, NULL);
+        ret = osi_TimerStart(&gTimerPeriodicScanComplete, CME_PERIODIC_SCAN_TIMEOUT  , FALSE);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: periodic scan timer started failed");
+        }
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: error periodic scan timer already started !!!");
+    }
+
+}
+
+void CME_periodic_scan_timeout()
+{
+    cmeScanSharedInfo_t *pCmeScanDB = scanResultTable_GetCmeScanDbPointer();
+    //CME_PRINT_REPORT_ERROR("\n\rCME: timeout for periodic scan !!");
+    CmeScan_ScanDone(SCAN_REQUEST_CONNECT_PERIODIC_SCAN, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_FAILED, 1, 1);
+}
+
+void CME_periodic_scan_timer_stop()
+{
+    int32_t ret;
+    if(gTimerPeriodicScanComplete.osTimerHandler != NULL)
+    {
+        ret = osi_TimerStop(&gTimerPeriodicScanComplete);
+        if(ret < 0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME: periodic scan timer stop failed");
+        }
+        osi_TimerDelete(&gTimerPeriodicScanComplete);
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rCME: periodic scan timer was not stated");
+    }
+    gTimerPeriodicScanComplete.osTimerHandler = NULL;
+
+}
+

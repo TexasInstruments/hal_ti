@@ -74,6 +74,9 @@ void CmeStationBssLossDiss      (Cme_Users_e __user);
 
 void CmeStationDisconnectKick   (Cme_Users_e __user);
 
+void CmeStaP2pClientInit        (Cme_Users_e __user);
+void CmeStaP2pClientDeinit      (Cme_Users_e __user);
+
 extern BOOLEAN isDhcpReleaseEnabled(int is_for_ap_role);
 extern int ipConfigSendDhcpRelease(int is_for_ap_role);
 extern int16_t CME_DhcpReleaseComplete();
@@ -111,8 +114,8 @@ const CmeStationSmEntry_t gCmeStationFlowSM[CME_STA_NUM_OF_EVENTS] =
     /* CME_STA_DEINIT_EVENT                 */  {CmeStationDeInit,              (1<<CME_STA_IDLE_STATE)},
     /* CME_STA_NETWORK_SEARCH_EVENT         */  {CmeStationSupplicantMng,       (1<<CME_STA_IDLE_STATE)},
     /* CME_STA_FAST_CONNECT_REQ_EVENT       */  {CmeStationFastConnect,         (1<<CME_STA_IDLE_STATE)},
-    /* CME_STA_WPA_COMPLETED_EVENT          */  {CmeStationConnected,           (1<<CME_STA_SUPPLICANT_MANAGED_STATE)},
-    /* CME_STA_SCAN_DONE                    */  {CmeScanDone,                   (1<<CME_STA_SUPPLICANT_MANAGED_STATE)|(1<<CME_STA_DISCONNECTING_STATE)},
+    /* CME_STA_WPA_COMPLETED_EVENT          */  {CmeStationConnected,           (1<<CME_STA_SUPPLICANT_MANAGED_STATE) | (1<<CME_STA_CONFIGURED_STATE)},
+    /* CME_STA_SCAN_DONE                    */  {CmeScanDone,                   (1<<CME_STA_SUPPLICANT_MANAGED_STATE) | (1<<CME_STA_DISCONNECTING_STATE)},
     /* CME_STA_WLAN_ROLE_UP_EVENT           */  {CmeStationConfigured,          (1<<CME_STA_CONNECTED_STATE)},
     /* CME_STA_WLAN_DISCONNECT_REQ_EVENT    */  {CmeStationDisconnectReq,       (1<<CME_STA_DISCONNECTING_STATE) | (1<<CME_STA_DISCONNECT_PEND_DHCP_REL_STATE) | (1<<CME_STA_SUPPLICANT_MANAGED_STATE) |(1<<CME_STA_CONNECTED_STATE) |(1<<CME_STA_CONFIGURED_STATE) },
     /* CME_STA_WLAN_PEER_DISCONNECT_REQ     */  {CmeStationPeerDisconnectReq,   (1<<CME_STA_DISCONNECTING_STATE) | (1<<CME_STA_DISCONNECT_PEND_DHCP_REL_STATE) |(1<<CME_STA_CONNECTED_STATE) |(1<<CME_STA_CONFIGURED_STATE) },
@@ -173,7 +176,7 @@ static uint8_t CmeStationFlowSmValidateTransitionUserEvent(Cme_STA_events_e even
     if (event < CME_STA_NUM_OF_EVENTS)
     {
         validTransition = ( (gCmeStationFlowSM[event].ValidState) & (1 << gCmeStationFlowState_ull) );
-        CME_PRINT_REPORT("\n\rCME :CmeStationFlowSmValidateTransitionUserEvent: Valid state !! , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)",
+        CME_PRINT_REPORT("\n\rCME :CmeStationFlowSmValidateTransitionUserEvent: Valid state !! , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)\n\r",
                 gCmeStationSmUser_ull,
                 user,
                 event,
@@ -181,7 +184,7 @@ static uint8_t CmeStationFlowSmValidateTransitionUserEvent(Cme_STA_events_e even
 
         if(!validTransition)
         {
-        	CME_PRINT_REPORT_ERROR("\n\rCME :Error first ! CmeStationFlowSmValidateTransitionUserEvent: Valid state:%d , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)",
+        	CME_PRINT_REPORT_ERROR("\n\rCME :Error first ! CmeStationFlowSmValidateTransitionUserEvent: Valid state:%d , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)\n\r",
                     validTransition,gCmeStationSmUser_ull,
                     user,
                     event,
@@ -192,8 +195,8 @@ static uint8_t CmeStationFlowSmValidateTransitionUserEvent(Cme_STA_events_e even
     }
     else
     {
-        GTRACE(GRP_CME_STA_FLOW,"CmeStationFlowSmValidateTransitionUserEvent: ERROR! state transition is not valid (event  ENUM(Cme_STA_events_e, %d) with state ENUM(Cme_STA_states_e, %d))",event,gCmeStationFlowState_ull);
-    	CME_PRINT_REPORT_ERROR("\n\rCME :Error CmeStationFlowSmValidateTransitionUserEvent: ERROR! state transition is not valid (event  ENUM(Cme_STA_events_e, %d) with state ENUM(Cme_STA_states_e, %d))",event,gCmeStationFlowState_ull);
+        GTRACE(GRP_CME_STA_FLOW,"CmeStationFlowSmValidateTransitionUserEvent: ERROR! state transition is not valid (event  ENUM(Cme_STA_events_e, %d) with state ENUM(Cme_STA_states_e, %d))\n\r",event,gCmeStationFlowState_ull);
+    	CME_PRINT_REPORT_ERROR("\n\rCME :Error CmeStationFlowSmValidateTransitionUserEvent: ERROR! state transition is not valid (event  ENUM(Cme_STA_events_e, %d) with state ENUM(Cme_STA_states_e, %d))\n\r",event,gCmeStationFlowState_ull);
 
     }
 
@@ -204,7 +207,7 @@ static uint8_t CmeStationFlowSmValidateTransitionUserEvent(Cme_STA_events_e even
         //
         validTransition = ( CME_STATION_FLOW_SM_VALID_USER_TRANSITION & (1 << gCmeStationFlowState_ull) );
 
-        GTRACE(GRP_CME_STA_FLOW,"CME :CmeStationFlowSmValidateTransitionUserEvent: Valid state:%d , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)",
+        GTRACE(GRP_CME_STA_FLOW,"CME :CmeStationFlowSmValidateTransitionUserEvent: Valid state:%d , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)\n\r",
                 validTransition,gCmeStationSmUser_ull,
                 user,
                 event,
@@ -222,13 +225,13 @@ static uint8_t CmeStationFlowSmValidateTransitionUserEvent(Cme_STA_events_e even
             //update new user
             gCmeStationSmUser_ull = user;
 
-            GTRACE(GRP_CME_STA_FLOW,"CmeStationFlowSmValidateTransitionUserEvent: Successful user handover, new Station Flow SM user is ENUM(Cme_Users_e, %d) ",
+            GTRACE(GRP_CME_STA_FLOW,"CmeStationFlowSmValidateTransitionUserEvent: Successful user handover, new Station Flow SM user is ENUM(Cme_Users_e, %d)\n\r",
                             gCmeStationSmUser_ull        );
 
         }
         else//error
         {
-        	CME_PRINT_REPORT_ERROR("\n\rCME :Error second! CmeStationFlowSmValidateTransitionUserEvent: Valid state:%d , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)",
+        	CME_PRINT_REPORT_ERROR("\n\rCME :Error second! CmeStationFlowSmValidateTransitionUserEvent: Valid state:%d , New User owner request (current user ENUM(Cme_Users_e, %d) new user ENUM(Cme_Users_e, %d)), event:%d current state ENUM(Cme_STA_states_e, %d)\n\r",
                     validTransition,gCmeStationSmUser_ull,
                     user,
                     event,
@@ -376,13 +379,25 @@ void CmeStationInit             (Cme_Users_e __user)
     }
     else
     {
+        cmeMngInitStaDB();
         CME_PRINT_REPORT("\n\rCME Cme STA Init");
         //update state to idle
         gCmeStationFlowState_ull = CME_STA_IDLE_STATE;
     }
 }
 
+void CmeStaP2pClientInit(Cme_Users_e __user)
+{
+    //update state to idle
+    GTRACE(GRP_CME,"STA interface gCmeStationFlowState_ull = CME_STA_IDLE_STATE");
+    gCmeStationFlowState_ull = CME_STA_IDLE_STATE; // CmeStaP2pClientInit
+}
 
+void CmeStaP2pClientDeinit(Cme_Users_e __user)
+{
+    //update state to disableing
+    gCmeStationFlowState_ull = CME_STA_DISABLED_STATE;
+}
 
 void CmeStationDeInit(Cme_Users_e __user)
 {
@@ -395,6 +410,7 @@ void CmeStationDeInit(Cme_Users_e __user)
     CME_ReleaseScanResults(CALLER7);
 
     GTRACE(GRP_CME,"Removing STA interface");
+    CME_PRINT_REPORT("\n\rRemoving STA interface ifname=%s", wpa_s->ifname);
 
     wpa_supplicant_remove_iface(gpSupplicantGlobals,
                                 wpa_s,
@@ -404,6 +420,8 @@ void CmeStationDeInit(Cme_Users_e __user)
     gCmeStationFlowState_ull = CME_STA_DISABLED_STATE;
 
     extAppDeinit();
+
+    cmeMngDeInitStaDB();
 }
 
 
@@ -503,6 +521,8 @@ void CmeStationDisconnectKick(Cme_Users_e __user)
     HOOK(HOOK_IN_CME_STATION_FLOW);
 
     //CME_PRINT_REPORT("\n\CmeStationDisconnectKick,cmeWlanDisconnect(WLAN_REASON_DEAUTH_LEAVING)");
+
+    gWPSkickDisconnect_ull = TRUE;
 
     //disconnect current network + stop any running scan
     if (cmeWlanDisconnect(WLAN_REASON_DEAUTH_LEAVING) > 0)
@@ -639,16 +659,31 @@ void CmeScanDone                (Cme_Users_e __user)
 {
     HOOK(HOOK_IN_CME_STATION_FLOW);
 
-
     if(gCmeStationFlowState_ull != CME_STA_DISCONNECTING_STATE)
     {
-        CME_PRINT_REPORT("\n\rCME CmeScanDone ,state :%d", gCmeStationFlowState_ull);
-        gCmeStationFlowState_ull = CME_STA_IDLE_STATE;
+        if(gCmeStationFlowState_ull == CME_STA_SUPPLICANT_MANAGED_STATE)
+        {
+            WlanEventConnect_t*  pArgs;
+
+            CME_PRINT_REPORT_ERROR("\n\rCME CmeScanDone, connection failed, probably timeout\n\r");
+            pArgs = os_zalloc(sizeof(WlanEventConnect_t));
+            pArgs->Status = -1;
+
+            wlanDispatcherSendEvent(WLAN_EVENT_CONNECT, (void*)pArgs, sizeof(WlanEventConnect_t));
+
+            os_free(pArgs);
+        }
+        else
+        {
+
+            CME_PRINT_REPORT("\n\rCME CmeScanDone, scan stopped ,state :%d change to CME_STA_IDLE_STATE", gCmeStationFlowState_ull);
+            gCmeStationFlowState_ull = CME_STA_IDLE_STATE;
+        }
 
     }
     else
     {
-        CME_PRINT_REPORT("\n\rCME CmeScanDone ,state :%d perform disconnect", gCmeStationFlowState_ull);
+        CME_PRINT_REPORT("\n\rCME: CmeScanDone, state :%d perform disconnect", gCmeStationFlowState_ull);
         gCmeStationFlowState_ull = CME_STA_IDLE_STATE;
         CME_WlanDisconnect(TRUE);
    }
@@ -665,10 +700,14 @@ void CmeStationConfigured       (Cme_Users_e __user)
 
 void CmeSetStaParams(void *staParams)
 {
-    RoleUpApCmd_t *pParams = (RoleUpApCmd_t *)staParams;
+    RoleUpStaCmd_t *pParams = (RoleUpStaCmd_t *)staParams;
 
-    // Set WPS parameters (WPS IE fields)
-    cfgSetWpsParameters(&(pParams->wpsParams));
+    // Set WPS parameters (WPS IE fields) if WPS is enabled
+    cfgSetWpsMode(pParams->wpsDisabled);
+    if (pParams->wpsDisabled == FALSE)
+    {
+        cfgSetWpsParameters(&(pParams->wpsParams));
+    }
 
     if (pParams->p2pDeviceEnabled)
     {
@@ -760,11 +799,6 @@ static int32_t supplicantRunSta()
     else
     {
         pGlobal = gpSupplicantGlobals;
-    }
-    GTRACE(GRP_CME, "CME: get p2p device = %d", cfgGetP2pDeviceEnable());
-    if (TRUE == cfgGetP2pDeviceEnable())
-    {
-        pGlobal->params.conf_p2p_dev = os_strdup(NETIF_CONF_NAME(TIWLAN_DEV_NAME_P2PDEV));
     }
 
     wpa_s = wpa_supplicant_add_iface(pGlobal, &iface, NULL);

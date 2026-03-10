@@ -382,9 +382,9 @@ NOTE: We only support packets coming from within the DS (i.e. From DS = 0)
 
 /* mgmt body max length */
 #define MAX_MGMT_BODY_LENGTH                2312
-/* maximal length of beacon body - note that actual beacons may actually be longer
-   than this size, at least according to the spec, but so far no larger beacon was seen */
-#define MAX_BEACON_BODY_LENGTH              700
+/* maximal length of beacon body - increased to 1600 to support WiFi certification
+   tests that require handling beacons up to 1500 bytes (e.g., test 10957) */
+#define MAX_BEACON_BODY_LENGTH              850
 
 /* length of standart beacon body (maximum for .11N ~230)- note that actual beacons may actually be longer
    than this size, at least according to the spec, but so far no larger beacon was seen */
@@ -730,7 +730,7 @@ typedef struct
 typedef struct 
 {
     dot11_eleHdr_t  hdr;
-    uint8_t           minTxPower;
+    int8_t           minTxPower;
     uint8_t           maxTxPower;
 }  dot11_CAPABILITY_t;
 

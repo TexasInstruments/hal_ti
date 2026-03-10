@@ -1,6 +1,6 @@
 zephyr_library()
 zephyr_compile_options(
-  --Wno-error
+  -Wno-error
   --include=ti_config/build_configs.h
 )
 
@@ -49,7 +49,14 @@ zephyr_library_sources(
   src/common/wpa_common.c
   src/common/sae.c
   src/common/wpa_ctrl.c
+  src/crypto/dh_group5.c
   src/crypto/dh_groups.c
+  src/crypto/sha1-prf.c
+  #  src/crypto/sha256-prf.c
+  #  src/crypto/sha256-kdf.c
+  src/crypto/sha1-tprf.c
+  src/crypto/
+  src/crypto/ms_funcs.c
   src/drivers/driver_common.c
   src/drivers/drivers.c
   src/eap_common/chap.c
@@ -165,5 +172,4 @@ zephyr_include_directories(
   src/fst
   src/tls
   wpa_supplicant/dbus
-  src/openssl/include
 )

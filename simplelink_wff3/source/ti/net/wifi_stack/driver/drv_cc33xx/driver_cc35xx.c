@@ -60,6 +60,12 @@
 #include "regulatory_domain_api.h"
 #include "csi.h"
 #include "control_cmd_fw.h"
+#include "ble_if.h"
+#include "errors.h"
+
+extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen);
+
+
 // ============================================================================
 //      Modules private definitions
 // ============================================================================
@@ -77,11 +83,10 @@ extern  cmeScanSharedInfo_t*    scanResultTable_GetCmeScanDbPointer();
 extern  Bool_e                  scanResultTable_NotifyScanPriodStart(uint8  scanTag);
 extern  OsiSyncObj_t            ScanResultTableSyncObj_ull;
 
+extern  WlanScanDwellTime_t scanDwellTimeParams;
 extern ti_driver_ifData_t * getDriverForRoleId(uint32_t aRoleId, struct wpa_global *apGlobal);
 extern int cc3xxx_trnspt_cmd_if_sta_remove(void *apPriv, const u8 *apAddr);
-
-
-
+extern int WLSendFW_DebugCommand(uint32_t id, void *cmd, uint32_t len, void *out, uint32_t outLen);
 // ============================================================================
 //		 Functions declarations which are not interface
 // ============================================================================
@@ -94,7 +99,7 @@ static int8_t trnspt_cmd_send_ies(uint32_t roleID,
                         EScanRequestType scanType,
                         struct wpa_driver_scan_params *apSuppParams,
                         RoleType_e roleType);
-static void trnspt_cmd_get_mac_addr(uint8 *macAddr, RoleType_e aRoleType);
+void trnspt_cmd_get_mac_addr(uint8 *macAddr, RoleType_e aRoleType);
 static int  trnspt_cmd_cfg_erp_protection (RoleID_t roleID, Bool_e erpProtectionEnabled);
 static int  trnspt_cmd_cfg_preamble (RoleID_t roleID, Bool_e shortBPreambleSupported);
 static int  trnspt_cmd_cfg_slot_time (RoleID_t roleID, SlotTime_e slotTime);
@@ -138,7 +143,7 @@ void cc3xxx_trnspt_cmd_if_event_handle(EventMailBox_t *pWlanFwEvent)
         GTRACE(GRP_DRIVER_CC33, "SCAN_COMPLETE_EVENT_ID event number of scan results %d", pWlanFwEvent->NumberOfScanResults);
         /* Get profiles/ad-hoc connection list */
         cmeScanSharedInfo_t *pCmeScanDB = scanResultTable_GetCmeScanDbPointer();
-        CmeScan_ScanDone(SCAN_REQUEST_ONE_SHOT, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_COMPLETE);
+        CmeScan_ScanDone(SCAN_REQUEST_ONE_SHOT, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_COMPLETE, 0, 0);
     }
 
     if(eventId & PERIODIC_SCAN_REPORT_EVENT_ID)
@@ -155,12 +160,12 @@ void cc3xxx_trnspt_cmd_if_event_handle(EventMailBox_t *pWlanFwEvent)
         CME_CC3XX_PORT_PRINT("\n\rFW event received , PERIODIC_SCAN_COMPLETE_EVENT_ID\n\r");
         /* Get profiles/ad-hoc connection list */
         cmeScanSharedInfo_t *pCmeScanDB = scanResultTable_GetCmeScanDbPointer();
-        CmeScan_ScanDone(SCAN_REQUEST_CONNECT_PERIODIC_SCAN, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_COMPLETE);
+        CmeScan_ScanDone(SCAN_REQUEST_CONNECT_PERIODIC_SCAN, pCmeScanDB->roleId, pCmeScanDB, CME_SCAN_STATUS_COMPLETE, 0, 0);
     }
 
     if(eventId & BSS_LOSS_EVENT_ID)
     {
-        CME_CC3XX_EVENT_PRINT("\n\rFW event received , BSS_LOSS_EVENT_ID\n\r");
+        CME_CC3XX_PORT_PRINT("\n\r FW event received , BSS_LOSS_EVENT_ID BssLossRoleIdBitMap 0x%x \n\r",pWlanFwEvent->BssLossRoleIdBitMap);
         if(pWlanFwEvent->BssLossRoleIdBitMap & 0x1) //role_sta
         {
             CME_BssLoss(0);
@@ -182,19 +187,33 @@ void cc3xxx_trnspt_cmd_if_event_handle(EventMailBox_t *pWlanFwEvent)
 
     if(eventId & CSI_EVENT_ID)
     {
-        CSI_PushMessage((WlanGetCSIData_t *)&pWlanFwEvent->csiData);
+        WlanGetCSIData_t csiData = {0};
+    
+        ASSERT_GENERAL(sizeof(WlanGetCSIData_t) == sizeof(CsiData_t));
+        os_memcpy(&csiData, &pWlanFwEvent->csiData, sizeof(WlanGetCSIData_t));
+        
+        CSI_PushMessage(&csiData);
     }
 
     if(eventId & RESEED_EVENT_ID)
     {
         CME_CC3XX_EVENT_PRINT("\n\rFW event received , RESEED_EVENT_ID with size %d\n\r",pWlanFwEvent->reseedRequestSize);
+#ifdef CC35XX
 
-        //Get new seed from HSM
-        uint8_t seed[MAX_SEED_SIZE];
-        os_memset(seed, 0x88, MAX_SEED_SIZE);
+        BleIf_SetSeed(MAX_SEED_SIZE);
+#endif
+    }
 
-        //Send set initial seed to the controller
-        ctrlCmdFw_SetSeedCmd(seed, MAX_SEED_SIZE);
+    if(eventId & FW_CRASH_EVENT_ID)
+    {
+        CME_PRINT_REPORT("\n\r [cmd_if_event_handle] FW event received , FW_CRASH_EVENT_ID");
+
+        wlanDispatcherSendEvent(WLAN_EVENT_FW_CRASH, NULL, 0);
+    }
+    if(eventId & ERROR_EVENT_ID)
+    {
+        CME_PRINT_REPORT("\n\r [cmd_if_event_handle ] FW event received , ERROR_EVENT_ID");
+        wlanDispatcherSendEvent(WLAN_EVENT_ERROR, NULL, 0);
     }
 }
 /******************************************************************************
@@ -220,7 +239,7 @@ extern TMacAddr     g_fuse_mac_addr[];
 void trnspt_cmd_get_mac_addr(uint8_t *macAddr, RoleType_e aRoleType)
 {
     //override the mac address
-    if (ROLE_IS_TYPE_STA_BASED(aRoleType))
+    if (ROLE_IS_TYPE_STA(aRoleType))
     {
         IRQ_UtilCopyMacAddress((uint8_t *)&g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_STA], macAddr);
     }
@@ -228,9 +247,8 @@ void trnspt_cmd_get_mac_addr(uint8_t *macAddr, RoleType_e aRoleType)
     {
        IRQ_UtilCopyMacAddress((uint8_t *)&g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_AP], macAddr);
     }
-    else if (ROLE_IS_TYPE_P2P_GO(aRoleType))//P2P GO
+    else if (ROLE_IS_TYPE_P2P(aRoleType))//P2P GO or P2P CL
     {
-        //WLAN_MAC_OFFSET_ROLE_P2P_GO is same mac as the WLAN_MAC_OFFSET_ROLE_AP
         IRQ_UtilCopyMacAddress((uint8_t *)&g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_STA], macAddr);
     }
     else if (ROLE_IS_TYPE_DEVICE(aRoleType))//Device -- off-channel device interface
@@ -243,7 +261,7 @@ void trnspt_cmd_get_mac_addr(uint8_t *macAddr, RoleType_e aRoleType)
     if (IRQ_UtilIsZeroMacAddress(macAddr))
     {
         // Allocate Mac address
-       assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+       ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
        /*CME_CC3XX_PORT_PRINT("\n\rDEVICE_PARAMS: MAC address is Zero, take the hard-coded MAC address 0x%x 0x%x 0x%x",
                macAddr[0],
                macAddr[1],
@@ -498,6 +516,10 @@ int cc3xxx_trnspt_cmd_if_enable_role (void *apDrv, Role_e aRoleType)
 
     GTRACE(GRP_WPA_SUPPLICANT, "CMD_ROLE_ENABLE ENUM(RoleType_e, %d) ", aRoleType);
     CME_CC3XX_PORT_PRINT("\n\r CMD_ROLE_ENABLE, Enable role ENUM(RoleType_e, %d) ", aRoleType);
+
+    // Init Deny List
+    DenyList_initList(&(pDrv->denyList));
+
     // --------------------------
     //  Prepare CMD
     // --------------------------
@@ -572,8 +594,11 @@ int cc3xxx_trnspt_cmd_if_disable_role (void *apDrv)
     int8_t                    rc;
     RoleDisableParameters_t *cmdParams = (RoleDisableParameters_t*)&cmd.commandParam.param;
 
+    // Clear Deny List
+    DenyList_clearList(&(pDrv->denyList));
+
     GTRACE(GRP_WPA_SUPPLICANT, "CMD_ROLE_DISABLE roleid=%d", pDrv->roleId);
-    CME_CC3XX_PORT_PRINT("\n\r CMD_ROLE_DISABLE \n\r");
+    CME_CC3XX_PORT_PRINT("\n\r CMD_ROLE_DISABLE roleid=%d \r\n", pDrv->roleId);
     // --------------------------
     //  Prepare CMD
     // --------------------------
@@ -589,7 +614,8 @@ int cc3xxx_trnspt_cmd_if_disable_role (void *apDrv)
    // retVal = g_stub_func.CommandDispatch(&cmd, &cmdComplete);//  gstube replace
     retVal = cmd_Send((char *)&cmd,cmd.nabHeader.len, (char *)&(cmdComplete.info.param), 0 );
     cmdComplete.info.status = retVal;
-    if(retVal >= 0 )//&& cmdComplete.info.status == CMD_STATUS_SUCCESS)
+    //in case of FW crash , the code will disable the role
+    if(retVal >= 0 || (retVal == WLAN_RET_TIMEOUT))//&& cmdComplete.info.status == CMD_STATUS_SUCCESS)
     {
          pDrv->roleEnabled = FALSE;
          rc = cmdComplete.info.status;//rc = 0;
@@ -660,7 +686,9 @@ int cc3xxx_trnspt_cmd_if_stop_role (void *apDrv)
     retVal = cmd_Send((char *)&cmd,cmd.nabHeader.len, (char *)&(cmdComplete.info.param), 0 );
 
     cmdComplete.info.status = retVal;
-    if(retVal >= 0)// && cmdComplete.info.status == CMD_STATUS_SUCCESS)
+
+    //in case fW crashed  make graceful stop
+    if((retVal >= 0) || (retVal == WLAN_RET_TIMEOUT))
     {
         rc = cmdComplete.info.status;//rc = 0;
         // Mark role was stopped (should be used to avoid restarting an active role)
@@ -680,7 +708,7 @@ int cc3xxx_trnspt_cmd_if_stop_role (void *apDrv)
                     if (wlanLinks_RemoveLink(uHlid) != OK)
                     {
                         //GTRACE(GRP_DRIVER_MX,"cc3xxx_trnspt_cmd_if_stop_role(): Failed to free link, HLID=%u", uHlid);
-                        assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+                        ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
                         return -NOK;
                     }
                     /* Reset Rx & Tx Link counters*/
@@ -698,6 +726,7 @@ int cc3xxx_trnspt_cmd_if_stop_role (void *apDrv)
             uint32_t    uHlid;
             linkType_e eLinkType;
             EWlanLinkState eState;
+
             for (uHlid=0; uHlid<WLANLINKS_MAX_LINKS; uHlid++)
             {
                 wlanLinks_GetLinkState(&eState, uHlid);
@@ -709,7 +738,7 @@ int cc3xxx_trnspt_cmd_if_stop_role (void *apDrv)
                         if (wlanLinks_RemoveLink(uHlid) != OK)
                         {
                             //GTRACE(GRP_DRIVER_MX,"cc3xxx_trnspt_cmd_if_stop_role(): Failed to free link, HLID=%u", uHlid);
-                            assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+                            ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
                             return -NOK;
                         }
                     }
@@ -746,7 +775,7 @@ int cc3xxx_trnspt_cmd_if_stop_role (void *apDrv)
                         if (wlanLinks_RemoveLink(uHlid) != OK)
                         {
                             //GTRACE(GRP_DRIVER_MX,"cc3xxx_trnspt_cmd_if_stop_role(): Failed to free link, HLID=%u", uHlid);
-                            assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+                            ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
                             return -NOK;
                         }
                     }
@@ -850,7 +879,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
 
         if(freq_to_chan(pDrv->assocFreq, &pParam->channelNumber, &pParam->band) < 0)
         {
-            assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+            ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
         }
         // set isDfsChannel if needed
         regulatoryDomain_IsChannelSupported(pParam->channelNumber, (Bool32 *)&(pParam->isDfsChannel));
@@ -928,7 +957,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
              //For STA
              if(wlanLinks_AddLink(pLinkInfo, pRetParam->linkId, pRetParam->session, pParam->ex.staBased.bssId, 0))
              {
-                 assert(0);
+                 ASSERT_GENERAL(0);
                  ret = NOK;
                  goto out_free;
              }
@@ -982,7 +1011,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
         //
         if(freq_to_chan(apDriverParams->freq->freq, &pParam->channelNumber, &pParam->band) < 0)
         {
-            assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+            ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
         }
         // set isDfsChannel if needed
         regulatoryDomain_IsChannelSupported(pParam->channelNumber, (Bool32 *)&(pParam->isDfsChannel));
@@ -1039,7 +1068,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
             //FOr AP Broadcast
             if(wlanLinks_AddLink(pLinkInfo, pRetParam->broadcastHLID, pRetParam->broadcastSession, apDriverParams->ssid, 0))
             {
-                assert(0);
+                ASSERT_GENERAL(0);
                 ret = NOK;
                 goto out_free;
             }
@@ -1066,6 +1095,11 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
                 udata_SetDataEncryption(pRetParam->broadcastHLID, TRUE, FALSE, FALSE);
                 wlanLinks_SetLinkDataEncryption(pRetParam->broadcastHLID, TRUE);
             }
+            else
+            {
+                udata_SetDataEncryption(pRetParam->broadcastHLID, FALSE, FALSE, FALSE);
+                wlanLinks_SetLinkDataEncryption(pRetParam->broadcastHLID, FALSE);
+            }
 
             udata_SetTxSessionId(pRetParam->broadcastHLID, pRetParam->broadcastSession);
 
@@ -1078,7 +1112,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
             //for AP global
             if(wlanLinks_AddLink(pLinkInfo, pRetParam->globalHLID, pRetParam->globalSession, apDriverParams->ssid, 0))
             {
-                assert(0);
+                ASSERT_GENERAL(0);
                 ret = NOK;
             }
 
@@ -1153,7 +1187,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
         if(freq_to_chan(apDriverParams->freq->freq, &pParam->channelNumber, &pParam->band) < 0)
         {
             GTRACE(GRP_WPA_SUPPLICANT, "CMD_ROLE_START: Assert in freq_to_chan");
-            //assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+            //ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
         }
         else
         {
@@ -1212,7 +1246,7 @@ int cc3xxx_trnspt_cmd_if_start_role(void *apDrv, void *apParams, RoleCommonParam
              //For DEVICE
              if(wlanLinks_AddLink(pLinkInfo, pRetParam->linkId, pRetParam->session, pDrv->macAddr, 0))
              {
-                 assert(0);
+                 ASSERT_GENERAL(0);
                  ret = NOK;
                  goto out_free;
              }
@@ -1329,31 +1363,37 @@ int cc3xxx_trnspt_cmd_if_change_role_type (void *apDrv, Role_e aRoleType)
     RETURNS:        0 - successfully, other - unsuccessfully
 
 ******************************************************************************/
-int cc3xxx_trnspt_cmd_if_cfg (uint8_t *pBuf, Cfg_e cfgID, size_t len)
+int cc3xxx_trnspt_cmd_if_cfg(uint8_t *pBuf, Cfg_e cfgID, size_t len)
 {
-   //
-
-    //CommandParamContol_t          cmd;
     CommandParamContol_t cmd;
-    CommandComplete_t    cmdComplete;
-    int                  retVal;
-    int                  rc = 0;
+    CommandComplete_t cmdComplete;
+    Cfg_t cmdParams;
+    int retVal;
+    int rc = 0;
 
-    Cfg_t                *cmdParams   = (Cfg_t *)&cmd.commandParam.param;
-
-    //GTRACE(GRP_DRIVER_MX, "Command Configure ENUM(Cfg_e,%d)", cfgID);
-    // CME_CC3XX_PORT_PRINT("\n\r CMD_CONFIGURE ENUM(Cfg_e,%d)", cfgID);
-
+    os_memset(&cmdParams, 0x0, sizeof(Cfg_t));
+    
     // --------------------------
     //  Prepare CMD
     // --------------------------
-    cmd.nabHeader.opcode = CMD_CONFIGURE;
+    cmd.nabHeader.opcode       = CMD_CONFIGURE;
     cmd.nabHeader.sync_pattern = HOST_SYNC_PATTERN;
-    cmd.commandParam.cmdID                 = CMD_CONFIGURE;
-    cmdParams->id             = cfgID;
-    cmdParams->length         = len;
+    cmd.commandParam.cmdID     = CMD_CONFIGURE;
+    cmdParams.id               = cfgID;
+    cmdParams.length           = len;
+    
+    /* Check if the buffer is big enough */
+    if (len > sizeof(Cfg_u))
+    {
+        CME_CC3XX_PORT_PRINT_ERROR("\n\rERROR!! trnspt_cmd_if_cfg failed: %d\n\r", cfgID);
+        CME_CC3XX_PORT_PRINT_ERROR("\n\rERROR!! len of trnspt_cmd_if_cfg = %d, "
+                                   "exceeds sizeof(Cfg_u) = %d\n\r",
+                                   len, sizeof(Cfg_u));
+        return CMD_GENERAL_STATUS_ERROR;
+    }
+    os_memcpy(&(cmdParams.ex), pBuf, len);
+    os_memcpy(cmd.commandParam.param, &cmdParams, sizeof(Cfg_t));
 
-    memcpy(&cmdParams->ex, pBuf, len);
     cmd.nabHeader.len = ALIGNN_TO_4(sizeof(NAB_header_t) + sizeof(cmd.commandParam.cmdID) + sizeof(Cfg_t));
 
     // --------------------------
@@ -1832,7 +1872,7 @@ int8_t trnspt_cmd_send_ies(uint32_t roleID,
               basicRatesMask,
               len);
 
-    assert(len <= DOT11_MAX_SUPPORTED_RATES );//  changed ASSERT_GENERAL to assert
+    ASSERT_GENERAL(len <= DOT11_MAX_SUPPORTED_RATES );//  changed ASSERT_GENERAL to assert
 
     if(len > DOT11_MAX_SUPPORTED_RATES)
     {
@@ -1874,7 +1914,7 @@ int8_t trnspt_cmd_send_ies(uint32_t roleID,
     if(ROLE_IS_TYPE_STA_BASED(roleType))
     {
         bWmeEnable = l2_cfgIsStaWmeEnabled();
-        axEnable = l2_cfg_isStaHeEnabled();
+        axEnable = l2_cfg_isStaHeEnabled() && !(l2_GetWirelessProto());
     }
 
     if (bWmeEnable)
@@ -2035,8 +2075,16 @@ int cc3xxx_trnspt_cmd_if_one_shot_scan(void *apPriv, struct wpa_driver_scan_para
                             apParams->extra_ies_len,
                             apParams->ssids[0],
                             apParams->ssids[0].ssid_len);
+    CME_PRINT_SCAN_DEBUG_REPORT("\n\r[Scan CMD] Params: num_ssids=%d, num_filter_ssids=%d, p2p_probe=%d, extra_ies_len=%d, ssid[0]=%s, ssid[0].ssid_len=%d", 
+                            apParams->num_ssids, 
+                            apParams->num_filter_ssids,
+                            apParams->p2p_probe,
+                            apParams->extra_ies_len,
+                            apParams->ssids[0],
+                            apParams->ssids[0].ssid_len);
 
-    CME_CC3XX_PORT_PRINT("\n\rScan CMD: start one shot connection scan");
+    CME_PRINT_SCAN_REPORT("\n\rScan CMD: start one shot connection scan roleId=%d, RoleType=%d, iface=%s",
+                            apDrv->roleId, apDrv->roleType, apDrv->iface);
 
     // check whether the scan was triggered by the supplicant or by the CME.
     // when triggered by the CME, the CME state is CME_STA_SUPPLICANT_MANAGED_STATE.
@@ -2052,6 +2100,7 @@ int cc3xxx_trnspt_cmd_if_one_shot_scan(void *apPriv, struct wpa_driver_scan_para
         {
             isWiFiDirectScan = TRUE; 
             GTRACE(GRP_DRIVER_MX, "[Scan CMD] isWiFiDirectScan=%d", isWiFiDirectScan);
+            CME_PRINT_SCAN_REPORT("\n\r[Scan CMD] isWiFiDirectScan=%d", isWiFiDirectScan);
         }
     }
 
@@ -2160,31 +2209,26 @@ int cc3xxx_trnspt_cmd_if_one_shot_scan(void *apPriv, struct wpa_driver_scan_para
     pScanCmd->snrThreshold      = 0;
     pScanCmd->useList           = TRUE;
 
-    /* Open AP is supported - do not using Rx Filter */
-    /* For WPS, supplicant makes the filter  */
-    /* For P2P Find/ scans triggered by the supplicant - do not use filter */
-    if((pCmeScanDB->mIsOpenProfileSupported != 0 && n_ssid != 0) 
-        || (CME_IsOngoingWPSAdHocConnection())
-        || apParams->p2p_probe
-        || gSupplicantInitiatedScanInProgress)
-    {
-        pScanCmd->ssidRXFilter = FALSE;
-    }
-    else
-    {
-        pScanCmd->ssidRXFilter = n_ssid ? TRUE : FALSE;
-    }
+    /* Do not use Rx Filter in the following cases: */
+    /* 1. Open AP is supported*/
+    /* 2. For WPS, supplicant makes the filter  */
+    /* 3. For P2P Find - scan triggered by the supplicant  */
+    /* 4. If we have a profile list  */
+    /* 5. If we enable non-transmit MBSSID connection scan  */
+    /* For other scenarios, you can consider setting ssidRXFilter to true */
+    pScanCmd->ssidRXFilter = FALSE;
   
     pScanCmd->numOfSSIDEntries = n_ssid ? n_ssid : 0;
     GTRACE(GRP_DRIVER_MX, "[Scan CMD] numOfSSIDs=%d, ssidRXFilter=%d n_ssid=%d",
-                            pScanCmd->numOfSSIDEntries,
-                            pScanCmd->ssidRXFilter,
-                            n_ssid);
+                            pScanCmd->numOfSSIDEntries, pScanCmd->ssidRXFilter, n_ssid);
+    CME_PRINT_SCAN_DEBUG_REPORT("\n\r[Scan CMD] numOfSSIDs=%d, ssidRXFilter=%d n_ssid=%d",
+                            pScanCmd->numOfSSIDEntries, pScanCmd->ssidRXFilter, n_ssid);
     if (isWiFiDirectScan)
     {
         // P2P filter flag configuration
         // using this flag will make FW filter the probe responces before sending to driver
         pScanCmd->scanParams.u.tScanInfo.scanResultsFilterCfg = SCAN_RESULTS_PASS_P2P;
+        gCmeP2pInfo.p2pFindStopping = FALSE;
     }
                    
     // --------------------------
@@ -2196,6 +2240,7 @@ int cc3xxx_trnspt_cmd_if_one_shot_scan(void *apPriv, struct wpa_driver_scan_para
                                 SCAN_REQUEST_ONE_SHOT,
                                 apParams,
                                 roleType);
+
 
     if(OK != status)
     {
@@ -2265,13 +2310,13 @@ int cc3xxx_trnspt_cmd_if_one_shot_scan(void *apPriv, struct wpa_driver_scan_para
     //  Duration time
     // --------------------------
 
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].passiveScanDuration    = SCAN_MAX_DWELL_TIME_PASSIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMaxDuration        = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMinDuration        = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].passiveScanDuration    = scanDwellTimeParams.max_dwell_time_passive_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMaxDuration        = scanDwellTimeParams.max_dwell_time_active_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMinDuration        = scanDwellTimeParams.min_dwell_time_active_msec;
 
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].passiveScanDuration      = SCAN_DFS_DWELL_TIME_PASSIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMaxDuration          = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMinDuration          = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].passiveScanDuration      = scanDwellTimeParams.dwell_time_dfs_passive_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMaxDuration          = scanDwellTimeParams.max_dwell_time_active_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMinDuration          = scanDwellTimeParams.min_dwell_time_active_msec;
 
     // --------------------------
     //  Prepare buffer to send
@@ -2285,6 +2330,9 @@ int cc3xxx_trnspt_cmd_if_one_shot_scan(void *apPriv, struct wpa_driver_scan_para
     {
         GTRACE(GRP_GENERAL_ERROR, "ERROR: Failed start scan status ENUM(CommandStatus_e,%d)",
                         retVal);
+        CME_CC3XX_PORT_PRINT_ERROR("\n\rERROR: Failed start scan status ENUM(CommandStatus_e,%d)",
+                        retVal);
+
         rc =  CMD_GENERAL_STATUS_ERROR;//rc = -1;
     }
     else
@@ -2492,13 +2540,13 @@ int cc3xxx_trnspt_cmd_if_sched_scan(void *apPriv,
     //  Duration time
     // --------------------------
 
-    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].passiveScanDuration    = SCAN_MAX_DWELL_TIME_PASSIVE_MSEC;
-    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMaxDuration        = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC;
-    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMinDuration        = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC;
+    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].passiveScanDuration    = scanDwellTimeParams.max_dwell_time_passive_msec;
+    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMaxDuration        = scanDwellTimeParams.max_dwell_time_active_msec;
+    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMinDuration        = scanDwellTimeParams.min_dwell_time_active_msec;
 
-    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_5GHZ].passiveScanDuration      = SCAN_DFS_DWELL_TIME_PASSIVE_MSEC;
-    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMaxDuration          = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC;
-    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMinDuration          = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC;
+    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_5GHZ].passiveScanDuration      = scanDwellTimeParams.dwell_time_dfs_passive_msec;
+    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMaxDuration          = scanDwellTimeParams.max_dwell_time_active_msec;
+    pScanCmd->scanParams.u.tConnScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMinDuration          = scanDwellTimeParams.min_dwell_time_active_msec;
 
     // --------------------------
     //  Prepare buffer to send
@@ -2620,7 +2668,7 @@ int cc3xxx_trnspt_cmd_if_site_survey(uint8_t roleID, CMEWlanScanCommon_t* pScanC
         //GTRACE(GRP_GENERAL_ERROR, "ERROR: Failed to allocate memory for scan command");
         CME_CC3XX_PORT_PRINT_ERROR("\n\r ERROR: Failed to allocate memory for scan command");
         rc =  CMD_GENERAL_STATUS_ERROR;//rc = -1;
-        goto out;
+        goto out_fail;
     }
     cmd.nabHeader.len = sizeof(NAB_header_t) + sizeof(cmd.commandParam.cmdID) + allocSize;
     aligned_length = ALIGNN_TO_4(cmd.nabHeader.len);
@@ -2691,7 +2739,7 @@ int cc3xxx_trnspt_cmd_if_site_survey(uint8_t roleID, CMEWlanScanCommon_t* pScanC
         GTRACE(GRP_GENERAL_ERROR, "ERROR: Failed send info elements");
         CME_CC3XX_PORT_PRINT_ERROR("\n\r ERROR: survey scan Failed send info elements");
         rc =  CMD_GENERAL_STATUS_ERROR;//rc = -1;
-        goto out_free;
+        goto out_fail;
     }
 
     // --------------------------
@@ -2706,7 +2754,7 @@ int cc3xxx_trnspt_cmd_if_site_survey(uint8_t roleID, CMEWlanScanCommon_t* pScanC
         GTRACE(GRP_GENERAL_ERROR, "ERROR: Failed build channel list");
         CME_CC3XX_PORT_PRINT_ERROR("\n\r ERROR: survey scan RROR: Failed build channel list");
         rc =  CMD_GENERAL_STATUS_ERROR;//rc = -1;
-        goto out_free;
+        goto out_fail;
     }
 
 
@@ -2714,13 +2762,13 @@ int cc3xxx_trnspt_cmd_if_site_survey(uint8_t roleID, CMEWlanScanCommon_t* pScanC
     // --------------------------
     //  Duration time
     // --------------------------
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].passiveScanDuration    = SCAN_MAX_DWELL_TIME_PASSIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMaxDuration        = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMinDuration        = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].passiveScanDuration    = scanDwellTimeParams.max_dwell_time_passive_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMaxDuration        = scanDwellTimeParams.max_dwell_time_active_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_2_4GHZ].scanMinDuration        = scanDwellTimeParams.min_dwell_time_active_msec;
 
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].passiveScanDuration      = SCAN_DFS_DWELL_TIME_PASSIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMaxDuration          = SCAN_MAX_DWELL_TIME_ACTIVE_MSEC;
-    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMinDuration          = SCAN_MIN_DWELL_TIME_ACTIVE_MSEC;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].passiveScanDuration      = scanDwellTimeParams.dwell_time_dfs_passive_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMaxDuration          = scanDwellTimeParams.max_dwell_time_active_msec;
+    pScanCmd->scanParams.u.tScanInfo.dwellCfg[RADIO_BAND_5GHZ].scanMinDuration          = scanDwellTimeParams.min_dwell_time_active_msec;
 
     // --------------------------
     //  Prepare buffer to send
@@ -2735,29 +2783,22 @@ int cc3xxx_trnspt_cmd_if_site_survey(uint8_t roleID, CMEWlanScanCommon_t* pScanC
                                    cmdComplete.info.status);
         CME_CC3XX_PORT_PRINT_ERROR("\n\r ERROR:Failed start scan status ENUM(CommandStatus_e,%d)",cmdComplete.info.status);
         rc =  CMD_GENERAL_STATUS_ERROR;//rc = -1;
+        goto out_fail;
     }
     else
     {
         rc = cmdComplete.info.status;//rc = 0;
+        goto out_success;
     }
 
-out_free:
-    os_free(pScanCmd);
-
-out:
-   //
-
+out_fail:
+out_success:
+    if( pScanCmd != NULL )
+    {
+        os_free(pScanCmd);
+    }
     return rc;
 }
-
-
-
-
-
-
-
-
-
 
 /******************************************************************************
 
@@ -2906,7 +2947,7 @@ int cc3xxx_trnspt_cmd_if_config_assoc_peer(void *apDrv, PeerCap_t *aPeerCap,
 	{
         GTRACE(GRP_DRIVER_CC33, "Warning: failed to cfg cts protection");
         CME_CC3XX_PORT_PRINT_ERROR("\n\rError: assert: failed to cfg cts protection useProtection:%d", useProtection);
-        assert(0);
+        ASSERT_GENERAL(0);
 	}
 
 /**************************************************************************/
@@ -2917,7 +2958,7 @@ int cc3xxx_trnspt_cmd_if_config_assoc_peer(void *apDrv, PeerCap_t *aPeerCap,
 	{
 		GTRACE(GRP_DRIVER_CC33, "Error: failed to set association info uAid:%d",uAid);
 		CME_CC3XX_PORT_PRINT_ERROR("\n\rError: failed to set association info uAid:%d",uAid);
-		 assert(0);
+		 ASSERT_GENERAL(0);
 	}
 
 /**************************************************************************/
@@ -2926,7 +2967,7 @@ int cc3xxx_trnspt_cmd_if_config_assoc_peer(void *apDrv, PeerCap_t *aPeerCap,
     {
         GTRACE(GRP_DRIVER_CC33, "Warning: failed to set peer cap");
         CME_CC3XX_PORT_PRINT_ERROR("\n\rError: failed to set peer cap RoleId:%d",RoleId);
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 /**************************************************************************/
 
@@ -2934,7 +2975,7 @@ int cc3xxx_trnspt_cmd_if_config_assoc_peer(void *apDrv, PeerCap_t *aPeerCap,
     {
         GTRACE(GRP_DRIVER_CC33, "Warning: failed to set bss cap");
         CME_CC3XX_PORT_PRINT_ERROR("\n\rError: failed cc3xxx_trnspt_cmd_if_cfg_bss_cap RoleId:%d",RoleId);
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
     CME_CON_PRINT("\n\rEnable BA policy for linkId:%d",link);
@@ -2966,12 +3007,11 @@ int cc3xxx_trnspt_cmd_if_sta_add(void *apPriv, struct hostapd_sta_add_params *ap
     AddPeerCmd_t *pStaParams;
 
     //CME_CC3XX_PORT_PRINT("\n\rcmd_if_sta_add: Add STA");
-
     // Sanity checks on received parameters
     if ( (NULL == pDrv) || (NULL == apParams) )
     {
         GTRACE(GRP_DRIVER_CC33, "ERROR: got NULL pointer from supplicant");
-        assert(0);//ASSERT_DRV_CC33(0);  changed
+        ASSERT_GENERAL(0);//ASSERT_DRV_CC33(0);  changed
         return 0;
     }
 
@@ -3004,6 +3044,16 @@ int cc3xxx_trnspt_cmd_if_sta_add(void *apPriv, struct hostapd_sta_add_params *ap
 
     GTRACE(GRP_DRIVER_DEBUG, "Peer %s, Add Command pending till 'set flags', add to list.", macStr);
     //CME_CC3XX_PORT_PRINT_ERROR("\n\rPeer %s, Add Command pending till 'set flags', add to list aid:%d.", macStr, apParams->aid);
+
+    // set MFP flag for WPA2_PLUS \ WPA3
+    if(apParams->flags & WPA_STA_MFP) 
+    {
+        pStaParams->peerInfo.configurePeer.mfp = TRUE;
+    }
+    else
+    {
+        pStaParams->peerInfo.configurePeer.mfp = FALSE;
+    }
 
     //
     // Keep peer parameters on the allocated command
@@ -3093,12 +3143,15 @@ int cc3xxx_trnspt_cmd_if_sta_remove(void *apPriv, const uint8_t *apAddr)
     int                     rc;
     char                    macStr[MAC_STR_LEN];
 
-    RemovePeer_t            *cmdParams   = (RemovePeer_t*)&cmd.commandParam.param;;
+    RemovePeer_t            *cmdParams   = (RemovePeer_t*)&cmd.commandParam.param;
 
     AddPeerCmd_t *pStaParams;
     AddPeerCmd_t *pPrevCmd; //Previous in link list (NULL if pStaParams is first)
 
     uint32_t lid;
+
+    GTRACE(GRP_WPA_SUPPLICANT, "CMD_REMOVE_PEER roleid=%d", pDrv->roleId);
+    CME_CC3XX_PORT_PRINT("\n\r CMD_REMOVE_PEER  roleid=%d", pDrv->roleId);
 
     if (NULL == apAddr)
         return -1;
@@ -3106,7 +3159,7 @@ int cc3xxx_trnspt_cmd_if_sta_remove(void *apPriv, const uint8_t *apAddr)
     if (NULL == pDrv)
     {
         GTRACE(GRP_DRIVER_CC33, "ERROR: NULL driver pointer");
-        assert(0);//ASSERT_DRV_CC33(0);  changed
+        ASSERT_GENERAL(0);//ASSERT_DRV_CC33(0);  changed
         return -1;
     }
 
@@ -3184,7 +3237,7 @@ int cc3xxx_trnspt_cmd_if_sta_remove(void *apPriv, const uint8_t *apAddr)
         if(rc < 0)
         {
             GTRACE(GRP_DRIVER_MX, "Not enable to remove link lid %d", lid);
-            assert(0);// ASSERT_GENERAL(0);//  changed to assert(0)
+            ASSERT_GENERAL(0);// ASSERT_GENERAL(0);//  changed to ASSERT_GENERAL(0)
         }
 
         rc = cmdComplete.info.status;//rc = 0;
@@ -3215,21 +3268,17 @@ int cc3xxx_trnspt_cmd_if_sta_remove(void *apPriv, const uint8_t *apAddr)
 int cc3xxx_trnspt_cmd_if_sta_set_flags(void *apPriv, const u8 *apAddr, unsigned int total_flags,
                          unsigned int flags_or, unsigned int flags_and)
 {
-   //
-
     int                     rc;
-    //CommandParamContol_t          cmd;
-    CommandParamContol_t cmd;
+    CommandParamContol_t    cmd;
     CommandComplete_t       cmdComplete;
     uint16_t                retVal;
     char                    macStr[MAC_STR_LEN];
-    ti_driver_ifData_t    *pDrv = (ti_driver_ifData_t *)apPriv;
-    AddPeerCmd_t *pStaParams;
-    AddPeerCmd_t *pPrevCmd; //Previous in link list (NULL if pStaParams is first)
-    Bool_e foundCmd = FALSE;
-    uint32_t uAcId;
-    uint32_t supportedRatesMask, basicRatesMask;
-
+    ti_driver_ifData_t      *pDrv = (ti_driver_ifData_t *)apPriv;
+    AddPeerCmd_t            *pStaParams;
+    AddPeerCmd_t            *pPrevCmd; //Previous in link list (NULL if pStaParams is first)
+    Bool_e                  foundCmd = FALSE;
+    uint32_t                uAcId;
+    uint32_t                supportedRatesMask, basicRatesMask;
 
     if (NULL == apAddr)
         return -1;
@@ -3358,7 +3407,7 @@ int cc3xxx_trnspt_cmd_if_sta_set_flags(void *apPriv, const u8 *apAddr, unsigned 
             if(wlanLinks_AddLink(pLinkInfo, (uint32_t)cmdReturn->linkId, cmdReturn->sessionId, cmdParams->peerInfo.configurePeer.macAddress, wps))
             {
                 os_free(pLinkInfo);
-                assert(0);
+                ASSERT_GENERAL(0);
                 return NOK;
             }
 
@@ -3379,9 +3428,34 @@ int cc3xxx_trnspt_cmd_if_sta_set_flags(void *apPriv, const u8 *apAddr, unsigned 
 
             udata_SetPeerParams(cmdReturn->linkId, apAddr, cmdParams->peerInfo.configurePeer.WMM);
 
-            udata_SetRxState(cmdReturn->linkId, LINK_STATE_OPEN);
+            //Set Rx State according to station authorization
+            if (total_flags & (WPA_STA_AUTHENTICATED | WPA_STA_ASSOCIATED))
+            {
+                if (flags_or & WPA_STA_AUTHORIZED)
+                {
+                    //Station is associated and authorized
+                    udata_SetRxState(cmdReturn->linkId, LINK_STATE_OPEN);
+                }
+                else
+                {
+                    //Station is associated but not authorized yet
+                    udata_SetRxState(cmdReturn->linkId, LINK_STATE_EAPOL);
+                }
+            }
+            //Set Tx State
             udata_SetTxState(cmdReturn->linkId, LINK_STATE_OPEN);
 
+            // If ap set pmf enabled based on peer mfp config attach to linkId
+            if (ROLE_IS_TYPE_AP_BASED(pDrv->roleType))
+            {
+                Bool_e isPmfEnable = FALSE;
+
+                if (pStaParams->peerInfo.configurePeer.mfp)
+                {
+                        isPmfEnable = TRUE;
+                }
+                udata_SetMgmtEncryption(cmdReturn->linkId, isPmfEnable);
+            }
 
             /* By default set all ACs of both links as not required for admission control (updated after connection) */
             for (uAcId = 0; uAcId < MAX_NUM_OF_AC; uAcId++)
@@ -3401,7 +3475,7 @@ int cc3xxx_trnspt_cmd_if_sta_set_flags(void *apPriv, const u8 *apAddr, unsigned 
                    cmdReturn->linkId,
                    cmdReturn->sessionId);
 
-            CME_PRINT_REPORT("\n Peer was added successfully macstr: %s link id %d session id %d.",
+            CME_PRINT_REPORT("\n\rPeer was added successfully macstr: %s link id %d session id %d.\n\r",
                    macStr,
                    cmdReturn->linkId,
                    cmdReturn->sessionId);
@@ -3435,6 +3509,7 @@ int cc3xxx_trnspt_cmd_if_sta_set_flags(void *apPriv, const u8 *apAddr, unsigned 
         {
             //CME_CC3XX_PORT_PRINT("\n\r update peer, peer: %s  link id:%d WPA_STA_AUTHORIZED *********",macStr,lid);
             GTRACE(GRP_DRIVER_MX, "update peer, peer: %s link id:%d WPA_STA_AUTHORIZED ",macStr, lid);
+            udata_SetRxState(lid, LINK_STATE_OPEN);
             connectionState = LINK_STATE_CONNECTED;
             sendStateChanged = TRUE;
         }
@@ -3478,10 +3553,22 @@ void WlanEventHandler(void *pWlanFwEvent)
     cc3xxx_trnspt_cmd_if_event_handle((EventMailBox_t*)pWlanFwEvent);
 }
 
-int cc3xxx_trnspt_cmd_set_ps(RoleID_t roleId,uint8_t power)
+int cc3xxx_trnspt_cmd_set_ps(RoleID_t roleId, uint8_t power)
 {
-    CME_CON_PRINT("\n\rti_driver : set ps not implement");
-    return 0;
+    int ret;
+    cmd_debug_psm_dbg_t cmdPsmCfg;
+    
+    cmdPsmCfg.forcePsmParams.paramIndex = 4;
+    cmdPsmCfg.forcePsmParams.paramValue = power;
+
+    CME_CON_PRINT("\n\rSet PS Mode %d\n\r", power);
+
+    ret = WLSendFW_DebugCommand(FORCE_PS_CFG,
+                                &cmdPsmCfg,
+                                sizeof(cmd_debug_psm_dbg_t),
+                                NULL,
+                                0);
+    return ret;
 }
 // ============================================================================
 //     SetDefault

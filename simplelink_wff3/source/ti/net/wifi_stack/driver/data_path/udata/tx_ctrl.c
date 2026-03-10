@@ -550,7 +550,7 @@ EStatusXmit txCtrl_XmitData(TTxCtrlBlk *pPktCtrlBlk, uint8_t *pBackpressureMap)
             }
 #endif
 
-            eStatus = TWD_txXfer_SendPacket(pPktCtrlBlk);
+            eStatus = TWD_txXferAggr_SendPacket(pPktCtrlBlk);
         }
         
         //CL_TRACE_END_L4("tiwlan_drv.ko", "INHERIT", "TX", ".XferSendPacket");
@@ -988,8 +988,7 @@ static void txCtrl_TxCompleteCb(TTxResultInfo *pTxResultInfo, uint32_t counter)
     //probably memblock were freed
     if (uSuccessfulTxCompletePkts > 0)
     {
-        //txMgmtQ_ReqToRunTxScheduler(); // it may that some memblock are free now
-        //Report("\r\n dbg_tx. txDataQ_ReqToRunTxScheduler");
+        //Report("\n\r dbg_tx. txDataQ_ReqToRunTxScheduler");
         txDataQ_ReqToRunTxScheduler();
     }
     /* Increment the link TKIP/AES-sequence-number by one per packet. */
@@ -1027,6 +1026,7 @@ uint32_t txCtrl_BuildDataPktHdr(TTxCtrlBlk *pPktCtrlBlk, AckPolicy_e ackPolicy, 
     uint16_t           typeLength;
     RoleID_t            eRoleId = pPktCtrlBlk->tTxPktParams.uFwRoleId;
     uint32_t            extraHThdr = IEEE80211_HT_CTL_LEN; // Add 4 bytes gap, may be filled later on by the PMAC
+    Bool_e              isNullDataFrame = pPktCtrlBlk->tTxPktParams.isNullDataFrame;
 
     *hdrPadding = 0;
 
@@ -1102,7 +1102,7 @@ uint32_t txCtrl_BuildDataPktHdr(TTxCtrlBlk *pPktCtrlBlk, AckPolicy_e ackPolicy, 
 
     uHdrLen += extraHThdr;
 
-    if (bEncrypt)
+    if (bEncrypt && !isNullDataFrame)
     {
         fc |= DOT11_FC_WEP;
 

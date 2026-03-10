@@ -64,6 +64,7 @@
 #include "scan_result_table.h"
 #include <upper_mac_versions.h>
 #include "csi.h"
+#include "fw_event_if.h"
 
 //#define EVENT_TEST
 #ifdef EVENT_TEST
@@ -78,6 +79,7 @@ OsiSyncObj_t p2p_find_stopped_syncObj = NULL;
 #define WLAN_PROTECTION
 
 extern StartRoleApps_t gRoleAppsParams;
+extern TFwEvent *gFwEvent;
 
 WlanNetworkDataRecvCB_t RecvCallBack[2] = {0};
 
@@ -87,18 +89,24 @@ uint32_t gWlanState = FALSE;
 extern uint32_t drv_getDriverLink(uint32_t uNetIfId, uint8_t* dst);
 extern char *cmeWlanGetKeyMgmt(void);
 extern uint32_t txHwQueue_SetInitializeHwBlocks (uint32_t tx_BlocksAvailable, uint32_t tx_NumTxDescriptor);
+int32_t CME_updateVendorElementsNotify(RoleType_e roleType,  uint16_t vendorElements_length, uint8_t* pVendorElements);
+int32_t CME_setPeerAgingTimeout(uint32_t agingTimeOut);
+#define WLAN_AP_MAX_INACTIVITY (5 * 60 * 1000) //need to be same as AP_MAX_INACTIVITY
+#define WLAN_AP_MIN_INACTIVITY (5000) //5 second minimum
 
 int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout);
 int roleDown_inter(WlanRole_e roleType, unsigned long int timeout);
+int32_t wlan_connect_internal(const signed char *pName, const int NameLen, const unsigned char *pMacAddr,
+        char SecType, const char *pPass, const char PassLen, unsigned int flags, void* conParams);
+
 
 bool gExtendedScanResults = FALSE;
 
 WlanSetCSIParams_t gCsiParams;
-
 typedef enum
 {
-    WLAN_IF_ROLE_UP_IN_PROGRESS = 0x1,
-    WLAN_IF_ROLE_DOWN_IN_PROGRESS = 0x2,
+    WLAN_IF_ROLE_UP_AP_IN_PROGRESS = 0x1,
+    WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS = 0x2,
     WLAN_IF_SURVEY_SCAN_IN_PROCESS = 0x4,
     WLAN_IF_CONNECT_IN_PROGRESS = 0x8,
     WLAN_IF_START_IN_PROGRESS = 0x10, //16,
@@ -111,8 +119,11 @@ typedef enum
     WLAN_IF_ONE_SHOT_SCAN_IN_PROGRESS = 0x800,//2048
     WLAN_IF_PERIODIC_SCAN_IN_PROGRESS = 0x1000,//4096
     WLAN_IF_SUPPLICANT_OPERATION_IN_PROGRESS = 0x2000,//8192
+    WLAN_IF_ROLE_UP_STA_IN_PROGRESS = 0x4000,
+    WLAN_IF_ROLE_DOWN_STA_IN_PROGRESS = 0x8000,
 
 }oper_bitmap_t;
+
 
 OsiLockObj_t        g_wlan_if_lockObj = NULL;
 uint32_t            g_oper_bitmap={0};/* see @oper_bitmap_t*/
@@ -135,14 +146,14 @@ void wlan_if_lock()
         if (ret != OSI_OK)
         {
             CME_PRINT_REPORT_ERROR("\r\nfailed to create lock object:g_wlan_if_lockObj");
-            assert(0);
+            ASSERT_GENERAL(0);
         }
         ret= osi_LockObjLock(&g_wlan_if_lockObj, OSI_WAIT_FOREVER);
     }
     if (ret != OSI_OK)
     {
         CME_PRINT_REPORT_ERROR("\r\nfailed to lock object:g_wlan_if_lockObj");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 }
 
@@ -157,7 +168,7 @@ void wlan_if_unlock()
         if (ret != OSI_OK)
         {
             CME_PRINT_REPORT_ERROR("\r\nfailed to unlock object:g_wlan_if_lockObj:%d",ret);
-            assert(0);
+            ASSERT_GENERAL(0);
         }
     }
     else
@@ -189,8 +200,10 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
     else if (bit_val == WLAN_IF_GET_EXCLUDE_IN_PROGRESS)
     {
         allow_bitmask =
-                WLAN_IF_ROLE_UP_IN_PROGRESS|
-                WLAN_IF_ROLE_DOWN_IN_PROGRESS|
+                WLAN_IF_ROLE_UP_AP_IN_PROGRESS|
+                WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS|
+                WLAN_IF_ROLE_UP_STA_IN_PROGRESS|
+                WLAN_IF_ROLE_DOWN_STA_IN_PROGRESS|
                 WLAN_IF_SURVEY_SCAN_IN_PROCESS|
                 WLAN_IF_CONNECT_IN_PROGRESS|
                 WLAN_IF_ONE_SHOT_SCAN_IN_PROGRESS|
@@ -201,8 +214,10 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
     else if (bit_val == WLAN_IF_SET_EXCLUDE_IN_PROGRESS)
     {
         allow_bitmask =
-                WLAN_IF_ROLE_UP_IN_PROGRESS|
-                WLAN_IF_ROLE_DOWN_IN_PROGRESS|
+                WLAN_IF_ROLE_UP_AP_IN_PROGRESS|
+                WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS|
+                WLAN_IF_ROLE_UP_STA_IN_PROGRESS|
+                WLAN_IF_ROLE_DOWN_STA_IN_PROGRESS|
                 WLAN_IF_SURVEY_SCAN_IN_PROCESS|
                 WLAN_IF_CONNECT_IN_PROGRESS|
                 WLAN_IF_ONE_SHOT_SCAN_IN_PROGRESS|
@@ -210,7 +225,7 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
                 WLAN_IF_SUPPLICANT_OPERATION_IN_PROGRESS|
                 WLAN_IF_DISCONNECT_IN_PROGRESS;
     }
-    else if (bit_val == WLAN_IF_ROLE_UP_IN_PROGRESS)
+    else if (bit_val == WLAN_IF_ROLE_UP_AP_IN_PROGRESS)
     {
         allow_bitmask =
                 WLAN_IF_SURVEY_SCAN_IN_PROCESS|
@@ -219,7 +234,7 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
                 WLAN_IF_PERIODIC_SCAN_IN_PROGRESS|
                 WLAN_IF_SUPPLICANT_OPERATION_IN_PROGRESS;
     }
-    else if (bit_val == WLAN_IF_ROLE_DOWN_IN_PROGRESS)
+    else if (bit_val == WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS)
     {
         allow_bitmask =
                 WLAN_IF_SURVEY_SCAN_IN_PROCESS|
@@ -231,7 +246,7 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
     else if (bit_val == WLAN_IF_SURVEY_SCAN_IN_PROCESS)
     {
         allow_bitmask =
-                WLAN_IF_ROLE_UP_IN_PROGRESS|
+                WLAN_IF_ROLE_UP_AP_IN_PROGRESS|
                 WLAN_IF_PERIODIC_SCAN_IN_PROGRESS;
 
         if (g_oper_bitmap & WLAN_IF_PERIODIC_SCAN_IN_PROGRESS)
@@ -244,8 +259,8 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
     else if ((bit_val == WLAN_IF_CONNECT_IN_PROGRESS) || (bit_val == WLAN_IF_SUPPLICANT_OPERATION_IN_PROGRESS))
     {
         allow_bitmask =
-                WLAN_IF_ROLE_UP_IN_PROGRESS |
-                WLAN_IF_ROLE_DOWN_IN_PROGRESS |
+                WLAN_IF_ROLE_UP_AP_IN_PROGRESS |
+                WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS |
                 WLAN_IF_SET_IN_PROGRESS |
                 WLAN_IF_GET_IN_PROGRESS |
                 WLAN_IF_GET_EXCLUDE_IN_PROGRESS |
@@ -255,8 +270,8 @@ int32_t is_wlan_oper_in_progress(uint32_t bit_val, uint8_t isRetryPrint)
     else if ((bit_val == WLAN_IF_ONE_SHOT_SCAN_IN_PROGRESS) || (bit_val == WLAN_IF_PERIODIC_SCAN_IN_PROGRESS))
     {
         allow_bitmask =
-                WLAN_IF_ROLE_UP_IN_PROGRESS|
-                WLAN_IF_ROLE_DOWN_IN_PROGRESS|
+                WLAN_IF_ROLE_UP_AP_IN_PROGRESS|
+                WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS|
                 WLAN_IF_SET_IN_PROGRESS|
                 WLAN_IF_GET_IN_PROGRESS|
                 WLAN_IF_GET_EXCLUDE_IN_PROGRESS|
@@ -328,52 +343,95 @@ void set_finish_wlan_stop()
     if (ret != OSI_OK)
     {
         CME_PRINT_REPORT_ERROR("\n\rfailed to delete lock object:g_wlan_if_lockObj");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
     g_wlan_if_lockObj = NULL;
 #endif
 }
 
 // wlan_roleup
-uint32_t set_cond_in_process_wlan_roleup()
+uint32_t set_cond_in_process_wlan_ap_roleup()
 {
 	uint32_t ret = OSI_OK;
 #ifdef WLAN_PROTECTION
     wlan_if_lock();
-    ret = is_wlan_oper_in_progress(WLAN_IF_ROLE_UP_IN_PROGRESS,1);
+    ret = is_wlan_oper_in_progress(WLAN_IF_ROLE_UP_AP_IN_PROGRESS,1);
     wlan_if_unlock();
 #endif
     return ret;
 }
 
-void set_finish_wlan_roleup()
+void set_finish_wlan_ap_roleup()
 {
 #ifdef WLAN_PROTECTION
     wlan_if_lock();
-    g_oper_bitmap &= ~WLAN_IF_ROLE_UP_IN_PROGRESS;
+    g_oper_bitmap &= ~WLAN_IF_ROLE_UP_AP_IN_PROGRESS;
     wlan_if_unlock();
 #endif
 }
 
 /// wlan_roledown
-int32_t set_cond_in_process_wlan_roledown()
+int32_t set_cond_in_process_wlan_ap_roledown()
 {
 	int32_t ret = OSI_OK;
 #ifdef WLAN_PROTECTION
     wlan_if_lock();
-    ret = is_wlan_oper_in_progress(WLAN_IF_ROLE_DOWN_IN_PROGRESS,1);
+    ret = is_wlan_oper_in_progress(WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS,1);
     wlan_if_unlock();
 #endif
 	return ret;
 }
-void set_finish_wlan_roledown()
+void set_finish_wlan_ap_roledown()
 {
 #ifdef WLAN_PROTECTION
     wlan_if_lock();
-    g_oper_bitmap &= ~WLAN_IF_ROLE_DOWN_IN_PROGRESS;
+    g_oper_bitmap &= ~WLAN_IF_ROLE_DOWN_AP_IN_PROGRESS;
     wlan_if_unlock();
 #endif
 }
+
+
+uint32_t set_cond_in_process_wlan_sta_roleup()
+{
+    uint32_t ret = OSI_OK;
+#ifdef WLAN_PROTECTION
+    wlan_if_lock();
+    ret = is_wlan_oper_in_progress(WLAN_IF_ROLE_UP_STA_IN_PROGRESS,1);
+    wlan_if_unlock();
+#endif
+    return ret;
+}
+
+void set_finish_wlan_sta_roleup()
+{
+#ifdef WLAN_PROTECTION
+    wlan_if_lock();
+    g_oper_bitmap &= ~WLAN_IF_ROLE_UP_STA_IN_PROGRESS;
+    wlan_if_unlock();
+#endif
+}
+
+/// wlan_roledown
+int32_t set_cond_in_process_wlan_sta_roledown()
+{
+    int32_t ret = OSI_OK;
+#ifdef WLAN_PROTECTION
+    wlan_if_lock();
+    ret = is_wlan_oper_in_progress(WLAN_IF_ROLE_DOWN_STA_IN_PROGRESS,1);
+    wlan_if_unlock();
+#endif
+    return ret;
+}
+void set_finish_wlan_sta_roledown()
+{
+#ifdef WLAN_PROTECTION
+    wlan_if_lock();
+    g_oper_bitmap &= ~WLAN_IF_ROLE_DOWN_STA_IN_PROGRESS;
+    wlan_if_unlock();
+#endif
+}
+
+
 
 /// wlan_connect
 int32_t set_cond_in_process_wlan_connect()
@@ -435,6 +493,17 @@ void set_finish_wlan_periodic_scan()
     g_oper_bitmap &= ~WLAN_IF_PERIODIC_SCAN_IN_PROGRESS;
     wlan_if_unlock();
 #endif
+}
+
+int32_t is_wlan_periodic_scan_in_progress()
+{
+    int32_t ret;
+#ifdef WLAN_PROTECTION
+    wlan_if_lock();
+    ret = g_oper_bitmap & WLAN_IF_PERIODIC_SCAN_IN_PROGRESS;
+    wlan_if_unlock();
+#endif
+    return ret;
 }
 
 // wlan_supplicant_operation
@@ -524,6 +593,11 @@ int32_t set_cond_in_process_wlan_set(WlanSet_e wlanSet)
         case WLAN_SET_VENDOR_IE:
         case WLAN_SET_EXTERNAL:
         case WLAN_SET_POWER_SAVE:
+        case WLAN_SET_P2P_CMD:
+        case WLAN_SET_CONNECTION_POLICY:
+        case WLAN_SET_TRIGGER_FW_ASSERT:
+        case WLAN_SET_EXT_P2P_BUILD_ACTION_FRAME:
+        case WLAN_SET_EXT_WPS_SESSION:
             bit_val = WLAN_IF_SET_EXCLUDE_IN_PROGRESS;//enable while connect in progress
             break;
         default:
@@ -549,6 +623,11 @@ void set_finish_wlan_set(WlanSet_e wlanSet)
         case WLAN_SET_VENDOR_IE:
         case WLAN_SET_EXTERNAL:
         case WLAN_SET_POWER_SAVE:
+        case WLAN_SET_TRIGGER_FW_ASSERT:
+        case WLAN_SET_P2P_CMD:
+        case WLAN_SET_CONNECTION_POLICY:
+        case WLAN_SET_EXT_P2P_BUILD_ACTION_FRAME:
+        case WLAN_SET_EXT_WPS_SESSION:
             bit_val = WLAN_IF_SET_EXCLUDE_IN_PROGRESS;//enable while connect in progress
             break;
         default:
@@ -573,11 +652,14 @@ int32_t set_cond_in_process_wlan_get(WlanGet_e wlanGetType)
     {
         case WLAN_GET_DEVICE_INFO:
         case WLAN_GET_FWVERSION:
+        case WLAN_GET_SPVERSION:
         case WLAN_GET_RSSI:
         case WLAN_GET_ROLE_CHANNEL_NUMBER:
         case WLAN_GET_HOST_VERSION:
         case WLAN_GET_EXTERNAL:
         case WLAN_GET_MACADDRESS:
+        case WLAN_GET_CONNECTION_POLICY:
+        case WLAN_GET_SYSINFO:
             bit_val = WLAN_IF_GET_EXCLUDE_IN_PROGRESS;//enable while connect in progress
             break;
         default:
@@ -601,11 +683,14 @@ void set_finish_wlan_get(WlanGet_e wlanGetType)
     {
         case WLAN_GET_DEVICE_INFO:
         case WLAN_GET_FWVERSION:
+        case WLAN_GET_SPVERSION:
         case WLAN_GET_RSSI:
         case WLAN_GET_ROLE_CHANNEL_NUMBER:
         case WLAN_GET_HOST_VERSION:
         case WLAN_GET_EXTERNAL:
         case WLAN_GET_MACADDRESS:
+        case WLAN_GET_CONNECTION_POLICY:
+        case WLAN_GET_SYSINFO:
             bit_val = WLAN_IF_GET_EXCLUDE_IN_PROGRESS;//enable while connect in progress
             break;
         default:
@@ -667,7 +752,7 @@ int Wlan_EtherPacketSend(WlanRole_e roleType, uint8_t *inbuf, uint32_t inbuf_len
     if (!pPktCtrlBlk)
     {
         os_free(pEthHead);
-        TX_FRAME_FLOW_CNTRL_PRINT_MUST("\n\rERROR Wlan_EtherPacketSend: Failed to allocate TxCtrlBlk");
+        TX_PRINT_ERROR("\n\rERROR Wlan_EtherPacketSend: Failed to allocate TxCtrlBlk");
         return -1;
     }
     set_nab_tx_header(&pPktCtrlBlk->aPktNabHdr, total_len );
@@ -764,21 +849,23 @@ int Wlan_Start(WlanEventHandlerCB_t eventHandlerCB)
     if(TRUE == gWlanState)
     {
 	    GTRACE(1, " Wlan already started !!!!!!\n\r");
-        Report("\n\rWlan already started!!");
+        Report("\n\rWlan already started!!\n\r");
         ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__WLAN_ALREADY_STARTED);
         goto fail;
     }
 
     // Init params
     gRoleAppsParams.hostConfiguredRolesBitmap = 0;
-    gRoleAppsParams.devicePowerSaveMode = WLAN_STATION_ACTIVE_MODE;
+    gRoleAppsParams.devicePowerSaveMode = WLAN_STATION_AUTO_PS_MODE;
     gRoleAppsParams.eventHandlerCB = eventHandlerCB;
+
+    l2_cfg_Init();
 
     ret = cme_init();
     if(ret != OSI_OK)
     {
         ret = -1;
-        assert(0);
+        ASSERT_GENERAL(0);
         goto fail;
     }
     ret = InitHostDriver();
@@ -788,7 +875,6 @@ int Wlan_Start(WlanEventHandlerCB_t eventHandlerCB)
     	goto fail;
     }
 
-    l2_cfg_Init();
 
     // test event handler 
 #ifdef EVENT_TEST
@@ -818,6 +904,24 @@ int Wlan_Start(WlanEventHandlerCB_t eventHandlerCB)
         }
     }
     set_finish_wlan_start();
+
+    ret = l2_cfg_GetStaHeSupport();
+    if (ret != WLAN_RET_CODE_OK)
+    {
+        return ret;
+    }
+    //get L2 support 5Ghz
+    {
+        extern Bool32 gL2Support5Ghz;
+        uint8_t is5GhzSupported = 0;
+        ret = l2_cfg_get5GhzSupport(&is5GhzSupported);
+        if (ret != WLAN_RET_CODE_OK)
+        {
+            return ret;
+        }
+        gL2Support5Ghz = (is5GhzSupported) ? TRUE : FALSE;
+    }   
+
     gWlanState = TRUE;
     return OSI_OK;
 fail:
@@ -837,6 +941,15 @@ int  Wlan_Stop(uint32_t flags)
         return -1;
     }
     
+    CME_PRINT_REPORT("\n\r ---Wlan_Stop-Wlan_RoleDown DEVICE ---\n\r");
+    GTRACE(GRP_SL_DISPATCH, "---Wlan_Stop-Wlan_RoleDown DEVICE---");
+
+    /* Sanity check before stop all the system process */
+    ret = Wlan_RoleDown(WLAN_ROLE_DEVICE, WLAN_WAIT_TIME_ROLE_SWITCH);
+    if(ret != OSI_OK)
+    {
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);//not call to fail in purposereturn WLAN_RET_OPER_IN_PROGRESS;//not calling fail inpurpose
+    }
 
     CME_PRINT_REPORT("\n\r ---Wlan_Stop-Wlan_RoleDown STA ---\n\r");
 
@@ -897,17 +1010,32 @@ int Wlan_RoleUp(WlanRole_e roleType, void *params, unsigned long int timeout)
     int ret = 0;
     uint32_t role_bitmap;
 
-
-    ret = set_cond_in_process_wlan_roleup();
-    if(ret != OSI_OK)
+    if(roleType == WLAN_ROLE_AP)
+    {
+        ret = set_cond_in_process_wlan_ap_roleup();
+    }
+    else
+    {
+        ret = set_cond_in_process_wlan_sta_roleup();
+    }
+    if (ret != OSI_OK)
     {
         CME_PRINT_REPORT("\n\r ---Wlan_RoleUp-rety-- %d",roleType);
 
-        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);//not call to fail in purpose
+        return WlanError(WLAN_ERROR_SEVERITY__LOW,
+                         WLAN_ERROR_MODULE__COMMANDS,
+                         WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);//not call to fail in purpose
     }
-   ret = roleUp_Inter(roleType, params, timeout);
+    ret = roleUp_Inter(roleType, params, timeout);
 
-    set_finish_wlan_roleup();
+    if(roleType == WLAN_ROLE_AP)
+    {
+        set_finish_wlan_ap_roleup();
+    }
+    else
+    {
+        set_finish_wlan_sta_roleup();
+    }
     return ret;
 }
 
@@ -918,7 +1046,15 @@ int Wlan_RoleDown(WlanRole_e roleType, unsigned long int timeout)
 
     HOOK(HOOK_WLAN_IF);
 
-   ret = set_cond_in_process_wlan_roledown();
+    if(roleType == WLAN_ROLE_AP)
+    {
+        ret = set_cond_in_process_wlan_ap_roledown();
+    }
+    else
+    {
+        ret = set_cond_in_process_wlan_sta_roledown();
+    }
+
     if(ret != OSI_OK)
     {
         CME_PRINT_REPORT("\n\r ---Wlan_RoleDown-retry--- %d",roleType);
@@ -927,69 +1063,242 @@ int Wlan_RoleDown(WlanRole_e roleType, unsigned long int timeout)
 
     ret = roleDown_inter(roleType, timeout);
 
-    set_finish_wlan_roledown();
+    if(roleType == WLAN_ROLE_AP)
+    {
+        set_finish_wlan_ap_roledown();
+    }
+    else
+    {
+        set_finish_wlan_sta_roledown();
+    }
     return ret;
+}
+
+int32_t wlan_connect_internal(const signed char *pName, const int NameLen, const unsigned char *pMacAddr,
+        char SecType, const char *pPass, const char PassLen, unsigned int flags, void* conParams)
+{
+    int ret;
+    int alloc_size = 0;
+    CMEEapWlanConnect_t *cmeParamsEap = NULL;
+    CMEWlanConnectCommon_t *cmeParams = NULL;
+
+    if(!(flags & WLAN_CONNECT_FLAG_ENTERPRISE_CONNECT))
+    {
+        alloc_size = M_ALIGN_TO_4_BYTES(sizeof(CMEWlanConnectCommon_t) + 1 + NameLen + PassLen );
+
+        cmeParams = os_zalloc(alloc_size);
+
+        if (!cmeParams)
+        {
+            TX_DATA_SEND_PRINT_ERROR("\n\rWlan_Connect ERROR allocation failed");
+            /* failed to allocate */
+            ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__MALLOC);
+            return ret;
+        }
+
+        cmeParams->SecType = SecType;
+        cmeParams->FastTransition = flags & WLAN_CONNECT_FLAG_FAST_TRANSITION_EN;
+        cmeParams->Flags = flags;
+
+        if (WLAN_CONNECT_FLAG_PROFILE_CONNECT & flags)
+        {
+            /* Wlan Profile Connect */
+            cmeParams->SsidLen = 0;
+            cmeParams->PasswordLen = 0;
+            os_memset(cmeParams->Bssid, 0, WLAN_BSSID_LENGTH);
+        }
+        else
+        {
+            /* Copy BSSID */
+            if (pMacAddr != NULL)
+            {
+                IRQ_UtilCopyMacAddress(pMacAddr, cmeParams->Bssid);//the ap Bssid
+            }
+
+            /* Copy the SSID */
+            cmeParams->SsidLen = NameLen;
+            os_memcpy(SSID_STRING(cmeParams), pName, NameLen);
+
+            /* Copy Password */
+            cmeParams->PasswordLen = PassLen;
+            os_memcpy(PASSWORD_STRING(cmeParams), pPass, PassLen);
+
+        }
+
+    }
+    ///Enterprise connection //////////////////////////////
+    else
+    {
+        WlanEapConnectParams_t* eapConParam = conParams;
+        if(!conParams)
+        {
+            TX_DATA_SEND_PRINT_ERROR("\n\rWlan_Connect ERROR missing enterprise configuration");
+            /* failed to allocate */
+            ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__MALLOC);
+            return ret;
+        }
+        alloc_size = M_ALIGN_TO_4_BYTES(sizeof(CMEEapWlanConnect_t) + 1 + NameLen + PassLen );
+
+        cmeParamsEap = os_zalloc(alloc_size);
+
+        if (!cmeParamsEap)
+        {
+            TX_DATA_SEND_PRINT_ERROR("\n\rWlan_Connect ERROR allocation failed");
+            /* failed to allocate */
+            ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__MALLOC);
+            return ret;
+        }
+
+        cmeParamsEap->EapCommonConnect.SecType = SecType;
+        cmeParamsEap->EapCommonConnect.FastTransition = flags & WLAN_CONNECT_FLAG_FAST_TRANSITION_EN;
+        cmeParamsEap->EapCommonConnect.Flags = flags;
+
+        switch( eapConParam->eap_phase1_val)
+        {
+            case WLAN_TLS:
+                cmeParamsEap->eap_phase1_val = TLS;
+                break;
+            case WLAN_TTLS:
+                cmeParamsEap->eap_phase1_val = TTLS;
+                break;
+            case WLAN_PEAP0:
+                cmeParamsEap->eap_phase1_val = PEAP0;
+                break;
+            case WLAN_PEAP2:
+                cmeParamsEap->eap_phase1_val = PEAP2;
+                break;
+            default:
+                TX_DATA_SEND_PRINT_ERROR("\n\reap_phase1_val not supported :%d",(int)eapConParam->eap_phase1_val);
+                ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__FW_RESPONSE_INVALID_PARAM);
+                return ret;
+                break;
+
+        }
+
+        if(eapConParam->eap_phase1_val != WLAN_TLS)
+        {
+            switch( eapConParam->eap_phase2_val)
+            {
+                case WLAN_MSCHAPV2_TYPE:
+                    cmeParamsEap->eap_phase2_val = MSCHAPV2_TYPE;
+                    break;
+                case WLAN_GTC_TYPE:
+                    cmeParamsEap->eap_phase2_val = GTC_TYPE;
+                    break;
+                default:
+                    TX_DATA_SEND_PRINT_ERROR("\n\reap_phase2_val not supported :%d",(int)eapConParam->eap_phase2_val);
+                    ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__FW_RESPONSE_INVALID_PARAM);
+                    return ret;
+                    break;
+
+            }
+        }
+        cmeParamsEap->pEap_ca_cert = eapConParam->pEap_ca_cert;
+        cmeParamsEap->pEap_client_cert = eapConParam->pEap_client_cert;
+        cmeParamsEap->pEap_private_key = eapConParam->pEap_private_key;
+        cmeParamsEap->eap_ca_cert_len = eapConParam->eap_ca_cert_len;
+        cmeParamsEap->eap_client_cert_len = eapConParam->eap_client_cert_len;
+        cmeParamsEap->eap_private_key_len = eapConParam->eap_private_key_len;
+        os_memcpy(cmeParamsEap->eapIdentity,eapConParam->eapIdentity,eapConParam->eapIdentityLen);
+        cmeParamsEap->eapIdentityLen = eapConParam->eapIdentityLen;
+        os_memcpy(cmeParamsEap->eapAnonymous ,eapConParam->eapAnonymous, eapConParam->eapAnonUserLen);
+        cmeParamsEap->eapAnonUserLen = eapConParam->eapAnonUserLen;
+
+    #if CC35XX_SUPPORT_ENT_PROFILE
+        if (WLAN_CONNECT_FLAG_PROFILE_CONNECT & flags)
+        {
+            /* Wlan Profile Connect */
+            cmeParamsEap->EapCommonConnect.SsidLen = 0;
+            cmeParamsEap->EapCommonConnect.PasswordLen = 0;
+            os_memset(cmeParamsEap->EapCommonConnect.Bssid, 0, WLAN_BSSID_LENGTH);
+        }
+        else
+    #endif
+        {
+            /* Copy BSSID */
+            if (pMacAddr != NULL)
+            {
+                IRQ_UtilCopyMacAddress(pMacAddr, cmeParamsEap->EapCommonConnect.Bssid);//the ap Bssid
+            }
+
+            /* Copy the SSID */
+            cmeParamsEap->EapCommonConnect.SsidLen = NameLen;
+            os_memcpy(EAP_SSID_STRING(cmeParamsEap), pName, NameLen);
+
+            /* Copy Password */
+            cmeParamsEap->EapCommonConnect.PasswordLen = PassLen;
+            os_memcpy(EAP_PASSWORD_STRING(cmeParamsEap), pPass, PassLen);
+
+        }
+
+    }
+
+    ret = CME_WlanConnect(cmeParams, cmeParamsEap,TRUE);
+    if(cmeParams != NULL)
+    {
+         os_free(cmeParams);
+    }
+    if(cmeParamsEap != NULL)
+    {
+        os_free(cmeParamsEap);
+    }
+
+    if(ret != 0)
+    {
+        CME_PRINT_REPORT_ERROR("\n\rWlan_Connect ERROR %d",ret);
+        return ret;
+    }
+   return ret;
 }
 
 int Wlan_Connect(const signed char *pName, const int NameLen, const unsigned char *pMacAddr,
                  char SecType, const char *pPass, const char PassLen, unsigned int flags)
 {
-    int ret;
-    int alloc_size = 0;
-    CMEWlanConnectCommon_t *params;
+    int ret = 0;
 
     HOOK(HOOK_WLAN_IF);
     ret = set_cond_in_process_wlan_connect();
     if(ret != OSI_OK)
     {
         CME_PRINT_REPORT("\n\r ---Wlan_Connect retry---");
-    	return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);// not to go to fail in purpose
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);// not to go to fail in purpose
     }
     CME_PRINT_REPORT("\n\r ---Wlan_Connect---");
 
-    alloc_size = M_ALIGN_TO_4_BYTES(sizeof(CMEWlanConnectCommon_t) + 1 + NameLen + PassLen );
 
-    params = os_zalloc(alloc_size);
+    flags &= (~WLAN_CONNECT_FLAG_ENTERPRISE_CONNECT);
 
-    if (!params)
-    {
-        TX_DATA_SEND_PRINT_ERROR("\n\rWlan_Connect ERROR allocation failed");
-        /* failed to allocate */
-        ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__MALLOC);
-        goto fail;
-    }
+    ret = wlan_connect_internal(pName, NameLen, pMacAddr,
+            SecType, pPass, PassLen,flags, NULL);
 
-    params->SecType = SecType;
-    params->FastTransition = flags & WLAN_CONNECT_FLAG_FAST_TRANSITION_EN;
-
-    /* Copy BSSID */
-    if (pMacAddr != NULL)
-    {
-        IRQ_UtilCopyMacAddress(pMacAddr, params->Bssid);//the ap Bssid
-    }
-
-    /* Copy the SSID */
-    params->SsidLen = NameLen;
-    os_memcpy(SSID_STRING(params), pName, NameLen);
-
-    /* Copy Password */
-    params->PasswordLen = PassLen;
-    os_memcpy(PASSWORD_STRING(params), pPass, PassLen);
-
-    ret = CME_WlanConnect(params, TRUE);
-    if(ret <  0)
-    {
-    	os_free(params);
-    	goto fail;
-    }
-    os_free(params);
-    HOOK(HOOK_WLAN_IF);
-    return ret;
-
-fail:
 	set_finish_wlan_connect();
 	return ret;
 }
+
+
+int Wlan_Connect_extended(const signed char *pName, const int NameLen, const unsigned char *pMacAddr,
+                 char SecType, const char *pPass, const char PassLen, unsigned int flags, void* params)
+{
+    int ret = 0;
+
+    HOOK(HOOK_WLAN_IF);
+    ret = set_cond_in_process_wlan_connect();
+    if(ret != OSI_OK)
+    {
+        CME_PRINT_REPORT("\n\r ---Wlan_Connect extended retry---");
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);// not to go to fail in purpose
+    }
+    CME_PRINT_REPORT("\n\r ---Wlan_Connect extended ---");
+
+
+    ret = wlan_connect_internal(pName, NameLen, pMacAddr,
+            SecType, pPass, PassLen,flags, params);
+
+
+    set_finish_wlan_connect();
+    return ret;
+}
+
 
 int Wlan_Disconnect(WlanRole_e roleType,void* params)
 {
@@ -1065,7 +1374,8 @@ int Wlan_Scan(WlanRole_e role, void* params,const unsigned char ScanResultsSize)
     }
 
     // if the scan is not WPS or P2P related, start survey scan protection
-    if (((scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PBC) && (scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PIN)) && 
+    if (((scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PBC) && 
+        (scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PIN)) && 
         (role != WLAN_ROLE_DEVICE))
     {
         ret = set_cond_in_process_wlan_survey_scan();
@@ -1081,18 +1391,18 @@ int Wlan_Scan(WlanRole_e role, void* params,const unsigned char ScanResultsSize)
     ret = CME_GetScanResults(0, ScanResultsSize, 0, &scanCmeCommon);
     if(ret != OSI_OK)
     {
-        CME_PRINT_REPORT_ERROR("\n\r Wlan_Scan failed :%d---",ret);
+        CME_PRINT_REPORT_ERROR("Wlan_Scan failed :%d---\n\r",ret);
     	goto fail;
     }
     return ret;
 fail:
-    if (((scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PBC) && (scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PIN)) && 
+    if (((scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PBC) && 
+        (scanCmeCommon.extWpsMode != WLAN_SEC_TYPE_WPS_PIN)) && 
         (role != WLAN_ROLE_DEVICE))
     {
         set_finish_wlan_survey_scan();
     }
     return ret;
-
 }
 
 int Wlan_Get(WlanGet_e wlanGetType, void *params)
@@ -1103,11 +1413,11 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params)
     ret = set_cond_in_process_wlan_get(wlanGetType);
     if(ret != OSI_OK)
     {
-        CME_PRINT_REPORT("\n\r ---Wlan_Get Retry:%d---",(uint32_t) wlanGetType);
+        CME_PRINT_REPORT("\n\r ---Wlan_Get Retry:%d---\n\r",(uint32_t) wlanGetType);
     	return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);// not to go to fail in purpose
     }
 
-    CME_PRINT_REPORT("\n\r ---Wlan_Get:%d---",(uint32_t) wlanGetType);
+    CME_PRINT_REPORT("\n\r ---Wlan_Get:%d---\n\r",(uint32_t) wlanGetType);
 
     switch (wlanGetType)
     {
@@ -1191,6 +1501,16 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params)
             ret = ctrlCmdFw_GetFwVersion((FWVersions_t*)params);
         }
         break;
+        case WLAN_GET_SPVERSION:
+        {
+            ret = ctrlCmdFw_GetSpVersion((SPVersions_t*)params);
+        }
+        break;
+        case WLAN_GET_SYSINFO:
+        {
+            ret = ctrlCmdFw_GetSysInfo((DeviceSystemInfo_t*)params);
+        }
+        break;
         case WLAN_GET_CONNECTION_KEY_MANAGEMENT:
         {
             char **key_mgmt = (char **) params;
@@ -1250,13 +1570,39 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params)
             ret = 0;
         }
         break;
-        
         case WLAN_GET_CSI:
         {
             WlanGetCSIData_t *csiData = (WlanGetCSIData_t *)params;
             ret = CSI_GetMessage(csiData);
         }
         break;
+        case WLAN_GET_PRIMARY_CONNECTIVITY_FW:
+        {
+            WlanConnectivityFWSlot_t *pWlanGetConnectivitySlot = (WlanConnectivityFWSlot_t *)params;
+
+            ret = osi_fget(OSI_FILESYSTEM_GET_CONNECTIVITY_FW_CONTAINER, &pWlanGetConnectivitySlot->Connectivityslot);
+        }
+        break;
+        case WLAN_GET_CONNECTION_POLICY:
+        {
+            WlanPolicySetGet_t *pPolicy = (WlanPolicySetGet_t *)params;
+            ret = CME_GetConnPolicy(pPolicy);
+        }
+        break;
+
+        case WLAN_GET_CONNECTION_SCAN_EARLY_TERMINATION:
+        {
+            uint8_t *enabled = (uint8_t *)params;
+            *enabled = CME_GetConnectionScanEarlyTermination();
+            ret = 0;
+        }
+        break;
+        case WLAN_GET_CUSTOM_DOMAIN_ENTRY:
+        {
+            ret = regulatoryDomain_GetCustomDomainEntry(params);
+        }
+        break;
+
         default:
             return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__INVALID_PARAM_GET_TYPE);
 		break;	
@@ -1298,6 +1644,14 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
 
             WlanMacAddress_t *pMacParams = (WlanMacAddress_t *)params;
 
+            /* Block any multicast MAC address - multicast addresses have the LSB of the first byte set to 1 */
+            if(MAC_MULTICAST(pMacParams->pMacAddress))
+            {
+                CME_PRINT_REPORT_ERROR("\n\rWLAN_SET_MACADDRESS: Multicast MAC addresses are not allowed");
+                ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__HOST_RESPONSE_INVALID_MAC_ADDR);
+                break;
+            }
+
             if(WLAN_ROLE_STA == pMacParams->roleType &&
                     1 == (role_bitmap & BIT_x(ROLE_STA)))
             {
@@ -1315,14 +1669,14 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
             else if(WLAN_ROLE_P2P_GO == pMacParams->roleType &&
                     1 == (role_bitmap & BIT_x(ROLE_P2P_GO))) 
             {
-                ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__SET_MAC_ROLE_P2P);;
+                ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__SET_MAC_ROLE_P2P);
                 break;
             }
 
             else if(ROLE_DEVICE == pMacParams->roleType &&
                     1 == (role_bitmap & BIT_x(ROLE_DEVICE)))
             {
-                ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__SET_MAC_ROLE_DEVICE);;
+                ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__SET_MAC_ROLE_DEVICE);
                 break;
             }
 
@@ -1355,6 +1709,7 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
 
         case WLAN_SET_CALIBRATOR_CHANNEL_TUNE:
         case WLAN_SET_CALIBRATOR_TX_START:
+        case WLAN_SET_CALIBRATOR_TX_TONE_START:
         case WLAN_SET_CALIBRATOR_TX_STOP:
         case WLAN_SET_CALIBRATOR_START_RX:
         case WLAN_SET_CALIBRATOR_STOP_RX:
@@ -1371,6 +1726,8 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
         case WLAN_SET_CALIBRATOR_TRANSMIT_OSI:
         case WLAN_SET_CALIBRATOR_BA_SESSION:
         case WLAN_SET_CALIBRATOR_LINK_ADAPT:
+        case WLAN_SET_CALIBRATOR_MANUAL_CALIBRATION:
+        case WLAN_SET_CALIBRATOR_THERMAL_CFG:
         {
             CalibratorCommandWrapper_t *calibratorCommand = (CalibratorCommandWrapper_t *)params;
             ret = ctrlCmdFw_CalibratorCommand(calibratorCommand->calibratorAction, calibratorCommand->calibratorCommandParams);
@@ -1379,7 +1736,77 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
 
         case WLAN_SET_VENDOR_IE:
         {
-            ret = ctrlCmdFw_SetVendorIE((wlanSetVendorInfo_t *)params);
+            wlanSetVendorInfo_t *VendorInfo = (wlanSetVendorInfo_t *)params;
+            int roleId;
+            ti_driver_ifData_t * pDrv;
+            uint8_t * pVendorElements;
+            RoleType_e RoleType;
+            //for STA: vendor IE will appear on ASSoc-request
+            //For AP : BEACON + PROBE_RESP +ASSOCI response
+            //convert enums
+            if(VendorInfo->role_type == WLAN_ROLE_AP)
+            {
+                RoleType = ROLE_AP;
+            }
+            else if(VendorInfo->role_type == WLAN_ROLE_STA)
+            {
+                RoleType = ROLE_STA;
+            }
+            else
+            {
+                GTRACE(GRP_DRIVER_CC33, "WLAN_SET_VENDOR_IE:wrong role");
+                CME_PRINT_REPORT_ERROR("\n\rWLAN_SET_VENDOR_IE:wrong role");
+                ret = WLAN_RET_COMMAND_ERROR_MID_TYPE__CMD_GENERAL;
+                break;
+            }
+
+           //send msg to the CME to keep the vendor elements on pDrv to be used for ASSOC req/response
+           ret = CME_updateVendorElementsNotify(RoleType,  VendorInfo->length, VendorInfo->data);
+
+            if(VendorInfo->role_type == WLAN_ROLE_AP)
+            {
+                //Send the vendor IE configuration to the FW for BEACON + PROBE RESP
+                ret = ctrlCmdFw_SetVendorIE(VendorInfo);
+            }
+        }
+        break;
+        case WLAN_SET_PEER_AGING_TIMEOUT:
+        {
+
+            //set timout for aging, after the timeout elapsed event is send to the app
+            //setting timeout to 0 means to stop the feature
+            wlanSetStaAgingTimout_t *SetStaAging = params;
+
+            CME_PRINT_REPORT("\n\rWLAN_SET_PEER_AGING_TIMEOUT %d",SetStaAging->peerAgingTimeoutMs);
+
+            //after AP_MAX_INACTIVITY the AP  will disconnect the sta
+            if(SetStaAging->peerAgingTimeoutMs > WLAN_AP_MAX_INACTIVITY )
+            {
+                CME_PRINT_REPORT_ERROR("\n\rERROR ! WLAN_SET_PEER_AGING_TIMEOUT,SetStaAging->peerAgingTimeoutMs must be < %d  and > 0",WLAN_AP_MAX_INACTIVITY);
+                ret =  WLAN_RET_COMMAND_ERROR_MID_TYPE__CMD_GENERAL;
+                break;
+            }
+            if ((SetStaAging->peerAgingTimeoutMs < WLAN_AP_MIN_INACTIVITY ) &&
+                    (SetStaAging->peerAgingTimeoutMs > 0))
+            {
+                CME_PRINT_REPORT_ERROR("\n\rERROR ! WLAN_SET_PEER_AGING_TIMEOUT,SetStaAging->peerAgingTimeoutMs must be > than %d or = 0", WLAN_AP_MIN_INACTIVITY);
+                ret =  WLAN_RET_COMMAND_ERROR_MID_TYPE__CMD_GENERAL;
+                break;
+            }
+            if( (SetStaAging->peerAgingTimeoutMs !=  0)  && (SetStaAging->peerAgingTimeoutMs < WLAN_AP_MIN_INACTIVITY ))
+            {
+                CME_PRINT_REPORT_ERROR("\n\rERROR ! WLAN_SET_PEER_AGING_TIMEOUT,SetStaAging->peerAgingTimeoutMs must be > than %d", WLAN_AP_MIN_INACTIVITY);
+                ret =  WLAN_RET_COMMAND_ERROR_MID_TYPE__CMD_GENERAL;
+                break;
+            }
+            //0 means stop the feature */
+
+            CME_setPeerAgingTimeout(SetStaAging->peerAgingTimeoutMs);
+        }
+        break;
+        case WLAN_SET_SCAN_DWELL_TIME:
+        {
+            ret = CME_SetScanDwellTime((WlanScanDwellTime_t *)params);
         }
         break;
         case WLAN_SET_RESET_DECRYPT_PACKETS_COUNT:
@@ -1419,6 +1846,8 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
             set_extWPSDone(ext->extWpsDone);
         }
         break;
+
+
         case WLAN_SET_EXT_P2P_BUILD_ACTION_FRAME:
         {
             WlanBuildActionBuffer_t* pActionBuff = (WlanBuildActionBuffer_t *)params;
@@ -1464,6 +1893,12 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
                         pAction->actionBuff.bufLen);
         }
         break;
+        case WLAN_SET_WPS_SESSION:
+        {
+            wlanWpsSession_t *wpsSession = (wlanWpsSession_t *)params;
+            ret = CME_StartApWpsSession(wpsSession);
+        }
+        break;
 
 		case WLAN_SET_EXT_WPS_SESSION:
         {
@@ -1471,7 +1906,14 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
             ret = CME_SetExtWpsSession(wpsParams);
         }
         break;
-        
+
+        case WLAN_SET_WPS_AP_PIN:
+        {
+            WlanSetWpsApPinParam_t *wlanSetWpaApPinParam = (WlanSetWpsApPinParam_t *)params;
+            ret = CME_SetWpsApPin(wlanSetWpaApPinParam);
+        }
+        break;
+
 	    case WLAN_SET_EXTENDED_SCAN_RESULTS:
 	    {
 	        scanResultTable_GetCmeScanDbPointer()->extendedScanResults = *((uint8_t *)params);
@@ -1508,6 +1950,11 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
 	        }
 	    }
 	    break;
+        case WLAN_SET_WIRELESS_PROTOCOL:
+        {
+            l2_StoreWirelessProto(*(uint8_t *)params);
+        }
+        break;
 
 		case WLAN_SET_BLE_ENABLE:
 	    {
@@ -1518,11 +1965,9 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
         case WLAN_SET_P2P_CMD:
         {
             WlanP2pCmd_t *pP2pCmdParam = (WlanP2pCmd_t *)params;
-            
-            ret = CME_SetP2pCmd(params);
+            ret = CME_SetP2pCmd(pP2pCmdParam);
         }
         break;
-
         case WLAN_SET_SCAN_RESULTS_SIZE:
         {
             scanResultTable_GetCmeScanDbPointer()->mNumDigestResultsMax = *(uint16_t *)params;
@@ -1593,8 +2038,37 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
         }
         break;
 
+        case WLAN_SET_PRIMARY_CONNECTIVITY_FW:
+        {
+            WlanConnectivityFWSlot_t *pWlanSetConnectivitySlot = (WlanConnectivityFWSlot_t *)params;
+
+            ret = osi_fset(OSI_FILESYSTEM_SET_CONNECTIVITY_FW_CONTAINER, &pWlanSetConnectivitySlot->Connectivityslot);
+        }
+        break;
+        case WLAN_SET_CONNECTION_SCAN_EARLY_TERMINATION:
+        {
+            uint8_t enable = *(uint8_t*)params;
+            ret = CME_SetConnectionScanEarlyTermination(enable);
+        }
+        break;
+
+        case WLAN_SET_CONNECTION_POLICY:
+        {
+            WlanPolicySetGet_t *wlanSetConnPolicyType = (WlanPolicySetGet_t *)params;
+            ret = CME_SetConnPolicy(wlanSetConnPolicyType);
+        }
+        break;
+
+        case WLAN_SET_CUSTOM_DOMAIN_ENTRY:
+        {
+            ret = regulatoryDomain_SetCustomDomainEntry(params);
+        }
+        break;
+
         default:
-            ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+            ret = WlanError(WLAN_ERROR_SEVERITY__LOW,
+                            WLAN_ERROR_MODULE__COMMANDS,
+                            WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
             break;
     }
 
@@ -1604,7 +2078,181 @@ end:
 
 }
 
+int Wlan_ProfileAdd(const signed char *pName, const int NameLen, const unsigned char *pMacAddr,
+                     const WlanSecParams_t* pSecParams, const WlanSecParamsExt_t* pSecExtParams,
+                     const uint32_t Priority, const uint8_t Hidden, const uint32_t Options)
+{
+    int ret;
+    int alloc_size = 0;
+    CMEWlanAddGetProfile_t *params;
+    uint8_t PassLen = 0;
 
+
+    if( NULL == pName )
+    {
+        CME_PRINT_REPORT_ERROR("\n\r Error! No SSID name in Wlan_ProfileAdd");
+    	return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__INVALID_PARAM_NAME);// not to go to fail in purpose
+    }
+
+    if (NULL != pSecParams)
+    {
+        PassLen = pSecParams->KeyLen;
+    }
+
+    CME_PRINT_REPORT("\n\r ---Wlan_ProfileAdd---");
+
+    /* Enterprise security profile */
+    if (NULL != pSecExtParams)
+    {
+        //TODO: Add support for enterprise profiles
+    }
+    /* Regular security profile */
+    else
+    {
+        /* Allocate memory for the parameters */
+
+        alloc_size = M_ALIGN_TO_4_BYTES(sizeof(CMEWlanAddGetProfile_t) + 1 
+                                        + NameLen + PassLen);
+        
+        params = os_zalloc(alloc_size);
+
+        if (!params)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rWlan_ProfileAdd ERROR allocation failed");
+            /* failed to allocate */
+            ret = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__MALLOC);
+            goto fail;
+        }
+
+        params->SecType = pSecParams->Type;
+        params->FastTransition = 0; // do we need this for profiles?
+
+        /* Copy BSSID */
+        if (pMacAddr != NULL)
+        {
+            IRQ_UtilCopyMacAddress(pMacAddr, params->Bssid);//the ap Bssid
+        }
+        else
+        {
+            IRQ_UtilZeroMacAddress(params->Bssid);
+        }
+
+        /* Copy the SSID */
+        params->SsidLen = NameLen;
+        os_memcpy(PROFILE_SSID_STRING(params), pName, NameLen);
+
+        /* Copy Password */
+        if (NULL != pSecParams)
+        {
+            params->PasswordLen = PassLen;
+            params->SecType = pSecParams->Type;
+            os_memcpy(PROFILE_PASSWORD_STRING(params), pSecParams->Key, PassLen);
+        }
+        else
+        {
+            params->PasswordLen = 0;
+            params->SecType = WLAN_SEC_TYPE_OPEN;
+        }
+
+        /* Copy Priority */
+        params->Priority = Priority;
+
+        /* Copy Hidden AP */
+        params->Hidden = Hidden?1:0;
+
+        ret = CME_AddProfile(params);
+        if(ret <  0)
+        {
+            CME_PRINT_REPORT_ERROR("\n\rCME_AddProfile ERROR %d", ret);
+            os_free(params);
+            goto fail;
+        }
+
+        os_free(params);
+        HOOK(HOOK_WLAN_IF);
+        return ret;
+
+    }
+fail:
+	set_finish_wlan_connect();
+	return ret;
+}
+
+int Wlan_ProfileGet(const uint16_t Index, signed char* pName, int *pNameLen,
+                        uint8_t *pMacAddr, WlanSecParams_t* pSecParams, WlanSecParamsExt_t* pEntParams,
+                        uint32_t *pPriority, uint32_t *pHidden)
+{
+    int16_t ret;
+    CMEWlanAddGetEapProfile_t *params = NULL;
+
+    //alloc memory
+    params = os_zalloc(sizeof(CMEWlanAddGetEapProfile_t) + MAX_SSID_LEN);
+    if (params == NULL)
+    {
+        CME_PRINT_REPORT_ERROR("\n\rWlan_ProfileGet ERROR allocation failed");
+        /* failed to allocate */
+        return WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__MALLOC);
+    }
+    
+    os_memset(params, 0, sizeof(CMEWlanAddGetEapProfile_t) + MAX_SSID_LEN);
+
+    ret = CME_GetProfile(Index, params);
+
+    if (ret < 0)
+    {
+        //return error
+        CME_PRINT_PROFILE_REPORT_ERROR("\n\rWlan_ProfileGet ERROR invalid index");
+        os_free(params);
+        return WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__HOST_RESPONSE_GET_PROFILE_INVALID_INDEX);
+    }
+
+    CME_PRINT_REPORT("\n\r ---Wlan_ProfileGet---");
+    
+    //copy ssid
+    os_memcpy(pName, EAP_PROFILE_SSID_STRING(params), params->CommonAddProf.SsidLen);
+    pName[params->CommonAddProf.SsidLen] = '\0';
+    *pNameLen = params->CommonAddProf.SsidLen;
+
+
+    //copy bssid
+    if (IRQ_UtilIsZeroMacAddress(params->CommonAddProf.Bssid) == FALSE)
+    {
+        os_memcpy(pMacAddr, params->CommonAddProf.Bssid, ETH_ALEN);
+    }
+    //copy priority
+    *pPriority = params->CommonAddProf.Priority;
+
+    //copy hidden
+    *pHidden = params->CommonAddProf.Hidden;
+
+    //copy security
+    if (NULL != pSecParams)
+    {
+        pSecParams->Type = params->CommonAddProf.SecType;
+    }
+    if (NULL != pEntParams)
+    {
+        //pEntParams->= params->PasswordLen;
+        //TBD
+    }
+
+    os_free(params);
+    HOOK(HOOK_WLAN_IF);
+
+    return 0;
+}
+
+int Wlan_ProfileDel(const uint8_t Index)
+{
+    int16_t status;
+
+    CME_PRINT_REPORT("\n\r ---Wlan_ProfileDel---");
+
+    status = CME_RemoveProfile(Index);
+
+    return status;
+
+}
 // ============================================================================
 //      Event Function
 // ============================================================================
@@ -1670,9 +2318,19 @@ int wlanDispatcherSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
             os_memcpy((void*)pWlanEvent->Data.RemovePeer.Mac, args, sizeof(pWlanEvent->Data.RemovePeer.Mac));
         }
         break;
+        case WLAN_EVENT_AUTHENTICATION_REJECTED:
+        {
+            os_memcpy((void *)&pWlanEvent->Data.AuthStatusCode, args, sizeof(uint16_t));
+        }
+        break;
         case WLAN_EVENT_CONNECTING:
         {
             os_memcpy((void *)&pWlanEvent->Data.Connecting, args, sizeof(WlanEventConnecting_t));
+        }
+        break;
+        case WLAN_EVENT_ASSOCIATION_REJECTED:
+        {
+            os_memcpy((void *)&pWlanEvent->Data.AssocStatusCode, args, sizeof(uint16_t));
         }
         break;
         case WLAN_EVENT_ACTION_FRAME_RX://only for cc33xx
@@ -1685,7 +2343,12 @@ int wlanDispatcherSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
             os_memcpy((void *)&pWlanEvent->Data.Associated, args, sizeof(WlanEventAssociated_t));
         }
         break;
-        
+        case WLAN_EVENT_WPS_INVALID_PIN:
+        {
+            //no argument
+        }
+        break;
+        case WLAN_EVENT_AP_WPS_START_FAILED:
         case WLAN_EVENT_AP_EXT_WPS_SETTING_FAILED:
         {
             os_memcpy((void *)&pWlanEvent->Data.wpsFailCode, args, sizeof(int8_t));
@@ -1712,15 +2375,23 @@ int wlanDispatcherSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
         break;
         case WLAN_EVENT_P2P_GROUP_STARTED:
         {
+            set_finish_wlan_connect();
             os_memcpy((void *)&pWlanEvent->Data.FormationComplete, args, sizeof(WlanEventFormationComplete_t));
         }
         break;
         case WLAN_EVENT_P2P_GROUP_REMOVED:
         {
+            set_finish_wlan_disconnect();
             os_memcpy((void *)&pWlanEvent->Data.GroupRemoved, args, sizeof(WlanEventGroupRemoved_t));
         }
         break;
 #ifdef CC35XX
+        case WLAN_EVENT_P2P_GROUP_FORMATION_FAILED:
+        {
+            set_finish_wlan_connect();
+            //no argument
+        }
+        break;
         case WLAN_EVENT_P2P_SCAN_COMPLETED:
         {
             //only if we are waiting for this syncObj
@@ -1732,10 +2403,34 @@ int wlanDispatcherSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
             }
         }
         break;
+        case WLAN_EVENT_P2P_PEER_NOT_FOUND:
+        {
+            set_finish_wlan_connect();
+        }
+        break;
+        case WLAN_EVENT_PEER_AGING:
+        {
+            pWlanEvent->Data.peerAging.inactiveTime = ((WlanEventPeerAging_t *)args)->inactiveTime;
+            MAC_COPY(pWlanEvent->Data.peerAging.peer_mac,((WlanEventPeerAging_t *)args)->peer_mac);
+        }
+        break;
+
 #endif
         case WLAN_EVENT_CONNECT_PERIODIC_SCAN_COMPLETE:
-        case WLAN_EVENT_FW_CRASH:
         case WLAN_EVENT_BSS_TRANSITION_INITIATED:
+        {
+            //no argument
+        }
+        break;
+        case WLAN_EVENT_FW_CRASH:
+        {
+            FW_EVENT_HANDLE_PRINT_ERROR("\n\rGot wlanDispatcherSendEvent\n\r");
+            // Important: DO NOT RELEASE THE FOLLOWING POINTER (FwCrashLog.pLogBuffer)
+            os_memcpy((void *)&pWlanEvent->Data.FwCrashLog, args, sizeof(WlanEventFwCrash_t));
+        }
+        break;
+        case WLAN_EVENT_COMMAND_TIMEOUT:
+        case WLAN_EVENT_GENERAL_ERROR:
         {
             //no argument
         }
@@ -1763,12 +2458,40 @@ int wlanDispatcherSendEvent(uint16_t opcode, uint8_t *args, uint16_t argsLen)
     return 0;
 }
 
+int32_t wlanValidateApParams(RoleUpApCmd_t *pApParams)
+{
+    
+    if(pApParams->ssid == NULL || 
+        (strlen((const char *)pApParams->ssid) == 0) || 
+        (strlen((const char *)pApParams->ssid) > WLAN_SSID_MAX_LENGTH))
+    {
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__INVALID_PARAM_NAME);
+    }
+
+    if ((pApParams->secParams.Type == WLAN_SEC_TYPE_WPA2_WPA3) ||
+        (pApParams->secParams.Type == WLAN_SEC_TYPE_WPA3))
+    {
+        //WPA3 SAE only and WPA3 Transition mode 
+        //According IEEE802.11-2020 - Defines 8-63 char passphrase
+        //WFA Spec V3.1 explicitly states transition mode must use passphrase (not 64-hex PSK) &
+        //SAE Alg requieres passphrase input, not pre-computetd PSK
+        if ((pApParams->secParams.Key == NULL) ||
+            (pApParams->secParams.KeyLen == 0) ||
+            (pApParams->secParams.KeyLen >= WPA_MAX_PASSPHRASE_LEN) ||
+            (pApParams->secParams.KeyLen < WPA_HEX_MIN_PASSPHRASE_LENGTH))
+        {
+            return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__INVALID_PARAM_PASSWRD);
+        }
+    }
+
+    return WLAN_RET_CODE_OK;
+}
+
 
 int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
 {
-    int ret = 0;
+    int32_t ret = 0;
     uint32_t role_bitmap;
-
 
     CME_PRINT_REPORT("\n\r ---Wlan_RoleUp internal--- %d",roleType);
 
@@ -1796,9 +2519,17 @@ int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
     {
         if (NULL != params)
         {
-            RoleUpApCmd_t *domainParams = (RoleUpApCmd_t *)params;
-            regulatoryDomain_SetCountry(domainParams->countryDomain);
-            regulatoryDomain_SetChannels();
+            RoleUpStaCmd_t *roleUpStaParams = (RoleUpStaCmd_t *)params;
+
+            /* Allow changes in reg domain only if no role is active */
+            if (role_bitmap == 0x0)
+            {
+                ret = regulatoryDomain_Init(roleType, roleUpStaParams->countryDomain, 0);
+                if (ret < 0)
+                {
+                    return ret;
+                }
+            }
             CME_SetStaParams(params);
         }
 
@@ -1808,14 +2539,41 @@ int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
     {
         if (NULL != params)
         {
-            RoleUpApCmd_t *domainParams = (RoleUpApCmd_t *)params;
-            if (domainParams->countryDomain[0] != '\0')
-            {
-                regulatoryDomain_SetCountry(domainParams->countryDomain);
-            }
-        }
+            RoleUpApCmd_t *roleUpApParams = (RoleUpApCmd_t *)params;
+            uint8_t is5GhzSupported = (uint8_t)l2_cfg_is5GhzSupported();
 
-        CME_SetApParams(params);
+            if (roleUpApParams->channel > 14)
+            {
+                /* 5Ghz is not supported */
+                if (is5GhzSupported == 0)
+                {
+                    ret = WlanError(WLAN_ERROR_SEVERITY__LOW,
+                                    WLAN_ERROR_MODULE__COMMANDS,
+                                    WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+                    goto fail;
+                }
+            }
+
+            /* Allow changes in reg domain only if no role is active */
+            if (role_bitmap == 0x0)
+            {
+                ret = regulatoryDomain_Init(roleType,
+                                            roleUpApParams->countryDomain,
+                                            roleUpApParams->channel);
+                if (ret < 0)
+                {
+                    goto fail;
+                }
+            }
+
+            ret = wlanValidateApParams(params);
+            if (ret < 0)
+            {
+                goto fail;
+            }
+
+            CME_SetApParams(params);
+        }
 
         role_bitmap |= (uint32_t)BIT_x(ROLE_AP);
 
@@ -1825,9 +2583,19 @@ int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
         /* If any other role is active, don't allow using PLT */
         if (role_bitmap != 0)
         {
-            GTRACE(GRP_DRIVER_CC33,"Can't enable calibrator when any other role is up!\r\n");
-            Report("\n\rCan't enable calibrator when any other role is up!\r\n");
-            ret =  WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__OTHER_ROLE_IS_UP);
+            GTRACE(GRP_DRIVER_CC33,"Can't enable calibrator when any other role is up!\n\r");
+            Report("\n\rCan't enable calibrator when any other role is up!\n\r");
+            ret = WlanError(WLAN_ERROR_SEVERITY__LOW,
+                            WLAN_ERROR_MODULE__COMMANDS,
+                            WLAN_ERROR_TYPE__OTHER_ROLE_IS_UP);
+            goto fail;
+        }
+
+        ret = regulatoryDomain_Init(roleType,
+                                    (uint8_t *)"US", /* Use "US" as Default */
+                                    0);
+        if (ret < 0)
+        {
             goto fail;
         }
 
@@ -1838,6 +2606,9 @@ int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
         }
         role_bitmap |= (uint32_t)BIT_x(ROLE_TRANSCEIVER);
 
+        /* Since Calibrator isn't set through CME we should 
+         * set the started role bitmap instead.
+         */
         CME_SetStartedRoleBitmap(role_bitmap);
 
     }
@@ -1846,6 +2617,19 @@ int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
         GTRACE(GRP_DRIVER_CC33,"CME: Role UP DEVICE");
         if (NULL != params)
         {
+            RoleUpStaCmd_t *p2pDeviceParams = (RoleUpStaCmd_t *)params;
+
+            /* Allow changes in reg domain only if no role is active */
+            if (role_bitmap == 0x0)
+            {
+                ret = regulatoryDomain_Init(roleType,
+                                            p2pDeviceParams->countryDomain,
+                                            p2pDeviceParams->P2pParams.operChannel);
+                if (ret < 0)
+                {
+                    goto fail;
+                }
+            }
             CME_SetStaParams(params);
         }
 
@@ -1853,17 +2637,21 @@ int roleUp_Inter(WlanRole_e roleType, void *params, unsigned long int timeout)
     }
     else
     {
-        Report("\n\rERROR! role not supported roleType:%d" , roleType);
-        GTRACE(GRP_DRIVER_CC33,"ERROR! role not supported roleType:%d" , roleType);
-        ret =  WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__COMMANDS, WLAN_ERROR_TYPE__ROLE_NOT_SUPPORTED);;
+        Report("\n\rERROR! role not supported roleType: %d", roleType);
+        GTRACE(GRP_DRIVER_CC33, "ERROR! role not supported roleType: %d", roleType);
+        ret =  WlanError(WLAN_ERROR_SEVERITY__LOW,
+                         WLAN_ERROR_MODULE__COMMANDS,
+                         WLAN_ERROR_TYPE__ROLE_NOT_SUPPORTED);
         goto fail;
     }
 
-    ret = CME_WlanSetMode(0,role_bitmap, (uint32_t)timeout, 0);
-
-    if (ret < 0)
+    if (!ROLE_IS_TYPE_TRANSCEIVER(roleType))
     {
-        goto fail;
+        ret = CME_WlanSetMode(0, role_bitmap, (uint32_t)timeout, 0);
+        if (ret < 0)
+        {
+            goto fail;
+        }
     }
 
     return ret;
@@ -1911,7 +2699,6 @@ int roleDown_inter(WlanRole_e roleType, unsigned long int timeout)
         role_bitmap &= ~(uint32_t)BIT_x(ROLE_TRANSCEIVER);
 
         CME_SetStartedRoleBitmap(role_bitmap);
-        role_bitmap = CME_GetStartedRoleBitmap();
     }
     else if (ROLE_IS_TYPE_DEVICE(roleType))
     {

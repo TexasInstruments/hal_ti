@@ -111,6 +111,17 @@ int32_t CME_WlanSetMode(uint8_t calledFromCmeThread,uint32_t role_bitmap, uint32
 int16_t CME_WlanSetPSMode(uint8_t aMode);
 
 /* ----------------------------------------------------------------------------
+ CME_StartApWpsSession
+      This function pushes a message with start ap wps session request parameters 
+      into CME message queue.
+
+ Parameters: Pointer to command parameters.
+
+ Return code: 0 - push succeeded, -1 failed.
+---------------------------------------------------------------------------- */
+int16_t CME_StartApWpsSession(wlanWpsSession_t *wpsSession);
+
+/* ----------------------------------------------------------------------------
  CME_SetExtWpsSession
 
 
@@ -119,6 +130,17 @@ int16_t CME_WlanSetPSMode(uint8_t aMode);
  Return code: 0 if pushing to CME queue succeeded, negative otherwise
 ---------------------------------------------------------------------------- */
 int16_t CME_SetExtWpsSession(wlanSetExtWpsSession_t *wpsParams);
+
+
+/* ----------------------------------------------------------------------------
+ CME_SetWpsApPin
+      This function sets WPS AP PIN (for ER)
+
+ Parameters:    WlanSetWpsApPinParam_t
+                
+ Return code:   0 -  succeeded, -1 failed.
+---------------------------------------------------------------------------- */
+int16_t CME_SetWpsApPin(WlanSetWpsApPinParam_t *pWpsApPinParams);
 
 /* ----------------------------------------------------------------------------
  CME_GetMacAddress
@@ -160,7 +182,7 @@ int16_t CME_SetMacAddress(uint32_t roleType, uint8_t *pMacAddress);
  	 	 	 	buffer. This buffer should be release from CME context.
  Return code:	0 - memory allocation succeeded, -1 failed.
 ---------------------------------------------------------------------------- */
-int32_t CME_WlanConnect(CMEWlanConnectCommon_t *apCmd, BOOLEAN requestByHost);
+int32_t CME_WlanConnect(CMEWlanConnectCommon_t *apCmd, CMEEapWlanConnect_t* apEapCmd, BOOLEAN requestByHost);
 
 /* ----------------------------------------------------------------------------
  CME_WlanConnectEap
@@ -185,11 +207,11 @@ int32_t CME_WlanConnect(CMEWlanConnectCommon_t *apCmd, BOOLEAN requestByHost);
 int16_t CME_AddProfile(CMEWlanAddGetProfile_t* new_profile);
 
 //same just for EAP type profile
-//int16_t CME_AddEapProfile(SlWlanAddGetEapProfile_t *new_profile);
+int16_t CME_AddEapProfile(CMEWlanAddGetEapProfile_t *new_profile);
 //same but with profile removal
 int16_t CME_RemoveProfile(uint8_t delete_profile_index);
 int16_t CME_DhcpReleaseComplete();
-//void CME_GetProfile(uint8_t profileIndex, SlWlanAddGetEapProfile_t *fillOutArgs);
+int16_t CME_GetProfile(uint8_t profileIndex, CMEWlanAddGetEapProfile_t *fillOutArgs);
 
 
 /* ----------------------------------------------------------------------------
@@ -244,7 +266,18 @@ void CME_SetStaParams(void *staParams);
                 buffer. This buffer should be release from CME context.
  Return code:   0 - memory allocation succeeded, -1 failed.
 ---------------------------------------------------------------------------- */
-//int16_t CME_SetConnPolicy(SlWlanPolicySetGet_t new_policy);
+int16_t CME_SetConnPolicy(WlanPolicySetGet_t *new_policy);
+
+/* ----------------------------------------------------------------------------
+ CME_GetConnPolicy
+      This function returns current policy settings
+
+ Parameters:    Pointer to command parameters, which are copied to a local
+                buffer. runs on WLAN_IF context
+ Return code:   0  - success, -1 failed
+---------------------------------------------------------------------------- */
+int16_t CME_GetConnPolicy(WlanPolicySetGet_t *policy);
+
 /* ----------------------------------------------------------------------------
  CME_WlanDisconnect
       This function pushes a message with WLAN disconnect command into
@@ -257,6 +290,7 @@ void CME_SetStaParams(void *staParams);
 
 ---------------------------------------------------------------------------- */
 int32_t CME_WlanDisconnect(BOOLEAN requestByHost);
+
 int16_t CME_WlanApRemovePeer(CMEWlanApRemovePeer_t *pCmdRemovePeer);
 
 /*---------------------------------------------------------------------------- */
@@ -284,6 +318,41 @@ int16_t CME_SetP2pCmd(WlanP2pCmd_t *p2pCmdParams);
 int16_t CME_SetNonPrefferedChannels(WlanNonPrefChannels_t *pNonPrefChannels);
 
 /* ----------------------------------------------------------------------------
+ CME_GetConnectionScanEarlyTermination
+      This function returns whether early termination is enabled for connection scans.
+
+ Parameters:    None
+
+ Return code:   1 for enabled, 0 for disabled.
+---------------------------------------------------------------------------- */
+int16_t CME_GetConnectionScanEarlyTermination();
+
+/* ----------------------------------------------------------------------------
+ CME_SetConnectionScanEarlyTermination
+      This function enables/disables early termination for connection scans.
+
+ Parameters:    enable
+
+ Return code:   0
+---------------------------------------------------------------------------- */
+int16_t CME_SetConnectionScanEarlyTermination(uint8_t enable);
+
+
+
+/* ----------------------------------------------------------------------------
+ CME_SetScanDwellTime
+      This function sets the scan dwell time
+
+ Parameters:    enable
+
+ Return code:   0
+---------------------------------------------------------------------------- */
+int16_t CME_SetScanDwellTime(WlanScanDwellTime_t* dwellTimes);
+
+
+
+
+/* ----------------------------------------------------------------------------
  CME_WlanExtP2pProcessProvDiscActionMsg
       This function send P2P prov-disc-reaponse message from external app
        it pushes the command to the message queue
@@ -304,7 +373,7 @@ int32_t CME_BwListSetParameter(BOOLEAN CalledFromHost, uint32_t IdAndOption, uin
 int32_t CME_BwListGetParameter(BOOLEAN CalledFromHost, uint32_t IdAndOption, uint16_t* pLength, void* pCurrentValue);
 int32_t CME_PrivateIeSet(BOOLEAN CalledFromHost, uint32_t IdAndOption, uint16_t Length, void* pNewValue);
 
-
+int16_t CME_WlanProfileConnectionValidateReq(CMEWlanConnectCommon_t *apCmd);
 //void cme_InternalEventHandler(CmeInternalMsgsIds_e _event, void *data);
 
 #endif // _CME_API_H_

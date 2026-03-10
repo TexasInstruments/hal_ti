@@ -62,6 +62,7 @@
 #include "cc3xxx_public_types.h"
 #include "cc3xxx_public_commands.h"
 #include "cc3xxx_public_infoele.h"
+
 #ifdef THICK_MAC_COMPILE
 #include "./upper_mac/upper_mac/user_interface/wlan_if.h"
 #endif
@@ -117,6 +118,8 @@ typedef enum
     BLE_EVENT_ID                                    = 0x08000000,//   BIT_27,
     RESEED_EVENT_ID                                 = 0x10000000,//   BIT_28,
     CSI_EVENT_ID                                    = 0x20000000,//   BIT_29,
+    FW_CRASH_EVENT_ID                               = 0x40000000,//   BIT_30,
+    ERROR_EVENT_ID                                  = 0x80000000,//   BIT_31,
 
     EVENT_MBOX_ALL_EVENT_ID                     = MAX_POSITIVE32
 } EventMBoxId_e;
@@ -191,7 +194,6 @@ typedef enum
     SMART_CONFIG_DECODE_COMPLETE_ERROR
 } SmartConfigDecodeStatus_enum;
 
-#define MAX_BLE_PKT_LEN     (256)
 typedef struct
 {
     uint8_t   data[MAX_BLE_PKT_LEN];
@@ -233,24 +235,24 @@ typedef struct __PACKED__
     uint32_t eventsVector;
 
     /* Events Data */
-    uint8_t                       NumberOfScanResults;                               /* how many scan results were parsed */
-    uint8_t                       NumberOfPeriodicScanResults;                       /* how many periodic scan results were parsed */
-    uint16_t                      ChannelSwitchRoleIdBitMap;                         /* channel switch multi-role event bit map*/
-    int8_t                        RSSISNRTriggerMetric[NUM_OF_RSSI_SNR_TRIGGERS];    /* RSSI and SNR Multiple Triggers Array */
-    uint32_t                      PeerRemovedLidBitMap;                              /* peer remove bit map*/
+    uint8_t                     NumberOfScanResults;                               /* how many scan results were parsed */
+    uint8_t                     NumberOfPeriodicScanResults;                       /* how many periodic scan results were parsed */
+    uint16_t                    ChannelSwitchRoleIdBitMap;                         /* channel switch multi-role event bit map*/
+    int8_t                      RSSISNRTriggerMetric[NUM_OF_RSSI_SNR_TRIGGERS];    /* RSSI and SNR Multiple Triggers Array */
+    uint32_t                    PeerRemovedLidBitMap;                              /* peer remove bit map*/
     BaSessionRxConstraint_t     BaSessionRxConstraint;                             /* role on whom to enable/disable Rx BA session */
-    uint16_t                      RocCompleteRoleIdBitMap;                           /* remain on channel complete multi-role event bit map*/
-    uint16_t                      BssLossRoleIdBitMap;                               /* bss loss multi-role event bit map*/
-    uint16_t                      MaxTxFailureLidBitMap;                             /* max tx fail link event bit map*/
-    uint16_t                      timeSyncMacTimestampHighMSB;
-    uint16_t                      InactiveStaLidBitMap;                              /* inactive STA link event bit map*/
-    uint16_t                      timeSyncMacTimestampHighLSB;
+    uint16_t                    RocCompleteRoleIdBitMap;                           /* remain on channel complete multi-role event bit map*/
+    uint16_t                    BssLossRoleIdBitMap;                               /* bss loss multi-role event bit map*/
+    uint16_t                    MaxTxFailureLidBitMap;                             /* max tx fail link event bit map*/
+    uint16_t                    timeSyncMacTimestampHighMSB;
+    uint16_t                    InactiveStaLidBitMap;                              /* inactive STA link event bit map*/
+    uint16_t                    timeSyncMacTimestampHighLSB;
     RxBaWinSizeChange_t         RxBaWinSizeChange;                                 /* OritB - IOP: APs not respecting max ampdu rx size (16k) workaround */
     SmartConfigDecodeEvent_t    smartConfigDecode;                                 /* used by Smart Config Decode event */
     SmartConfigSyncEvent_t      smartConfigSync;                                   /* used by Smart Config Sync event */
-    uint16_t                      timeSyncMacTimestampMSB;                           /* time sync Mac Timestamp MSB */
+    uint16_t                    timeSyncMacTimestampMSB;                           /* time sync Mac Timestamp MSB */
     RadarDetected_t             radarDetectedInfo;                                 /* The radar detection info */
-    uint16_t                      timeSyncMacTimestampLSB;                           /* time sync Mac Timestamp LSB */
+    uint16_t                    timeSyncMacTimestampLSB;                           /* time sync Mac Timestamp LSB */
     bleEvent_t                  bleEvent;                                          /* ble event data */
     CsiData_t                   csiData;
     uint8                       reseedRequestSize;                                 /* reseed request size */
@@ -336,5 +338,4 @@ typedef struct __PACKED__
 
 
 #endif /* PUBLIC_EVENT_MBOX_H*/
-
 

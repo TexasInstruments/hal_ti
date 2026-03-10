@@ -55,6 +55,7 @@
 
 extern Cme_STA_states_e gCmeDeviceFlowState_ull;
 extern int CmeDeviceFlowIsSMIdle();
+extern void set_finish_wlan_sta_roleup();
 
 
 typedef enum
@@ -120,7 +121,7 @@ int cme_role_switch_manager(Cme_Users_e _deactivating_user, uint32_t deactivatio
             {
                 ASSERT_GENERAL(0);
             }
-            GTRACE(GRP_SL_DISPATCH, "1. cme_role_switch_manager : CME role switch acked back to host if");
+            GTRACE(GRP_SL_DISPATCH, "cme_role_switch_manager : CME role switch acked back to host if");
         }
         return rc;
     }
@@ -197,32 +198,28 @@ int cme_role_switch_manager(Cme_Users_e _deactivating_user, uint32_t deactivatio
     //
     // ACTIVATION! requsted bitmap & ~active bitmap will give us bitmap of the needed activation role bitmap
     //
-
-    // handle for each role seperatly
     if (needed_activation_roles & BIT_x(ROLE_STA))
-    { // role station
+    {
         ASSERT_GENERAL(cme_current_sta_like_role_state_ull == CME_ROLE_DEACTIVATED);
         cme_activate_sta_role();
     }
 
     if (needed_activation_roles & BIT_x(ROLE_AP))
-    { // role station
-
-        // AP role activation is done in one step (there is no "Activating")
+    {
         ASSERT_GENERAL(cme_current_ap_like_role_state_ull == CME_ROLE_DEACTIVATED);
 
         if (signal_event_when_done)
         {
-            //AP role up is up when the supplicant finish to configure the uAP
-            //so the Synch object will be signal only when the uAP is up
+            // AP role up is up when the supplicant finish to configure the uAP
+            // so the Sync object will be signaled only when the uAP is up
             g_signal_role_change_state_done.cme_signalWhenRoleStateChanged = signal_event_when_done;
 
-            signal_event_when_done= FALSE;
+            signal_event_when_done = FALSE;
         }
 
         cme_activate_ap_role();
 
-        if(g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK)
+        if (g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK)
         {
             signal_event_when_done = TRUE;
             g_signal_role_change_state_done.cme_signalWhenRoleStateChanged = 0;
@@ -231,8 +228,7 @@ int cme_role_switch_manager(Cme_Users_e _deactivating_user, uint32_t deactivatio
     }
 
     if (needed_activation_roles & BIT_x(ROLE_DEVICE))
-    { // role station
-
+    {
         // AP role activation is done in one step (there is no "Activating")
         ASSERT_GENERAL(cme_current_device_role_state_ull == CME_ROLE_DEACTIVATED);
         cme_activate_device_role();
@@ -248,28 +244,32 @@ int cme_role_switch_manager(Cme_Users_e _deactivating_user, uint32_t deactivatio
     }
 #endif
     if (needed_activation_roles & BIT_x(ROLE_TRANSCEIVER))
-    { // role transceiver
+    {
         ASSERT_GENERAL(cme_current_transceiver_like_role_state_ull == CME_ROLE_DEACTIVATED);
         cme_activate_transceiver_role();
     }
 
-
     // END of ACTIVATION procedure
 
-    // if got here,  potentially all activations should have been already done
-    if ((CME_ACTIVATABLE_MASKED_ROLE_BITMAP(cme_active_role_bitmap_ull) == CME_ACTIVATABLE_MASKED_ROLE_BITMAP(requested_active_role))
-            ||(g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK))
+    // If got here, potentially all activations should have been already done
+    if ((CME_ACTIVATABLE_MASKED_ROLE_BITMAP(cme_active_role_bitmap_ull) == CME_ACTIVATABLE_MASKED_ROLE_BITMAP(requested_active_role)) ||
+        (g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK))
     {
         // release CME manager (during role switch)
         gCmeRoleSwitchActive = FALSE;
         if (signal_event_when_done)
         {
-            CME_PRINT_REPORT("\n\rCME_WlanSetMode : signal role status change done, status :%d\r\n",g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status);
+            CME_PRINT_REPORT("\n\rCME_WlanSetMode: signal role status change done, status :%d\r\n",
+                             g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status);
+            if (needed_activation_roles & BIT_x(ROLE_STA))
+            {
+                set_finish_wlan_sta_roleup();
+            }        
             if (OSI_OK != osi_SyncObjSignal(&gCmeCommandBlockingSyncObject))
             {
                 ASSERT_GENERAL(0);
             }
-            GTRACE(GRP_SL_DISPATCH, "2. cme_role_switch_manager : CME role switch acked back to host if");
+            GTRACE(GRP_SL_DISPATCH, "cme_role_switch_manager: CME role switch acked back to host if");
         }
     }
 
@@ -328,7 +328,7 @@ int cme_activate_sta_role()
 
     cme_current_sta_like_role_state_ull = CME_ROLE_ACTIVATING;
 
-    CME_PRINT_STATE_CHNGE_REPORT("\n\CME: cme_activate_sta_role, change state to :CME_STA_INIT_EVENT !!");
+    CME_PRINT_STATE_CHNGE_REPORT("\r\nCME: cme_activate_sta_role, change state to :CME_STA_INIT_EVENT !!");
 
     // call STA role supplicant init
     rc = CmeStationFlowSM(CME_STA_INIT_EVENT, CME_STA_NONE_USER);
@@ -683,13 +683,13 @@ int cme_activate_ap_role()
 #if 0
     pwrmgt_addResourceRequirement ( PWRMGT_CLIENT_AP_ROLE, PWRMGT_RESOURCE_PHY_FULL_BIT ) ;
 #endif
-    // hostapd init
-    // call AP role supplicant init
-#ifdef CONFIG_AP
-    rc = CmeAPFlowSM(CME_AP_INIT_EVENT);
-    if ((rc == 0) && (g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status == CME_SIGNAL_ROLE_CHNGE_STATUS_OK))
-    {
 
+#ifdef CONFIG_AP
+    // hostapd init
+    rc = CmeAPFlowSM(CME_AP_INIT_EVENT);
+    if ((rc == 0) &&
+        (g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status == CME_SIGNAL_ROLE_CHNGE_STATUS_OK))
+    {
         cme_current_ap_like_role_state_ull = CME_ROLE_ACTIVATED;
         cme_active_role_bitmap_ull |= BIT_x(ROLE_AP);
 #ifdef CC33XX_CME_DEBUG
@@ -711,17 +711,20 @@ int cme_activate_ap_role()
             g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status = CME_SIGNAL_ROLE_CHNGE_STATUS_OK;
             if (OSI_OK != osi_SyncObjSignal(&gCmeCommandBlockingSyncObject))
             {
-                    ASSERT_GENERAL(0);
+                ASSERT_GENERAL(0);
             }
+            osi_uSleep(1000); // Temp WA !!!!!
         }
     }
     else
     {
-        GTRACE(GRP_CME, "cme_activate_ap_role: AP activation ERROR! invalid event state ");
-        CME_PRINT_REPORT_ERROR("\r\ncme_activate_ap_role: AP activation ERROR! invalid event state ");
+        GTRACE(GRP_CME, "cme_activate_ap_role: AP activation ERROR!");
+        CME_PRINT_REPORT_ERROR("\r\ncme_activate_ap_role: AP activation ERROR!");
+
+        cme_current_ap_like_role_state_ull = CME_ROLE_DEACTIVATED;
         rc = -1;
     }
-#endif
+#endif // CONFIG_AP
 
     HOOK(HOOK_IN_CME_ROLE_ACTIVATION);
 
@@ -776,9 +779,7 @@ int cme_deactivate_ap_role()
 
     if (rc == 0)
     {
-#if 0 // TODO: : Lwip
-        cme_role_ap_ip_netapps_bringdown();
-#endif
+        CME_PRINT_REPORT("\n\rcme_deactive_ap_role succeed");
         cme_current_ap_like_role_state_ull = CME_ROLE_DEACTIVATED;
         cme_active_role_bitmap_ull &= ~(BIT_x(ROLE_AP));
 #ifdef CC33XX_CME_DEBUG
@@ -791,6 +792,7 @@ int cme_deactivate_ap_role()
     else
     {
         GTRACE(GRP_CME, "cme_deactivate_ap_role: AP disconnect  ERROR! invalid event state ");
+        CME_PRINT_REPORT_ERROR("\n\rcme_deactivate_ap_role: AP disconnect  ERROR! invalid event state ");
         rc = -1;
         ASSERT_GENERAL(0);
     }

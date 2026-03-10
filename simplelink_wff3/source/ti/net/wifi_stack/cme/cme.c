@@ -84,15 +84,27 @@
 #include "cme_internal_api.h"
 #include "l2_cfg.h"
 #include "regulatory_domain_api.h"
+#include "wps_hostapd.h"
 // ============================================================================
 //      Debug only - CME tester
 // ============================================================================
 extern void cmeTestInit();
 extern bool mx_driver_scan_is_scan_tagged_frame(void *pDesc);
 extern void set_finish_wlan_supplicant_operation();
-extern void cmeP2pCancel();
 extern void cmeP2pListen();
+extern void cfgBuildP2pParameters(struct wpa_config *conf);
 extern  cmeScanSharedInfo_t*    scanResultTable_GetCmeScanDbPointer();
+extern int32_t is_wlan_periodic_scan_in_progress();
+extern ti_driver_ifData_t * getDriverForRoleId(uint32_t aRoleId, struct wpa_global *apGlobal);
+extern void CME_periodic_scan_timer_stop();
+extern void CME_start_periodic_scan_timer();
+extern int ti_driver_inact_mili(void *priv, const u8 *addr);
+
+void CME_start_peer_aging_timer(OsiTimer_t* osTimer, uint32_t timeout);
+void CME_peer_aging_timer_stop(OsiTimer_t* osTimer);
+
+extern void wlanLinks_getPeerList(int32_t* numOfPeers, uint8_t** mac_addr_peer_list);
+
 
 void *XMALLOC(size_t n, void* heap, int type)
 {
@@ -110,6 +122,10 @@ void XFREE(void *p, void* heap, int type)
 
 
 // Debug ----------------------------------------------------------------------
+#define CC35XX_ADD_SUPPORT_ENT_PROFILE (0)
+
+#define IS_PROFILE_CONNECT(Flags) ((Flags & WLAN_CONNECT_FLAG_PROFILE_CONNECT) == WLAN_CONNECT_FLAG_PROFILE_CONNECT)
+
 
 // Supplicant & driver_cc33 APIs
 extern int eloop_get_timeout(void);
@@ -117,6 +133,9 @@ extern void eloop_handle_timeout();
 extern void _recvNetworkPacket(uint32_t netifid,uint8_t *inbuf, uint32_t inbuf_len);
 extern int WLSendFW_Command(uint16_t opcode, uint32_t id, void *cmd, uint32_t len, void *out, uint32_t outLen);
 extern void ti_driver_cancel_remain_on_channel_timer_callback_handle();
+
+//Profile Managers
+extern uint8_t     gPreferredReadFromFS;
 
 // ============================================================================
 //      Modules private definitions
@@ -158,6 +177,8 @@ typedef enum
 //    CME_MESSAGE_ID_ROLE_STOP_COMPLETE,      // FW role stop complete indication
 
     CME_MESSAGE_ID_P2P_CMD,                 // Wlan Set P2P commads 
+
+    CME_MESSAGE_ID_SET_WPS_AP_PIN,          // Wlan Set WPS AP PIN for ER 
 
     // -------------------------------
     //  Internal events
@@ -205,7 +226,8 @@ typedef enum
     CME_MESSAGE_ID_AUTH_TIMEOUT,            // STA/P2P_CL authentication/association timeout notification
     CME_MESSAGE_ID_ROLE_STOPPED,            // A role stop sequence was stopped in all L2 layers.
                                             // Must be received before a role can be disabled
-    CME_MESSAGE_ID_SET_WPS_SESSION,         // Set WPS session according to parameters
+    CME_MESSAGE_ID_START_AP_WPS_SESSION,    // Start AP WPS session according to parameters
+    CME_MESSAGE_ID_SET_EXT_WPS_SESSION,     // Set external WPS session according to parameters
 
     // -------------------------------
     //  Supplicant events
@@ -246,7 +268,15 @@ typedef enum
 
     CME_MESSAGE_ID_SCAN_DONE,  //scan stopped , can happen when user initiate disconnect
 
-    CME_MESSAGE_ID_SET_NON_PREFFERED_CHANNELS
+    CME_MESSAGE_ID_SET_NON_PREFFERED_CHANNELS,
+
+    CME_MESSAGE_ID_SET_VENDOR_ELEMETS,
+
+    CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT,
+
+    CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME,
+
+    CME_MESSAGE_ID_SET_SCAN_DWELL_TIME
 
 } CmeMsgsIds_e;
 
@@ -272,10 +302,7 @@ typedef struct
 typedef struct
 {
     CMEWlanConnectCommon_t *pConnectCmd;        // pointer to to received command
-    // TODO need to implement
-#if 0
-    SlWlanConnectEapCommand_t *pConnectEapCmd;  // pointer for eap connect command - relevant in EAP case only
-#endif
+    CMEEapWlanConnect_t *pConnectEapCmd;  // pointer for eap connect command - relevant in EAP case only
     uint32_t                 keyMgmtType;         // parsed management key, bit msk defined
                                                 // in supplicant code, WPA_KEY_MGMT_xxx
     uint8_t                  profiles_connection;
@@ -300,9 +327,15 @@ typedef struct
 //preferred network profile command (add/remove)
 typedef struct
 {
-        CMEWlanAddGetProfile_t *Profile;
-        int16_t                *pNewProfileIndex;
+    CMEWlanAddGetProfile_t *Profile;
+    int16_t                *pNewProfileIndex;
 } CmeWlanProfile_t;
+
+typedef struct
+{
+    WlanPolicySetGet_t policy;
+}CmeWlanPolicy_t;
+
 
 #define CHANNEL_SWITCH_ELEM_LEN         3
 typedef uint8_t CmeChannelSwitchIE_t [CHANNEL_SWITCH_ELEM_LEN];
@@ -333,6 +366,13 @@ typedef struct
     uint8_t                *actionBuff;
     uint32_t                actionBuffLen;
 }CmeWlanSendActionParam_t;
+
+typedef struct
+{
+    RoleType_e roleType;
+    uint16_t vendorElements_length;
+    uint8_t* pVendorElements;
+} CMEWlanSetVendorElements_t;
 
 
 /* disconnect specific flags */
@@ -366,19 +406,24 @@ typedef struct
 #if 0
         CmeWlanEapProfile_t     eapProfile;
 #endif
-        u8                      deletedProfileIdx;
-        // TODO need to implement
-#if 0
+        uint8_t                 deletedProfileIdx;
+
         CmeWlanPolicy_t         policy;
-#endif
-        CmeWlanApRemovePeer_t    apRemovePeer;
-        CmeChannelSwitchIE_t     channelSwitchIe;
-        CmeExtAppAction_t        extAppAction;
-        wlanSetExtWpsSession_t   wpsParams;
-        CmeWlanRocParam_t        rocParam;
-        CmeWlanSendActionParam_t sendActionParam;
-        WlanP2pConfigChannelParam_t p2pConfigParams; 
-        WlanNonPrefChannels_t    nonPrefChannels;
+
+        CmeWlanApRemovePeer_t         apRemovePeer;
+        CmeChannelSwitchIE_t          channelSwitchIe;
+        CmeExtAppAction_t             extAppAction;
+        wlanWpsSession_t              wpsSession;
+        wlanSetExtWpsSession_t        wpsParams;
+        CmeWlanRocParam_t             rocParam;
+        CmeWlanSendActionParam_t      sendActionParam;
+        WlanP2pConfigChannelParam_t   p2pConfigParams; 
+        WlanNonPrefChannels_t         nonPrefChannels;
+        CMEWlanSetVendorElements_t    vendorElements;
+        uint32_t                      peerAgingTimeout;
+        WlanScanDwellTime_t            dwellTimes;
+
+        WlanSetWpsApPinParam_t          wpsApPin;
 
     } un;
 
@@ -448,6 +493,7 @@ uint8_t      gContRunThrdLoopCme = TRUE;
 OsiSyncObj_t gThrdLoopStoppedCmeSync = NULL;
 OsiSyncObj_t gCmeThrdDummySleep = NULL;
 OsiSyncObj_t gCmeEapolsStaSyncObject = NULL;
+OsiSyncObj_t gtxCompleteSyncObj = NULL;
 
 
 /* save last disconnect info */
@@ -459,7 +505,7 @@ CmeWlanConnect_t gCme_PendingWlanConnect;
 
 
 //CME manager role switch indicator
-uint8_t gCmeRoleSwitchActive ; //Should be in ULL since the system can go to sleep while in role switch
+uint8_t gCmeRoleSwitchActive;
 
 signal_role_change_state_done_t g_signal_role_change_state_done = { .cme_signalWhenRoleStateChanged =0,
                                                 .cme_signalWhenRoleStateChanged_status= CME_SIGNAL_ROLE_CHNGE_STATUS_OK };
@@ -495,16 +541,15 @@ static Bool32 isRxMgmtFrameSafeToFilter (void *descriptor);
 int32_t cmeMsgQueueCleanup (void);
 int32_t cmeMsgQueueCleanupAll (void);
 static int32_t validateWlanConnectParams(CMEWlanConnectCommon_t *apCmd);
-static void  initDebugInfo();
-static int32_t cme_validate_eap_connection_params(uint8_t SsidLen,
-                                                uint8_t PasswordLen,
-                                                uint8_t                           UserLen,
-                                                uint8_t                         AnonUserLen,
-                                                uint8_t                         CertIndex,
-                                                uint32_t                        EapBitmask,
-                                                uint8_t do_validate_role);
+static int32_t cme_validate_eap_connection_params(uint8_t  SsidLen,
+                                                  uint8_t  PasswordLen,
+                                                  uint8_t  UserLen,
+                                                  uint8_t  AnonUserLen,
+                                                  uint8_t  CertIndex,
+                                                  uint32_t EapBitmask,
+                                                  uint8_t  do_validate_role);
 
-static BOOLEAN isSameConnectParamsInProgress(CMEWlanConnectCommon_t *pCmdbuffer);
+static BOOLEAN isSameConnectParamsInProgress(CMEWlanConnectCommon_t *pCmdbuffer, CMEEapWlanConnect_t *pConnectEapCmd);
 
 
 static cmePrivateIeCB_t* getPrivateIeWorkingCopy(void);
@@ -827,10 +872,6 @@ TMacAddr     g_fuse_mac_addr[6]= {
 
 int16_t CME_GetMacAddress(uint32_t roleType, uint8_t *pMacAddress)
 {
-    const uint8_t *pCurrMac;
-    struct wpa_supplicant *wpa_s;
-    uint32_t roleId;
-
     /*get mac address from  g_fuse_mac_addr */
     if (WLAN_ROLE_STA == roleType)
     {
@@ -858,9 +899,6 @@ int16_t CME_GetMacAddress(uint32_t roleType, uint8_t *pMacAddress)
     {
         return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_RET_CODE_DEV_NOT_STARTED);
     }
-
-
-
 }
 
 // ----------------------------------------------------------------------------
@@ -931,21 +969,25 @@ int32_t CME_WlanSetMode(uint8_t calledFromCmeThread,uint32_t role_bitmap, uint32
 
     cmeMsg_t msg;
     int32_t ret = 0;
+    uint32_t originalStartedRoleBitmap = CME_GetStartedRoleBitmap();
 
     if (role_bitmap == 0xFF)
     {
         GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode : ERROR - invalid role %d",role_bitmap);
         CME_PRINT_REPORT("\r\nCME_WlanSetMode : ERROR - invalid role %d",role_bitmap);
-        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);
+        return WlanError(WLAN_ERROR_SEVERITY__LOW,
+                         WLAN_ERROR_MODULE__CME,
+                         WLAN_ERROR_TYPE__INVALID_ROLE);
     }
 
-    //
-    //cme manager sanity check
-    //
+    // CME manager sanity check
     if (CME_GetStartedRoleBitmap() == role_bitmap)
     {
-        GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode : nothing to do , role bitmap 0x%x is already set , exit func",role_bitmap);
-        CME_PRINT_REPORT("\r\nCME_WlanSetMode : nothing to do ,role bitmap 0x%x is already set, exit func\n\r ",role_bitmap);
+        GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode: nothing to do, role "
+                                "bitmap 0x%x is already set, exit func",
+                                role_bitmap);
+        CME_PRINT_REPORT("\r\nCME_WlanSetMode: nothing to do, role bitmap "
+                         "0x%x is already set, exit func\n\r", role_bitmap);
         /************************************************************
          *  EARLY EXIT POINT - requested role bitmap is already set!
          ***********************************************************/
@@ -954,48 +996,34 @@ int32_t CME_WlanSetMode(uint8_t calledFromCmeThread,uint32_t role_bitmap, uint32
 
     if (gCmeRoleSwitchActive != FALSE)
     {
-    	CME_PRINT_REPORT_ERROR("\r\nCME_WlanSetMode : ERROR ! rgCmeRoleSwitchActive != FALSE , gCmeRoleSwitchActive:%d\n\r",gCmeRoleSwitchActive);
-        //impossible - !!role switch should hold the command mailbox until its done
-        return -1;
+        // Impossible - role switch should hold the command mailbox until its done
+    	CME_PRINT_REPORT_ERROR("\r\nCME_WlanSetMode: ERROR! " 
+                               "rgCmeRoleSwitchActive != FALSE, "
+                               "gCmeRoleSwitchActive:%d\n\r",
+                               gCmeRoleSwitchActive);
+        return WlanError(WLAN_ERROR_SEVERITY__LOW,
+                         WLAN_ERROR_MODULE__CME,
+                         WLAN_ERROR_TYPE__RET_OPER_IN_PROGRESS);
     }
 
-
-
     GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode : CME mode set role bitmap 0x%x",
-                        role_bitmap);
-
+                            role_bitmap);
 
     CME_SetStartedRoleBitmap(role_bitmap);
-//    if (updateSetModeFlash)
-//    {
-//        SetRoleAppValues_SetToFlash(NULL, TRUE);
-//    }
 
     GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode cont ---");
     CME_PRINT_REPORT("\r\nCME_WlanSetMode cont ---");
 
-    gCmeRoleSwitchActive = TRUE; //Must be set here, just before sending "CME_MESSAGE_ID_NEW_ROLE_SET" command.
-                                 //Can not be set before SetRoleAppValues_SetToFlash() since this function release the context
-                                 //and cme context (i.e in CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED event) also looks at this
-                                 //global and starts role switch internally, before we wait here on the sync object.
-
-    //clear previous blocking sync object (this command is blocking)
-
-    //ret = osi_SyncObjClear(&gCmeCommandBlockingSyncObject);
-
-    if (OSI_INVALID_PARAMS == ret)
-    {
-        GTRACE(GRP_GENERAL_ERROR, "CME_WlanSetMode: osi_SyncObjClear failed. ret value  = %d", ret);
-    	CME_PRINT_REPORT_ERROR("\r\nCME_WlanSetMode: osi_SyncObjClear failed. ret value  = %d", ret);
-        ASSERT_GENERAL(0);
-        return ret;
-    }
+    // Must be set here, just before sending "CME_MESSAGE_ID_NEW_ROLE_SET" command,
+    // since this function releases the context and CME context also looks at this
+    // global and starts role switch internally, before we wait here on the sync object.
+    gCmeRoleSwitchActive = TRUE;
 
     g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status = CME_SIGNAL_ROLE_CHNGE_STATUS_OK;
 
-    if(!calledFromCmeThread)
+    if (!calledFromCmeThread)
     {
-        // prepare role set command
+        // Prepare role set command
         msg.msgId                   = CME_MESSAGE_ID_NEW_ROLE_SET;
         msg.un.wlanMode.role_bitmap = role_bitmap;
         msg.un.wlanMode.calledFromCmeThread = calledFromCmeThread;
@@ -1004,58 +1032,79 @@ int32_t CME_WlanSetMode(uint8_t calledFromCmeThread,uint32_t role_bitmap, uint32
 
         pushMsg2Queue(&msg);
 
-		//NOW wait on sync object - new role set operation must block command mailbox!
-		GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode : triggered CME with role switch request, wait for completion , timeout: %lu \r\n",timeout);
-		CME_PRINT_REPORT_ERROR("\n\rCME_WlanSetMode : send to CME with role switch request, wait for completion , timeout: %lu \r\n",timeout);
-
+		GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode: triggered CME with role "
+                                "switch request, wait for completion, timeout:"
+                                " %lu\r\n", timeout);
+        CME_PRINT_REPORT("\n\rCME_WlanSetMode: send to CME with role switch "
+                         "request, wait for completion, timeout: %lu \r\n",
+                         timeout);
+        
+        // Wait on sync object - new role set operation must block command mailbox!
 		ret = osi_SyncObjWait(&gCmeCommandBlockingSyncObject, timeout);
-
-	    if (OSI_OK!=ret)
+	    if (OSI_OK != ret)
 	    {
-	        ASSERT_GENERAL(timeout!=OSI_WAIT_FOREVER);//ASSERT_GENERAL only if timeout is set to FOREVER, otherwise it is legal
+	        ASSERT_GENERAL(timeout != OSI_WAIT_FOREVER);
 	        GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode : Got CME role switch TIMEOUT! carry on");
             CME_PRINT_REPORT_ERROR("\n\rCME_WlanSetMode : Got CME role switch TIMEOUT! carry on\n\r");
-			return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_TIMEOUT_IN_PRGRESS);
+
+			return WlanError(WLAN_ERROR_SEVERITY__LOW,
+                             WLAN_ERROR_MODULE__CME,
+                             WLAN_ERROR_TYPE__HOST_RESPONSE_TIMEOUT_IN_PRGRESS);
 	    }
-	    //if role up has time out , it means that it fails during the supplicant_run_ap/sta
-	    else if(g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK)
+	    // If role up has timed out, it means that it failed during the supplicant_run_ap/sta
+	    else if (g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK)
 	    {
             CME_PRINT_REPORT_ERROR("\n\rCME_WlanSetMode : Got role switch error\r\n");
-			return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_STATUS_ERROR);
+            CME_SetStartedRoleBitmap(originalStartedRoleBitmap);
+
+			return WlanError(WLAN_ERROR_SEVERITY__LOW,
+                             WLAN_ERROR_MODULE__CME,
+                             WLAN_ERROR_TYPE__HOST_RESPONSE_STATUS_ERROR);
 	    }
 	    else
 	    {
 	        GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode : Got CME role switch acknowledgments, role switch completed");
-	        CME_PRINT_REPORT_ERROR("\n\rCME_WlanSetMode : Got CME role switch acknowledgments, role switch completed\r\n");
+	        CME_PRINT_REPORT("\n\rCME_WlanSetMode : Got CME role switch acknowledgments, role switch completed\r\n");
 	    }
 
 	    HOOK(HOOK_IN_CME);
-
     }
-    else //if it is been called from CME thread
+    else
     {
         int role_switch_rc;
 
-        GTRACE(GRP_CME,"CME: CME_WlanSetMode,calledFromCmeThread:%d",calledFromCmeThread);
-        CME_PRINT_REPORT("\r\nCME: CME_WlanSetMode : deactivate and activate roles,calledFromCmeThread:%d\r\n",calledFromCmeThread);
-        //new role set request -must be set in command
+        GTRACE(GRP_CME, "CME_WlanSetMode, calledFromCmeThread");
+        CME_PRINT_REPORT("\r\nCME_WlanSetMode: deactivate and activate roles");
+
+        // New role set request - must be set in command
         gCme_PendingWlanConnect.pConnectCmd = NULL;
 
-        if(gCmeRoleSwitchActive == TRUE)
-        //It can be false in case the role switch was initiated internally by CME
+        // gCmeRoleSwitchActive can be false in case the role switch was
+        // initiated internally by CME
+        if (gCmeRoleSwitchActive == TRUE)
         {
-        	uint8_t signal_event = !calledFromCmeThread;
-            role_switch_rc = cme_role_switch_manager(CmeStationFlow_GetCurrentUser(),(BIT_x(ROLE_STA) | BIT_x(ROLE_AP) | BIT_x(ROLE_DEVICE)),signal_event/*if role switch done signal event*/);
+        	uint8_t signalEvent  = !calledFromCmeThread;
+            uint32_t activationBitmap = BIT_x(ROLE_STA) | BIT_x(ROLE_AP) | BIT_x(ROLE_DEVICE);
+
+            role_switch_rc = cme_role_switch_manager(CmeStationFlow_GetCurrentUser(),
+                                                     activationBitmap,
+                                                     signalEvent /*if role switch done signal event*/);
             if (role_switch_rc == 0)
             {
-                //in case role activation completed - try profile search
-                cmeProfileManagerConfigChange(0);
+                // In case role activation completed - try profile search
+                cmeProfileManagerConfigChange(0, CALLER2);
+            }
+
+            // Use this global flag to find out if role state change was successful.
+            // In case of error, restore original started roles bitmap.
+            if (g_signal_role_change_state_done.cme_signalWhenRoleStateChanged_status != CME_SIGNAL_ROLE_CHNGE_STATUS_OK)
+            {
+                CME_SetStartedRoleBitmap(originalStartedRoleBitmap);
             }
         }
 
 		GTRACE(GRP_SL_DISPATCH, "CME_WlanSetMode :  role_switch_rc:%d",role_switch_rc);
 		CME_PRINT_REPORT_ERROR("\n\rCME_WlanSetMode : role_switch_rc:%d\r\n", role_switch_rc);
-
     }
 
     return WLAN_RET_CODE_OK;
@@ -1076,6 +1125,7 @@ int16_t CME_WlanSetPSMode(uint8_t aMode)
     if(CME_GetPowerSaveMode() == aMode)
     {
         GTRACE(GRP_GENERAL_ERROR, "CME_WlanSetPSMode: Power save %d already set", aMode);
+        CME_PRINT_REPORT_ERROR("\n\rCME_WlanSetMode : Power save %d already set\n\r", aMode);
         return 0;
     }
 
@@ -1089,11 +1139,21 @@ int16_t CME_WlanSetPSMode(uint8_t aMode)
     return pushMsg2Queue(&msg);
 }
 // ----------------------------------------------------------------------------
+int16_t CME_StartApWpsSession(wlanWpsSession_t *wpsSession)
+{
+    cmeMsg_t msg;
+
+    msg.msgId = CME_MESSAGE_ID_START_AP_WPS_SESSION;
+    os_memcpy(&(msg.un.wpsSession), wpsSession, sizeof(wlanWpsSession_t));
+
+    return pushMsg2Queue(&msg);
+}
+
 int16_t CME_SetExtWpsSession(wlanSetExtWpsSession_t *wpsParams)
 {
     cmeMsg_t msg;
 
-    msg.msgId = CME_MESSAGE_ID_SET_WPS_SESSION;
+    msg.msgId = CME_MESSAGE_ID_SET_EXT_WPS_SESSION;
     os_memcpy(&(msg.un.wpsParams), wpsParams, sizeof(wlanSetExtWpsSession_t));
 
     return pushMsg2Queue(&msg);
@@ -1108,21 +1168,60 @@ int16_t CME_SetBLE_Enable()
     return pushMsg2Queue(&msg);
 }
 
+int16_t CME_SetScanDwellTime(WlanScanDwellTime_t* dwellTimes)
+{
+    cmeMsg_t msg;
+
+    msg.msgId = CME_MESSAGE_ID_SET_SCAN_DWELL_TIME;
+    os_memcpy(&(msg.un.dwellTimes), dwellTimes, sizeof(WlanScanDwellTime_t));
+    
+    return pushMsg2Queue(&msg);
+}
 
 int16_t CME_SetP2pCmd(WlanP2pCmd_t *p2pCmdParams)
 {
     cmeMsg_t msg;
 
+    int16_t ret = 0;
+
     msg.msgId = CME_MESSAGE_ID_P2P_CMD;
     msg.generalData = p2pCmdParams->Id;
     if (p2pCmdParams->Id == P2P_CMD_ID_CONFIG_CHANNELS)
     {
+        Bool32 isDfsChannel = FALSE;
+
        msg.un.p2pConfigParams.operChannel   = p2pCmdParams->Data.cfgParams.operChannel;
        msg.un.p2pConfigParams.operClass     = p2pCmdParams->Data.cfgParams.operClass;
        msg.un.p2pConfigParams.listenChannel = p2pCmdParams->Data.cfgParams.listenChannel;
        msg.un.p2pConfigParams.listenClass   = p2pCmdParams->Data.cfgParams.listenClass;
        msg.un.p2pConfigParams.goIntent      = p2pCmdParams->Data.cfgParams.goIntent;
+
+       //Check validity of operating channel
+       if (p2pCmdParams->Data.cfgParams.operChannel != 0)
+		{
+			ret = regulatoryDomain_IsChannelSupported(p2pCmdParams->Data.cfgParams.operChannel, &isDfsChannel);
+			if (ret == 0)
+			{
+				CME_PRINT_REPORT_ERROR("\r\nP2P device set channel failed: "
+									   "operating channel not "
+									   "supported");
+				return WlanError(WLAN_ERROR_SEVERITY__LOW,
+								 WLAN_ERROR_MODULE__COMMANDS,
+								 WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+			}
+	
+			if (isDfsChannel)
+			{
+				CME_PRINT_REPORT_ERROR("\r\nP2P device set chennel failed: "
+									   "Operating channel must "
+									   "not be a DFS channel");
+				return WlanError(WLAN_ERROR_SEVERITY__LOW,
+								 WLAN_ERROR_MODULE__COMMANDS,
+								 WLAN_ERROR_TYPE__INVALID_PARAM_CHANNEL);
+			}
+		}
     }
+
     
     return pushMsg2Queue(&msg);
 }
@@ -1155,6 +1254,58 @@ int16_t CME_SetNonPrefferedChannels(WlanNonPrefChannels_t *pNonPrefChannels)
 }
 
 // ----------------------------------------------------------------------------
+int16_t CME_GetConnectionScanEarlyTermination()
+{
+    return gConnectionScanEarlyTerminationEnabled;
+}
+
+// ----------------------------------------------------------------------------
+int16_t CME_SetConnectionScanEarlyTermination(uint8_t enable)
+{
+    gConnectionScanEarlyTerminationEnabled = enable;
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+int16_t CME_SetConnPolicy(WlanPolicySetGet_t *new_policy)
+{
+    cmeMsg_t msg;
+
+
+    cmeMngSetConnectionPolicy( 0 , //any p2p - not suported
+                               0 , //open policy - not suported 
+                                new_policy->fastPolicy,
+                                new_policy->autoPolicy,
+                                new_policy->fastPersistant);
+
+    msg.msgId = CME_MESSAGE_ID_POLICY_SET;
+    msg.un.policy.policy.fastPolicy = new_policy->fastPolicy;
+    msg.un.policy.policy.autoPolicy = new_policy->autoPolicy;
+    msg.un.policy.policy.fastPersistant = new_policy->fastPersistant;
+
+    return pushMsg2Queue(&msg);
+
+}
+
+int16_t CME_GetConnPolicy(WlanPolicySetGet_t *policy)
+{
+    CME_GetConnectionPolicy(NULL, &policy->fastPolicy, &policy->autoPolicy, NULL, &policy->fastPersistant);
+    return 0;
+}
+
+
+int16_t CME_SetWpsApPin(WlanSetWpsApPinParam_t *pWpsApPinParams)
+{
+    cmeMsg_t msg;
+
+    msg.msgId = CME_MESSAGE_ID_SET_WPS_AP_PIN;
+    
+    os_memcpy(&(msg.un.wpsApPin), pWpsApPinParams, sizeof(WlanSetWpsApPinParam_t));
+
+    return pushMsg2Queue(&msg);
+}
+
+// ----------------------------------------------------------------------------
 
 /* Sec type to key management type LUT */
 static const uint32_t SecTypeToWPAkey_lut[] = {
@@ -1163,7 +1314,7 @@ static const uint32_t SecTypeToWPAkey_lut[] = {
 /* (2) SL_SEC_TYPE_WPA_WPA2  */       WPA_KEY_MGMT_PSK,
 /* (3) SL_SEC_TYPE_WPS_PBC  */        WPA_KEY_MGMT_WPS,
 /* (4) SL_SEC_TYPE_WPS_PIN  */        WPA_KEY_MGMT_WPS,
-/* (5) SL_SEC_TYPE_WPA_ENT  */        WPA_KEY_MGMT_UNEXPECTED,
+/* (5) CME_SEC_TYPE_WPA_ENT  */       WPA_KEY_MGMT_UNEXPECTED,
 /* (6) SL_SEC_TYPE_P2P_PBC  */        WPA_KEY_MGMT_NONE,
 /* (7) SL_SEC_TYPE_P2P_PIN_KEYPAD */  WPA_KEY_MGMT_NONE,
 /* (8) SL_SEC_TYPE_P2P_PIN_DISPLAY */ WPA_KEY_MGMT_NONE,
@@ -1228,19 +1379,26 @@ int32_t CME_WlanConnectValidateReq (CMEWlanConnectCommon_t *apCmd, BOOLEAN  *pIs
 
     if (ROLE_TYPE_NONE == roleType)
     {
-        GTRACE(GRP_CME, "CME_WlanConnectValidateReq: Role type is not NONE!!!");
-        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);
+        GTRACE(GRP_CME, "CME_WlanConnectValidateReq: Role sta type is NONE!!!");
+        roleType = drv_getDeviceIface(gpSupplicantGlobals, &wpa_s);
+        if (ROLE_TYPE_NONE == roleType)
+        {
+            GTRACE(GRP_CME, "CME_WlanConnectValidateReq: Role device type is NONE!!!");
+            return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);
+        }
     }
-
 
     //PROFILES connection case (command all zeros)- new
     if ((TRUE == IRQ_UtilIsZeroMacAddress((const uint8_t *)apCmd->Bssid)) &&
         (0 == apCmd->SsidLen) &&
-        (apCmd->SecType==0) &&
+        (IS_PROFILE_CONNECT(apCmd->Flags)) &&
         (apCmd->PasswordLen==0))
     {
+        CME_PRINT_PROFILE_REPORT("\n\r [PROFILE] CME_WlanConnectValidateReq: Profile connection\n\r");
+        status = CME_WlanProfileConnectionValidateReq(apCmd);
         *pIsProfileConnection = 1;
-        status = 0;
+        
+        return status;
     }
     else
     {
@@ -1324,47 +1482,96 @@ int32_t CME_WlanConnectValidateReq (CMEWlanConnectCommon_t *apCmd, BOOLEAN  *pIs
 
 
 // ----------------------------------------------------------------------------
-int32_t CME_WlanConnect(CMEWlanConnectCommon_t *apCmd, BOOLEAN requestByHost)
+int32_t CME_WlanConnect(CMEWlanConnectCommon_t *apCmd, CMEEapWlanConnect_t* apEapCmd, BOOLEAN requestByHost)
 {
     cmeMsg_t msg;
     int32_t    status;
     BOOLEAN  isProfileConnection = FALSE;
+    CMEWlanConnectCommon_t *pCmd = NULL;
+    CMEEapWlanConnect_t *pEapCmd = NULL;
 
+    uint32_t cmdLen;
 
-    /* extract the corresponding key managment */
-    status = CME_WlanGetKeyMngtBySecType (apCmd->SecType, &msg.un.wlanConnect.keyMgmtType);
-
-    /* check connection params and fill the security type */
-    status |= CME_WlanConnectValidateReq(apCmd, &isProfileConnection);
-
-
-    /* Connect cmd is invalid/wrong secType - just return the error */
-    if (0 != status)
+    if(apCmd)
     {
-        return status;
+        /* extract the corresponding key managment */
+        status = CME_WlanGetKeyMngtBySecType (apCmd->SecType, &msg.un.wlanConnect.keyMgmtType);
+
+        /* check connection params and fill the security type */
+        status |= CME_WlanConnectValidateReq(apCmd, &isProfileConnection);
+
+
+        /* Connect cmd is invalid/wrong secType - just return the error */
+        if (0 != status)
+        {
+            return status;
+        }
+
+        // have to allocate memory and copy the command since dispatcher
+        // frees command memory after this function returns.
+        cmdLen = sizeof(CMEWlanConnectCommon_t) + 1 + apCmd->SsidLen + apCmd->PasswordLen;
+        pCmd = os_malloc(cmdLen); //Should be ull since that in connect while disconnecting and in
+                                                           //fast connect we keep the command till we use it.
+
+
+        // In case of allocation failure send error indication to host
+        if (NULL == pCmd)
+        {
+            status = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__MALLOC);
+            CME_PRINT_REPORT("\n\rERROR!! CME:allocation of pCmd failed");
+        }
+        else
+        {
+            // Copy the command to a local buffer and send a message to invoke the CME context
+            os_memcpy(pCmd, apCmd, cmdLen);
+        }
+
+
+    }
+    else //apEapCmd
+    {
+        /* extract the corresponding key managment */
+        status = CME_WlanGetKeyMngtBySecType (apEapCmd->EapCommonConnect.SecType, &msg.un.wlanConnect.keyMgmtType);
+
+        /* check connection params and fill the security type */
+        status |= CME_WlanConnectValidateReq(&apEapCmd->EapCommonConnect, &isProfileConnection);
+
+
+        /* Connect cmd is invalid/wrong secType - just return the error */
+        if (0 != status)
+        {
+            return status;
+        }
+
+        // have to allocate memory and copy the command since dispatcher
+        // frees command memory after this function returns.
+        cmdLen = sizeof(CMEEapWlanConnect_t) + 1 + apEapCmd->EapCommonConnect.SsidLen + apEapCmd->EapCommonConnect.PasswordLen;
+        pEapCmd = os_malloc(cmdLen); //Should be ull since that in connect while disconnecting and in
+                                                           //fast connect we keep the command till we use it.
+
+
+        // In case of allocation failure send error indication to host
+        if (NULL == pEapCmd)
+        {
+            status = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__MALLOC);
+            CME_PRINT_REPORT("\n\rERROR!! CME:allocation of ENT pCmd  failed");
+        }
+        else
+        {
+            // Copy the command to a local buffer and send a message to invoke the CME context
+            os_memcpy(pEapCmd, apEapCmd, cmdLen);
+        }
+
+
     }
 
-    // have to allocate memory and copy the command since dispatcher
-    // frees command memory after this function returns.
-    uint32_t len = sizeof(CMEWlanConnectCommon_t) + 1 + apCmd->SsidLen + apCmd->PasswordLen;
-    CMEWlanConnectCommon_t *pCmd = os_malloc(len); //Should be ull since that in connect while disconnecting and in
-                                                       //fast connect we keep the command till we use it.
 
-
-    // In case of allocation failure send error indication to host
-    if (NULL == pCmd)
+    if (pCmd || pEapCmd)
     {
-        status = WlanError(WLAN_ERROR_SEVERITY__MID, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__MALLOC);
-        CME_PRINT_REPORT("\n\rERROR!! CME:allocation of pCmd failed");
-    }
-    else
-    {
-        // Copy the command to a local buffer and send a message to invoke the CME context
-        os_memcpy(pCmd, apCmd, len);
 
         msg.msgId = CME_MESSAGE_ID_WLAN_CONNECT;
         msg.un.wlanConnect.pConnectCmd = pCmd;
-        //msg.un.wlanConnect.pConnectEapCmd = NULL;
+        msg.un.wlanConnect.pConnectEapCmd = pEapCmd;
 
 
         msg.generalData = 0;
@@ -1428,8 +1635,10 @@ int32_t CME_WlanDisconnect(BOOLEAN requestByHost)
 
     if (gCmeRoleSwitchActive != FALSE)
     {
-        ASSERT_GENERAL(0);//impossible - !!role switch should hold the command mailbox until its done
-        return -1;
+        CME_PRINT_REPORT_ERROR("\n\rNOTE: gCmeRoleSwitchActive TRUE - role switch already in progress");
+        int ret;
+        ret = cme_role_switch_manager(CmeStationFlow_GetCurrentUser(),(BIT_x(ROLE_STA)),1/*if role switch done signal event*/);
+        return ret;
     }
 
     GTRACE(GRP_SL_DISPATCH, "CME_WlanDisconnect gCmeRoleSwitchActive=%d! ", gCmeRoleSwitchActive);
@@ -1474,6 +1683,337 @@ int32_t CME_WlanDisconnect(BOOLEAN requestByHost)
     return status;
 }
 
+//
+// CONNECTION PROFILES API's
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// ----------------------------------------------------------------------------
+int16_t CME_GetProfile(uint8 profileIndex, CMEWlanAddGetEapProfile_t *fillOutArgs)
+{
+    int16_t RetVal = WLAN_RET_CODE_OK;
+
+    if (profileIndex >= CME_SCAN_MAX_PROFILES)
+    {
+        GTRACE(GRP_CME, "Error - Profile Index does not exist - %d", profileIndex);
+        // When error code is returned, it is transfered in the SecType field.
+        fillOutArgs->CommonAddProf.SecType = WLAN_ERROR_TYPE__HOST_RESPONSE_GET_PROFILE_INVALID_INDEX; //SL_ERROR_WLAN_GET_PROFILE_INVALID_INDEX;
+        fillOutArgs->CommonAddProf.SsidLen = 0;
+
+        RetVal = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_GET_PROFILE_INVALID_INDEX);
+        
+    }
+    else
+    {
+        //
+        //prevent preemption of this thread (host interface) so that preferred networks structure wont be changed during reading
+        //
+        //uint32 old_preempt = osi_DisablePreemption();
+
+        RetVal = cmeGetPreferredNetwork(profileIndex, fillOutArgs);
+
+        //restore original preemption
+        //osi_RestorePreemption(old_preempt);
+
+        if(RetVal < 0)
+        {
+            fillOutArgs->CommonAddProf.SecType = RetVal;
+            fillOutArgs->CommonAddProf.SsidLen = 0; // add info to Host that this ID has no entry
+        }
+    }
+    
+    return RetVal;
+}
+
+// ----------------------------------------------------------------------------
+int16_t CME_RemoveProfile(uint8_t delete_profile_index)
+{
+    cmeMsg_t  msg;
+    int16_t   status = WLAN_RET_CODE_OK;
+
+    //validity check
+    if (
+               (WLAN_DEL_ALL_PROFILES != delete_profile_index)  //delete all profiles request
+            && (delete_profile_index >= CME_SCAN_MAX_PROFILES)  //profile index is in range
+        )
+    {
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_GET_PROFILE_INVALID_INDEX);
+    }
+    else if(CME_IsOngoingWPSAdHocConnection())
+    {
+
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_ADD_REMOVE_PROFILE_FAILED_WPS_IN_PROGRESS);
+    }
+
+    if (status == WLAN_RET_CODE_OK)
+    {
+        // Now instead of doing the whole flow from the CME context we will call cmeDeletePreferredNetwork from
+        // the dispatcher context and write the profile to flash BUT NOT TO GLOBAL.
+        // We want to prevent the possibility of race condition so we disable profile remove durring WPS, and
+        // only when we are done writing to flash, we will send a message to the CME to update the global GLX and to do
+        // cmeProfileManagerConfigChange
+        status = cmeDeletePreferredNetwork(delete_profile_index);
+        GTRACE(GRP_SL_DISPATCH, "CME_RemoveProfile: Profile index %d is removed", delete_profile_index);
+        CME_PRINT_REPORT("\n\rCME_RemoveProfile: Profile index %d is removed", delete_profile_index);
+
+        if(status == WLAN_RET_CODE_OK)
+        {
+            msg.msgId = CME_MESSAGE_ID_PROFILE_REMOVED;
+            msg.un.deletedProfileIdx = delete_profile_index;
+
+            pushMsg2Queue(&msg);
+        }
+    }
+
+    return status;
+}
+
+// ----------------------------------------------------------------------------
+#if CC35XX_ADD_SUPPORT_ENT_PROFILE
+int16 CME_AddEapProfile(CMEWlanAddGetEapProfile_t *new_profile)
+{
+    cmeMsg_t msg;
+
+    int16      index;
+    CMEWlanAddGetEapProfile_t *sl_wlan_add_profile_args = new_profile;
+
+    int32_t  status = cme_validate_eap_connection_params(sl_wlan_add_profile_args->Common.SsidLen,
+                                                       sl_wlan_add_profile_args->Common.PasswordLen,
+                                                       sl_wlan_add_profile_args->UserLen,
+                                                       sl_wlan_add_profile_args->AnonUserLen,
+                                                       sl_wlan_add_profile_args->CertIndex,
+                                                       sl_wlan_add_profile_args->EapBitmask,
+                                                       0/*do not validate role*/);
+
+
+    GTRACE(GRP_SL_DISPATCH, "CME_AddEapProfile : CME manager status check result = %d ", status);
+
+    if (WLAN_RET_CODE_OK == status)
+    {
+
+        // Now instead of doing the whole flow from the CME context we will call cmeAddPreferredNetwork from
+        // the dispatcher context and write the profile to flash BUT NOT TO GLOBAL.
+        // Only when we are done we will send a message to the CME to update the global GLX and to do
+        // cmeProfileManagerConfigChange
+        cmeAddPreferredNetwork(NULL,NULL,sl_wlan_add_profile_args,&index);
+
+        if ( index >= 0) //meaning successful profile index allocation
+        {
+            msg.msgId = CME_MESSAGE_ID_PROFILE_EAP_ADDED;
+            pushMsg2Queue(&msg);
+        }
+
+        status = index;
+
+        GTRACE(GRP_SL_DISPATCH, "CME_AddEapProfile: Profile written to flash, index returned is %d", index);
+
+    }
+    return status;
+}
+#endif
+// ----------------------------------------------------------------------------
+int16_t CME_AddProfile(CMEWlanAddGetProfile_t* new_profile)
+{
+    cmeMsg_t   msg;
+    int16_t    status;
+    int16_t    index;
+    BOOLEAN    isProfileConnection = TRUE;
+    const CMEWlanAddGetProfile_t *cme_wlan_add_profile_args = new_profile;
+    uint32_t keyMgmtType;    
+
+    //
+    //validity check
+    //
+    /* extract the corresponding key managment */
+    status = CME_WlanGetKeyMngtBySecType (new_profile->SecType, &keyMgmtType);
+
+    /* Profile Add cmd is invalid/wrong secType - just return the error */
+    if (WLAN_RET_CODE_OK != status)
+    {
+        return status;
+    }
+
+    if ((0 == cme_wlan_add_profile_args->SsidLen) || (cme_wlan_add_profile_args->SsidLen > SSID_MAX_LEN))
+    {
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_SSID_LEN);
+    }
+    else if(CME_IsOngoingWPSAdHocConnection())
+    {
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_ADD_REMOVE_PROFILE_FAILED_WPS_IN_PROGRESS);
+    }
+    else
+    {
+        switch (cme_wlan_add_profile_args->SecType)
+        {
+#if 0            
+            case WLAN_SEC_TYPE_P2P_PBC: // P2P_PBC
+            case SL_SEC_TYPE_P2P_PIN_DISPLAY: // P2P_PIN
+            case SL_SEC_TYPE_P2P_PIN_KEYPAD: // P2P_PIN
+#endif 
+            case WLAN_SEC_TYPE_OPEN:
+                break;
+            case WLAN_SEC_TYPE_WPA_WPA2:
+            case WLAN_SEC_TYPE_WPA3:
+            case WLAN_SEC_TYPE_WPA2_PLUS:
+            case WLAN_SEC_TYPE_WPA2_WPA3:
+            {
+                if (cme_wlan_add_profile_args->PasswordLen > WPA_MAX_PASSPHRASE_LEN)
+                {
+                    status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_PASSPHRASE_TOO_LONG);
+                }
+            }break;
+
+            default:
+                status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_INVALID_SECURITY_TYPE);
+                break;
+        } // switch (pArgs->sec_type)
+    }
+
+    /* Profile Add cmd param is invalid/wrong secType - just return the error */
+    if (WLAN_RET_CODE_OK == status)
+    {
+    
+        // Now instead of doing the whole flow from the CME context we will call cmeAddPreferredNetwork from
+        // the dispatcher context and write the profile to flash BUT NOT TO GLOBAL.
+        // We want to prevent the possibility of race condition so we disable profile add durring WPS, and
+        // only when we are done writing to flash, we will send a message to the CME to update the global GLX and to do
+        // cmeProfileManagerConfigChange
+        cmeAddPreferredNetwork(new_profile,&index,NULL,NULL);
+
+        if ( index >= 0) //meaning successful profile index allocation
+        {
+            msg.msgId = CME_MESSAGE_ID_PROFILE_ADDED;
+
+            pushMsg2Queue(&msg);
+        }
+
+        status = index;
+        GTRACE(GRP_SL_DISPATCH, "CME_AddProfile: Profile written to flash, index returned is %d", index);
+    }
+    return status;
+}
+
+int16_t CME_WlanProfileConnectionValidateReq(CMEWlanConnectCommon_t *apCmd)
+{
+    int16_t status = WLAN_RET_CODE_OK;
+    CMEWlanAddGetEapProfile_t *fillOutArgs;
+    uint8_t index = apCmd->SecType;
+
+    fillOutArgs = os_malloc(sizeof(CMEWlanAddGetEapProfile_t) + MAX_SSID_LEN);
+
+    if (fillOutArgs == NULL)
+    {
+        CME_PRINT_REPORT_ERROR("\n\rERROR: allocation failed");
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_GET_PROFILE_INVALID_INDEX);
+    }
+
+    if(CME_GetProfile(index, fillOutArgs) == WLAN_RET_CODE_OK)
+    {
+        status = WLAN_RET_CODE_OK;
+    }
+    else
+    {
+        CME_PRINT_REPORT_ERROR("\n\rProfile Index does not exist - %d", index);
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_GET_PROFILE_INVALID_INDEX);
+    }
+    
+    os_free(fillOutArgs);
+    return status;
+}
+
+// ----------------------------------------------------------------------------
+#if CC35XX_ADD_SUPPORT_ENT_PROFILE
+static int32_t cme_validate_eap_connection_params(uint8_t  SsidLen,
+                                                  uint8_t  PasswordLen,
+                                                  uint8_t  UserLen,
+                                                  uint8_t  AnonUserLen,
+                                                  uint8_t  CertIndex,
+                                                  unit32_t EapBitmask,
+                                                  uint8_t  do_validate_role)
+{
+    int32_t status = WLAN_RET_CODE_OK;
+    //
+    //EAP is relevant for STA role only
+    //
+    if (do_validate_role && (!cme_is_activated_role_from_type(ROLE_STA)))
+    {
+        GTRACE(GRP_CME, "WLAN Dispatcher ERROR! CME_WlanConnectEap: Command Not Supported in non-STA Mode - parse cmdCME_WlanConnectEap");
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);
+    }
+
+
+    if((0 == SsidLen) || (SsidLen > SSID_MAX_LEN))
+    {
+        GTRACE(GRP_CME, "WLAN Dispatcher: Parameter Error");
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_SSID_LEN);//SL_ERROR_WLAN_SSID_LEN_ERROR;
+    }
+    else
+    {
+        //now supporting 2 sets of ENT certificate files, user must state if it is the first one (0) or the second set (1)
+        //TODO - 1 ENT is allowed!!
+        if (CertIndex != 0 && CertIndex != 1)
+        {
+            GTRACE(GRP_CME, "WLAN Dispatcher: certificate index out of range");
+            status = -1;//SL_ERROR_WLAN_EAP_WRONG_CERT_INDEX;
+
+        }
+        else if ((0 == UserLen) || (UserLen > MAX_USER_LEN))
+        {
+            GTRACE(GRP_CME, "WLAN Dispatcher: Parameter Error");
+            status = -1; //SL_ERROR_WLAN_USER_ID_LEN_ERROR;
+        }
+        else
+        {
+
+            switch (EAPBITMASK_GET_PHASE1_VAL(EapBitmask))
+            {
+                case TLS: // TLS
+                    break; //TLS
+                case TTLS: // TTLS
+                case PEAP0: // PEAP
+                case PEAP1: // PEAP
+                    if (EAPBITMASK_GET_PHASE2_VAL(EapBitmask) > 2) // Should be MSCHAPV2 or TLS or PSK
+                    {
+                        status = SL_ERROR_WLAN_EAP_WRONG_METHOD;
+                    }
+
+                    else
+                    {
+                        if (((0 == PasswordLen) || ( PasswordLen > MAX_PASS_LEN)) &&
+                                ((EAPBITMASK_GET_PHASE2_VAL(EapBitmask) == 0)||( EAPBITMASK_GET_PHASE2_VAL(EapBitmask) == 2 ))  ) //MSCHAPV2 or PSK
+                        {
+                            status = SL_ERROR_WLAN_PASSWORD_ERROR;
+                        }
+                        else if (AnonUserLen > MAX_ANON_LEN)
+                        {
+                            status = SL_ERROR_WLAN_EAP_ANONYMOUS_LEN_ERROR;
+                        }
+                    }
+                    break;
+                case FAST: // FAST
+                    if ((0 == PasswordLen) || ( PasswordLen > MAX_PASS_LEN))
+                    {
+                        status = SL_ERROR_WLAN_PASSWORD_ERROR;
+                    }
+                    else if (AnonUserLen > MAX_ANON_LEN)
+                    {
+                        status = SL_ERROR_WLAN_EAP_ANONYMOUS_LEN_ERROR;
+                    }
+
+                    break;
+                default:
+                    status = SL_ERROR_WLAN_EAP_WRONG_METHOD;
+                    GTRACE(GRP_CME, "ERROR!parse cmd EAP connect, unsupported eap bitmask!!! %d",  EAPBITMASK_GET_PHASE1_VAL(EapBitmask));
+                    break;
+            }
+        }
+    }
+
+    return status;
+
+}
+#endif
+//
+//   END OF PROFILES APIs
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 // ----------------------------------------------------------------------------
 void CME_ChannelSwitchSetTxPower(uint8_t channel)
 {
@@ -1532,7 +2072,7 @@ int32_t CME_RemainOnChannelTimeoutNotify(uint32_t aRoleId)
 
     cmeMsg_t msg;
 
-    msg.msgId = CME_MESSAGE_ID_ROC_TIMER_TIMEOUT;;
+    msg.msgId = CME_MESSAGE_ID_ROC_TIMER_TIMEOUT;
     msg.roleId = aRoleId;
 
     return pushMsg2Queue_fromIntr(&msg);
@@ -1591,6 +2131,65 @@ int32_t CME_sendActionFrameNotify( ti_driver_ifData_t     *pDrv,
     return pushMsg2Queue(&msg);
 }
 
+
+int32_t CME_updateVendorElementsNotify(RoleType_e roleType,  uint16_t vendorElements_length, uint8_t* pVendorElements)
+{
+    HOOK(HOOK_IN_CME);
+
+    cmeMsg_t msg;
+    uint8_t* pVendorIE = NULL;
+    int32 ret;
+
+    if(vendorElements_length)
+    {
+        pVendorIE = os_malloc(vendorElements_length);
+        if(pVendorIE == NULL)
+        {
+            GTRACE(GRP_DRIVER_CC33, "WLAN_SET_VENDOR_IE:failed to allocate memory, size :%d",vendorElements_length);
+            CME_PRINT_REPORT_ERROR("\n\rWLAN_SET_VENDOR_IE:failed to allocate memory size :%d", vendorElements_length);
+            ret = WLAN_RET_COMMAND_ERROR_MID_TYPE__CMD_GENERAL;
+            return ret;
+        }
+
+        os_memcpy(pVendorIE,pVendorElements,vendorElements_length);
+    }
+
+    msg.msgId = CME_MESSAGE_ID_SET_VENDOR_ELEMETS ;
+    msg.un.vendorElements.roleType = roleType;
+    msg.un.vendorElements.vendorElements_length = vendorElements_length;
+    msg.un.vendorElements.pVendorElements = pVendorIE;
+
+    return pushMsg2Queue(&msg);
+}
+
+
+int32_t CME_setPeerAgingTimeout(uint32_t agingTimeOut)
+{
+    HOOK(HOOK_IN_CME);
+
+    cmeMsg_t msg;
+    uint8_t* pVendorIE = NULL;
+    int32 ret;
+
+    msg.msgId = CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT ;
+    msg.un.peerAgingTimeout = agingTimeOut;
+
+    return pushMsg2Queue(&msg);
+}
+
+
+int32_t CME_peerAgingSampleTime()
+{
+    HOOK(HOOK_IN_CME);
+
+    cmeMsg_t msg;
+
+    msg.msgId = CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME ;
+
+    return pushMsg2Queue(&msg);
+}
+
+
 // ----------------------------------------------------------------------------
 CmeTxDesc_t *CME_CopyTxDesc(void *srcDesc, uint32_t status)
 {
@@ -1600,7 +2199,7 @@ CmeTxDesc_t *CME_CopyTxDesc(void *srcDesc, uint32_t status)
     if(!pDesc)
     {
         CME_PRINT_REPORT("\n\rCME_TxResult,pDesc is NULL");
-        assert(0);
+        ASSERT_GENERAL(0);
         return NULL;
     }
     pDstDesc = os_malloc(sizeof(CmeTxDesc_t));
@@ -1792,7 +2391,9 @@ int32_t CmeScan_SetProfilesAndResultsMem(cmeScanSharedInfo_t *apSharedInfo,
 int32_t CmeScan_ScanDone(EScanRequestType    aScanReqType,
                        uint32_t              aRoleId,
                        cmeScanSharedInfo_t *apSharedInfo,
-                       cmeScanStatus_e     aStatus)
+                       cmeScanStatus_e     aStatus,
+                       uint8_t             fromIntr,
+                       uint8_t             fromTimeout)
 {
     cmeMsg_t msg;
 
@@ -1804,7 +2405,23 @@ int32_t CmeScan_ScanDone(EScanRequestType    aScanReqType,
     msg.un.postScanInfo.status = aStatus;
     msg.un.postScanInfo.pSharedInfo = apSharedInfo;
 
-    return pushMsg2Queue(&msg);
+    if (fromTimeout)
+    {
+        msg.un.postScanInfo.fromTimeout = TRUE;
+    }
+    else
+    {
+        msg.un.postScanInfo.fromTimeout = FALSE;
+    }
+
+    if(!fromIntr)
+    {
+        return pushMsg2Queue(&msg);
+    }
+    else
+    {
+        return pushMsg2Queue_fromIntr(&msg);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -1981,6 +2598,7 @@ int32_t CME_RxEapol(void *aDesc)
     {
         GTRACE(0, "Forward EAPOL Rx to External WPS, netifId: %u", netifId);
         _recvNetworkPacket(netifId, (uint8*)((TEthernetHeader *)RX_ETH_PKT_DATA((uint8_t *)aDesc)), RX_ETH_PKT_LEN((uint8_t *)aDesc));
+        RxBufFree(aDesc);
         return 0;
     }
 
@@ -2013,7 +2631,7 @@ int cmePendingWlanConnectTrigger()
 
     GTRACE(GRP_CME,"cme_PendingWlanConnect.pConnectCmd value 0x%x",(uint32_t)gCme_PendingWlanConnect.pConnectCmd);
     CME_PRINT_REPORT("\n\rCME:cme_PendingWlanConnect.pConnectCmd value 0x%x",(uint32_t)gCme_PendingWlanConnect.pConnectCmd);
-    if (gCme_PendingWlanConnect.pConnectCmd == NULL)
+    if ((gCme_PendingWlanConnect.pConnectCmd == NULL) && (gCme_PendingWlanConnect.pConnectEapCmd == NULL))
     {
         CME_PRINT_REPORT("\n\rCME:cme_PendingWlanConnect.connect cmd is not waiting");
         return 0;
@@ -2035,7 +2653,7 @@ int cmePendingWlanConnectTrigger()
     GTRACE(GRP_CME,"cme_InternalEventHandler: WlanConnect event trigger following previous network DISCONNECTEd event");
     CME_PRINT_REPORT("\n\rcme_InternalEventHandler: WlanConnect event trigger following previous network DISCONNECTEd event");
 
-    cmeWlanConnect(pDrv->roleId, gCme_PendingWlanConnect.pConnectCmd, NULL,
+    cmeWlanConnect(pDrv->roleId, gCme_PendingWlanConnect.pConnectCmd, gCme_PendingWlanConnect.pConnectEapCmd,
                    gCme_PendingWlanConnect.keyMgmtType,gCme_PendingWlanConnect.profiles_connection);
 
     //clear wlanconnect, releasing the buffer performed inside wlanConnect
@@ -2044,7 +2662,7 @@ int cmePendingWlanConnectTrigger()
 
 
     gCme_PendingWlanConnect.pConnectCmd = NULL;
-    //gCme_PendingWlanConnect.pConnectEapCmd = NULL;
+    gCme_PendingWlanConnect.pConnectEapCmd = NULL;
 
     return 1;
 
@@ -2121,8 +2739,8 @@ void cme_Thread(void* apParam)
 
     uint32_t requested_active_role  = 0;
     
-    int32_t              eloopTimeout;
-    uint32_t               timeoutMs = 0xFFFFFFFF;
+    int32_t            eloopTimeout;
+    uint32_t           timeoutMs = 0xFFFFFFFF;
     cmeMsg_t           msg;
     OsiReturnVal_e     rc;
     int role_switch_rc;
@@ -2151,19 +2769,16 @@ void cme_Thread(void* apParam)
 
     if(running)
     {
-        CME_PRINT_REPORT("\n\rcme_Thread: thrd is up and stopped");
-        CME_PRINT_REPORT("\n\rcme_Thread: thrd is running");
+        CME_PRINT_REPORT("\n\rcme_Thread: thrd is up and running");
     }
 
-    //initDebugInfo();
+    cmeMngInit();
+
     gCmeRoleSwitchActive = FALSE;
 
 
     //signal that thread is up and running
     osi_SyncObjSignal(&gCmeThreadStarted);
-
-    cmeProfileManagerConfigChange(0);
-
 
 
     while(running)
@@ -2202,6 +2817,7 @@ void cme_Thread(void* apParam)
                 case CME_MESSAGE_ID_CSA_NOTIFY:
                 {
                     int ret = 0;
+                    Bool32 isDfsChannel;
 
                     gCmdChannelSwitchStart.channelSwitchParams.RoleID = msg.roleId;
                     gCmdChannelSwitchStart.channelSwitchParams.stopTx = msg.un.channelSwitchIe[0];
@@ -2210,11 +2826,14 @@ void cme_Thread(void* apParam)
                     //gCmdChannelSwitchStart.channelSwitchParams.band = ;
 
                     // set isDfsChannel if needed
-                    regulatoryDomain_IsChannelSupported(gCmdChannelSwitchStart.channelSwitchParams.channel, (Bool32 *)&(gCmdChannelSwitchStart.channelSwitchParams.isDfsChannel));
+                    regulatoryDomain_IsChannelSupported(gCmdChannelSwitchStart.channelSwitchParams.channel,
+                                                        &isDfsChannel);
+
+                    gCmdChannelSwitchStart.channelSwitchParams.isDfsChannel = (uint8_t )isDfsChannel;
 
                     ret = WLSendFW_Command(CMD_CHANNEL_SWITCH, CMD_CHANNEL_SWITCH, 
-                                            (void *)&gCmdChannelSwitchStart,
-                                            sizeof(cmd_channel_switch_t), NULL, 0);
+                                           (void *)&gCmdChannelSwitchStart,
+                                           sizeof(cmd_channel_switch_t), NULL, 0);
                 }
                 break; // CME_MESSAGE_ID_CSA_NOTIFY
                 case CME_MESSAGE_ID_CS_FINISH:
@@ -2232,13 +2851,17 @@ void cme_Thread(void* apParam)
 
                 case CME_MESSAGE_ID_SCAN_DONE:
                 {
+                    struct wpa_supplicant *wpa_s = NULL;
+                    wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, msg.roleId);
                     GTRACE(GRP_CME, "CME: CME_MESSAGE_ID_SCAN_DONE");
                     CME_PRINT_REPORT("\n\rCME: CME_MESSAGE_ID_SCAN_DONE");
                 	CME_PRINT_STATE_CHNGE_REPORT("\n\rCME: CME_MESSAGE_ID_SCAN_DONE, change state to :CME_STA_SCAN_DONE !!");
-
-                    //msg for scan done received from transport layer
-                    //due to user request to stop scan or disconnect
-                    CmeStationFlowSM(CME_STA_SCAN_DONE, CmeStationFlow_GetCurrentUser());
+                    if (wpa_s != NULL)
+                    {
+                        //msg for scan done received from transport layer
+                        //due to user request to stop scan or disconnect
+                        CmeStationFlowSM(CME_STA_SCAN_DONE, CmeStationFlow_GetCurrentUser());
+                    }
                 }
                 break;
                 case CME_MESSAGE_ID_GET_SCAN_RESULTS:
@@ -2307,26 +2930,38 @@ void cme_Thread(void* apParam)
                         GTRACE(GRP_CME, "CME: site survey is already running");
 
                     }
-                }break; // CME_MESSAGE_ID_GET_SCAN_RESULTS// 
+                }break; // CME_MESSAGE_ID_GET_SCAN_RESULTS//
+
                 case CME_MESSAGE_ID_NEW_ROLE_SET:
                 {
-                    GTRACE(GRP_CME,"CME: handle CME_MESSAGE_ID_NEW_ROLE_SET,calledFromCmeThread:%d",msg.un.wlanMode.calledFromCmeThread);
-                    CME_PRINT_REPORT("CME: handle CME_MESSAGE_ID_NEW_ROLE_SET : deactivate and activate roles,calledFromCmeThread:%d",msg.un.wlanMode.calledFromCmeThread);
-                    //new role set request -must be set in command
+                    GTRACE(GRP_CME, "CME: handle CME_MESSAGE_ID_NEW_ROLE_SET, "
+                                    "calledFromCmeThread:%d", 
+                                    msg.un.wlanMode.calledFromCmeThread);
+                    CME_PRINT_REPORT("\n\rCME: handle CME_MESSAGE_ID_NEW_ROLE_SET: "
+                                     "deactivate and activate roles, calledFromCmeThread:%d, "
+                                     "gCmeRoleSwitchActive=%d",
+                                     msg.un.wlanMode.calledFromCmeThread, gCmeRoleSwitchActive);
+
+                    // New role set request - must be set in command
                     gCme_PendingWlanConnect.pConnectCmd = NULL;
 
-                    if(gCmeRoleSwitchActive == TRUE)
-                    //It can be false in case the role switch was initiated internally by CME
+                    // It can be false in case the role switch was initiated internally by CME
+                    if (gCmeRoleSwitchActive == TRUE)
                     {
-                    	uint8_t signal_event = !msg.un.wlanMode.calledFromCmeThread;
-                        role_switch_rc = cme_role_switch_manager(CmeStationFlow_GetCurrentUser(),(BIT_x(ROLE_STA) | BIT_x(ROLE_AP) | BIT_x(ROLE_DEVICE)),signal_event/*if role switch done signal event*/);
+                    	uint8_t signalEvent = !msg.un.wlanMode.calledFromCmeThread;
+                        uint32_t actionBitmap = BIT_x(ROLE_STA) | BIT_x(ROLE_AP) | BIT_x(ROLE_DEVICE);
+
+                        role_switch_rc = cme_role_switch_manager(CmeStationFlow_GetCurrentUser(),
+                                                                 actionBitmap,
+                                                                 signalEvent /* if role switch done signal event */);
                         if (role_switch_rc == 0)
                         {
                             //in case role activation completed - try profile search
-                            cmeProfileManagerConfigChange(0);
+                            cmeProfileManagerConfigChange(0, CALLER1);
                         }
                     }
-                }break; // CME_MESSAGE_ID_NEW_ROLE_SET // 
+                }break; // CME_MESSAGE_ID_NEW_ROLE_SET //
+
                 case CME_MESSAGE_ID_PS_SET:
                 {
                     struct wpa_supplicant *wpa_s = NULL;
@@ -2346,7 +2981,114 @@ void cme_Thread(void* apParam)
                     }
 
                 }break; //CME_MESSAGE_ID_PS_SET
-                case CME_MESSAGE_ID_SET_WPS_SESSION:
+                case CME_MESSAGE_ID_START_AP_WPS_SESSION:
+                {
+                    int8_t ret = 0;
+                    wlanWpsSession_t *wpsSession = &(msg.un.wpsSession);
+                    uint32_t roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_AP);
+                    struct wpa_supplicant *wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
+                    char *endptr;
+                    unsigned long pin_val;
+                    size_t pin_len = 0;
+
+                    if (NULL == wpa_s)
+                    {
+                        GTRACE(GRP_CME, "Can't start a WPS session if AP is not activated!");
+                        wlanDispatcherSendEvent(WLAN_EVENT_AP_WPS_START_FAILED, (void*)(&ret), sizeof(int8_t));
+                        break;
+                    }
+
+                    if (wpsSession->wpsMethod == WPS_METHOD_PBC)
+                    {
+                        ret = wpa_supplicant_ap_wps_pbc(wpa_s, NULL, NULL);
+                        if (ret < 0)
+                        {
+                            GTRACE(GRP_CME, "Failed starting AP WPS PBC session, error code %d", ret);
+                            wlanDispatcherSendEvent(WLAN_EVENT_AP_WPS_START_FAILED, (void*)(&ret), sizeof(int8_t));
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        pin_len = strlen(wpsSession->pin);
+                        // Validate PIN length: must be 4 or 8 digits
+                        if (pin_len != 4 && pin_len != 8) 
+                        {
+                            GTRACE(GRP_CME, "AP WPS session: invalid PIN length %d (expected 4 or 8)", pin_len);
+                            CME_PRINT_REPORT_ERROR("\n\rAP WPS session: invalid PIN length %d (expected 4 or 8)", pin_len);
+                            wlanDispatcherSendEvent(WLAN_EVENT_WPS_INVALID_PIN, NULL, 0);
+                            break;
+                        }
+
+                        pin_val = strtoul(wpsSession->pin, &endptr, 10);
+                        if (*endptr != '\0')
+                        {
+                            GTRACE(GRP_CME, "AP WPS session: invalid PIN - contains non-numeric characters");
+                            CME_PRINT_REPORT_ERROR("\n\rAP WPS session: invalid PIN - contains non-numeric characters");
+                            wlanDispatcherSendEvent(WLAN_EVENT_WPS_INVALID_PIN, NULL, 0);
+                            break;
+                        }
+                        
+                        if (pin_len == 8) 
+                        {
+                            if (wps_pin_valid(pin_val) == FALSE) 
+                            {
+                                GTRACE(GRP_CME, "AP WPS session: invalid 8-digit PIN checksum");
+                                CME_PRINT_REPORT_ERROR("\n\rAP WPS session: invalid 8-digit PIN checksum");
+                                wlanDispatcherSendEvent(WLAN_EVENT_WPS_INVALID_PIN, NULL, 0);
+                                break;
+                            }
+                        }
+
+                        ret = wpa_supplicant_ap_wps_pin(wpa_s, NULL, (const char*)wpsSession->pin, NULL, 0, 0);
+                        if (ret < 0)
+                        {
+                            GTRACE(GRP_CME, "Failed starting AP WPS PIN session, error code %d", ret);
+                            wlanDispatcherSendEvent(WLAN_EVENT_AP_WPS_START_FAILED, (void*)(&ret), sizeof(int8_t));
+                            break;
+                        }
+                    }
+                }break; //CME_MESSAGE_ID_START_AP_WPS_SESSION
+
+                case CME_MESSAGE_ID_SET_WPS_AP_PIN:
+                {
+                    int8_t ret = 0;
+                    WlanSetWpsApPinParam_t *wpsApPin = &(msg.un.wpsApPin);
+                    uint32_t roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_AP);
+                    struct wpa_supplicant *wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
+                    char *endptr;
+                    unsigned long pin_val;
+
+                    if (NULL == wpa_s)
+                    {
+                        GTRACE(GRP_CME, "Cannot set WPS AP PIN if AP is not activated!");
+                        CME_PRINT_REPORT_ERROR("\r\nCME: CME_MESSAGE_ID_SET_WPS_AP_PIN ,AP Role is not up");
+                        ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__ROLE_IS_NOT_UP);
+                        break;
+                    }
+                    
+                    pin_val = strtoul(wpsApPin->pin, &endptr, 10);
+                    if ((*endptr != '\0') || (wps_pin_valid(pin_val) == FALSE)) 
+                    {
+                        GTRACE(GRP_CME, "AP WPS PIN Set: invalid PIN code received");
+                        CME_PRINT_REPORT_ERROR("\r\nCME: CME_MESSAGE_ID_SET_WPS_AP_PIN ,invalid PIN code received");
+                        wlanDispatcherSendEvent(WLAN_EVENT_WPS_INVALID_PIN, NULL, 0);
+                        break;
+                    }
+
+                    ret = hostapd_wps_ap_pin_set(wpa_s->ap_iface->bss[0], (const char*)wpsApPin->pin, wpsApPin->timeout);
+                    if (ret < 0)
+                    {
+                        GTRACE(GRP_CME, "Failed - to set AP WPS PIN, error code %d", ret);
+                        CME_PRINT_REPORT_ERROR("\r\nCME: CME_MESSAGE_ID_SET_WPS_AP_PIN ,Failed - to set AP WPS PIN, error code %d", ret);
+                        ret = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_PARAM_SET_TYPE);
+                        break;
+                    }
+
+                    
+                }break; //CME_MESSAGE_ID_SET_WPS_AP_PIN
+
+                case CME_MESSAGE_ID_SET_EXT_WPS_SESSION:
                 {
                     int8_t ret = 0;
                     struct wpa_supplicant *pApInterface;
@@ -2367,7 +3109,7 @@ void cme_Thread(void* apParam)
                             if (ret < 0)
                             {
                                 GTRACE(GRP_CME, "Failed starting AP WPS PBC session, error code %d", ret);
-                                CmeApWpsFailureNotify(ret);
+                                CmeApExtWpsFailureNotify(ret);
                             }
                         }
                         else
@@ -2381,7 +3123,7 @@ void cme_Thread(void* apParam)
                             if (ret < 0)
                             {
                                 GTRACE(GRP_CME, "Failed starting AP WPS pin session, error code %d", ret);
-                                CmeApWpsFailureNotify(ret);
+                                CmeApExtWpsFailureNotify(ret);
                             }
                         }
                     }
@@ -2391,10 +3133,10 @@ void cme_Thread(void* apParam)
                         if (ret < 0)
                         {
                             GTRACE(GRP_CME, "Failed stopping AP WPS session, error code %d", ret);
-                            CmeApWpsFailureNotify(ret);
+                            CmeApExtWpsFailureNotify(ret);
                         }
                     }
-                }break; //CME_MESSAGE_ID_SET_WPS_SESSION
+                }break; //CME_MESSAGE_ID_SET_EXT_WPS_SESSION
                 case CME_MESSAGE_ID_WLAN_CONNECT:
                 {
                     GTRACE(GRP_CME, "CME: CME_MESSAGE_ID_WLAN_CONNECT called. CmeStationFlowIsSMIdle=%d, generalData=0x%x (roleid=%d)",
@@ -2403,21 +3145,30 @@ void cme_Thread(void* apParam)
                            msg.roleId);
                     CME_PRINT_REPORT("\n\rCME: CME_MESSAGE_ID_WLAN_CONNECT called. generalData=0x%x",msg.generalData);
 
-                    CMEWlanConnectCommon_t *pCmdbuffer = msg.un.wlanConnect.pConnectCmd;
+                    CMEWlanConnectCommon_t *pConnectCmd = msg.un.wlanConnect.pConnectCmd;
+                    CMEEapWlanConnect_t *pConnectEapCmd = msg.un.wlanConnect.pConnectEapCmd;
                     BOOLEAN bReconnect = FALSE;
+
                     /* specifiy this cmd requested by the user */
                     if (msg.generalData & CME_GENERAL_DATA_CONNECT_IS_USER_REQ)
                     {
-                        bReconnect = isSameConnectParamsInProgress(pCmdbuffer);
+                        bReconnect = isSameConnectParamsInProgress(pConnectCmd,pConnectEapCmd);
 
-                        gSaveCurrentSupplicantProfile = CMEisSameConnectParams(pCmdbuffer);
+                        if(pConnectCmd)
+                        {
+                            gSaveCurrentSupplicantProfile = CMEisSameConnectParams(pConnectCmd,SSID_STRING(pConnectCmd));
+                        }
+                        else
+                        {
+                            gSaveCurrentSupplicantProfile = CMEisSameConnectParams(&pConnectEapCmd->EapCommonConnect,EAP_SSID_STRING(pConnectEapCmd));
+                        }
                         GTRACE(GRP_CME, "CME: CMEisSameConnectParams = %d", gSaveCurrentSupplicantProfile);
                         CME_PRINT_REPORT("\n\rCME: CMEisSameConnectParams = %d", gSaveCurrentSupplicantProfile);
 
     
                     }
                    
-                    cmeWlanConnectDigest(pCmdbuffer, msg.un.wlanConnect.keyMgmtType, msg.generalData, bReconnect);
+                    cmeWlanConnectDigest(pConnectCmd, pConnectEapCmd, msg.un.wlanConnect.keyMgmtType, msg.generalData, bReconnect);
 
                 }break; // CME_MESSAGE_ID_WLAN_CONNECT // 
                 case CME_MESSAGE_ID_WLAN_DISCONNECT:
@@ -2443,6 +3194,13 @@ void cme_Thread(void* apParam)
 
                     if (ROLE_IS_TYPE_STA_BASED(pDrv->roleType))
                     {
+
+                        if (msg.generalData & CME_GENERAL_DATA_DISCONNECT_IS_USER_REQ)
+                        {
+                            //disconnection initiated by user - we remove pmk cache
+                            cmeRemoveWpaPmkCache();
+                        }
+
                         //check if disconnection needed:
                         if (! CmeStationFlowIsSMIdle() )
                         {
@@ -2455,14 +3213,13 @@ void cme_Thread(void* apParam)
 
                             if (0 != CmeStationFlowSM(disconnectEvent,CmeStationFlow_GetCurrentUser()))
                             {
-                            GTRACE(GRP_CME,"CME: ERROR!CmeStationFlowSM tried to set disconnect in STA flow SM and failed!! ");
-                            CME_CON_PRINT("\n\rCME: ERROR!CmeStationFlowSM tried to set disconnect in STA flow SM and failed!! ");
-                            ASSERT_GENERAL(0);
-                            //exit point
-                            break;
+                                GTRACE(GRP_CME,"CME: ERROR!CmeStationFlowSM tried to set disconnect in STA flow SM and failed!! ");
+                                CME_CON_PRINT("\n\rCME: ERROR!CmeStationFlowSM tried to set disconnect in STA flow SM and failed!! ");
+                                ASSERT_GENERAL(0);
+                                //exit point
+                                break;
                             }
                         }
-
                         else
                         {
                             GTRACE(GRP_SL_DISPATCH,"CME_MESSAGE_ID_WLAN_DISCONNECT: send disconnect event ");
@@ -2482,15 +3239,20 @@ void cme_Thread(void* apParam)
                                     // External WPS, clear state
                                     extWpsClear();
                                 }
+
+                                //remove gAdHocProfile_ull profiles
+                                cmeClearAdHocProfile(wpa_s);
                                 
                                 //clear supplicant profiles if exist
                                 cmeRemoveAllProfilesFromSupplicant(wpa_s, WLAN_REASON_DEAUTH_LEAVING);
                                 pArgs->IsStaIsDiscnctInitiator = 1;
-
+                                
                                 wlanDispatcherSendEvent(WLAN_EVENT_DISCONNECT, (void*)pArgs, sizeof(WlanEventDisconnect_t));
 
                                 os_free(pArgs);
                             }
+
+                            cmeProfileManagerConfigChange(0, CALLER9);
                         }
                     }
                     else if (ROLE_IS_TYPE_DEVICE(pDrv->roleType))
@@ -2560,8 +3322,28 @@ void cme_Thread(void* apParam)
                                  }
                            }
 
-#endif
+#endif           
+
                 }break; // CME_MESSAGE_ID_WLAN_DISCONNECT
+
+
+                case CME_MESSAGE_ID_PROFILE_EAP_ADDED:
+                case CME_MESSAGE_ID_PROFILE_ADDED:
+                {
+                    // Instead of touching this global from the dispatcher context,
+                    // we assume that the global is not updated
+                    GTRACE(GRP_CME, "CME: CCME_MESSAGE_ID_PROFILE_EAP_ADDED ||CME_MESSAGE_ID_PROFILE_ADDED  request");
+				    gPreferredReadFromFS = FALSE;
+                    cmeProfileManagerConfigChange(0, CALLER4);
+                }break;
+
+                case CME_MESSAGE_ID_PROFILE_REMOVED:
+                {
+                    // Instead of touching this global from the dispatcher context, we assume that the global is not updated
+				    gPreferredReadFromFS = FALSE;
+				    cmeIsCurrentlyConnectedProfileDeleted(msg.un.deletedProfileIdx);
+                }break; //CME_MESSAGE_ID_PROFILE_REMOVED
+
                 case CME_MESSAGE_ID_AP_REMOVE_PEER:
                 {
                     sendInternalEvent = FALSE;
@@ -2654,6 +3436,11 @@ void cme_Thread(void* apParam)
                     // update the wait on msgQ timeout
                 }break; // CME_MESSAGE_ID_NEW_ELOOP_TIMEOUT //
 
+                case CME_MESSAGE_ID_POLICY_SET:
+                {
+                    cmeMngConnectionPolicyUpdated(msg.un.policy.policy.fastPolicy);
+                }break;
+
                 case CME_MESSAGE_ID_SCAN_COMPLETE:
                 {
                     uint8_t                 numOfSSID;
@@ -2675,9 +3462,8 @@ void cme_Thread(void* apParam)
                     // That's the reason for verifying profiles memory is valid before
                     // releasing the memory.
 
-                    CME_PRINT_REPORT("\n\rCME received CME_MESSAGE_ID_SCAN_COMPLETE FW");
-                    GTRACE(GRP_CME,"CME received CME_MESSAGE_ID_SCAN_COMPLETE FW");
-                    GTRACE(GRP_CME,"CME roleid(%d) SiteSurvgeyState=%d P2pFindStopping=%d", 
+                    CME_PRINT_REPORT("\n\rCME received CME_MESSAGE_ID_SCAN_COMPLETE FW scantype=%d", msg.un.postScanInfo.scanType);
+                    GTRACE(GRP_CME,"CME received CME_MESSAGE_ID_SCAN_COMPLETE FW. roleid(%d) SiteSurvgeyState=%d P2pFindStopping=%d", 
                         msg.roleId, gSetSiteSurvey, gCmeP2pInfo.p2pFindStopping);
 
                     if (SCAN_REQUEST_CONNECT_PERIODIC_SCAN == msg.un.postScanInfo.scanType)
@@ -2701,13 +3487,17 @@ void cme_Thread(void* apParam)
                         //     Notes
                         //     gSetSiteSurvey == CME_SITE_SURVEY_IDLE
                         //     gCmeP2pInfo.p2pFindStopping == TRUE
+                        //     regarding supplicant scans:
+                        //     in one shot scans initiated by the supplicant mNumProfiles might be equal to zero,
+                        //     so in case we get here when supplicant initiated scan is in progress - 
+                        //     check if this is the current scan or a periodic scan that runs in parallel.
                         cmeScanSharedInfo_t*    pCmeScanDB = (cmeScanSharedInfo_t*)scanResultTable_GetCmeScanDbPointer();
 
                         numOfSSID = msg.un.postScanInfo.pSharedInfo->mOneShotProfiles.mNumProfiles;
                         if ((numOfSSID == 0)
                             && (msg.un.postScanInfo.scanType == SCAN_REQUEST_ONE_SHOT)
                             && (gCmeP2pInfo.p2pFindStopping == FALSE)
-                            && (!gSupplicantInitiatedScanInProgress) // besides site survey scans, one shot scans triggered by the supplicant might also not have profiles.
+                            && ((!gSupplicantInitiatedScanInProgress) || (gSupplicantInitiatedScanInProgress && is_wlan_periodic_scan_in_progress()))
                         )
                         {
                             if(gSetSiteSurvey == CME_SITE_SURVEY_RUNNING)
@@ -2721,7 +3511,6 @@ void cme_Thread(void* apParam)
                                 CME_PRINT_SCAN_REPORT("\r\nCME_MESSAGE_ID_SCAN_COMPLETE, Warning! no connection scan in process, ignore the SCAN_COMPLETE\r\n");
                                 // connection scan should always have profiles
                                 //this can happen if scan_complete send from the FW twice ,
-
                                 break;//don't process this scan complete
                             }
                         }
@@ -2764,6 +3553,7 @@ void cme_Thread(void* apParam)
                             //handle wlanConnect on wlanConnect (waiting for the first one to disconnect)
                             //
                             GTRACE(GRP_CME_CONN_ON_CONN,"gCme_PendingWlanConnect.pConnectCmd value 0x%x",(uint32_t)gCme_PendingWlanConnect.pConnectCmd);
+                            CME_CON_PRINT("\n\rgCme_PendingWlanConnect.pConnectCmd value 0x%x",(uint32_t)gCme_PendingWlanConnect.pConnectCmd);
                             if (gCme_PendingWlanConnect.pConnectCmd != NULL)
                             {
                                 CME_PRINT_STATE_CHNGE_REPORT("\n\rCME: CME_MESSAGE_ID_SCAN_COMPLETE, change state to CME_STA_NETWORK_SEARCH_EVENT !!");
@@ -2780,9 +3570,10 @@ void cme_Thread(void* apParam)
 
 
                                 GTRACE(GRP_CME,"cme_InternalEventHandler: WlanConnect event trigger following previous network DISCONNECTEd event");
+                                CME_CON_PRINT("\n\rcme_InternalEventHandler: WlanConnect event trigger following previous network DISCONNECTEd event");
                                 //send the actual connect command with the relevant ssid
                                 // gCme_PendingWlanConnect.pConnectEapCmd?
-                                cmeWlanConnect(msg.roleId, gCme_PendingWlanConnect.pConnectCmd, NULL,
+                                cmeWlanConnect(msg.roleId, gCme_PendingWlanConnect.pConnectCmd, gCme_PendingWlanConnect.pConnectEapCmd,
                                             gCme_PendingWlanConnect.keyMgmtType,gCme_PendingWlanConnect.profiles_connection);
 
                                 //clear wlanconnect, releasing the buffer performed inside wlanConnect
@@ -2799,12 +3590,13 @@ void cme_Thread(void* apParam)
                                 }
 
                                 //In any case (with or without role switch) trigger profile manager to evaluate if profile search should be triggered
-                                cmeProfileManagerConfigChange(0);
+                                cmeProfileManagerConfigChange(0,CALLER8);
                             }
                         }
                         else if (ROLE_IS_TYPE_DEVICE(roleType))
                         {
                             GTRACE(GRP_CME_CONN_ON_CONN,"gCme_PendingWlanConnect.pConnectCmd value 0x%x",(uint32_t)gCme_PendingWlanConnect.pConnectCmd);
+                            CME_CON_PRINT("\n\rgCme_PendingWlanConnect.pConnectCmd value 0x%x",(uint32_t)gCme_PendingWlanConnect.pConnectCmd);
                             if (gCme_PendingWlanConnect.pConnectCmd != NULL)
                             {
                                 //CME_PRINT_STATE_CHNGE_REPORT("\n\rCME: CME_MESSAGE_ID_SCAN_COMPLETE, change state to CME_STA_NETWORK_SEARCH_EVENT !!");
@@ -2814,11 +3606,15 @@ void cme_Thread(void* apParam)
 
                                 //clear wlanconnect, releasing the buffer performed inside wlanConnect 
                                 gCme_PendingWlanConnect.pConnectCmd = NULL;
-
                             }
-
                         }
                     }
+
+                    if (msg.un.postScanInfo.fromTimeout == TRUE)
+                    {
+                        wlanDispatcherSendEvent(WLAN_EVENT_GENERAL_ERROR, NULL, 0);
+                    }
+
                 }break; // CME_MESSAGE_ID_SCAN_COMPLETE
                 case CME_MESSAGE_ID_SCAN_PERIOD_COMPLETE:
                 {
@@ -2848,6 +3644,9 @@ void cme_Thread(void* apParam)
                             }
                         }
                     }
+
+                    CME_periodic_scan_timer_stop();
+                    CME_start_periodic_scan_timer();
 
                     // Notify supplicant of scan period completion
                     drv_handleScanCompleteEvent(wpa_s->drv_priv,
@@ -2932,6 +3731,31 @@ void cme_Thread(void* apParam)
                     cmeConsequtiveScanCompletesNoCandidate();
 
                 }break; // CME_MESSAGE_ID_SCAN_PERIOD_COMPLETE
+
+                case CME_MESSAGE_ID_FAST_CONNECTION_TIMEOUT:
+                {
+				    GTRACE(GRP_CME,"CME_MESSAGE_ID_FAST_CONNECTION_TIMEOUT event");
+                    CME_PRINT_PROFILE_REPORT("\r\nCME_MESSAGE_ID_FAST_CONNECTION_TIMEOUT event");
+				    cmeFastConnectionTimerReleaseResources();
+
+				    if (0 != CmeStationFlowSM(CME_STA_WLAN_DISCONNECT_REQ_EVENT,CME_STA_FAST_CONNECT_USER))
+				    {
+				       GTRACE(GRP_CME,"CME: ERROR!CmeStationFlowSM tried to set disconnect in STA flow SM and failed!! ");
+				       ASSERT_GENERAL(0);
+				    }
+
+				    //if was immediately disconnected - invalidate the connection
+				    if (CmeStationFlowIsSMIdle() )
+				    {
+				        cmeMarkInvalidFastConnectionData();
+
+				        //now, as the SM is idle, fallback to regular WlanConnect
+				        cmePendingWlanConnectTrigger();
+
+				    }
+
+                } break; // CME_MESSAGE_ID_FAST_CONNECTION_TIMEOUT
+
                 case CME_MESSAGE_ID_TX_DONE:
                 {
                     drv_handleTxResult(msg.un.txRxPacket.pDesc);
@@ -2959,7 +3783,7 @@ void cme_Thread(void* apParam)
 
                 case CME_MESSAGE_ID_EXT_ROC:
                 {
-                    CME_CON_PRINT("\n\rCME : got msg CME_MESSAGE_ID_EXT_ROC\n\r");
+                    CME_PRINT_ROC_REPORT("\n\rCME : got msg CME_MESSAGE_ID_EXT_ROC\n\r");
                     wpa_drv_remain_on_channel(msg.un.rocParam.wpa_s,
                                               msg.un.rocParam.freq,
                                               msg.un.rocParam.duration);
@@ -3081,7 +3905,7 @@ void cme_Thread(void* apParam)
                        //
                        //get bssid address here
                        //
-                       ti_driver_ifData_t *pDrv = drv_getDriverData(NETIF_NAME(TIWLAN_DEV_NAME_STA));
+                       ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)wpa_s->drv_priv;
                        uint8_t *bssidAddr  = pDrv->currBssid;
                        uint8_t is_first_connect = IRQ_UtilIsZeroMacAddress(gCmeLastConnectedBssId) ;
 
@@ -3142,6 +3966,7 @@ void cme_Thread(void* apParam)
                             os_memcpy(pArgs->Bssid, bssidAddr, MAC_ADDR_LEN);
                             os_memcpy(pArgs->SsidName, pDrv->ssid, pDrv->ssid_len);
                             pArgs->SsidLen =  pDrv->ssid_len;
+                            pArgs->Status = 0;
 
                             if(freq_to_chan(pDrv->freq, &pArgs->Channel, &band) < 0)
                             {
@@ -3210,6 +4035,13 @@ void cme_Thread(void* apParam)
                             cmeFreePendingWlanConnectResources();
                             //validate the fast connection now that it is official success
                             cmeSaveFastConnectionData();
+
+                            if (ROLE_IS_TYPE_STA(role_type))
+                            {
+                                //Check if the transition mode is disabled during the connection with Transition mode
+                                cmeCheckCurrentIsTransitionMode();
+                            }
+
                         }
                     }
                 }break; // CME_MESSAGE_ID_WPA_SUPP_COMPLETED
@@ -3253,12 +4085,39 @@ void cme_Thread(void* apParam)
                 case CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED:
                 {
                     struct wpa_supplicant *wpa_s;
-                    RoleType_e role_type     = drv_getStaIface(gpSupplicantGlobals, &wpa_s);
-                    ti_driver_ifData_t *pDrv = (ti_driver_ifData_t*)wpa_s->drv_priv;
+                    wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, msg.roleId);
+                    ti_driver_ifData_t *pDrv = NULL; 
+                    RoleType_e role_type = ROLE_ID_NONE;
                     uint16_t disconnect_reason = msg.generalData;
+                    int rc = 0;
+                    uint8_t isStopping = FALSE;
 
                     /* save last disconnect reason */
                     gLastDisconnectInfo.ReasonCode = disconnect_reason;
+
+                    if (wpa_s != NULL)
+                    {
+                        // Get STA/P2P CL role is valid and select the correct iface
+                        pDrv = (ti_driver_ifData_t*)wpa_s->drv_priv;
+                        role_type = pDrv->roleType;
+                    }
+                    else
+                    {
+                        // we are getting here in case of p2p client teardown
+                        // and client role was deactivated
+                        // and wpa_s is NULL 
+                        
+                        CME_PRINT_REPORT("\r\n CME: CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED, wpa_s is NULL!! (roleid=%d) gCmeRoleSwitchActive =%d",
+                               msg.roleId, gCmeRoleSwitchActive);
+                        // unset p2p_client role       
+                        set_finish_wlan_supplicant_operation();
+                        cme_set_unset_started_role(FALSE, ROLE_P2P_CL);
+
+
+                        break;
+                        ASSERT_GENERAL(0);
+                    }
+
 
                     if ((pDrv != NULL) && (pDrv->pAuthInfo != NULL))
                     {
@@ -3266,17 +4125,20 @@ void cme_Thread(void* apParam)
                     }
 
                     int is_sta_connected = cme_is_started_role_from_type(role_type);
-                    // Get STA/P2P CL role is valid and select the correct iface
+                    
 
                     ASSERT_GENERAL(wpa_s!=NULL);
 
+                    int is_fast_connection = (CmeStationFlow_GetCurrentUser() ==  CME_STA_FAST_CONNECT_USER ? 1 : 0);
+
                     GTRACE(GRP_CME,"cme_InternalEventHandler: got event CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED role ID %d (roleType=%d) reason %d",
                                    msg.roleId, pDrv->roleType, msg.generalData);
-                  
+                    CME_PRINT_REPORT("\r\nCME: got event CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED role ID %d (roleType=%d) reason %d is_fast_connection=%d",
+                                   msg.roleId, pDrv->roleType, msg.generalData, is_fast_connection);
+
                     //invalidate connecting index in case it was profile search
                     cmeZeroConnectionIndex();
 
-                    int is_fast_connection = (CmeStationFlow_GetCurrentUser() ==  CME_STA_FAST_CONNECT_USER ? 1 : 0);
 
                     if (ROLE_IS_TYPE_STA_BASED(role_type))
                     {
@@ -3297,35 +4159,35 @@ void cme_Thread(void* apParam)
                     //remove gAdHocProfile_ull profiles
                     cmeClearAdHocProfile(wpa_s);
 
+                    //
+                    //remove profiles from supplicant, not relevant anymore (if it is a result of wlan disconnect it is done already) - check it?
+                    //
+                    cmeRemoveAllProfilesFromSupplicant(wpa_s, disconnect_reason);
+
                     
                     if (isextWPS() && isExtWpsInProgress())
                     {
                         // External WPS, clear state
                         extWpsClear();
                     }
-                	CME_PRINT_STATE_CHNGE_REPORT("\n\rCME: CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED, change state to CME_STA_WLAN_DISCONNECT_COMPLETE_EVENT !!");
 
-                    if (ROLE_IS_TYPE_P2P_CLIENT(role_type))
+                    CME_PRINT_STATE_CHNGE_REPORT("\n\rCME: CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED, change state to CME_STA_WLAN_DISCONNECT_COMPLETE_EVENT !!");
+                    if (0 != CmeStationFlowSM(CME_STA_WLAN_DISCONNECT_COMPLETE_EVENT,CmeStationFlow_GetCurrentUser()))
                     {
-
-                        GTRACE(GRP_CME,"CME: CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED change roleType to STA from P2P CL ");
-                        CME_PRINT_REPORT("\n\rCME: CME_MESSAGE_ID_WPA_SUPP_DISCONNECTED change roleType to STA from P2P CL ");
-
-                        // we are here if disconenction of p2p client occured 
-                        // need to revert type to STA
-                        pDrv->ops->change_type(pDrv, ROLE_STA);
+                        GTRACE(GRP_CME,"CME: ERROR!CmeStationFlowSM tried to set sta result found in STA flow SM and failed!! ");
+                        ASSERT_GENERAL(0);
                     }
-
-                    int rc = 0;
+                    
                     //
-                    //if we are during role switch
+                    //CME was success to disconnect, now lets check if also need to  perform role_down
                     //
                     if (gCmeRoleSwitchActive != FALSE)
                     {
-                        CME_PRINT_REPORT("\n\rCME: cme_role_switch_manager");
+                        CME_PRINT_REPORT("\n\rCME: continue cme_role_switch_manager");
 
                         //notify STA/P2P deactivation
                         rc = cme_role_switch_manager(CmeStationFlow_GetCurrentUser(),(BIT_x(ROLE_STA)),1/*if role switch done signal event*/);
+                        isStopping = TRUE;
 
                     }
                     //handle fast connect deauth receive (while not yet connected)
@@ -3368,22 +4230,32 @@ void cme_Thread(void* apParam)
 
                     GTRACE(GRP_CME,"fast connect disconnection: is_sta_connected=%d, disconnect_reason=%d, rc=%d",
                                 is_sta_connected, disconnect_reason, rc);
-
-                    //
+                    CME_PRINT_PROFILE_REPORT("\r\nfast connect disconnection: is_sta_connected=%d, disconnect_reason=%d, rc=%d gCmeRoleSwitchActive=%d",
+                                is_sta_connected, disconnect_reason, rc, gCmeRoleSwitchActive);
+                    //            
                     //   In case station was connected before, but the disconnection arrives from the AP (and not local disconnect request)
                     //   then we should invalidate the fast connection data, in case it was valid
                     //
+        #if 0 // Save old algorithm for now
                     if (is_sta_connected && (WLAN_REASON_DEAUTH_LEAVING != disconnect_reason))/*in case*/
                     {
-                        CME_PRINT_REPORT("\n\rCME: cmeMarkInvalidFastConnectionData");
                         cmeMarkInvalidFastConnectionData();
                     }
-
-                    if (0 != CmeStationFlowSM(CME_STA_WLAN_DISCONNECT_COMPLETE_EVENT,CmeStationFlow_GetCurrentUser()))
+        #else
+                    // Invalidate fast connection data if:
+                    // station was connected before disconnection
+                    // AND ( the disconnection arrives from a local disconnect request
+                    //      OR the disconnection arrives from the AP) <- NEW!!
+                    // AND not from the role down
+                    // And not part of connect process ( disconnect before connection ?)
+                    if (is_sta_connected && 
+                        /*(WLAN_REASON_DEAUTH_LEAVING == disconnect_reason) && */
+                        (isStopping == FALSE) && 
+                        (gCme_PendingWlanConnect.pConnectCmd == NULL))
                     {
-                        GTRACE(GRP_CME,"CME: ERROR!CmeStationFlowSM tried to set sta result found in STA flow SM and failed!! ");
-                        ASSERT_GENERAL(0);
+                        cmeMarkInvalidFastConnectionData();
                     }
+        #endif
 
                     if (rc == 0)//CME no longer in role switch, and no fast connect second chance
                     {
@@ -3391,11 +4263,8 @@ void cme_Thread(void* apParam)
 
                         if (cmePendingWlanConnectTrigger()==0)
                         {
-                            //if no pending wlanConnect-
-                            CME_PRINT_REPORT("\n\rCME: cmeProfileManagerConfigChange");
-
                             //trigger profile manager to evaluate if profile search should be triggered
-                            cmeProfileManagerConfigChange(0);
+                            cmeProfileManagerConfigChange(0, CALLER7);
                         }
                     }
 
@@ -3477,7 +4346,9 @@ void cme_Thread(void* apParam)
                 break;
                 case CME_MESSAGE_ID_ASSOCIATED:
                 {
-                    ti_driver_ifData_t *pDrv = drv_getDriverData(NETIF_NAME(TIWLAN_DEV_NAME_STA));
+                    struct wpa_supplicant *wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, msg.roleId);
+                    ti_driver_ifData_t *pDrv = ( ti_driver_ifData_t *)wpa_s->drv_priv;
+                    CME_PRINT_REPORT("\n\rCME: CME_MESSAGE_ID_ASSOCIATED role ID %d", msg.roleId);
                     if (pDrv->roleStarted == FALSE)
                     {
                         break;
@@ -3515,62 +4386,102 @@ void cme_Thread(void* apParam)
                     os_free(pArgs);
                 }   
                 break;
+                case CME_MESSAGE_ID_SET_SCAN_DWELL_TIME:
+                {
+                    WlanScanDwellTime_t  dwellTimes = msg.un.dwellTimes;
+                    cmeScan_store_scan_dwell_times(dwellTimes);
+                }
+                break;
                 case CME_MESSAGE_ID_BLE_ENABLED:
+
                     BleIf_EnableBLE();
                     break;
-
                 case CME_MESSAGE_ID_P2P_CMD:
                 {
                     struct wpa_supplicant *wpa_s;
-                    uint32_t roleId;
-
-                    if (msg.generalData == P2P_CMD_ID_SCAN_STOP)
+                    
+                    //CME_PRINT_REPORT("\n\r CME: P2P CMD #%d", msg.generalData);
+                    switch (msg.generalData)
                     {
-                        //we can stop p2p_findon role device only
-                        //role device role, if exist stop scan
-                        roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_DEVICE);
-                        if (roleId != INVALID_ROLE_ID)
+                        case P2P_CMD_ID_SCAN_STOP:
                         {
-                            wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
+                            //we can stop p2p_find on role device only
+                            //role device role, if exist stop scan
 
-                            cmeStopP2pFind(wpa_s);
+                            wpa_s = drv_getP2pDeviceSupplicant();
+
+                            if (wpa_s != NULL)
+                            {
+                                cmeStopP2pFind(wpa_s);
+                            }
+                            else
+                            {
+                                GTRACE(GRP_CME, "CME: ERROR! Stop p2p find failed - no device roleId!!!");
+                                CME_PRINT_REPORT("\n\r CME: ERROR! Stop p2p find failed - no device roleId!!!");
+                            }
                         }
-                        else
+                        break;
+
+                        case P2P_CMD_ID_GROUP_REMOVE:
                         {
-                            GTRACE(GRP_CME, "CME: ERROR! Stop p2p find failed - no device roleId!!!");
-                            CME_PRINT_REPORT("\n\r CME: ERROR! Stop p2p find failed - no device roleId!!!");
+                            cmeP2pGroupRemove();
                         }
-                    }
-                    else if (msg.generalData == P2P_CMD_ID_GROUP_REMOVE)
-                    {
-                        cmeP2pGroupRemove();
-                    }
-                    else if (msg.generalData == P2P_CMD_ID_CONFIG_CHANNELS)
-                    {
-                        P2pParams_t params;
-                        params.operChannel = msg.un.p2pConfigParams.operChannel;
-                        params.operReg = msg.un.p2pConfigParams.operClass;
-                        params.listenChannel = msg.un.p2pConfigParams.listenChannel;
-                        params.listenReg = msg.un.p2pConfigParams.listenClass;
-                        params.goIntent = msg.un.p2pConfigParams.goIntent;
+                        break;
 
-                        GTRACE(GRP_CME, "CME: P2P_CMD_ID_CONFIG_CHANNELS setting oper:%d %d listen:%d %d go_intent=%d", 
-                        params.operChannel, params.operReg, params.listenChannel, params.listenReg, params.goIntent);
+                        case P2P_CMD_ID_CONFIG_CHANNELS:
+                        {
+                            P2pParams_t params;
+                            params.operChannel = msg.un.p2pConfigParams.operChannel;
+                            params.operReg = msg.un.p2pConfigParams.operClass;
+                            params.listenChannel = msg.un.p2pConfigParams.listenChannel;
+                            params.listenReg = msg.un.p2pConfigParams.listenClass;
+                            params.goIntent = msg.un.p2pConfigParams.goIntent;
 
-                        cfgSetP2pParameters(&params);
+                            GTRACE(GRP_CME, "CME: P2P_CMD_ID_CONFIG_CHANNELS setting oper:%d %d listen:%d %d go_intent=%d", 
+                            params.operChannel, params.operReg, params.listenChannel, params.listenReg, params.goIntent);
+
+                            cfgSetP2pParameters(&params);
+
+                            //apply changed params on the wpa_supplicant config struct
+                            //1. get device drv
+
+                            wpa_s = drv_getP2pDeviceSupplicant();
+
+                            if (wpa_s != NULL)
+                            {
+                                //2. update p2p
+                                cfgBuildP2pParameters(wpa_s->conf);
+
+                            }
+                            else
+                            {
+                                GTRACE(GRP_CME, "CME: ERROR! P2P_CMD_ID_CONFIG_CHANNELS failed - no device roleId!!!");
+                                CME_PRINT_REPORT("\n\r CME: ERROR! P2P_CMD_ID_CONFIG_CHANNELS failed - no device roleId!!!");
+                            }
+   
+                        }
+                        break;
+
+                        case P2P_CMD_ID_LISTEN:
+                        {
+                            cmeP2pListen();
+                        }
+                        break;
+
+                        case P2P_CMD_ID_CANCEL:
+                        {
+                            cmeP2pCancel();
+                        }
+                        break;
+
+                        default:
+
+                            break;
 
                     }
-                    else if (msg.generalData == P2P_CMD_ID_LISTEN)
-                    {
-                        cmeP2pListen();
-                    }
-                    else if (msg.generalData == P2P_CMD_ID_CANCEL)
-                    {
-                        cmeP2pCancel();
-                    }
+
                 }
                 break;
-
                 case CME_MESSAGE_ID_SET_NON_PREFFERED_CHANNELS:
                 {
                     struct wpa_supplicant *wpa_s;
@@ -3590,6 +4501,208 @@ void cme_Thread(void* apParam)
                     }
 
                     os_free(msg.un.nonPrefChannels.channel_list);
+                }
+                break;
+
+                case CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT:
+                {
+                    uint32_t peerAgingTimeout = msg.un.peerAgingTimeout;
+                    RoleType_e RoleType = ROLE_AP;
+                    int32_t roleId;
+                    ti_driver_ifData_t * pDrv = NULL;
+
+                    CME_PRINT_REPORT("\n\rCME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT, peerAgingTimeoutEvent:%d", peerAgingTimeout);
+                    GTRACE(GRP_CME, "CME_MESSAGE_ID_SET__VENDOR_ELEMETS peerAgingTimeoutEvent:%d",peerAgingTimeout);
+
+                    roleId = drv_getRoleIdFromType(gpSupplicantGlobals,RoleType);
+                    if(roleId == ROLE_ID_NONE)
+                    {
+                        GTRACE(GRP_DRIVER_CC33, "CME:CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT:Role is not up");
+                        CME_PRINT_REPORT_ERROR("\n\rCME:CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT:Role is not up");
+                        break;
+                    }
+                    pDrv   = getDriverForRoleId(roleId, gpSupplicantGlobals);
+                    if(pDrv == NULL)
+                    {
+                        GTRACE(GRP_DRIVER_CC33, "CME :CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT:Role is not up, pDrv is null");
+                        CME_PRINT_REPORT_ERROR("\n\rCME:CME_MESSAGE_ID_CONFIGURE_PEER_AGING_TIMEOUT:Role is not up, pDrv is null");
+                        break;
+                    }
+
+                    pDrv->peerAgingTimeout = peerAgingTimeout;
+                    if(pDrv->timerPeerAgingSample.osTimerHandler != NULL)
+                    {
+                        CME_peer_aging_timer_stop(&pDrv->timerPeerAgingSample);
+                    }
+
+                    if(peerAgingTimeout)
+                    {
+                        CME_start_peer_aging_timer(&pDrv->timerPeerAgingSample, peerAgingTimeout);
+                    }
+                }
+                break;
+
+                case CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME:
+                {
+                    RoleType_e RoleType = ROLE_AP;
+                    int32_t roleId;
+                    ti_driver_ifData_t * pDrv = NULL;
+                    int32_t inActTime;
+                    uint8_t *addr;
+                    int32_t NumPeer;
+                    int i;
+                    uint8_t *p_mac_addr_peer_list;//[MAX_NUM_OF_AP_UNICAST_LINKS][6];
+                    WlanEventPeerAging_t*  pArgs;
+
+                    roleId = drv_getRoleIdFromType(gpSupplicantGlobals,RoleType);
+                    if(roleId == ROLE_ID_NONE)
+                    {
+                        GTRACE(GRP_DRIVER_CC33, "CME:CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME:Role is not up");
+                        CME_PRINT_REPORT_ERROR("\n\rCME:CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME:Role is not up");
+                        break;
+                    }
+                    pDrv   = getDriverForRoleId(roleId, gpSupplicantGlobals);
+                    if(pDrv == NULL)
+                    {
+                        GTRACE(GRP_DRIVER_CC33, "CME :CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME:Role is not up, pDrv is null");
+                        CME_PRINT_REPORT_ERROR("\n\rCME:CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME:Role is not up, pDrv is null");
+                        break;
+                    }
+
+
+                    wlanLinks_getPeerList(&NumPeer, &p_mac_addr_peer_list);
+
+                    for(i=0;i<(NumPeer*MAC_ADDR_LEN);i+= MAC_ADDR_LEN)
+                    {
+                        addr = (uint8_t*)&p_mac_addr_peer_list[i];
+
+                        inActTime = ti_driver_inact_mili(pDrv, addr);
+
+                        if(inActTime > 0)
+                        {
+                            //CME_PRINT_REPORT("\n\rCME:Aging of Peer=" MACSTR ", inActime: %d",MAC2STR(addr), inActTime);
+                            if((pDrv->peerAgingTimeout) && (inActTime > pDrv->peerAgingTimeout))
+                            {
+                                pArgs = os_zalloc(sizeof(WlanEventPeerAging_t));
+                                if(pArgs == NULL)
+                                {
+                                    CME_PRINT_REPORT_ERROR("\n\rCME:CME_MESSAGE_ID_PEER_AGING_SAMPLE_TIME: allocation for pargs failed");
+                                }
+                                else
+                                {
+                                    pArgs->inactiveTime = inActTime;
+                                    MAC_COPY(pArgs->peer_mac, addr);
+                                    wlanDispatcherSendEvent(WLAN_EVENT_PEER_AGING, (void*)pArgs, sizeof(WlanEventPeerAging_t));
+                                    os_free(pArgs);
+                                }
+                            }
+                        }
+                    }
+
+                    if(p_mac_addr_peer_list != NULL)
+                    {
+                        os_free(p_mac_addr_peer_list);
+                    }
+
+                    if(pDrv->peerAgingTimeout> 0)
+                    {
+                        //CME_PRINT_REPORT("\n\rCME_MESSAGE_ID_PEER_AGING_SAMPLE_TIMECME_start_peer_aging_timer");
+
+                        CME_start_peer_aging_timer(&pDrv->timerPeerAgingSample, pDrv->peerAgingTimeout);
+                    }
+                }
+                break;
+                case CME_MESSAGE_ID_SET_VENDOR_ELEMETS:
+                {
+                    int32_t roleId;
+                    ti_driver_ifData_t * pDrv;
+                    uint16_t length= msg.un.vendorElements.vendorElements_length;
+                    uint8_t* pData = msg.un.vendorElements.pVendorElements;
+
+                    CME_PRINT_REPORT("\n\rCME_MESSAGE_ID_SET__VENDOR_ELEMETS, length:%d", length);
+                    GTRACE(GRP_CME, "CME_MESSAGE_ID_SET__VENDOR_ELEMETS");
+
+                    roleId = drv_getRoleIdFromType(gpSupplicantGlobals,(RoleType_e)msg.un.vendorElements.roleType);
+                    if(roleId == ROLE_ID_NONE)
+                    {
+                        GTRACE(GRP_DRIVER_CC33, "CME:WLAN_SET_VENDOR_IE:Role is not up");
+                        CME_PRINT_REPORT_ERROR("\n\rCME:WLAN_SET_VENDOR_IE:Role is not up");
+                        if(pData)
+                        {
+                            os_free(pData);
+                        }
+                        break;
+                    }
+                    pDrv   = getDriverForRoleId(roleId, gpSupplicantGlobals);
+                    if(pDrv == NULL)
+                    {
+                        GTRACE(GRP_DRIVER_CC33, "CME :WLAN_SET_VENDOR_IE:Role is not up, pDrv is null");
+                        CME_PRINT_REPORT_ERROR("\n\rCME:WLAN_SET_VENDOR_IE:Role is not up, pDrv is null");
+                        if(pData)
+                        {
+                            os_free(pData);
+                        }
+                        break;
+                    }
+
+                    ////////// AP role
+                    if(msg.un.vendorElements.roleType == ROLE_AP)
+                    {
+                        struct wpa_supplicant *wpa_s = pDrv->ctx;
+                        struct hostapd_data *hapd = wpa_s->ap_iface->bss[0];
+                        struct wpabuf *  buf = NULL;
+
+                        if(hapd == NULL)
+                        {
+                            GTRACE(GRP_DRIVER_CC33, "CME :WLAN_SET_VENDOR_IE: hapd is null");
+                            CME_PRINT_REPORT_ERROR("\n\rCME:WLAN_SET_VENDOR_IE:hapd is null ");
+                            if(pData)
+                            {
+                                os_free(pData);
+                            }
+                            break;
+                        }
+
+                        //free the buf that already exists
+                        if(hapd->conf->assocresp_elements != NULL)
+                        {
+                            wpabuf_free(hapd->conf->assocresp_elements);
+                            hapd->conf->assocresp_elements = NULL;
+                        }
+
+                        if(length > 0)
+                        {
+                            buf = wpabuf_alloc_ext_data(pData, length);
+                            if (buf == NULL)
+                            {
+                                GTRACE(GRP_DRIVER_CC33, "CME :WLAN_SET_VENDOR_IE:failed to allocated mem:%d",length);
+                                CME_PRINT_REPORT_ERROR("\n\rCME:WLAN_SET_VENDOR_IE:failed to allocate mem :%d ",length);
+                                if(pData)
+                                {
+                                    os_free(pData);
+                                }
+                                break;
+                            }
+                        }
+                        hapd->conf->assocresp_elements = buf;//will be freed by the supplicant
+                    }
+                    ////////// STA role
+                    else//STA
+                    {
+                        pDrv->vendorIEInfo.vendor_elements_length = length;
+
+                        if(pDrv->vendorIEInfo.vendor_elements)
+                        {
+                            //free the old vendor iE
+                            os_free(pDrv->vendorIEInfo.vendor_elements);
+                            pDrv->vendorIEInfo.vendor_elements = NULL;
+                        }
+                        if(length != 0)
+                        {
+                            pDrv->vendorIEInfo.vendor_elements = pData;//will be released when the Pdrv is released
+                        }
+
+                    }
                 }
                 break;
 
@@ -3665,7 +4778,7 @@ int32_t cme_deinit()
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete thread \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
 
@@ -3675,7 +4788,7 @@ int32_t cme_deinit()
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete msgQ \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
         // ============== Delete sync object ======================== //
@@ -3683,14 +4796,14 @@ int32_t cme_deinit()
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
         ret = osi_SyncObjDelete(&gCmeThreadStarted);
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
 
@@ -3700,35 +4813,42 @@ int32_t cme_deinit()
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
         ret = osi_SyncObjDelete(&gThrdLoopStoppedCmeSync);
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
         ret = osi_SyncObjDelete(&gCmeThrdRunStopSyncObject);
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete gCmeThrdRunStopSyncObject sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
         ret = osi_SyncObjDelete(&gCmeThrdDummySleep);
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete gCmeThrdDummySleep sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
             return ret;
         }
         ret = osi_SyncObjDelete(&gCmeEapolsStaSyncObject);
         if(OSI_OK != ret)
         {
             CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete gCmeEapolsStaSyncObject sync object \n\r");
-            assert(0);
+            ASSERT_GENERAL(0);
+            return ret;
+        }
+        ret = osi_SyncObjDelete(&gtxCompleteSyncObj);
+        if(OSI_OK != ret)
+        {
+            CME_PRINT_REPORT_ERROR("cme_deinit: FAILED to delete gtxCompleteSyncObj sync object \n\r");
+            ASSERT_GENERAL(0);
             return ret;
         }
 
@@ -3779,10 +4899,12 @@ int32_t cme_init()
 #endif
     gPrivateIeCB = NULL;
 
-    //p2p related info init
+    //initialize p2p info
     gCmeP2pInfo.p2pFindStopping = FALSE;
     gCmeP2pInfo.p2pConnectPending = FALSE;
 
+    /* Connection Policy load */
+    LoadConnectionPolicy_GetFromFlash(TRUE, 0);
 
     // CME role switch is blocking the command mailbox from receiving any other commands
      rc = osi_SyncObjCreate(&gCmeCommandBlockingSyncObject);
@@ -3843,6 +4965,14 @@ int32_t cme_init()
          return rc;
      }
 
+     rc = osi_SyncObjCreate(&gtxCompleteSyncObj);
+     if(rc != OSI_OK)
+     {
+         GTRACE_NVIC(GRP_CME, "cme_init: Sync object gtxCompleteSyncObj Create failed");
+         ASSERT_GENERAL(0);
+         return rc;
+     }
+
     rc = osi_MsgQCreate(&gCmeMessageQueue,
                         "eloopQueue",
                         MSGQ_MSG_SIZE,
@@ -3873,7 +5003,6 @@ int32_t cme_init()
     {
         GTRACE_NVIC(GRP_CME,"cme_init: osi_ThreadCreate created successfully");
     }
-
     //wait for CME thread start running
     osi_SyncObjWait(&gCmeThreadStarted, OSI_WAIT_FOREVER);
 
@@ -3915,7 +5044,7 @@ static int32_t pushMsg2Queue(cmeMsg_t *apMsg)
         CME_PRINT_REPORT_ERROR("\r\nCME: current msgID=%d roleId:%d", apMsg->msgId, apMsg->roleId);
         debug_print_msg_type_subtype(apMsg);
         cme_debug_print_cME_queue_content(apMsg);
-        assert(0);
+        ASSERT_GENERAL(0);
 #endif //CME_MSG_QUEUE_DEBUG
         CME_MsgFree(apMsg);
     }
@@ -3958,7 +5087,7 @@ static int32_t pushMsg2Queue_fromIntr(cmeMsg_t *apMsg)
         GTRACE(GRP_CME,"CME: current msgID=%d", apMsg->msgId);
         CME_PRINT_REPORT_ERROR("\r\nCME: current msgID=%d", apMsg->msgId);
         cme_debug_print_cME_queue_content(apMsg);
-        assert(0);
+        ASSERT_GENERAL(0);
 #endif //CME_MSG_QUEUE_DEBUG
         CME_MsgFree(apMsg);
 
@@ -4178,7 +5307,7 @@ static BOOLEAN isMsgQueueAboveThreshold()
             }
         
         }
-        assert(0);
+        ASSERT_GENERAL(0);
         
 #endif //CME_QUEUE_DEBUG
         return TRUE;
@@ -4284,11 +5413,26 @@ static Bool32 isTxResultSafeToFilter (void *descriptor)
 // Function checks if reconnection is needed - i.e. in case both SSID & BSSID are equal, 
 // reconnect is not needed and function returns NULL
 // in case of WPS connection, if prev connection was WPS and scanning, reconnect is not needed and function returns NULL
-static BOOLEAN isSameConnectParamsInProgress(CMEWlanConnectCommon_t *pCmdbuffer)
+static BOOLEAN isSameConnectParamsInProgress(CMEWlanConnectCommon_t *pConnect, CMEEapWlanConnect_t *pConnectEapCmd)
 {
     BOOLEAN bReconnect = FALSE;
 
+    int8_t* ssidName;
+
     CME_WlanStatus_e state = (CME_WlanStatus_e)CmeStationFlowHostStatusGet();
+
+    CMEWlanConnectCommon_t *pConCmd;
+
+    if(pConnectEapCmd)
+    {
+        pConCmd = &pConnectEapCmd->EapCommonConnect;
+        ssidName = EAP_SSID_STRING(pConnectEapCmd);
+    }
+    else
+    {
+        pConCmd = pConnect;
+        ssidName = SSID_STRING(pConnect);
+    }
 
     GTRACE(GRP_CME, "CME: isSameConnectParamsInProgress: WLAN_STATUS: %d", state);
 
@@ -4301,39 +5445,39 @@ static BOOLEAN isSameConnectParamsInProgress(CMEWlanConnectCommon_t *pCmdbuffer)
         drv_getStaIface(gpSupplicantGlobals, &wpa_s);
 
         //not WPS
-        if ( (pCmdbuffer->SecType != WLAN_SEC_TYPE_WPS_PBC) && (pCmdbuffer->SecType != WLAN_SEC_TYPE_WPS_PIN) )
+        if ( (pConCmd->SecType != WLAN_SEC_TYPE_WPS_PBC) && (pConCmd->SecType != WLAN_SEC_TYPE_WPS_PIN))
         {
             GTRACE(GRP_CME, "CME: isSameConnectParamsInProgress: Now compare ssid/bssid...");
             if (wpa_s->current_ssid != NULL)
             {
                 /* compare the conn params */
-                if ((pCmdbuffer->SsidLen > 0) && (wpa_s->current_ssid->ssid_len))
+                if ((pConCmd->SsidLen > 0) && (wpa_s->current_ssid->ssid_len))
                 {
-                    bReconnect |= (pCmdbuffer->SsidLen != wpa_s->current_ssid->ssid_len);
-                    bReconnect |= !!(memcmp(SSID_STRING(pCmdbuffer), wpa_s->current_ssid->ssid, pCmdbuffer->SsidLen));
+                    bReconnect |= (pConCmd->SsidLen != wpa_s->current_ssid->ssid_len);
+                    bReconnect |= !!(memcmp(ssidName, wpa_s->current_ssid->ssid, pConCmd->SsidLen));
 
                     noCheck = FALSE;
                 }
 
                 /* if bssid is not fully null compare it as well */
-                if ( pCmdbuffer->Bssid[0] ||
-                     pCmdbuffer->Bssid[1] ||
-                     pCmdbuffer->Bssid[2] ||
-                     pCmdbuffer->Bssid[3] ||
-                     pCmdbuffer->Bssid[4] ||
-                     pCmdbuffer->Bssid[5] )
+                if ( pConCmd->Bssid[0] ||
+                        pConCmd->Bssid[1] ||
+                        pConCmd->Bssid[2] ||
+                        pConCmd->Bssid[3] ||
+                        pConCmd->Bssid[4] ||
+                        pConCmd->Bssid[5] )
                 {
 
                     if (state == WLAN_STATUS_CONNECTED)
                     {
                         /* compare the BSSID */
-                        bReconnect |= !!(memcmp(pCmdbuffer->Bssid, wpa_s->bssid, MAC_ADDR_LEN));
+                        bReconnect |= !!(memcmp(pConCmd->Bssid, wpa_s->bssid, MAC_ADDR_LEN));
 
                     }
                     else
                     {
                         /* compare the BSSID */
-                        bReconnect |= !!(memcmp(pCmdbuffer->Bssid, wpa_s->current_ssid->bssid, MAC_ADDR_LEN));
+                        bReconnect |= !!(memcmp(pConCmd->Bssid, wpa_s->current_ssid->bssid, MAC_ADDR_LEN));
                     }
                     noCheck = FALSE;
                 }
@@ -4349,7 +5493,7 @@ static BOOLEAN isSameConnectParamsInProgress(CMEWlanConnectCommon_t *pCmdbuffer)
             else
             {
                 /* compare with last AdHoc connection */
-                BOOLEAN IsDifferent = cmeCompareLastAdHocConnParams(pCmdbuffer);
+                BOOLEAN IsDifferent = cmeCompareLastAdHocConnParams(pConCmd);
 
                 GTRACE(GRP_CME, "CME: isSameConnectParamsInProgress: Comparing last AdHoc conn params");
 
@@ -4407,8 +5551,8 @@ static int32_t validateWlanConnectParams(CMEWlanConnectCommon_t *apCmd)
 {
     int32_t      status = 0;
 
-    // Verify STA based role exists
-    if (!cme_is_sta_role_like_activated())
+    // Verify STA based role or Device exists
+    if (!cme_is_sta_role_like_activated() && !cme_is_device_role_like_activated())
     {
         GTRACE(GRP_SL_DISPATCH, "ERROR: connect command is not supported in AP Mode");
         status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);
@@ -4424,7 +5568,7 @@ static int32_t validateWlanConnectParams(CMEWlanConnectCommon_t *apCmd)
     }
 #endif
 	// If security is needed, verify password is valid
-	else if ( (0 == apCmd->PasswordLen) && (
+	else if ( (!(apCmd->Flags & WLAN_CONNECT_FLAG_ENTERPRISE_CONNECT)) && (0 == apCmd->PasswordLen) && (
 			(( CME_SEC_TYPE_WEP == apCmd->SecType ) || ( CME_SEC_TYPE_WPA_WPA2 == apCmd->SecType ) 
             || ( CME_SEC_TYPE_WPA3 == apCmd->SecType ) || (CME_SEC_TYPE_WPA2_PLUS == apCmd->SecType)) 
             || ( CME_SEC_TYPE_WPA2_WPA3 == apCmd->SecType ) ) )
@@ -4436,11 +5580,11 @@ static int32_t validateWlanConnectParams(CMEWlanConnectCommon_t *apCmd)
 	// perform sanity check on received parameters
 	else
 	{
-	    /* Lior: ssid length constraint has been removed as we support connection of bssid only */
+	    /* ssid length constraint has been removed as we support connection of bssid only */
 		if ( (/* (0 == apCmd->SsidLen) ||  */ (SSID_MAX_LEN < apCmd->SsidLen)) && (
 				(( CME_SEC_TYPE_WEP == apCmd->SecType ) || ( CME_SEC_TYPE_WPA_WPA2 == apCmd->SecType ))
                 || ( CME_SEC_TYPE_WPA3 == apCmd->SecType ) || (CME_SEC_TYPE_WPA2_PLUS == apCmd->SecType)
-                || (CME_SEC_TYPE_WPA2_WPA3 == apCmd->SecType) ) )
+                || (CME_SEC_TYPE_WPA2_WPA3 == apCmd->SecType) || (CME_SEC_TYPE_WPA_ENT == apCmd->SecType) ) )
 		{
 			GTRACE(GRP_CME,"Illegal SSID length %d security type %d", apCmd->SsidLen, apCmd->SecType);
 			status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_SSID_LEN);
@@ -4455,11 +5599,12 @@ static int32_t validateWlanConnectParams(CMEWlanConnectCommon_t *apCmd)
 // cmePendingWlanConnectStore
 //                          - store the pending connection command block (point at the original buffers)
 //
-void cmePendingWlanConnectStor(CMEWlanConnectCommon_t *pConnectCmd,void *pConnectEapCmd,uint16_t keyMgmtType, uint8_t profiles_connection)
+void cmePendingWlanConnectStor(CMEWlanConnectCommon_t *pConnectCmd,CMEEapWlanConnect_t *pConnectEapCmd,uint16_t keyMgmtType, uint8_t profiles_connection)
 {
     HOOK(HOOK_IN_CME);
 
     gCme_PendingWlanConnect.pConnectCmd = pConnectCmd;
+    gCme_PendingWlanConnect.pConnectEapCmd = pConnectEapCmd;
 
     //gCme_PendingWlanConnect.pConnectEapCmd = pConnectEapCmd;
 
@@ -4649,7 +5794,7 @@ int16 CME_WlanApRemovePeer(CMEWlanApRemovePeer_t *pCmdRemovePeer)
 
         if (pushMsg2Queue(&msg) < 0)
         {
-            status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_STATUS_ERROR);;
+            status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__HOST_RESPONSE_STATUS_ERROR);
         }
         else
         {
@@ -4661,7 +5806,7 @@ int16 CME_WlanApRemovePeer(CMEWlanApRemovePeer_t *pCmdRemovePeer)
     }
     else
     {
-        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);;;
+        status = WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__CME, WLAN_ERROR_TYPE__INVALID_ROLE);
     }
 
     return status;

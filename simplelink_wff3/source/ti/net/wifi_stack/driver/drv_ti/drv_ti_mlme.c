@@ -97,6 +97,9 @@
 #define MAX_AUTH_MSG_LEN        (MAX_EXTRA_IES_LEN + AUTH_MSG_HEADER_LEN)
 
 
+#define TX_COMPLETE_TIMEOUT     (200)
+
+
 // ============================================================================
 // 	Type definitions
 // ============================================================================
@@ -105,7 +108,13 @@
 //		Modules data base
 // ============================================================================
 // sync object deauth flow
-OsiSyncObj_t gtxCompleteSyncObj;
+extern OsiSyncObj_t gtxCompleteSyncObj;
+
+// ============================================================================
+//      External Functions
+// ============================================================================
+/* WLAN event dispatcher to host */
+extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t * args, uint16_t argsLen);
 
 // ============================================================================
 //		Local Functions declarations
@@ -367,7 +376,7 @@ int32_t ti_drv_txAssocReqPacket(ti_driver_ifData_t *apDrv,
 
 
     // Added for correct rates configuration
-    Channel_e apChan_temp;
+    Channel_e apChannel;
     uint8_t apBand_temp;
     int32_t connect_ch = -1;
     int32_t band24 = -1;
@@ -537,13 +546,13 @@ int32_t ti_drv_txAssocReqPacket(ti_driver_ifData_t *apDrv,
     basicRatesBM = 0; // association request should not publish basic rates, so removing the default initialization 
 
     // Remove 11b rates when connecting to 5Ghz AP
-    if (freq_to_chan(apDrv->freq, &apChan_temp, &apBand_temp))
+    if (freq_to_chan(apDrv->freq, &apChannel, &apBand_temp))
     {
         GTRACE(GRP_GENERAL_ERROR, "ERROR: failed to get channel from freq %d for role %d",
                                        apDrv->freq, apDrv->roleType);
         return -1;
     }
-    if (!(is_bg_channel(apChan_temp)))
+    if (!(is_bg_channel(apChannel)))
     {
         supportedRatesBM = supportedRatesBM & ~ANY_B_RATE;
     }
@@ -585,10 +594,11 @@ int32_t ti_drv_txAssocReqPacket(ti_driver_ifData_t *apDrv,
     //
     if (pCandidateDesc->mScanResult.caps & DOT11_SPECTRUM_MANAGEMENT)
     {
-        powerCapability_t   powerCapability;
-        dot11_CAPABILITY_t  *pDot11PowerCapability = (dot11_CAPABILITY_t *)pPack;
+        powerCapability_t powerCapability;
+        dot11_CAPABILITY_t *pDot11PowerCapability = (dot11_CAPABILITY_t *)pPack;
+        uint8_t maxTxPower;
 
-        regulatoryDomain_GetPowerCapability(&powerCapability);
+        regulatoryDomain_GetPowerCapability(&powerCapability, apChannel);
 
         pDot11PowerCapability->hdr.eleId = DOT11_CAPABILITY_ELE_ID;
         pDot11PowerCapability->hdr.eleLen = DOT11_CAPABILITY_ELE_LEN;
@@ -635,11 +645,13 @@ int32_t ti_drv_txAssocReqPacket(ti_driver_ifData_t *apDrv,
  
 
     //if channel is 5GHZ, then add VHT Support
-    if(!(is_bg_channel(apChan_temp)))
+    if(!(is_bg_channel(apChannel)))
     {
         if((band_cfg == L2_CFG_BAND_ONLY_5GHZ) || (band_cfg == L2_CFG_BAND_BOTH))    
         {
-            if(FALSE != pCandidateDesc->mVhtCapabilitesPresent)
+            if(FALSE != (pCandidateDesc->mVhtCapabilitesPresent && l2_cfg_isStaHeEnabled() && !(l2_GetWirelessProto()) ))
+            {
+        
                 if ( (CIPHER_SUITE_TKIP != cipherSuite) && (CIPHER_SUITE_WEP != cipherSuite) )
                 {
                     len = l2_cfgBuildVhtCapabilitiesIe(apDrv->roleId, pPack);
@@ -652,10 +664,10 @@ int32_t ti_drv_txAssocReqPacket(ti_driver_ifData_t *apDrv,
                     actualSize += len;
                     GTRACE(GRP_DRIVER_CC33, "added Operating Mode Notification Size %d", actualSize);
                 }
+            }
         }
     }
-
-    isHeConnection = l2_cfg_isStaHeEnabled() &&
+    isHeConnection = l2_cfg_isStaHeEnabled() && !(l2_GetWirelessProto()) &&
                     (FALSE != pCandidateDesc->mHeCapabilitiesPresent) &&
                     (FALSE != pCandidateDesc->mHeOperationPresent);
     //HE
@@ -688,6 +700,25 @@ int32_t ti_drv_txAssocReqPacket(ti_driver_ifData_t *apDrv,
         pPack += len;
         actualSize += len;
         GTRACE(GRP_DRIVER_CC33, "added QOS actual size %d", actualSize);
+    }
+
+    //add Vendor elements to Assoc request
+    if(apDrv->vendorIEInfo.vendor_elements_length > 0)
+    {
+        len = apDrv->vendorIEInfo.vendor_elements_length;
+        if((actualSize +len) > MAX_ASSOC_MSG_LENGTH)
+        {
+            GTRACE(GRP_DRIVER_CC33, "Error!vendor elements actual size %d is bigger than max size", actualSize);
+            MLME_REPORT_PRINT_ERROR( "\n\rERROR!vendor elements actual size %d is bigger than max size", actualSize);
+        }
+        else
+        {
+            os_memcpy(pPack, apDrv->vendorIEInfo.vendor_elements,len);
+            pPack += len;
+            actualSize += len;
+            GTRACE(GRP_DRIVER_CC33, "added vendor iE size %d", actualSize);
+            MLME_REPORT_PRINT( "\n\radded vendor iE size %d", actualSize);
+        }
     }
 
     //
@@ -906,9 +937,8 @@ int32_t ti_drv_txDeauthDisassocPacket(ti_driver_ifData_t *apDrv,
         GTRACE(GRP_DRIVER_CC33, "ti_drv_txDeauthDisassocPacket: ERROR No valid hlid was found!  NetifId = %d", link);
         return NOK;
     }
-        
-    //identify if encripted mgmt frame
-    if (txCtrlParams_GetMgmtEncryptMode(link))
+    //identify if encripted mgmt frame only if not broadcast
+    if (txCtrlParams_GetMgmtEncryptMode(link) && !MAC_MULTICAST((uint8_t *)apBssid))
     {
         SecureHdrLength = RSN_SEC_LEN;
         extraHThdr += SecureHdrLength;
@@ -953,12 +983,17 @@ int32_t ti_drv_txDeauthDisassocPacket(ti_driver_ifData_t *apDrv,
     } 
 
     COPY_WLAN_WORD(&pDot11Header->fc, &fc);
-
-    MAC_COPY (pDot11Header->DA, (uint8_t *)apBssid);
+    MAC_COPY (pDot11Header->DA, (uint8_t *)apBssid); 
     MAC_COPY (pDot11Header->SA, (uint8_t *)apDrv->macAddr);
+
+    // WLAN_DISCONNECT_AP_REMOVE_PEER is only on unicast deauth    
     if(WLAN_DISCONNECT_AP_REMOVE_PEER == aReason)
     {
         aReason = WLAN_DISCONNECT_DEAUTH_SENDING_STA_LEAVING;
+    }
+
+    if(ROLE_IS_TYPE_AP_BASED(apDrv->roleType))
+    {
         MAC_COPY (pDot11Header->BSSID, (uint8_t *)apDrv->macAddr);
     }
     else
@@ -973,15 +1008,6 @@ int32_t ti_drv_txDeauthDisassocPacket(ti_driver_ifData_t *apDrv,
 
     pkt->fTxCompleteCb = (TMgmtPacketCb)deauthDisassocTxResultCb;
 
-    // Create a sync object to wait for tx complete
-    osiRetVal = osi_SyncObjCreate (&gtxCompleteSyncObj);
-    if (osiRetVal!=OSI_OK)
-    {
-        Report("\n\rti_drv_txDeauthDisassocPacket: sync object creation failed");
-        assert(0);
-        return NOK;
-    }
-
     /* submit for tx */
     osiRetVal = udata_SendTxMgmtPacket(pkt);
    
@@ -994,16 +1020,16 @@ int32_t ti_drv_txDeauthDisassocPacket(ti_driver_ifData_t *apDrv,
     }
 
     //Wait for tx complete
-    osiRetVal = osi_SyncObjWait(&gtxCompleteSyncObj, OSI_WAIT_FOREVER);
+    osiRetVal = osi_SyncObjWait(&gtxCompleteSyncObj, TX_COMPLETE_TIMEOUT);
     if (OSI_OK != osiRetVal)
     {
         GTRACE(GRP_GENERAL_ERROR, "ERROR: osi_SyncObjectWait failed, rc = %d", osiRetVal);
-        assert(0);
+        MLME_REPORT_PRINT_ERROR("\n\rERROR: osi_SyncObjectWait failed, rc = %d", osiRetVal);
+        ret = NOK;
+        goto fail;
     }
 
  fail:
-    osi_SyncObjDelete(&gtxCompleteSyncObj);
-
     MLME_REPORT_PRINT("\n\rdrv_ti_mlme:ti_drv_txDeauthDisassocPacket send done ret:%d ",ret);
 
 
@@ -1021,6 +1047,7 @@ int32_t ti_drv_txDeauthDisassocPacket(ti_driver_ifData_t *apDrv,
 void deauthDisassocTxResultCb(void *apDesc)
 {
     MLME_REPORT_PRINT("\n\rdrv_ti_mlme:deauthDisassocTxResultCb");
+    GTRACE(GRP_DRIVER_CC33, "drv_ti_mlme:deauthDisassocTxResultCb");
 
     /* Signal to the waiting thread */
     //GTRACE(GRP_DRIVER_CC33, "\n\rdeauthDisassocTxResultCb: Signal to the waiting thread");
@@ -1121,27 +1148,25 @@ rxMngPackNextOperation_e ti_drv_rxAuthResponsePacket(
                                 macSender,
                                 apMngPack->u.auth.status_code);
 
-		// If AP can't accept the request, give it another chance within 200msecs
-		if (WLAN_STATUS_AP_UNABLE_TO_HANDLE_NEW_STA == apMngPack->u.auth.status_code)
+        wlanDispatcherSendEvent(WLAN_EVENT_AUTHENTICATION_REJECTED, (void *)&apMngPack->u.auth.status_code, sizeof(uint16_t));
+
+		if (WLAN_STATUS_AP_UNABLE_TO_HANDLE_NEW_STA == apMngPack->u.auth.status_code ||
+            WLAN_STATUS_ASSOC_REJECTED_TEMPORARILY == apMngPack->u.auth.status_code ||
+            WLAN_STATUS_DENIED_INSUFFICIENT_BANDWIDTH == apMngPack->u.auth.status_code ||
+            WLAN_STATUS_REQUEST_DECLINED == apMngPack->u.auth.status_code)
 		{
-			u32 delayMS = 200;	// in msecs
-
-			GTRACE(GRP_DRIVER_CC33, "	authentication rejected, will try again in %d msecs", delayMS);
-			apDrv->pAuthInfo->timeoutMS = delayMS;
-
-			// TODO - handle return code
-			eloop_register_timeout(0,						// seconds
-								   delayMS*1000, 			// useconds
-								   ti_drv_AuthTimeout,	    // Timeout callback
-								   apDrv,					// eloop data
-								   NULL);					// user data
-
-			// TODO - cancel the remain on channel
-			return RX_MGMT_NONE;
+			if (DENY_LIST_EN) 
+            {
+                GTRACE(GRP_DRIVER_CC33, "Authentication rejected, adding this MAC to Deny List");
+                DenyList_addElement(&(apDrv->denyList), apMngPack->sa, DENY_LIST_DEFAULT_EXPIRY_TIME + osi_GetTimeMS());
+                
+                MLME_REPORT_PRINT("\n\rti_drv_rxAuthResponsePacket:destroyAuthData");
+                destroyAuthData(apDrv, TRUE);
+                return RX_MGMT_NONE;
+            }
 		}
 
-		// For any other failure indication, clear the auth info and let supplicant
-		// decide how to continue.
+		// For any other failure indication, let supplicant decide how to continue.
 		// (For WLAN_STATUS_NOT_SUPPORTED_AUTH_ALG supplicant starts again.)
         MLME_REPORT_PRINT("\n\rti_drv_rxAuthResponsePacket:destroyAuthData");
 		destroyAuthData(apDrv, TRUE);
@@ -1230,6 +1255,11 @@ rxMngPackNextOperation_e ti_drv_rxAssocResponsePacket(
 
     GTRACE(GRP_DRIVER_CC33, "RX %ssoc response for %s status %d ", (aIsReassoc ? "Rea" :"A" ), macSender, status_code);
     MLME_REPORT_PRINT("\r\nRX %ssoc response for %s status %d ", (aIsReassoc ? "Rea" :"A" ), macSender, status_code);
+
+    if (WLAN_STATUS_SUCCESS != status_code)
+    {
+        wlanDispatcherSendEvent(WLAN_EVENT_ASSOCIATION_REJECTED, (void *)&status_code, sizeof(uint16_t));
+    }
 
     pIes = apMngPack->u.assoc_resp.variable;
     ieee802_11_parse_elems(pIes, aPackLen - minLen, &parsedElems, 1 /* show errors in log */);
@@ -1359,6 +1389,25 @@ rxMngPackNextOperation_e ti_drv_rxAssocResponsePacket(
 }
 
 // ----------------------------------------------------------------------------
+Bool_e ti_drv_checkUnprotectedDeauthDisassocEventCriteria(
+                                        ti_driver_ifData_t  *apDrv,
+						                struct ieee80211_mgmt *apMngPack)
+{
+    TWlanLinkInfo pLinkInfo;
+    wlanLinks_ReadLinkInfo(&pLinkInfo, apDrv->link);
+    if (IRQ_UtilCompareMacAddress(apDrv->macAddr, apMngPack->da) &&
+        pLinkInfo.bPMFEncription && 
+        (IS_PROTECTED_FRAME(le_to_host16(apMngPack->frame_control)) == FALSE) &&
+        ((apMngPack->u.deauth.reason_code == WLAN_REASON_CLASS2_FRAME_FROM_NONAUTH_STA) || 
+         (apMngPack->u.deauth.reason_code == WLAN_REASON_CLASS3_FRAME_FROM_NONASSOC_STA)))
+    {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+// ----------------------------------------------------------------------------
 rxMngPackNextOperation_e ti_drv_rxDeauthPacket(
 						   ti_driver_ifData_t  *apDrv,
 						   struct ieee80211_mgmt *apMngPack,
@@ -1402,6 +1451,11 @@ rxMngPackNextOperation_e ti_drv_rxDeauthPacket(
 		return RX_MGMT_NONE;
 	}
 
+    if (ti_drv_checkUnprotectedDeauthDisassocEventCriteria(apDrv, apMngPack))
+    {
+        return RX_MGMT_UNPROT_DEAUTH;
+    }
+
 	finalizeStaDisconnect(apDrv, 1097);
 
 	// at this point the mac80211, mlme.c marks interface is idle,
@@ -1439,6 +1493,11 @@ rxMngPackNextOperation_e ti_drv_rxDisassocPacket(
     if (FALSE == apDrv->associated ||
 	    !IRQ_UtilCompareMacAddress(apDrv->currBssid, apMngPack->sa))
 		return RX_MGMT_NONE;
+
+    if (ti_drv_checkUnprotectedDeauthDisassocEventCriteria(apDrv, apMngPack))
+    {
+        return RX_MGMT_UNPROT_DISASSOC;
+    }
 
 	finalizeStaDisconnect(apDrv, 1135);
 

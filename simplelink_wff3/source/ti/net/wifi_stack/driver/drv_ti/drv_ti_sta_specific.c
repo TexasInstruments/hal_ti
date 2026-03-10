@@ -162,13 +162,16 @@ int ti_driver_authenticate(void *apPriv, struct wpa_driver_auth_params *apParams
 
     ASSERT_GENERAL(ROLE_IS_TYPE_STA_BASED(pDrv->roleType));
 
-    // when trying to authenticate during the regular CME connection flow the CME state is CME_STA_SUPPLICANT_MANAGED_STATE.
-    // if thats not the case, it means we were already connected and we are roaming now.
-    if (CmeStationFlow_GetCurrentState() != CME_STA_SUPPLICANT_MANAGED_STATE)
+    if (ROLE_IS_TYPE_STA(pDrv->roleType))
     {
-        gBssTransitionState = TRANSITION_IN_PROGRESS;
+        // when trying to authenticate during the regular CME connection flow the CME state is CME_STA_SUPPLICANT_MANAGED_STATE.
+        // if thats not the case, it means we were already connected and we are roaming now.
+        if (CmeStationFlow_GetCurrentState() != CME_STA_SUPPLICANT_MANAGED_STATE)
+        {
+            gBssTransitionState = TRANSITION_IN_PROGRESS;
+        }
     }
-
+    
     // Reset DB for the new connection (as in driver_80211.c, nl80211_mark_disconnected)
     markDisconnected(pDrv, __LINE__);
 
@@ -514,6 +517,7 @@ int ti_driver_associate(void *apPriv,struct wpa_driver_associate_params *apParam
     pAssocInfo = os_zalloc(sizeof(assocInfo_t) + apParams->wpa_ie_len);
     if (pAssocInfo == NULL)
     {
+        CME_PRINT_REPORT_ERROR("\n\rti_driver_associate:allocate pAssocInfo failed: sizeof(assocInfo_t):%d + wpa_ie_len:%d", sizeof(assocInfo_t),apParams->wpa_ie_len);
         ASSERT_GENERAL(FALSE);
         return -1;
 
@@ -618,6 +622,33 @@ int ti_driver_get_ssid(void *apPriv, u8 *apSsid)
     GTRACE(GRP_DRIVER_CC33, "Return SSID %s of len %d to supplicant", apSsid, ssidLen);
 
     return ssidLen;
+}
+
+/* ----------------------------------------------------------------------------
+ ti_driver_add_pmkid
+    This API serves for STA role only.
+    If STA is connected with WPA3 to the AP, it returns the PMKID.
+    Else it returns NULL
+
+ Parameters:    IN  apPriv - Pointer to driver object
+                OUT pmkid  - Pointer to current PMKID cache
+ Return code:   
+---------------------------------------------------------------------------- */
+
+int ti_driver_add_pmkid(void *apPriv, struct wpa_pmkid_params *pmkid)
+{
+    ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
+    struct wpa_supplicant *wpa_s = pDrv->wpa_s;
+
+    if ((wpa_s != NULL) && (pmkid != NULL))
+    {
+        CME_PRINT_REPORT("\n\rti_driver_add_pmkid: role id=%d, PMK len=%d reauth_threshhold=%d p_fils_cache_id:%p selected keymgmt=%d peer BSSID: " MACSTR, 
+            pDrv->roleId, pmkid->pmk_len, pmkid->pmk_reauth_threshold, pmkid->fils_cache_id, wpa_s->key_mgmt, MAC2STR(pmkid->bssid));
+
+        cmeAddWpaPmkCache(wpa_s, (uint8_t*)pmkid->pmkid, (uint8_t*)pmkid->pmk, pmkid->pmk_len, (uint8_t*)pmkid->bssid, wpa_s->key_mgmt);
+    }
+
+    return 0;
 }
 
 // ============================================================================
@@ -959,7 +990,7 @@ int32_t startDevOffchannelRole(void *apPriv, uint32_t aFreq)
     }
 
     pDrv->offChannel_roc_started = 1; 
-    CME_CON_PRINT("\n\rti_driver: ROC started");
+    CME_PRINT_ROC_REPORT("\n\rti_driver: ROC started");
 
     os_free(input_params.freq);
 
@@ -1380,7 +1411,7 @@ void setPeerHeCapabilities(uint8_t                        *pHeCapabilitiesPos,
     HOOK(HOOK_DRV_TI_STA_SPECIFIC);
 
         // If local supports HE, set peer capabilities
-       if ( (FALSE != l2_cfg_isStaHeEnabled()) &&
+       if ( (FALSE != l2_cfg_isStaHeEnabled()) && (!(l2_GetWirelessProto())) &&
             (NULL != pHeCapabilitiesPos) && (NULL != pHeOperationPos))
        {
            pPeerCapParams->peerHeSupport = 1;
@@ -1496,6 +1527,7 @@ void ti_drv_setApInfo(ti_driver_ifData_t    *apDrv,
     uint32_t   localSupportedRates;
     uint8_t *pIes = apMngPack->u.assoc_resp.variable;
     uint8_t *muEcdaPos;
+    heBssCap_t heBssCap = {0};
 
     apDrv->link = 0;
 
@@ -1585,16 +1617,15 @@ void ti_drv_setApInfo(ti_driver_ifData_t    *apDrv,
 
     wlanLinks_SetLinkAid(aid, apDrv->link);
 
-    setPeerHtCapabilities((uint8_t *)apParsedElems->ht_capabilities, (uint8_t *)apParsedElems->ht_operation,
+    setPeerHtCapabilities((uint8_t *)apParsedElems->ht_capabilities,
+                          (uint8_t *)apParsedElems->ht_operation,
                           &apDrv->bssCap.htCfgInBss, &apDrv->peerCap.htPeerCap);
 
-
-
-    setPeerHeCapabilities((uint8_t *)apParsedElems->he_capabilities, (uint8_t *)apParsedElems->he_operation, muEcdaPos,
-                          &apDrv->bssCap.heCfgInBss, &apDrv->peerCap.hePeerCap, apDrv->assocParams.muEdca, apDrv->currBssid);
-
-
-
+    os_memcpy(&heBssCap, &apDrv->bssCap.heCfgInBss, sizeof(heBssCap_t));
+    setPeerHeCapabilities((uint8_t *)apParsedElems->he_capabilities,
+                          (uint8_t *)apParsedElems->he_operation, muEcdaPos,
+                          &heBssCap, &apDrv->peerCap.hePeerCap,
+                          apDrv->assocParams.muEdca, apDrv->currBssid);
 }
 
 //after associate and connect
@@ -1617,3 +1648,446 @@ void ti_drv_setApAssocInfo(ti_driver_ifData_t    *apDrv)
 
 }
 
+
+// ============================================================================
+//      AP Deny List
+// ============================================================================
+
+/******************************************************************************
+  Function          : DenyList_initList
+
+  Description       : Function to zero list structure when role is enabled
+
+  Input parameters  : Pointer to the DenyList_LinkedList_t structure
+
+  Output parameters : None (void)
+  
+  Return value      : 0 if successful, -1 if list is NULL
+
+  Coder             : Dana
+******************************************************************************/
+int DenyList_initList(DenyList_LinkedList_t* list) 
+{
+    if (!list) 
+    {
+        return -1;
+    }
+        list->head = NULL;
+        list->size = 0;
+        GTRACE(GRP_DRIVER_CC33, "DenyList_initList");
+
+        return 0;
+}
+
+/******************************************************************************
+  Function          : DenyList_timerExpiry
+
+  Description       : Callback function that is called when the timer expires.
+                      It verifies and removes expired elements from the deny list.
+                      The assumption is that this function is called from the same 
+                      context where the timer was registered. This is the context 
+                      of the CME and supplicant.
+
+  Input parameters  : list - pointer to the DenyList_LinkedList_t structure
+
+  Output parameters : None (void)
+  
+  Return value      : None (void)
+
+  Coder             : Dana
+******************************************************************************/
+static void DenyList_timerExpiry(void *list, void *timeout_ctx) 
+{
+    DenyList_LinkedList_t* plist = list;
+
+    GTRACE(GRP_DRIVER_CC33, "DenyList_timerExpiry: Timer expired, verifying and removing expired elements");
+
+    DenyList_verifyAndRemoveExpiredElements(plist);
+
+    // If the list is not empty, re-register the timer
+    if (plist->size > 0) 
+    {
+       if (eloop_is_timeout_registered(DenyList_timerExpiry, list, NULL)) 
+        {   
+            eloop_cancel_timeout(DenyList_timerExpiry, list, NULL);
+        }
+        eloop_register_timeout(DENY_LIST_TIMER_TIMEOUT_SECONDS,         // seconds
+                               0,                                       // useconds
+                               DenyList_timerExpiry,                    // Timeout callback
+                               list,                                    // eloop data
+                               NULL);                                   // pointer to packet	
+    } 
+    else 
+    {
+        GTRACE(GRP_DRIVER_CC33, "DenyList_timerExpiry: List is empty, timer will not be re-registered");
+    }
+}
+
+/******************************************************************************
+  Function          : DenyList_clearList
+
+  Description       : Function to clear the entire list and remove the timer 
+                      if it exists. This function will free all the nodes in the list.
+
+  Input parameters  : Pointer to the DenyList_LinkedList_t structure
+
+  Output parameters : None (void)
+  
+  Return value      : None
+
+  Coder             : Dana
+******************************************************************************/
+void DenyList_clearList(DenyList_LinkedList_t* list) 
+{
+    if (!list || !DENY_LIST_EN)
+    {
+        return;
+    } 
+    GTRACE(GRP_DRIVER_CC33, "DenyList_clearList: Clearing list");
+
+    // Remove timer if exists
+    if (eloop_is_timeout_registered(DenyList_timerExpiry, (void *) list, NULL))
+    {
+        eloop_cancel_timeout(DenyList_timerExpiry, (void *) list, NULL);
+    }
+
+    DenyList_Node_t* current = list->head;
+    while (current) 
+    {
+        DenyList_Node_t* temp = current;
+        current = current->next;
+        free(temp);
+    }
+
+    list->head = NULL;
+    list->size = 0;
+}
+
+/******************************************************************************
+  Function          : DenyList_elementExists
+
+  Description       : Helper function to check if a MAC address exists in the list
+
+  Input parameters  : list - pointer to the DenyList_LinkedList_t structure
+                      macAddr - MAC Address to search for in the list
+
+  Output parameters : node - pointer to the DenyList_Node_t structure where the found node will be stored
+  
+  Return value      : 1 if MAC Address exists in the list, 0 if it does not exist
+
+  Coder             : Dana
+******************************************************************************/
+int DenyList_elementExists(DenyList_LinkedList_t* list, uint8_t macAddr[6], DenyList_Node_t** node) 
+{
+    if (!list || !list->head)
+    {
+        return 0;
+    } 
+
+    DenyList_Node_t* current = list->head;
+    uint32_t nowTime = osi_GetTimeMS(); // Get the current time
+    DenyList_Node_t* prev = NULL;
+
+    while (current) 
+    {
+        // While we traverse the list, we will verify expiry before comparing the MAC address
+        if ((current->expiryTime - nowTime) > UINT32_MAX/2)
+        {
+            // Expiry time has passed, remove the element
+            if (prev) 
+            {
+                prev->next = current->next;
+            } else 
+            {
+                list->head = current->next;
+            }
+            DenyList_Node_t* temp = current;
+            current = current->next;
+            
+            GTRACE(GRP_DRIVER_CC33, "DenyList_elementExists: Mac address %02x:%02x:%02x:%02x:%02x:%02x expiry %d removed from list",  
+            temp->macAddr[0], temp->macAddr[1], temp->macAddr[2], temp->macAddr[3], temp->macAddr[4], temp->macAddr[5], temp->expiryTime);
+            CME_PRINT_REPORT("\n\rDenyList_elementExists: Mac address %02x:%02x:%02x:%02x:%02x:%02x expiry %d removed from list\n\r",  
+            temp->macAddr[0], temp->macAddr[1], temp->macAddr[2], temp->macAddr[3], temp->macAddr[4], temp->macAddr[5], temp->expiryTime);
+
+            free(temp);
+            list->size--;
+        } 
+        else
+        {
+            // Now we actually compare the MAC address
+            if (memcmp(current->macAddr, macAddr, 6) == 0)
+            {
+                GTRACE(GRP_DRIVER_CC33, "DenyList_elementExists: Mac address already exists");
+                if (node != NULL)
+                {
+                    *node = current;
+                }
+                return 1; // MAC address found
+            }
+            // Move to the next node
+            prev = current;
+            current = current->next;
+        }
+    }
+    return 0; // MAC address not found
+}
+
+/******************************************************************************
+  Function          : DenyList_findAndRemoveSoonestExpiry
+
+  Description       : Function to find and remove the node with the soonest expiry time in the list.
+                      This function is useful for managing the deny list and ensuring that
+                      we can efficiently find the node that should be removed next when the 
+                      list is full. 
+
+  Input parameters  : list - pointer to the DenyList_LinkedList_t structure
+
+  Output parameters : None (void)
+  
+  Return value      : None (void)
+
+  Coder             : Dana
+******************************************************************************/
+void DenyList_findAndRemoveSoonestExpiry(DenyList_LinkedList_t* list) 
+{
+    if (!list || !list->head) 
+    {
+        return; // List is empty or invalid
+    }
+
+    DenyList_Node_t* current = list->head;
+    DenyList_Node_t* soonestNode = current;
+    DenyList_Node_t* prev = NULL;
+    DenyList_Node_t* prevSoonest = NULL;
+    uint32_t nowTime = osi_GetTimeMS();
+
+    // Traverse the list to find the soonest expiry node
+    while (current) 
+    {
+        if ((nowTime - current->expiryTime) < (nowTime - soonestNode->expiryTime)) 
+        {
+            soonestNode = current; // Update the node with the soonest expiry time
+            prevSoonest = prev; // Track the previous node of the soonest node
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    // Remove the soonest expiry node from the list
+    if (soonestNode == list->head) 
+    {
+        list->head = soonestNode->next; // Update head if the soonest node is the first node
+    } else if (prevSoonest) 
+    {
+        prevSoonest->next = soonestNode->next; // Bypass the soonest node
+    }
+
+    list->size--; // Decrement the size of the list
+
+    GTRACE(GRP_DRIVER_CC33, "DenyList_findAndRemoveSoonestExpiry:  MAC address=%02x:%02x:%02x:%02x:%02x:%02x expiry Time %d",
+    soonestNode->macAddr[0], soonestNode->macAddr[1], soonestNode->macAddr[2], soonestNode->macAddr[3], soonestNode->macAddr[4], soonestNode->macAddr[5], soonestNode->expiryTime);
+    CME_PRINT_REPORT("\n\rDenyList_findAndRemoveSoonestExpiry:  MAC address=%02x:%02x:%02x:%02x:%02x:%02x expiry Time %d\n\r", 
+    soonestNode->macAddr[0], soonestNode->macAddr[1], soonestNode->macAddr[2], soonestNode->macAddr[3], soonestNode->macAddr[4], soonestNode->macAddr[5], soonestNode->expiryTime);
+
+    // Free the memory of the removed node
+    free(soonestNode);
+}
+
+/******************************************************************************
+  Function          : DenyList_addElement
+
+  Description       : Function to add an element to the list
+
+  Input parameters  : list - pointer to the DenyList_LinkedList_t structure
+                      macAddr - NAC Address to add to the list
+                      expiryTime - expiry time in MS of the new list Entry
+
+  Output parameters : None (void)
+  
+  Return value      : 0 if the MAC address was successfully added,
+                      -1 if the list is empty or invalid,
+                      -2 if the MAC address already exists in the list (expiry time updated),
+                      -3 if memory allocation failed
+
+  Coder             : Dana
+******************************************************************************/
+int DenyList_addElement(DenyList_LinkedList_t* list, uint8_t macAddr[6], uint32_t expiryTime) 
+{
+     DenyList_Node_t* node = NULL; 
+
+    if (list == NULL) 
+    {
+        return -1;
+    }
+
+    // Begin by clearing old entries from the list
+    DenyList_verifyAndRemoveExpiredElements(list);
+
+    if (DenyList_elementExists(list, macAddr, &node)) 
+    {
+        node->expiryTime = expiryTime; // Update the expiry time of the existing node
+
+        GTRACE(GRP_DRIVER_CC33, "DenyList_addElement:  updated node MAC address=%02x:%02x:%02x:%02x:%02x:%02x expiry Time %d",
+        (node)->macAddr[0], (node)->macAddr[1], (node)->macAddr[2], (node)->macAddr[3], (node)->macAddr[4], (node)->macAddr[5], (node)->expiryTime);
+
+        return -2; // MAC address already exists in the list, update the expiry time
+    }
+
+    if (list->size >= DENY_LIST_MAX_ENTRIES) 
+    {
+        // List is full - Need to remove the entry that is closest to its expiry
+        GTRACE(GRP_DRIVER_CC33, "DenyList_addElement: List full - remove soonest expiry");
+        DenyList_findAndRemoveSoonestExpiry(list);
+    }
+
+    // Create a new node
+    DenyList_Node_t* newNode = (DenyList_Node_t*)malloc(sizeof(DenyList_Node_t));
+    if (newNode == NULL) 
+    {
+        return -3; // Memory allocation failed
+    }
+
+    memcpy(newNode->macAddr, macAddr, 6);
+    newNode->expiryTime = expiryTime;
+    newNode->next = list->head;
+
+    // Add the new node to the head of the list
+    list->head = newNode;
+    list->size++;
+    GTRACE(GRP_DRIVER_CC33, "DenyList_addElement:  added MAC address=%02x:%02x:%02x:%02x:%02x:%02x expiry Time %d list size %d", 
+        macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5], expiryTime, list->size);
+    CME_PRINT_REPORT("\n\rDenyList_addElement:  added MAC address=%02x:%02x:%02x:%02x:%02x:%02x expiry Time %d list size %d\n\r", 
+        macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5], expiryTime, list->size);
+
+    // ONLY if this is the first element in the list, create a timer for clearing the list
+    if (list->size == 1)
+    {
+        eloop_register_timeout(DENY_LIST_TIMER_TIMEOUT_SECONDS,         // seconds
+                               0,                                       // useconds
+                               DenyList_timerExpiry,                    // Timeout callback
+                               list,                                   // eloop data
+                               NULL);                                   // pointer to packet
+    }
+
+    return 0; // Success
+}
+
+/******************************************************************************
+  Function          : DenyList_removeElement
+
+  Description       : Function to remove an element from the list
+
+  Input parameters  : list - pointer to the DenyList_LinkedList_t structure
+                      macAddr - MAC Address to remove from the list
+
+  Output parameters : None (void)
+  
+  Return value      : -1 if the list is empty or invalid,
+                      -2 if the MAC address was not found in the list,
+                      0 if the MAC address was successfully removed
+
+  Coder             : Dana
+******************************************************************************/
+int DenyList_removeElement(DenyList_LinkedList_t* list, uint8_t macAddr[6]) 
+{
+    if (!list || !list->head) 
+    {
+        return -1; // List is empty or invalid
+    }
+
+    DenyList_Node_t* current = list->head;
+    DenyList_Node_t* prev = NULL;
+
+    while (current) 
+    {
+        if (memcmp(current->macAddr, macAddr, 6) == 0) 
+        {
+            // MAC address found, remove the node
+            if (prev) 
+            {
+                prev->next = current->next;
+            } else 
+            {
+                list->head = current->next;
+            }
+            GTRACE(GRP_DRIVER_CC33, "DenyList_removeElement: Mac address %02x:%02x:%02x:%02x:%02x:%02x removed from list", 
+            macAddr[0], macAddr[1], macAddr[2], macAddr[3], macAddr[4], macAddr[5]);
+
+            free(current);
+            list->size--;
+            return 0; // Success
+        }
+        prev = current;
+        current = current->next;
+    }
+    return -2; // MAC address not found
+}
+
+/******************************************************************************
+  Function          : DenyList_verifyAndRemoveExpiredElements
+
+  Description       : Function that iterates through the linked list, checks the expiry time of each
+                      element against the current time, and removes expired elements.
+                      This function should be called when trying to connect.
+
+  Input parameters  : list - pointer to the DenyList_LinkedList_t structure
+
+  Output parameters : None (void)
+  
+  Return value      : None (void)
+
+  Coder             : Dana
+******************************************************************************/
+void DenyList_verifyAndRemoveExpiredElements(DenyList_LinkedList_t* list) 
+{
+    if (!list || !list->head) 
+    {
+        return; // List is empty or invalid
+    }
+
+    GTRACE(GRP_DRIVER_CC33, "DenyList_verifyAndRemoveExpiredElements");
+
+    uint32_t nowTime = osi_GetTimeMS(); // Get the current time
+    DenyList_Node_t* current = list->head;
+    DenyList_Node_t* prev = NULL;
+
+    while (current) 
+    {
+        if ((current->expiryTime - nowTime) > UINT32_MAX/2)
+        {
+            // Expiry time has passed, remove the element
+            if (prev) 
+            {
+                prev->next = current->next;
+            } else 
+            {
+                list->head = current->next;
+            }
+            DenyList_Node_t* temp = current;
+            current = current->next;
+
+            GTRACE(GRP_DRIVER_CC33, "DenyList_verifyAndRemoveExpiredElements: Mac address %02x:%02x:%02x:%02x:%02x:%02x expiry %d removed from list",  
+            temp->macAddr[0], temp->macAddr[1], temp->macAddr[2], temp->macAddr[3], temp->macAddr[4], temp->macAddr[5], temp->expiryTime);
+            CME_PRINT_REPORT("\n\rDenyList_verifyAndRemoveExpiredElements: Mac address %02x:%02x:%02x:%02x:%02x:%02x expiry %d removed from list\n\r",  
+            temp->macAddr[0], temp->macAddr[1], temp->macAddr[2], temp->macAddr[3], temp->macAddr[4], temp->macAddr[5], temp->expiryTime);
+
+            free(temp);
+            list->size--;
+
+            if (list->size == 0)
+            {
+                // If the list is empty, cancel the timer
+                if (eloop_is_timeout_registered(DenyList_timerExpiry, (void *) list, NULL)) 
+                {
+                    eloop_cancel_timeout(DenyList_timerExpiry, (void *) list, NULL);
+                }
+            }
+
+        } else 
+        {
+            // Move to the next node
+            prev = current;
+            current = current->next;
+        }
+    }
+}

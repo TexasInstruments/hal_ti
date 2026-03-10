@@ -57,6 +57,7 @@
 #include "tx_ctrl_api.h"
 #include "tw_driver.h"
 #include "init_host.h"
+#include "l2_cfg.h"
 /******************************************************************************
                                     EXTERN
 ******************************************************************************/
@@ -117,7 +118,7 @@ int32_t InitHostDriver(void)
     ret = osi_LockObjCreate(&extAppLockObj);
     if (ret != OSI_OK)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return(ret);
     }
 
@@ -129,7 +130,7 @@ int32_t InitHostDriver(void)
     ret = trnspt_Init(TrnsptThrdPrior);
     if(ret < 0)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return(ret);
     }
 
@@ -152,6 +153,7 @@ int32_t InitHostDriver(void)
 #ifdef REMOVE_TX_CODE
     ret |= rxXfer_Init(); //TODO to remove
 #endif
+    ret |= txXferAggr_Init();
     ret |= txXfer_Init();
     ret |= txResult_Init();
     ret |= txCtrlBlk_Init();
@@ -162,13 +164,13 @@ int32_t InitHostDriver(void)
     if(ret)
     {
         Report("\r\nERROR !udata_Init failed");
-        assert(0);
+        ASSERT_GENERAL(0);
         return(ret);
     }
 
     if(ret)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
 
@@ -181,7 +183,7 @@ int32_t InitHostDriver(void)
     if(ret < 0)
     {
         Report("\r\nERROR !HwInit failed \n\r");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
     Report("Hardware init DONE! \n\r");
@@ -193,23 +195,22 @@ int32_t InitHostDriver(void)
     //so need to separate  the init into two init function
     bus_sendInitCommand(0/*not used*/, 0);
 
-    wlan_IRQInit(FwEvent_irq_handler);
-
+    /* enable the IRQ interrupt */
+    wlan_IRQEnableInt();
 
     ret = cc3xxx_set_defaults();
 
     if(ret < 0)
     {
         Report("\r\nERROR !set defults failed");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
-
     ret = init_device((uint32_t)CONTROL_BUFFER_READ_SIZE_BTL,(uint32_t)CONTROL_BUFFER_READ_SIZE);
 
     if(ret < 0)
     {
         Report("\r\nERROR !Init device FAILED");
-        assert(0);
+        ASSERT_GENERAL(0);
     }
 
     return ret;
@@ -239,12 +240,21 @@ void DeInitHostDriverInternal(void * hCbHndl)
     }
 
     /* Data path */
+    ret = txXferAggr_Destroy();
+
+    if (ret)
+    {
+        goto fail;
+    }
+
+    /* Data path */
     ret = txXfer_Destroy();
 
     if (ret)
     {
         goto fail;
     }
+
 
     ret = txResult_Destroy();
     if (ret)
@@ -286,7 +296,7 @@ void DeInitHostDriverInternal(void * hCbHndl)
 fail:
 
     Report("Hardware deinit FAILED!!!!!! ret = %d \n\r", ret);
-    assert(0);
+    ASSERT_GENERAL(0);
     return;
 }
 
@@ -313,7 +323,7 @@ int32_t DeInitHostDriver(void)
     if(0 == uDestroyClientId)
     {
         /* max number of clients is exceeded, report error and exit. */
-        assert(0);
+        ASSERT_GENERAL(0);
         return WlanError(WLAN_ERROR_SEVERITY__HIGH, WLAN_ERROR_MODULE__DEVICE, WLAN_ERROR_TYPE__REACHED_MAX_CLIENTS);
     }
 
@@ -321,7 +331,7 @@ int32_t DeInitHostDriver(void)
     ret = trnspt_Destroy(uDestroyClientId);
     if(OSI_OK != ret)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return ret;
     }
 
@@ -332,7 +342,7 @@ int32_t DeInitHostDriver(void)
     ret = twIf_Destroy();
     if(OSI_OK != ret)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return ret;
     }
     osi_LockObjDelete(&driverLock);
@@ -340,7 +350,7 @@ int32_t DeInitHostDriver(void)
     ret = osi_LockObjDelete(&extAppLockObj);
     if (ret != OSI_OK)
     {
-        assert(0);
+        ASSERT_GENERAL(0);
         return ret;
     }
 
@@ -457,4 +467,39 @@ void host_getCounters(WlanRole_e roleType, dbg_cntr_trnspt_t *counters)
 
 }
 
+/******************************************************************************
 
+    NAME:           InitIniParamsHost
+
+    PROTOTYPE:      init
+
+    DESCRIPTION:    Read ini params value to initate globals on wlan_start 
+
+    CALLER:        ctrlCmdFw_DownloadIniParams
+
+    RETURNS:        NONE
+******************************************************************************/
+void InitIniParamsHost(cmd_ini_params_download_t *cmd)
+{
+    struct cc33xx_conf_file *conf = (struct cc33xx_conf_file *)(cmd->payload);
+
+    // Set ps_scheme according to PowerSaveScheme
+    uint8_t ps_scheme = conf->mac.ps_scheme; 
+    AcPsMode_t acPsMode =
+    {
+        .wmeAcPsMode[AC_BE] = ps_scheme,
+        .wmeAcPsMode[AC_BK] = ps_scheme,
+        .wmeAcPsMode[AC_VI] = ps_scheme,
+        .wmeAcPsMode[AC_VO] = ps_scheme
+    };
+    l2_cfg_Dynamic_set(L2_AC_PS_MODE, (uint8_t *)&acPsMode);
+
+    // Update the l2CfgCommon_t parameters based on the INI file configuration
+    if (gpL2CommonCfg != NULL)
+    {
+        // Set the he support value
+        gpL2CommonCfg->heSupport = conf->mac.he_enable;
+    }
+
+    // CMD is freed in caller function
+}

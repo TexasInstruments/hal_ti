@@ -140,9 +140,12 @@ void* g_remain_on_channel_apPriv = NULL;
 
 p2pGroupRoleType_e gP2pGroupRoleType = NOT_IN_GROUP; // used only for p2p events
 
-const uint8_t gTIHwConfigChannlesBG[] = PERIODIC_SCAN_CHANNELS_ARRAY_B_G_BAND;
-const uint8_t gTIHwConfigChannlesA[] = PERIODIC_SCAN_CHANNELS_ARRAY_A_BAND;
+p2pGroupRole_e gP2pGroupRole = P2P_GROUP_ROLE_NONE;
 
+const uint8_t gTIHwConfigChannelsBG[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+const uint8_t gTIHwConfigChannelsA[] = PERIODIC_SCAN_CHANNELS_ARRAY_A_BAND;
+
+//Extended capabilities for STA role
 const uint8_t gTIStaExtendedCapabilities[] = {
     [WLAN_EXT_CAPAB_BYTE(WLAN_EXT_CAPAB_EXT_CHAN_SWITCH)] = 
         BIT(WLAN_EXT_CAPAB_EXT_CHAN_SWITCH % 8),
@@ -153,6 +156,11 @@ const uint8_t gTIStaExtendedCapabilities[] = {
 
 const uint8_t gTIStaExtendedCapabilitiesMask[sizeof gTIStaExtendedCapabilities] = {0};
 
+//Extended capabilities for AP role
+const uint8_t gTIApExtendedCapabilities[] = {0};
+
+const uint8_t gTIApExtendedCapabilitiesMask[sizeof gTIApExtendedCapabilities] = {0};
+
 extern TMacAddr g_fuse_mac_addr[];
 
 extern uint32_t isextP2P();
@@ -162,9 +170,14 @@ extern uint32_t isextDPP();
 extern int32_t set_cond_in_process_wlan_supplicant_operation();
 extern int32_t set_cond_in_process_wlan_one_shot_scan();
 extern int32_t set_cond_in_process_wlan_periodic_scan();
-extern int32_t set_cond_in_process_wlan_roledown();
-extern void set_finish_wlan_roledown();
+extern int32_t set_cond_in_process_wlan_ap_roledown();
+extern int32_t set_cond_in_process_wlan_sta_roledown();
+extern void set_finish_wlan_ap_roledown();
+extern void set_finish_wlan_sta_roledown();
 extern void set_finish_wlan_supplicant_operation();
+extern void CME_start_one_shot_scan_timer();
+extern void CME_start_periodic_scan_timer();
+extern void CME_peer_aging_timer_stop(OsiTimer_t *osTimer);
 
 OsiLockObj_t    extAppLockObj;
 extern txCtrl_t *gTxCtrlCB;
@@ -173,6 +186,9 @@ extern txCtrl_t *gTxCtrlCB;
 uint32_t gBtmCtr = 0;
 
 extern OsiSyncObj_t gCmeEapolsStaSyncObject;
+
+extern void CmeStaP2pClientInit(Cme_Users_e __user);
+extern void trnspt_cmd_get_mac_addr(uint8 *macAddr, RoleType_e aRoleType);
 
 // ============================================================================
 //      Local Functions declarations
@@ -318,6 +334,23 @@ void *ti_driver_if_init(void *ctx, const char *ifname, void *global_priv)
     {
         gpDriverIfDataSta = pDrv; 
     }
+    else if(0 == os_strcmp(ifname, NETIF_NAME(TIWLAN_DEV_NAME_P2P))) //group
+    {
+        //gpDriverIfDataSta2 = pDrv; 
+        if (gP2pGroupRole == P2P_GROUP_ROLE_CLIENT)
+        {
+            gpDriverIfDataSta = pDrv; //saved just for l2_packet interface implementation
+        }
+        else if (gP2pGroupRole == P2P_GROUP_ROLE_GO)
+        {
+            gpDriverIfDataAp = pDrv; //saved just for l2_packet interface implementation
+        }
+        else
+        {
+            //todo - there also can be to cases - 1. p2p cl joining to Ago and p2p aGO
+            gpDriverIfDataSta = pDrv;
+        }
+    }
     else
     {
         /* ASSERT_GENERAL */
@@ -370,11 +403,29 @@ void *ti_driver_if_init(void *ctx, const char *ifname, void *global_priv)
         rsn_init();
         scan_result_table_init();
         pDrv->apPowerLevel = DBM_DIV_10_2_DBM(MAX_TX_POWER);
+
+        pDrv->security_key_idx_mc1 = 0xFF;
+        pDrv->security_key_idx_mc2 = 0xFF;
+        pDrv->broadcastNextKeyArrEntry = 0;
     }
 
-    CME_PRINT_REPORT("\r\nregulatoryDomain_init start");
-    regulatoryDomain_init();
-    CME_PRINT_REPORT("\r\nregulatoryDomain_init finish");
+    if (pDrv && ROLE_IS_TYPE_P2P(pDrv->roleType))
+    {
+        GTRACE(GRP_DRIVER_CC33, "The P2P Role interface is initialized: %d", pDrv->roleType);
+        CME_PRINT_REPORT("\r\nThe P2P Role interface is initialized: %d", pDrv->roleType);
+        if (ROLE_IS_TYPE_P2P_CLIENT(pDrv->roleType))
+        {
+            // Supplicant is the one that initializes p2p client role
+            // we need to move the STA SM Flow to activated state
+            CmeStaP2pClientInit(CME_STA_NONE_USER);
+        }
+    }
+    //p2p device just initialized -  yet no role group
+    if (pDrv && ROLE_IS_TYPE_DEVICE(pDrv->roleType))
+    {
+        gP2pGroupRole = P2P_GROUP_ROLE_NONE;
+    }
+
     pDrv->fwMaxTxPower = DBM_DIV_10_2_DBM(MAX_TX_POWER);
 
     if(g_offChannelDev.p_remain_channel_mutex == NULL)
@@ -425,7 +476,13 @@ void ti_driver_deinit(void *apPriv)
 
     GTRACE(GRP_DRIVER_CC33, "Deinit driver role ID %d type ENUM(RoleType_e,%d)",
                              pDrv->roleId, pDrv->roleType);
+    CME_PRINT_REPORT("\r\nDeinit driver role ID %d type ENUM(RoleType_e,%d)",
+                             pDrv->roleId, pDrv->roleType);
 
+    if(ROLE_IS_TYPE_P2P(pDrv->roleType))
+    {
+        gP2pGroupRole = P2P_GROUP_ROLE_NONE;
+    }
 
     // Now that role is down, it is the time for memory cleanup
     if (FALSE != ROLE_IS_TYPE_STA_BASED(pDrv->roleType))
@@ -434,6 +491,7 @@ void ti_driver_deinit(void *apPriv)
                                  pDrv->roleId, pDrv->roleType);
         CME_PRINT_REPORT("\r\nSTA Based Driver role ID %d type ENUM(RoleType_e,%d)",
                                  pDrv->roleId, pDrv->roleType);
+        
 
         // Note: STA role is already stopped at this point. Once disabled scan
         // requets can't be served anymore.
@@ -448,10 +506,26 @@ void ti_driver_deinit(void *apPriv)
             CME_PRINT_REPORT_ERROR("\r\nDisable STA role failed");
         }
 
+        // supplicant is responsible to deactivate a p2p client role
+        // we are about to free the driver data, so we need to
+        // move STA SM Flow to deactivated state
+        if (ROLE_IS_TYPE_P2P_CLIENT(pDrv->roleType))
+        {
+            CME_PRINT_REPORT("\r\nin deinit[P2P] Set CmeStationFlowSM to CME_STA_DISABLED_STATE ***");
+            CmeStaP2pClientDeinit(CME_STA_NONE_USER);
+            gP2pGroupRoleType = NOT_IN_GROUP;
+        }
         // Verify the dynamically allocated members were released; if not, this
         // is the last chance ...
         // This is needed for the use case of enabled but not started role where
         // allocated memory wasn't set yet to
+        if(pDrv->vendorIEInfo.vendor_elements_length != 0)
+        {
+            os_free(pDrv->vendorIEInfo.vendor_elements);
+            pDrv->vendorIEInfo.vendor_elements = NULL;
+            pDrv->vendorIEInfo.vendor_elements_length = 0;
+        }
+
         os_free(pDrv);
         gpDriverIfDataSta = NULL;
     }
@@ -474,7 +548,7 @@ void ti_driver_deinit(void *apPriv)
 
         //TODO: role should already be stoped. Should it be checked here, and if not perform stop?
         // Note: AP role is still active, have to stop it before disabling the role
-        if( pDrv->ops->stop_role(pDrv) != 0 )
+        if( pDrv->ops->stop_role(pDrv) <0 )
         {
             CME_PRINT_REPORT_ERROR("\n\rStop AP role failed");
         }
@@ -488,6 +562,10 @@ void ti_driver_deinit(void *apPriv)
         {
             CME_PRINT_REPORT_ERROR("\n\rDisable AP role failed");
         }
+
+        //if aging timer and thread are up release them
+        CME_peer_aging_timer_stop(&pDrv->timerPeerAgingSample);
+        pDrv->peerAgingTimeout = 0;
 
         os_free(pDrv);
         gpDriverIfDataAp = NULL;
@@ -588,6 +666,7 @@ int ti_driver_get_capa(void *apPriv, struct wpa_driver_capa *apCapa)
     return 0;
 } // ti_driver_get_capa
 
+
 /* ----------------------------------------------------------------------------
  ti_driver_get_ext_capa
       This function returns the extended driver capabilities to supplicant
@@ -604,7 +683,24 @@ int ti_driver_get_ext_capa(void *priv, enum wpa_driver_if_type type,
 			     const u8 **ext_capab, const u8 **ext_capab_mask,
 			     unsigned int *ext_capab_len)
 {
-    if (type == WPA_IF_STATION)
+    ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)priv;
+    uint8_t roleType;
+    if(NULL == pDrv)
+    {
+        GTRACE(GRP_GENERAL_ERROR, "Error: NULL driver pointer");
+        return -1;
+    } 
+
+    roleType = (uint8_t)pDrv->roleType;
+    
+    if (roleType == ROLE_AP)
+    {
+        *ext_capab = gTIApExtendedCapabilities;
+        *ext_capab_mask = gTIApExtendedCapabilitiesMask;
+        *ext_capab_len = sizeof gTIApExtendedCapabilities;
+    }
+
+    if (roleType == ROLE_STA)
     {
         *ext_capab = gTIStaExtendedCapabilities;
         *ext_capab_mask = gTIStaExtendedCapabilitiesMask;
@@ -612,7 +708,7 @@ int ti_driver_get_ext_capa(void *priv, enum wpa_driver_if_type type,
     }
 
     return 0;
-}
+}// ti_driver_get_ext_capa
 
 /* ----------------------------------------------------------------------------
  ti_driver_set_key
@@ -662,13 +758,6 @@ int ti_driver_set_key(void *apPriv, struct wpa_driver_set_key_params *params)
     //CME_CC3XX_PORT_PRINT("\n\rSet/Remove keys: alg %d, key index %d, seq len %d, key len %d, set TX %d",
     //       params->alg, params->key_idx, params->seq_len, params->key_len, params->set_tx);
 
-    if ( MAX_KEYS_NUM <= params->key_idx )
-    {
-        // Should not happen; start w/ ASSERT_GENERAL, if happens try to understand the scenario - TODO
-        ASSERT_GENERAL(FALSE);
-        return -1;
-    }
-
     os_memset(&secKey, 0, sizeof(secKey));
 
     if (NULL != params->addr)
@@ -679,7 +768,7 @@ int ti_driver_set_key(void *apPriv, struct wpa_driver_set_key_params *params)
 
     if (ROLE_IS_TYPE_AP_BASED(pDrv->roleType))
     {
-        uint8_t lid = 0xFF;
+        uint8_t lid = INVALID_LINK;
 
         if (MAC_BROADCAST(secKey.macAddress)) //AP Broadcast
         {
@@ -767,6 +856,7 @@ int ti_driver_set_key(void *apPriv, struct wpa_driver_set_key_params *params)
                 (params->alg != WPA_ALG_NONE) &&
                 (params->key_len > 0))
             {
+                TX_PRINT_ERROR("\n\rti_driver_set_key : STA invalid interface alg:%d key_len:%d", params->alg, params->key_len);
                 ASSERT_GENERAL (FALSE);
             }
             TX_PRINT_ERROR("\n\rti_driver_set_key : STA invalid interface");
@@ -829,205 +919,430 @@ int ti_driver_set_key(void *apPriv, struct wpa_driver_set_key_params *params)
     return 0;
 } // ti_driver_set_key
 
+static int8_t countSupportedChannels(uint8_t band, uint8_t *pChanList,
+                                     uint8_t chanListLen, uint8_t *numSupported,
+                                     uint8_t roleType)
+{
+    uint8_t i = 0;
+    channelCapability_t channelCapability = {0};
+    int32_t ret = 0;
+
+    for (i = 0; i < chanListLen; i++)
+    {
+        ret = regulatoryDomain_GetCapability(band, pChanList[i],
+                                             &channelCapability);
+        if (ret < 0)
+        {
+            GTRACE(MSG_ERROR, "ERROR: failed getting channel capability");
+            CME_PRINT_REPORT_ERROR("\n\rFailed getting channel %d capability, "
+                                   "band %d\n\r",pChanList[i], band);
+            return ret;
+        }
+
+        if (ROLE_IS_TYPE_AP(roleType) ||
+            ROLE_IS_TYPE_P2P_GO(roleType))
+        {
+            /* Not DFS - DFS isn't supported for AP role */
+            if (((channelCapability.uFlags & TIW_REG_DOMAIN_DFS) == 0) &&
+                ((channelCapability.channelValidityActive != 0) ||
+                 (channelCapability.channelValidityPassive != 0)))
+            {
+                *numSupported += 1;
+            }
+        }
+        else
+        {
+            /* For other roles DFS channels are supported */
+            if ((channelCapability.channelValidityActive != 0) ||
+                (channelCapability.channelValidityPassive != 0))
+            {
+                *numSupported += 1;
+            }
+        }
+    }
+
+    return 0;
+}
 
 // ----------------------------------------------------------------------------
-static int32_t ti_drv_buildSingleModeCapability(RoleType_e aRoleType,
-                                              struct hostapd_hw_modes *apHwMode)
+static int32_t buildApChannelsCapability(RoleType_e roleType,
+                                         struct hostapd_hw_modes *hwMode,
+                                         uint8_t band)
+{
+    uint8_t *pChanList = NULL;
+    uint32_t freqBase = 0;
+    uint8_t chanListLen = 0, maxTxPower = 0, j = 0;
+    uint8_t numSupported = 0, i = 0;
+    channelCapability_t channelCapability = {0};
+    int32_t ret = 0;
+
+    if (band == RADIO_BAND_2_4GHZ)
+    {
+        pChanList = (uint8_t *)&gTIHwConfigChannelsBG;
+        chanListLen = sizeof(gTIHwConfigChannelsBG);
+        freqBase = BASE_FREQ_2_4;
+    }
+    else if (band == RADIO_BAND_5GHZ)
+    {
+        pChanList = (uint8_t *)&gTIHwConfigChannelsA;
+        chanListLen = sizeof(gTIHwConfigChannelsA);
+        freqBase = BASE_FREQ_5_0;
+    }
+    else
+    {
+        return -1;
+    }
+
+    /* Count only non-DFS channels for AP. We don't support CAC and 
+    * hence can't operate AP mode in non-DFS channels.
+    * First we count and then we know how much channels to allocate
+    */
+    ret = countSupportedChannels(band, pChanList, chanListLen,
+                                 &numSupported, roleType);
+    if (ret < 0)
+    {
+        return ret;
+    }
+
+    if (numSupported == 0)
+    {
+        hwMode->num_channels = 0;
+        CME_PRINT_REPORT_ERROR("\n\rWARNING: failed to build channels list - 0 channels");
+        return -1;
+    }
+    hwMode->num_channels = numSupported;
+
+    hwMode->channels = os_zalloc(sizeof(struct hostapd_channel_data) * (hwMode->num_channels));
+    if (NULL == hwMode->channels)
+    {
+        CME_PRINT_REPORT_ERROR("\n\rERROR: failed to allocate memory for channels info");
+        return -1;
+    }
+
+    /* After counting the channels in order to allocate tight memory
+     * size, fill out channels in input buffer.
+     */
+    for (i = 0; i < chanListLen; i++)
+    {
+        ret = regulatoryDomain_GetCapability(band, pChanList[i],
+                                             &channelCapability);
+        if (ret < 0)
+        {
+            return ret;
+        }
+
+        if (ROLE_IS_TYPE_AP(roleType) ||
+            ROLE_IS_TYPE_P2P_GO(roleType))
+        {
+            /* DFS channel or non-supported channel, skip it */
+            if (((channelCapability.uFlags & TIW_REG_DOMAIN_DFS) != 0) ||
+                ((channelCapability.channelValidityActive == 0) &&
+                 (channelCapability.channelValidityPassive == 0)))
+            {
+                continue;
+            }
+        }
+        else
+        {
+            /* Channel not supported, skip it */
+            if ((channelCapability.channelValidityActive == 0) &&
+                (channelCapability.channelValidityPassive == 0))
+            {
+                continue;
+            }
+        }
+
+        ASSERT_GENERAL(j < hwMode->num_channels);
+
+        hwMode->channels[j].chan = pChanList[i];
+        hwMode->channels[j].freq = (hwMode->channels[j].chan * 5) + freqBase;
+
+        ret = regulatoryDomain_getChMaxPower(hwMode->channels[j].chan, &maxTxPower);
+        if (ret)
+        {
+            hwMode->channels[j].max_tx_power = maxTxPower;
+        }
+
+        /* Channel 14 frequency breaks frequency offset calculation */
+        if (hwMode->channels[j].chan == CHANNEL_14)
+        {
+            hwMode->channels[j].freq = FREQ_CH_14;
+        }
+
+        hwMode->channels[j].allowed_bw = HOSTAPD_CHAN_WIDTH_20;
+        j++;
+    }
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+static void buildApHtCapability(struct hostapd_hw_modes *hwMode, const htCapabilities_t *pHtCap)
+{
+    os_memset(hwMode->mcs_set, 0, 16);
+
+    os_memcpy(hwMode->mcs_set,
+              pHtCap->suppMcsSet.rxMscBitmask,
+              RX_MCS_BITMASK_SIZE);
+
+    os_memcpy(&hwMode->mcs_set[RX_MCS_BITMASK_SIZE],
+              &(pHtCap->suppMcsSet.highestSupportedDataRate),
+              RX_HIGHEST_SUPP_DATA_RATE_BM_SIZE);
+
+    os_memcpy(&hwMode->mcs_set[RX_MCS_BITMASK_SIZE +
+                               RX_HIGHEST_SUPP_DATA_RATE_BM_SIZE],
+              &(pHtCap->suppMcsSet.txSettingBM),
+              sizeof(pHtCap->suppMcsSet.txSettingBM));
+
+    hwMode->ht_capab = pHtCap->htCapabBM;
+
+    //we want to disable AMSDU Support for AP Role always
+    hwMode->ht_capab &= ~BIT_11;
+
+
+
+    
+    hwMode->a_mpdu_params = *((uint8_t *)&pHtCap->ampduCfg);
+}
+
+// ----------------------------------------------------------------------------
+static int32_t ti_drv_buildSingleModeCapability(RoleType_e roleType,
+                                                struct hostapd_hw_modes *hwMode)
 {
     HOOK(HOOK_IN_DRIVER_TI_WIFI);
 
-    uint8_t  *pChanList;
     uint32_t basicRatesBM, supportedRatesBM;
-    uint32_t i, freqBase;
+    uint32_t i;
     Bool32 htSupported;
-    int    rates[DOT11_MAX_SUPPORTED_RATES];
+    int rates[DOT11_MAX_SUPPORTED_RATES];
     const htCapabilities_t *pHtCap = NULL;
+    uint8_t band = 0;
+    int32_t ret = 0;
 
-    switch (apHwMode->mode)
+    if (hwMode->mode == HOSTAPD_MODE_IEEE80211A)
     {
+        // Get supported rates & remove B rates
+        cfgGetRates(roleType, &basicRatesBM, &supportedRatesBM);
 
-        case HOSTAPD_MODE_IEEE80211A:
-            // Get supported rates & remove B rates
-            cfgGetRates(aRoleType, &basicRatesBM, &supportedRatesBM);
-            //remove MCS rates OSPREY_LDBOSPREY_LDB-1915
-            EXCLUDE_MCS_RATES(supportedRatesBM);
+        // Remove MCS rates
+        EXCLUDE_MCS_RATES(supportedRatesBM);
 
-            supportedRatesBM = supportedRatesBM & ~ANY_B_RATE;
-            apHwMode->num_rates = convertBitmapToSupplicantRates(supportedRatesBM, rates);
+        supportedRatesBM = supportedRatesBM & ~ANY_B_RATE;
+        hwMode->num_rates = convertBitmapToSupplicantRates(supportedRatesBM, rates);
 
-            // TODO - channels should be taken from regulatory domain module
-            apHwMode->num_channels = sizeof(gTIHwConfigChannlesA);
-            pChanList = (uint8_t *)&gTIHwConfigChannlesA;
-            freqBase = BASE_FREQ_5_0;
-            break;
+        band = RADIO_BAND_5GHZ;
+    }
+    else if ((hwMode->mode == HOSTAPD_MODE_IEEE80211B) ||
+             (hwMode->mode == HOSTAPD_MODE_IEEE80211G))
+    {
+        // Get supported rates & remove OFDM rates
+        cfgGetRates(roleType, &basicRatesBM, &supportedRatesBM);
 
-        case HOSTAPD_MODE_IEEE80211G:
-            cfgGetRates(aRoleType, &basicRatesBM, &supportedRatesBM);
-            //remove MCS rates OSPREY_LDBOSPREY_LDB-1915
-            EXCLUDE_MCS_RATES(supportedRatesBM);
+        // Remove MCS rates
+        EXCLUDE_MCS_RATES(supportedRatesBM);
 
-            apHwMode->num_rates = convertBitmapToSupplicantRates(supportedRatesBM, rates);
-
-            // TODO - channels should be taken from regulatory domain module
-            apHwMode->num_channels = sizeof(gTIHwConfigChannlesBG);
-            pChanList = (uint8_t *)&gTIHwConfigChannlesBG;
-            freqBase = BASE_FREQ_2_4;
-            break;
-
-        case HOSTAPD_MODE_IEEE80211B:
-            // Get supported rates & remove OFDM rates
-            cfgGetRates(aRoleType, &basicRatesBM, &supportedRatesBM);
-            //remove MCS rates OSPREY_LDBOSPREY_LDB-1915
-            EXCLUDE_MCS_RATES(supportedRatesBM);
-
+        if (hwMode->mode == HOSTAPD_MODE_IEEE80211B)
+        {
             supportedRatesBM = supportedRatesBM & ~ANY_AG_OFDM_RATE;
-            apHwMode->num_rates = convertBitmapToSupplicantRates(supportedRatesBM, rates);
+        }
 
-            // TODO - channels should be taken from regulatory domain module
-            apHwMode->num_channels = sizeof(gTIHwConfigChannlesBG);
-            pChanList = (uint8_t *)&gTIHwConfigChannlesBG;
-            freqBase = BASE_FREQ_2_4;
-            break;
+        hwMode->num_rates = convertBitmapToSupplicantRates(supportedRatesBM, rates);
 
-        default:
-            return -1;
+        band = RADIO_BAND_2_4GHZ;
+    }
+    else
+    {
+        return -1;
+    }
+
+    ret = buildApChannelsCapability(roleType, hwMode, band);
+    if (ret < 0)
+    {
+        GTRACE(MSG_ERROR, "WARNING: No channels found for HW mode");
+        return -1;
     }
 
     htSupported = l2_cfgGetHtCapabilities(&pHtCap);
 
     if (htSupported)
     {
-
-        os_memset(apHwMode->mcs_set, 0, 16);
-        os_memcpy(apHwMode->mcs_set, pHtCap->suppMcsSet.rxMscBitmask, RX_MCS_BITMASK_SIZE);
-        os_memcpy(&apHwMode->mcs_set[RX_MCS_BITMASK_SIZE], &(pHtCap->suppMcsSet.highestSupportedDataRate), RX_HIGHEST_SUPP_DATA_RATE_BM_SIZE);
-        os_memcpy(&apHwMode->mcs_set[RX_MCS_BITMASK_SIZE+RX_HIGHEST_SUPP_DATA_RATE_BM_SIZE], &(pHtCap->suppMcsSet.txSettingBM), sizeof(pHtCap->suppMcsSet.txSettingBM));
-
-        apHwMode->ht_capab = pHtCap->htCapabBM;
-        apHwMode->a_mpdu_params = *((uint8_t *)&pHtCap->ampduCfg);
-
+        buildApHtCapability(hwMode, pHtCap);
     }
 
-    apHwMode->channels = os_zalloc(sizeof(struct hostapd_channel_data) * (apHwMode->num_channels)) ;
-
-    if (NULL == apHwMode->channels)
+    hwMode->rates = os_zalloc(sizeof(struct hostapd_rate_data) * (hwMode->num_rates));
+    if (NULL == hwMode->rates)
     {
-        GTRACE(MSG_ERROR, "ERROR: failed to allocate memory for channels info");
-        return -1;
-    }
-
-    for (i=0; i<apHwMode->num_channels; ++i)
-    {
-		//Added for AP role
-        Bool_e maxPowerValid;
-        uint8_t max_tx_power;
-        apHwMode->channels[i].chan = pChanList[i];
-        apHwMode->channels[i].freq = apHwMode->channels[i].chan*5 + freqBase;
-        maxPowerValid = regulatoryDomain_getChMaxPower(apHwMode->channels[i].chan, &max_tx_power);
-        if (maxPowerValid)
-        {
-            apHwMode->channels[i].max_tx_power = max_tx_power;
-        }
-
-                                                 // have to take this one from regulatory domain (?)
-
-        // the below is imported from MCP for 40MHz channel, as it is not
-        // supported code is commented out
-//        if (apHwMode->ht_capab & HT_CAP_INFO_SUPP_CHANNEL_WIDTH_SET)
-//        {
-//            apHwMode->channels[i].flag |= HOSTAPD_CHAN_HT40;
-//            if (pChanList[i].flags & TIW_REG_DOMAIN_HT40PLUS)
-//                apHwMode->channels[i].flag |= HOSTAPD_CHAN_HT40PLUS;
-//            if (pChanList[i].flags & TIW_REG_DOMAIN_HT40MINUS)
-//                apHwMode->channels[i].flag |= HOSTAPD_CHAN_HT40MINUS;
-//        }
-
-        if (apHwMode->channels[i].chan == 14)
-            apHwMode->channels[i].freq = FREQ_CH_14;
-
-        apHwMode->channels[i].allowed_bw = HOSTAPD_CHAN_WIDTH_20;
-    }
-
-    apHwMode->rates = os_zalloc(sizeof(struct hostapd_rate_data) * (apHwMode->num_rates));
-
-    if (NULL == apHwMode->rates)
-    {
+        os_free(hwMode->channels);
         GTRACE(MSG_ERROR, "ERROR: failed to allocate memory for rates info");
         return -1;
     }
 
-    for (i=0; i<apHwMode->num_rates; ++i)
+    for (i = 0; i < hwMode->num_rates; i++)
     {
-        apHwMode->rates[i] = rates[i];
+        hwMode->rates[i] = rates[i];
     }
 
     HOOK(HOOK_IN_DRIVER_TI_WIFI);
 
     return 0;
-
 }
+
+static int32_t getHwNumModes(uint16_t *numModes,
+                             uint8_t *is2_4GHzBandSupported,
+                             uint8_t *is5GHzBandSupported)
+{
+    uint8_t phyConfig = l2_GetPhyConfig();
+
+    ASSERT_GENERAL(phyConfig <= 2);
+
+    *numModes = 0;
+
+    *is2_4GHzBandSupported = regulatoryDomain_isBandSupported(RADIO_BAND_2_4GHZ);
+    *is5GHzBandSupported = regulatoryDomain_isBandSupported(RADIO_BAND_5GHZ);
+
+    if (phyConfig == L2_CFG_BAND_ONLY_2_4GHZ)
+    {
+        if (!(*is2_4GHzBandSupported))
+        {
+            return -1;
+        }
+        *numModes = 1;
+    }
+    else if (phyConfig == L2_CFG_BAND_ONLY_5GHZ)
+    {
+        if (!(*is5GHzBandSupported))
+        {
+            return -1;
+        }
+        *numModes = 1;
+    }
+    else if (phyConfig == L2_CFG_BAND_BOTH)
+    {
+        // It might happen that phyCfg and regulatory domain rules
+        // aren't aligned. In this case we try to adjust the
+        // phy configuration with the regulatory domain
+        if ((*is2_4GHzBandSupported))
+        {
+            *numModes += 1;
+        }
+
+        if ((*is5GHzBandSupported))
+        {
+            *numModes += 1;
+        }
+    }
+
+    return 0;
+}
+
 /* ----------------------------------------------------------------------------
  ti_driver_get_hw_feature_data
       This function reprots driver capabilities to supplicant.
       This includes supported bands and channels, HT capabilities.
 
- Parameters:    IN  apDrv - Pointer to driver object
-                OUT apNumModes - Pointer to number of supported modes
-                OUT apFlags - Pointer to flags, set to 0 as in MCP
+ Parameters:    IN  priv     - Pointer to driver object
+                OUT numModes - Pointer to number of supported modes
+                OUT flags    - Pointer to flags, set to 0 as in MCP
  Return code:   On success - pointer to driver parameters
                 On failure - NULL
 ---------------------------------------------------------------------------- */
-struct hostapd_hw_modes * ti_driver_get_hw_feature_data(void *apPriv,
-                                                          u16  *apNumModes,
-                                                          u16  *apFlags, u8 *apDfs)
+struct hostapd_hw_modes *ti_driver_get_hw_feature_data(void *priv,
+                                                       u16 *numModes,
+                                                       u16 *flags, u8 *apDfs)
 {
     HOOK(HOOK_IN_DRIVER_TI_WIFI);
 
-    ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
+    struct hostapd_hw_modes *pHwModes = NULL;
+    ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)priv;
     uint8_t phyConfig = l2_GetPhyConfig();
-    uint32_t numModes;
+    uint8_t is2_4GHzBandSupported = 0, is5GHzBandSupported = 0;
+    uint8_t mode = 0;
+    int32_t ret = 0;
 
-    struct hostapd_hw_modes *pHwModes;
-
-    ASSERT_GENERAL(phyConfig <= 2);
-    numModes =  (phyConfig == 0) ? 1 : // DOT11_BAND_ONLY_2_4GHZ
-                (phyConfig == 1) ? 1 : // DOT11_BAND_ONLY_5GHZ
-                                   2 ; // DOT11_BAND_BOTH
-
-    pHwModes = os_zalloc(numModes * sizeof(struct hostapd_hw_modes));
-
-    if (NULL == pHwModes)
+    ret = getHwNumModes(numModes,
+                        &is2_4GHzBandSupported,
+                        &is5GHzBandSupported);
+    if (ret < 0)
     {
-        GTRACE(MSG_ERROR, "ERROR: failed to allocate memory for HW modes");
+        GTRACE(MSG_ERROR, "ERROR: Failed getting number "
+                          "of supported HW modes");
         return NULL;
     }
 
-    // TODO - have to use regulatory domain results in order to select mode
+    if (*numModes == 0)
+    {
+        GTRACE(MSG_ERROR, "ERROR: No HW mode is supported");
+        return NULL;
+    }
+
+    pHwModes = os_zalloc((*numModes) * sizeof(struct hostapd_hw_modes));
+    if (NULL == pHwModes)
+    {
+        GTRACE(MSG_ERROR, "ERROR: failed to allocate memory for HW modes");
+        *numModes = 0;
+        return NULL;
+    }
 
     switch (phyConfig)
     {
-        case 0: // DOT11_BAND_ONLY_2_4GHZ
+        case L2_CFG_BAND_ONLY_2_4GHZ:
             pHwModes[0].mode = HOSTAPD_MODE_IEEE80211G;
-            ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[0]);
-            break;
-        case 1: // DOT11_BAND_ONLY_5GHZ
-            pHwModes[0].mode = HOSTAPD_MODE_IEEE80211A;
-            ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[0]);
+
+            ret = ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[0]);
+            if (ret < 0)
+            {
+                *numModes = 0;
+                os_free(pHwModes);
+                return NULL;
+            }
             break;
 
-        case 2: // DOT11_BAND_BOTH
-            pHwModes[0].mode = HOSTAPD_MODE_IEEE80211G;
-            pHwModes[1].mode = HOSTAPD_MODE_IEEE80211A;
-            ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[0]);
-            ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[1]);
+        case L2_CFG_BAND_ONLY_5GHZ:
+            pHwModes[0].mode = HOSTAPD_MODE_IEEE80211A;
+
+            ret = ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[0]);
+            if (ret < 0)
+            {
+                *numModes = 0;
+                os_free(pHwModes);
+                return NULL;
+            }
+            break;
+
+        case L2_CFG_BAND_BOTH:
+
+            if (is2_4GHzBandSupported)
+            {
+                pHwModes[mode].mode = HOSTAPD_MODE_IEEE80211G;
+                ret = ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[mode]);
+                if (ret < 0)
+                {
+                    *numModes = 0;
+                    os_free(pHwModes);
+                    return NULL;
+                }
+                mode++;
+            }
+
+            if (is5GHzBandSupported)
+            {
+                pHwModes[mode].mode = HOSTAPD_MODE_IEEE80211A;
+                ret = ti_drv_buildSingleModeCapability(pDrv->roleType, &pHwModes[mode]);
+                if (ret < 0)
+                {
+                    *numModes = 0;
+                    os_free(pHwModes);
+                    return NULL;
+                }
+            }
+
             break;
 
         default:
             ASSERT_GENERAL(0);
     }
 
-    *apNumModes = numModes;
-    *apFlags = 0;
+    *flags = 0;
 
     HOOK(HOOK_IN_DRIVER_TI_WIFI);
 
@@ -1078,9 +1393,11 @@ void ti_driver_state_changed(struct wpa_supplicant *wpa_s,
     GTRACE(GRP_DRIVER_CC33, "ti_driver: state wpa_s->wpa_state=%d, new_state=%d, old_state=%d, pDrv->roleStarted=%d, CmeStationFlow_GetCurrentState()=%d",
                             wpa_s->wpa_state, new_state, old_state, pDrv->roleStarted, CmeStationFlow_GetCurrentState());
 
-    CME_PRINT_REPORT("\n\rti_driver: state wpa_s->wpa_state=%d, new_state=%d, old_state=%d, pDrv->roleStarted=%d, CmeStationFlow_GetCurrentState()=%d",
-                            wpa_s->wpa_state, new_state, old_state, pDrv->roleStarted, CmeStationFlow_GetCurrentState());
+    CME_PRINT_REPORT("\n\rti_driver: state wpa_s->wpa_state=%d, new_state=%d, old_state=%d, pDrv->roleStarted=%d, CmeStationFlow_GetCurrentState()=%d roleType=%d",
+                            wpa_s->wpa_state, new_state, old_state, pDrv->roleStarted, CmeStationFlow_GetCurrentState(), pDrv->roleType);
 
+    if (ROLE_IS_TYPE_STA(pDrv->roleType))
+    {
     // During BSS transition flow, the CME state is different from CME_STA_SUPPLICANT_MANAGED_STATE. 
     // If we reach this point when gBssTransitionState is BTM_RECEIVED and the CME state is CME_STA_SUPPLICANT_MANAGED_STATE, 
     // it means that a BTM request was received but the transition was rejected. Set gBssTransitionState back to NO_TRANSITION.
@@ -1097,7 +1414,7 @@ void ti_driver_state_changed(struct wpa_supplicant *wpa_s,
         GTRACE(GRP_DRIVER_CC33, "ti_driver_state_changed: bss transition flow, gBssTransitionState=%d", gBssTransitionState);
         CME_PRINT_REPORT("\n\rti_driver_state_changed: bss transition flow, gBssTransitionState=%d", gBssTransitionState);
     }
-
+    }
     //If we are out of scanning, and we are after 'wpa_select_network (called by cme connection manager)', we should zero this flag.
     //if we are out of scanning in other cases (i.e. WPS), it does not matter and we can zero this flag anyway.
     if (old_state == WPA_SCANNING)
@@ -1110,7 +1427,12 @@ void ti_driver_state_changed(struct wpa_supplicant *wpa_s,
     if (((CME_IsOngoingWPSAdHocConnection()) || (gWPSfirstDisconnect_ull==TRUE))
         && !(isextWPS() && isExtWpsInProgress()))
     {
-        if (WPA_DISCONNECTED == new_state)
+        if (gWPSkickDisconnect_ull)
+        {
+            gWPSkickDisconnect_ull = FALSE;
+            gWPSfirstDisconnect_ull = FALSE; 
+        }
+        else if (WPA_DISCONNECTED == new_state)
         {
             //Filter WPS first disconnect
             //TODO: Do we want to send a different disconnect event to the CME and it will filter it?
@@ -1229,6 +1551,19 @@ void ti_driver_state_changed(struct wpa_supplicant *wpa_s,
             //ti_driver_start_security_mgmt_seq(pDrv->roleId);
         }
     }
+    else if ((gBssTransitionState != NO_TRANSITION) && 
+             ((WPA_ASSOCIATING == old_state) && (new_state == WPA_DISCONNECTED)))
+    {
+        //we are during BSS transition but association was rejected
+        //clean up association attempt and prepate for potential retry
+        //do not disconnect
+        CME_PRINT_REPORT("\n\rAssoc rejected during btm.");
+        if (ROLE_IS_TYPE_STA(pDrv->roleType))
+        {
+            cmeRemoveWpaPmkCache();
+        }
+        //notify associating failure?
+    }
     // Transition from connected to disconnected (may be reconnecting or scanning)
     else if (((WPA_ASSOCIATED <= old_state) && (new_state < WPA_ASSOCIATED) && (gBssTransitionState == NO_TRANSITION)) ||
              ((WPA_DISCONNECTED == new_state) && (gBssTransitionState != NO_TRANSITION)))
@@ -1286,6 +1621,12 @@ void ti_driver_state_changed(struct wpa_supplicant *wpa_s,
         {
             CME_PRINT_REPORT("\n\rCME_notifyScanDone");
             CME_notifyScanDone(pDrv->roleId);
+            
+            // Disconnection during scan while in WPS
+            if (CME_IsOngoingWPSAdHocConnection())
+            {
+                CME_NotifyStaConnectionState(pDrv->roleId, LINK_CONNECTION_STATE_DISCONNECTED, pDrv->deauthReason);
+            }
         }
     }
 
@@ -1412,7 +1753,7 @@ int ti_driver_send_l2_data(ti_driver_ifData_t *pDrv,
     {
         CME_PRINT_REPORT("\n\rSend L2 packet of type ETHERTYPE_EAPOL dataLen:%d", dataLen);
 
-        //TODO. ETHERTYPE_EAPOL need to be changed in order to work
+
         pEthHead  = os_malloc(sizeof(TEthernetHeader));
         if (!pEthHead)
         {
@@ -1526,6 +1867,11 @@ int ti_driver_send_l2_data(ti_driver_ifData_t *pDrv,
             pPktCtrlBlk->tTxDescriptor.csumData = 0;
         }
 
+        if ((proto == FRAME_TYPE_NO_DATA_FRAME) || (proto == FRAME_TYPE_QOS_NO_DATA_FRAME))
+        {
+            pPktCtrlBlk->tTxPktParams.isNullDataFrame = 1;
+        }
+
         /* Send the packet to the driver for transmission. */
         status = udataNet_InsertDataPacket(pPktCtrlBlk, uNetIfId, D_TAG_CLSFR /* TODO: need to implement */);
 		return status; // no need to free pEthHead, it will be free by lower layers
@@ -1579,14 +1925,14 @@ int ti_driver_get_country(void *apPriv, char *apCountry)
 
 ---------------------------------------------------------------------------- */
 int ti_driver_send_mgmt_frame(void *apPriv,
-                       const uint8_t *apData,
-                       size_t aDataLen,
-                       int32_t aNoack,
-                       uint32_t freq,
-                       const uint16_t *csa_offs,
-                       size_t csa_offs_len,
-                       int32_t no_encrypt,
-                       uint32_t wait)
+                              const uint8_t *apData,
+                              size_t aDataLen,
+                              int aNoack,
+                              unsigned int freq,
+                              const uint16_t *csa_offs,
+                              size_t csa_offs_len,
+                              int no_encrypt,
+                              unsigned int wait)
 {
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
     int32_t ret = 0;
@@ -1600,7 +1946,7 @@ int ti_driver_send_mgmt_frame(void *apPriv,
         //if freq = 0 means Use bss->freq and wait_time =0
         if (((freq == pDrv->freq) || (freq == 0)))
         {
-            wpa_printf(MSG_INFO, "ti_driver: P2P send mgmt frame on bss-freq :%d",pDrv->freq);
+            wpa_printf(MSG_DEBUG, "ti_driver: P2P send mgmt frame on bss-freq :%d",pDrv->freq);
             ret = ti_send_mgmt_frame(pDrv, apData, aDataLen);
             if(ret < 0)
             {
@@ -1844,9 +2190,8 @@ int ti_driver_ext_set_ROC( uint32_t    channel,
         ret = -1;
         goto out;
     }
-    roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_DEVICE);
 
-    wpa_s = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
+    wpa_s = drv_getP2pDeviceSupplicant(); 
 
     //role was not enabled
     if(wpa_s == NULL )
@@ -1962,7 +2307,14 @@ int Wlan_RoleDown_from_CME_thread(WlanRole_e roleType, unsigned long int timeout
 
     HOOK(HOOK_WLAN_IF);
 
-    ret = set_cond_in_process_wlan_roledown();
+    if(roleType == WLAN_ROLE_AP)
+    {
+        ret = set_cond_in_process_wlan_ap_roledown();
+    }
+    else
+    {
+        ret = set_cond_in_process_wlan_sta_roledown();
+    }
     if(ret != OSI_OK)
     {
         CME_PRINT_REPORT("\n\r ---device roleDown_from_CME_thread - retry---");
@@ -2017,11 +2369,25 @@ int Wlan_RoleDown_from_CME_thread(WlanRole_e roleType, unsigned long int timeout
         }
     }
     HOOK(HOOK_WLAN_IF);
-    set_finish_wlan_roledown();
+    if(roleType == WLAN_ROLE_AP)
+    {
+        set_finish_wlan_ap_roledown();
+    }
+    else
+    {
+        set_finish_wlan_sta_roledown();
+    }
     return ret;
 
     fail:
-		set_finish_wlan_roledown();
+        if(roleType == WLAN_ROLE_AP)
+        {
+            set_finish_wlan_ap_roledown();
+        }
+        else
+        {
+            set_finish_wlan_sta_roledown();
+        }
         return ret;
 }
 
@@ -2153,14 +2519,26 @@ int ti_driver_one_shot_scan(void *apPriv, struct wpa_driver_scan_params *apParam
     {
         ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
 
-        return pDrv->ops->one_shot(apPriv, apParams);
+        if(pDrv->ops->one_shot(apPriv, apParams) == 0)
+        {
+            CME_PRINT_REPORT("\n\rti_driver: start one shot timer");
+            CME_start_one_shot_scan_timer();
+        }
+        else
+        {
+            CME_PRINT_REPORT("\n\rti_driver: starting one shot scan failed, start one shot timer");
+            CME_start_one_shot_scan_timer();
+
+        }
+
     }
     else
     {
-        GTRACE(GRP_DRIVER_CC33_DEBUG, "one shot scan failed to start");
-        CME_PRINT_REPORT("\n\rone shot scan failed to start");
+        GTRACE(GRP_DRIVER_CC33_DEBUG, "ti_driver: one shot scan failed to start");
+        CME_PRINT_REPORT("\n\rti_driver: one shot scan failed to start");
         return -1;
     }
+    return ret;
 } // ti_driver_one_shot_scan
 
 
@@ -2316,7 +2694,11 @@ int ti_driver_sched_scan(void *apPriv, struct wpa_driver_scan_params *apParams)
     {
         ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
 
-        return pDrv->ops->sched_scan(apPriv, apParams);
+        pDrv->ops->sched_scan(apPriv, apParams);
+
+        CME_start_periodic_scan_timer();
+
+        return 0;
     }
     else
     {
@@ -2385,7 +2767,7 @@ int ti_driver_abort_scan(void *apPriv, uint64_t scan_cookie)
 
  Return code:   0 - OK, role found -1 - else
 ---------------------------------------------------------------------------- */
-int ti_driver_start_remain_on_channel(void *apPriv, uint32_t aFreq, uint32_t aDuration)
+int ti_driver_start_remain_on_channel(void *apPriv, unsigned int aFreq, unsigned int aDuration)
 {
     int32_t ret = 0;
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
@@ -2539,7 +2921,7 @@ void ti_driver_cancel_remain_on_channel_timer_callback()
     //send message to CME to cancel timer and CROC
     //from CME we calling to ti_driver_cancel_remain_on_channel_timer_callback_handle()
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)g_remain_on_channel_apPriv;
-    CME_PRINT_REPORT("\n\rti_driver, cancel_remain_on_channel_timer_callback");
+    CME_PRINT_ROC_REPORT("\n\rti_driver, cancel_remain_on_channel_timer_callback");
     CME_RemainOnChannelTimeoutNotify(pDrv->roleId);
   
 }
@@ -2566,7 +2948,7 @@ void ti_driver_cancel_remain_on_channel_timer_callback_handle()
     wpa_printf(MSG_INFO, "timer - ti_driver_cancel_remain_on_channel : timeout, roleid=%d, roc_started=%d, RocInitiateExplicitly=%d", 
                         pDrv->roleId, pDrv->offChannel_roc_started, g_offChannelDev.RocInitiateExplicitly);
 
-    CME_PRINT_REPORT("\r\ntimer - ti_driver_cancel_remain_on_channel : timeout, roleid=%d, roc_started=%d, RocInitiateExplicitly=%d",
+    CME_PRINT_ROC_REPORT("\r\ntimer - ti_driver_cancel_remain_on_channel : timeout, roleid=%d, roc_started=%d, RocInitiateExplicitly=%d",
                         pDrv->roleId, pDrv->offChannel_roc_started, g_offChannelDev.RocInitiateExplicitly);
 
     //if roc is started, we need to cancel roc (FW CROC) and stop device role
@@ -2638,7 +3020,7 @@ int ti_driver_cancel_remain_on_channel(void *apPriv)
     if((pDrv->pRemainOnChannelTimer.osTimerHandler != NULL) 
         && ( g_offChannelDev.off_channel_dev_timer_was_set))
     {
-        CME_PRINT_REPORT("\n\rti_driver, cancel_remain_on_channel,osi_TimerStop");
+        CME_PRINT_ROC_REPORT("\n\rti_driver, cancel_remain_on_channel,osi_TimerStop");
         osi_TimerStop(&pDrv->pRemainOnChannelTimer);
         osi_TimerDelete(&pDrv->pRemainOnChannelTimer);
         g_offChannelDev.off_channel_dev_timer_was_set = 0;
@@ -2681,10 +3063,10 @@ int ti_driver_cancel_remain_on_channel(void *apPriv)
 
  Return code:   0 - OK, role found -1 - else
 ---------------------------------------------------------------------------- */
-int ti_driver_probe_req_report(void *apPriv, int32_t aReport)
+int ti_driver_probe_req_report(void *apPriv, int aReport)
 {
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
-    wpa_printf(MSG_DEBUG, "Msg from supplicant  wait or stop-wait for probe_req. IsToWait %d (role %d)",
+    CME_PRINT_ROC_REPORT("\n\rMsg from supplicant wait or stop-wait for probe_req. IsToWait %d (role %d)",
             aReport, pDrv->roleId);
 
     pDrv->p2pReportProbeRequestRx = aReport;
@@ -2707,7 +3089,7 @@ int ti_driver_if_add(void *apPriv, enum wpa_driver_if_type type,
                     const char *bridge, int use_existing, int setup_ap)
 {
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)apPriv;
-    wpa_printf(MSG_DEBUG, "ti_driver: Add new interface: type = %d, ifname=%s, force_ifname: %s, drvRoleid=%d",
+    CME_PRINT_REPORT("\n\rti_driver: Add new interface: type = %d, ifname=%s, force_ifname: %s, drvRoleid=%d",
                 type, ifname, force_ifname, pDrv->roleId);
     switch(type)
     {
@@ -2718,13 +3100,17 @@ int ti_driver_if_add(void *apPriv, enum wpa_driver_if_type type,
         case WPA_IF_P2P_CLIENT:
         case WPA_IF_P2P_GO:
         case WPA_IF_P2P_GROUP:
+        {
             /* we need the p2p-group interface up to get its mac addr */
-//            (void)linux_set_iface_flags(drv->drv_global->cmd_sock, NETIF_NAME(TIWLAN_DEV_NAME_P2PGROUP), 1);
+            uint8_t pAddress[6] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+            trnspt_cmd_get_mac_addr(pAddress, ROLE_STA);
+            IRQ_UtilCopyMacAddress(pAddress, if_addr);
             os_strlcpy(force_ifname, NETIF_NAME(TIWLAN_DEV_NAME_P2P), IFNAMSIZ);
+        }
             break;
         case WPA_IF_P2P_DEVICE:
             os_strlcpy(force_ifname, NETIF_NAME(TIWLAN_DEV_NAME_P2PDEV), IFNAMSIZ);
-            wpa_printf(MSG_DEBUG, "ti_driver: force_ifname to use: %s", force_ifname);
+            CME_PRINT_REPORT("\n\rti_driver: force_ifname to use: %s", force_ifname);
             break;
         case WPA_IF_STATION:
             os_strlcpy(force_ifname, NETIF_NAME(TIWLAN_DEV_NAME_STA), IFNAMSIZ);
@@ -2732,18 +3118,6 @@ int ti_driver_if_add(void *apPriv, enum wpa_driver_if_type type,
         default:
             GTRACE(GRP_GENERAL_ERROR, "ERROR in adding an unknown if type: %d, ifname=%s", type, ifname);
             return -1;
-    }
-
-    if (addr)
-    {
-        IRQ_UtilCopyMacAddress(addr, if_addr);
-    }
-    else
-    {
-        // TODO need to implement roles
-        //uint8_t *pAddress = Roles_GetLocalMacFromRoleId(pDrv->roleId);
-        uint8_t pAddress[6] = {0xFF, 0xFF, 0xFF,0xFF,0xFF,0xFF};
-        IRQ_UtilCopyMacAddress(pAddress, if_addr);
     }
 
     return 0;
@@ -2953,7 +3327,7 @@ RoleType_e drv_getStaIface(struct wpa_global *apGlobal, struct wpa_supplicant **
     // supports 2 roles at most. If first role isn't a STA based role,
     // check if there's another role.
     {
-        if (NULL != wpa_s->next)
+        while (NULL != wpa_s->next)
         {
             wpa_s = wpa_s->next;
             pDrv = (ti_driver_ifData_t *)wpa_s->drv_priv;
@@ -2983,14 +3357,16 @@ RoleType_e drv_getDeviceIface(struct wpa_global *apGlobal, struct wpa_supplicant
     RoleType_e roleType = ROLE_TYPE_NONE;
     struct wpa_supplicant *wpa_s;
     ti_driver_ifData_t *pDrv;
-#if 0 //TODO
     // API may be called when there's no active supplicant interface.
     // Expected mainly for irrelevant driver commands, still we shouldn't crush.
     //
     //
-    if (apGlobal==NULL || NULL == apGlobal->ifaces)
+    if ((apGlobal==NULL) || (NULL == apGlobal->ifaces))
+    {
+        CME_PRINT_REPORT_ERROR("\r\nERROR ! apGlobal or apGlobal->ifaces is NULL");
         return ROLE_TYPE_NONE;
-#endif
+    }
+
     wpa_s = apGlobal->ifaces;
     pDrv = (ti_driver_ifData_t *)wpa_s->drv_priv;
 
@@ -3002,7 +3378,7 @@ RoleType_e drv_getDeviceIface(struct wpa_global *apGlobal, struct wpa_supplicant
     // supports 2 roles at most. If first role isn't a STA based role,
     // check if there's another role.
     {
-        if (NULL != wpa_s->next)
+        while (NULL != wpa_s->next)
         {
             wpa_s = wpa_s->next;
             pDrv = (ti_driver_ifData_t *)wpa_s->drv_priv;
@@ -3195,6 +3571,17 @@ RoleType_e drv_getRoleTypeFromRoleId(struct wpa_global *apGlobal, uint32_t aRole
     return ROLE_TYPE_NONE;
 }
 
+ struct wpa_supplicant* drv_getP2pDeviceSupplicant(void)
+{
+    uint32_t roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_DEVICE);
+    if (roleId == INVALID_ROLE_ID) 
+    {
+        GTRACE(GRP_CME, "CME: ERROR! No P2P device role");
+        return NULL;
+    }
+    return drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
+}
+
 // ----------------------------------------------------------------------------
 
 void drv_handleScanCompleteEvent(void *apDrv, EScanRequestType aScanType, uint32_t aNumResults)
@@ -3248,6 +3635,11 @@ void drv_handleOneShotScanStoppedEvent(struct wpa_supplicant *wpa_s,EScanRequest
 {
     HOOK(HOOK_IN_DRIVER_TI_WIFI);
 
+    if ((wpa_s == NULL) || (wpa_s->drv_priv == NULL))
+    {
+        return;
+    }
+
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)wpa_s->drv_priv;
 
     // For one shot scan, clear the completed scan indication on driver DB
@@ -3274,6 +3666,8 @@ Bool32 drv_stopConnectionScans(struct wpa_supplicant *wpa_s)
     GTRACE(GRP_DRIVER_CC33_DEBUG, "Scan stop, wpa_state = %d, Scaning = %d, Sched Scaning = %d, gBssTransitionState = %d", 
         wpa_s->wpa_state, wpa_s->scanning, wpa_s->sched_scanning, gBssTransitionState);
 
+    CME_PRINT_SCAN_REPORT("\r\n drv_stopConnectionScans: wpa_state = %d, Scaning = %d, Sched Scaning = %d, gBssTransitionState = %d", 
+        wpa_s->wpa_state, wpa_s->scanning, wpa_s->sched_scanning, gBssTransitionState);
     // If wpa State is already WPA_SCANNING
     // the change state will move to State = WPA_INACTIVE
     // and CME_MESSAGE_ID_SCAN_DONE send to CME thread
@@ -3643,7 +4037,7 @@ static void sendEventDeauthDisassoc(ti_driver_ifData_t *apDrv, uint32_t aType,
     union wpa_event_data event;
     uint32  minLen = WLAN_HDR_LEN + sizeof(apMngPack->u.deauth);
     uint16 reason_code;
-    wpaEventType_e type;
+    enum wpa_event_type   type;
 
     GET_MAC_STR(apMngPack->bssid, macStr);
 
@@ -3705,6 +4099,89 @@ static void sendEventDeauthDisassoc(ti_driver_ifData_t *apDrv, uint32_t aType,
     else
     {
         ASSERT_GENERAL(0);
+    }
+
+    wpa_supplicant_event(apDrv->ctx, type, &event);
+
+    HOOK(HOOK_IN_DRIVER_TI_WIFI);
+}
+
+/* ----------------------------------------------------------------------------
+ sendEventUnprotDeauthDisassoc
+    Send unprotected deauthentication/disassociation event to supplicant (based on driver_nl80211.c, mlme_event_deauth_disassoc)
+    This API may be activated in response to reception of disconnection packet
+    or when we're sending a disconnection packet.
+    Packet originator (local/remote) is detected using BSSID comparison, set
+    on locally_generated field in the event sturcture.
+
+ Parameters:    apDrv - pointer to driver instance
+                aType - deauth/disassoc
+                apMngPack - pointer to received/transmitted packet header
+                aPackLen - number of bytes in packet, including 80211 header
+
+ Return code:   none
+---------------------------------------------------------------------------- */
+static void sendEventUnprotDeauthDisassoc(ti_driver_ifData_t *apDrv, uint32_t aType,
+                                          struct ieee80211_mgmt *apMngPack,
+                                          uint32_t aPackLen)
+{
+    HOOK(HOOK_IN_DRIVER_TI_WIFI);
+
+    char macStr[MAC_STR_LEN];
+    union wpa_event_data event;
+    uint32  minLen = WLAN_HDR_LEN + sizeof(apMngPack->u.deauth);
+    uint16 reason_code;
+    enum wpa_event_type  type;
+
+    GET_MAC_STR(apMngPack->bssid, macStr);
+
+    CME_PRINT_REPORT("\r\n sendEventUnprotDeauthDisassoc: apMngPack->bssid:" MACSTR "\r\n",MAC2STR(apMngPack->bssid) );
+    GTRACE(GRP_DRIVER_CC33, "sendEventUnprotDeauthDisassoc: apMngPack->bssid:" MACSTR "\r\n",MAC2STR(apMngPack->bssid) );
+
+    // If we're associated but not to the sending device, just drop the packet
+    if (FALSE != apDrv->associated &&
+        0 == IRQ_UtilCompareMacAddress(apMngPack->bssid, apDrv->authBssid) &&
+        0 == IRQ_UtilCompareMacAddress(apMngPack->bssid, apDrv->currBssid))
+    {
+        /*
+         * We have presumably received this deauth as a
+         * response to a clear_state_mismatch() outgoing
+         * deauth.  Don't let it take us offline!
+         */
+        GTRACE(GRP_DRIVER_CC33, "RX deauth from unknown BSSID %s, ignoring ...", macStr);
+
+        CME_PRINT_REPORT("\r\n sendEventDeauthDisassoc :apDrv->associated:%d apMngPack->bssid: " MACSTR
+                    " apDrv->authBssid:" MACSTR "apDrv->currBssid:" MACSTR "\r\n",
+                    apDrv->associated,MAC2STR(apMngPack->bssid),  MAC2STR(apDrv->authBssid), MAC2STR(apDrv->currBssid));
+
+        return;
+    }
+
+    os_memset(&event, 0, sizeof(event));
+
+    /* Note: Same offset for Reason Code in both frame subtypes */
+    if (minLen <= aPackLen)
+    {
+        reason_code = le_to_host16(apMngPack->u.deauth.reason_code);
+    }
+
+    if (FRAME_TYPE_DISASSOCIATION == aType)
+    {
+        event.unprot_disassoc.sa = apMngPack->sa;
+        event.unprot_disassoc.da = apMngPack->da;
+        event.unprot_disassoc.reason_code = reason_code;
+        type = EVENT_UNPROT_DISASSOC;
+    }
+    else if (FRAME_TYPE_DEAUTHENTICATION == aType)
+    {
+        event.unprot_deauth.sa = apMngPack->sa;
+        event.unprot_deauth.da = apMngPack->da;
+        event.unprot_deauth.reason_code = reason_code;
+        type = EVENT_UNPROT_DEAUTH;
+    }
+    else
+    {
+        return;
     }
 
     wpa_supplicant_event(apDrv->ctx, type, &event);
@@ -3955,7 +4432,7 @@ void drv_handleRxMngPacket(void *descriptor)
     if(NULL == gpSupplicantGlobals->ifaces)
     {
         GTRACE(GRP_DRIVER_CC33, "drv_handleRxMngPacket : supplicant already stopped drop the packets");
-        CME_PRINT_REPORT_ERROR("\n\rdrv_handleRxMngPacket : supplicant already stopped drop the packets");
+        CME_PRINT_REPORT_ERROR("\n\rdrv_handleRxMngPacket : supplicant already stopped drop the packets\n\r");
         RxBufFree(desc);
 
         return;
@@ -4074,6 +4551,12 @@ void drv_handleRxMngPacket(void *descriptor)
     //if management frame is protected - remove security header. copy payload backward
     if (extraHdr)
     {
+        if ((int32_t)(packLen - extraHdr) < (int32_t)sizeof(MPDUHeader_t))
+        {
+            //packet is too short, drop it
+            goto fail;
+        }
+
         uint8_t*  ptr1 = (uint8_t*)pMngPack + sizeof(MPDUHeader_t);
         uint8_t*  ptr2 = (uint8_t*)pMngPack + sizeof(MPDUHeader_t) + extraHdr; //include security header
 
@@ -4479,9 +4962,9 @@ void drv_handleRxMngPacket(void *descriptor)
                         }
                 		uint32_t actionVariable;
             			COPY_WLAN_32BIT(&actionVariable, &pMngPack->u.action.u.public_action.variable);
-            			CME_PRINT_REPORT("\n\rdrv_handleRxMngPacket : Rx Packet is of type:WLAN_ACTION_PUBLIC ,action:%d  vendor type: 0x%x",
+            			CME_CC3XX_PORT_PRINT("\n\rdrv_handleRxMngPacket : Rx Packet is of type:WLAN_ACTION_PUBLIC ,action:%d, vendor type: 0x%x",
             						pMngPack->u.action.u.public_action.action,actionVariable  );
-            			wpa_printf(MSG_INFO,"drv_handleRxMngPacket : Rx Packet is of type:WLAN_ACTION_PUBLIC ,action:%d  vendor type: 0x%x",
+            			wpa_printf(MSG_INFO,"drv_handleRxMngPacket : Rx Packet is of type:WLAN_ACTION_PUBLIC ,action:%d, vendor type: 0x%x",
             							pMngPack->u.action.u.public_action.action,actionVariable  );
             			if(packLen >= IEEE80211_HDRLEN + 9)//size of public action frame is at least 9
             			{
@@ -4640,6 +5123,14 @@ void drv_handleRxMngPacket(void *descriptor)
             sendEventDeauthDisassoc(pDrv, FRAME_TYPE_DISASSOCIATION, pMngPack, packLen);
         	CME_PRINT_STATE_CHNGE_REPORT("\n\rCME: RX_MGMT_DISASSOC, change state to CME_STA_WLAN_PEER_DISCONNECT_REQ !!");
             CmeStationFlowSM(CME_STA_WLAN_PEER_DISCONNECT_REQ, CME_STA_NONE_USER);
+            break;
+        case RX_MGMT_UNPROT_DEAUTH:
+            CME_PRINT_REPORT("\n\rdrv_handleRxMngPacket : sendEventUnprotDeauthDisassoc");
+            sendEventUnprotDeauthDisassoc(pDrv, FRAME_TYPE_DEAUTHENTICATION, pMngPack, packLen);
+            break;
+        case RX_MGMT_UNPROT_DISASSOC:
+            CME_PRINT_REPORT("\n\rdrv_handleRxMngPacket : sendEventUnprotDeauthDisassoc");
+            sendEventUnprotDeauthDisassoc(pDrv, FRAME_TYPE_DISASSOCIATION, pMngPack, packLen);
             break;
         case RX_MGMT_AUTH:
             CME_PRINT_REPORT("\n\rdrv_handleRxMngPacket : sendRxAuthEvent\n");
@@ -4841,7 +5332,19 @@ void drv_handleRxEapol(void *aDesc)
     {
         /* we are not have any link id yet ROLE_STA */
         roleId = drv_getRoleIdFromType(gpSupplicantGlobals,(RoleType_e)ROLE_STA);
-        pDrv   = getDriverForRoleId(roleId, gpSupplicantGlobals);
+        if (roleId != ROLE_ID_NONE)
+        {
+            pDrv   = getDriverForRoleId(roleId, gpSupplicantGlobals);
+        }
+        else
+        {
+            /* maybe we have p2p client role started */
+            roleId = drv_getRoleIdFromType(gpSupplicantGlobals,(RoleType_e)ROLE_P2P_CL);
+            if (roleId != ROLE_ID_NONE)
+            {
+                pDrv   = getDriverForRoleId(roleId, gpSupplicantGlobals);
+            }
+        }
     }
     else
     {
@@ -5117,8 +5620,8 @@ fail:
  Return code:   none
 ---------------------------------------------------------------------------- */
 void drv_sendConnectTimeoutEvent(ti_driver_ifData_t  *apDrv,
-                                     wpaEventType_e        aType,
-                                     uint8_t                 *apBssid)
+                                 enum wpa_event_type  aType,
+                                     uint8_t         *apBssid)
 {
     HOOK(HOOK_IN_DRIVER_TI_WIFI);
 
@@ -5129,7 +5632,8 @@ void drv_sendConnectTimeoutEvent(ti_driver_ifData_t  *apDrv,
     GTRACE(GRP_DRIVER_CC33,  "Connection timeout for %s, sending ENUM(wpaEventType_e, %d) to supplicant",
                               macStr, aType);
 
-    CME_CC3XX_PORT_PRINT("\n\r drv_sendConnectTimeoutEvent, Send command CMD_ROLE_STOP %d",apDrv->roleId);
+    CME_ROLE_PRINT_REPORT("\n\r drv_sendConnectTimeoutEvent, Send command CMD_ROLE_STOP %d wpaEventType_e: %d", 
+        apDrv->roleId, aType);
 
     apDrv->ops->cancel_remain_on_channel(apDrv);
 
@@ -5173,18 +5677,9 @@ void drv_handleGroupRole(struct wpa_supplicant *wpa_s, Bool_e isGroupRoleGo)
 
     // wait for group started or group failure events
     gP2pGroupRoleType = NOT_IN_GROUP; 
-
-    if (isGroupRoleGo == FALSE)
-    {
-        //we become a Client Peer in Group - change interface to type Client
-        //get devices parent interface, in this case STA
-        pDrv = (ti_driver_ifData_t *)wpa_s->parent->drv_priv;
-        //change in FW its role type to ROLE_P2P_CL
-        pDrv->ops->change_type(pDrv, ROLE_P2P_CL);
-    }
-    
+  
     //send event to CME
-    //in case we become Client -> need to change STA Flow SM
+    //in case we become Client -> need to change STA SM State
     CME_P2pNegConfirmation(pDrv->roleId, isGroupRoleGo);
 }
 
@@ -5257,42 +5752,21 @@ void ti_driver_go_neg_completed(struct wpa_supplicant *wpa_s,
     GTRACE(GRP_DRIVER_CC33, "ti_driver_go_neg_completed: res.ssid=%s status:%d  isGO=%d peer=" MACSTR, 
             res->ssid, res->status, res->role_go, MAC2STR(res->peer_device_addr));
 
-    //In case of success send to CME negotiation confirm message
     if (res->status != 0)
     {
         GTRACE(GRP_DRIVER_CC33, "Negotiation Failed!");
-        pDrv->p2pConnectionStarted = FALSE;
+        cmeP2pClearAll();
 
         return;
     }
     //Negotiation was successful 
-
-    // In case we are going to become a GO  
     if (res->role_go == TRUE)
     {
-        struct wpa_supplicant *wpa_ap;
-        struct wpa_supplicant *wpa_sta;
-        // enable role AP interface
-        cme_activate_ap_role();
-        // and switch wpa_s->parrent for AP ap_priv 
-        roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_AP);
-        wpa_ap = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
-       
-        //get sta if the initial owner of device if
-        roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_STA);
-        wpa_sta = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
-
-        GTRACE(GRP_DRIVER_CC33, "Notify before switch: ap_if=%p ap_if_dev=%p, sta_if=%p sta_if_dev=%p, dev_if=%p, dev-parent=%p",
-            wpa_ap, wpa_ap->p2pdev, wpa_sta, wpa_sta->p2pdev, wpa_s, wpa_s->parent);
-
-        wpa_s->parent = wpa_ap; //now dev parent is AP iface
-
-        //wpa_sta->p2pdev = NULL; //remove the ownership from sta if
-        //wpa_ap->p2pdev = wpa_s; //set owner for AP like role
-
-        GTRACE(GRP_DRIVER_CC33, "Notify after switch: ap_if=%p ap_if_dev=%p, sta_if=%p sta_if_dev=%p, dev_if=%p, dev-parent=%p",
-            wpa_ap, wpa_ap->p2pdev, wpa_sta, wpa_sta->p2pdev, wpa_s, wpa_s->parent);
-
+        gP2pGroupRole = P2P_GROUP_ROLE_GO;
+    }
+    else
+    {
+        gP2pGroupRole = P2P_GROUP_ROLE_CLIENT;
     }
 
     drv_handleGroupRole(wpa_s, res->role_go);
@@ -5311,14 +5785,22 @@ void ti_driver_p2p_find_stopped(struct wpa_supplicant *wpa_s)
     ti_driver_ifData_t *pDrv = (ti_driver_ifData_t *)wpa_s->drv_priv;
 
     GTRACE(GRP_DRIVER_CC33, "ti_driver: p2p_find_stopped! gP2pSearchStopping=%d", gCmeP2pInfo.p2pFindStopping);
-    CME_PRINT_REPORT("\n\rp2p find stopped");
+    CME_PRINT_REPORT("\n\rp2p find stopped. gP2pSearchStopping=%d", gCmeP2pInfo.p2pFindStopping);
     gCmeP2pInfo.p2pFindStopping = TRUE;
  
     if (pDrv->p2pPeerCandidateIsFound == 0)
     {
         // we didn't find any peer candidate and search is timeout
         // mark that connection is stopped
-        pDrv->p2pConnectionStarted = 0;
+        if (pDrv->p2pConnectionStarted == TRUE)
+        {
+            // Notify application that P2P peer was not found during find timeout
+            GTRACE(GRP_CME, "P2P find timed out - peer not found, notify host");
+            CME_PRINT_REPORT("\n\rP2P find timed out - peer not found, notify host");
+            wlanDispatcherSendEvent(WLAN_EVENT_P2P_PEER_NOT_FOUND, (void*)NULL, 0);
+            gCmeP2pInfo.p2pConnectPending = FALSE;
+        }
+        pDrv->p2pConnectionStarted = FALSE;
     }
 
 }
@@ -5335,9 +5817,19 @@ void ti_driver_p2p_group_formation_failure(struct wpa_supplicant *wpa_s)
     uint32_t roleId;
 
     //clean bit. connection stopped with failure
-    CME_PRINT_REPORT("\n\r ti_driver : P2P Group Formation FAILED");
+    CME_PRINT_REPORT("\n\r ti_driver : P2P Group Formation FAILED roleid=%d, roleType = %d, if_name = %s",
+        pDrv->roleId, pDrv->roleType, wpa_s->ifname);  
     GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group Formation FAILED roleid=%d, roleType = %d, if_name = %s",
         pDrv->roleId, pDrv->roleType, wpa_s->ifname);  
+
+    // need to stop all running p2p related processes
+    // in case when P2P CL role is up and scanning - stop scan
+    if (ROLE_IS_TYPE_P2P_CLIENT(pDrv->roleType))
+    {
+        drv_stopConnectionScans(wpa_s);
+    }
+    //event to app that group formation failed
+    wlanDispatcherSendEvent(WLAN_EVENT_P2P_GROUP_FORMATION_FAILED, NULL, 0);
 }
 
 /* ----------------------------------------------------------------------------
@@ -5353,18 +5845,16 @@ void ti_driver_p2p_group_started(struct wpa_supplicant *wpa_s, struct wpa_ssid *
     
     gP2pGroupRoleType = (client == 0)?GO_IN_GROUP:CLIENT_IN_GROUP;
 
-    CME_PRINT_REPORT("\n\r P2P Group STARTED");
-    GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group Started roleid=%d is %s, group ssid %s, wpaState=%d gP2pGroupRoleType=%d", 
+    CME_PRINT_REPORT("\n\r ti_driver: P2P Group Started roleid=%d is %s, group ssid %s, wpaState=%d gP2pGroupRoleType=%d", 
         pDrv->roleId, (client == 0)?"GO":"Client", ssid->ssid, wpa_s->wpa_state, gP2pGroupRoleType);
     if (wpa_s->go_params != NULL) 
     {   
-    GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group Started freq=%d status=%d peer if_addr=%02x:%02x:%02x:%02x:%02x:%02x", 
-        wpa_s->go_params->freq, wpa_s->go_params->status,
-        wpa_s->go_params->peer_interface_addr[0], wpa_s->go_params->peer_interface_addr[1], wpa_s->go_params->peer_interface_addr[2],
-        wpa_s->go_params->peer_interface_addr[3], wpa_s->go_params->peer_interface_addr[4], wpa_s->go_params->peer_interface_addr[5]);
+        GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group Started freq=%d status=%d peer if_addr=%02x:%02x:%02x:%02x:%02x:%02x", 
+            wpa_s->go_params->freq, wpa_s->go_params->status,
+            wpa_s->go_params->peer_interface_addr[0], wpa_s->go_params->peer_interface_addr[1], wpa_s->go_params->peer_interface_addr[2],
+            wpa_s->go_params->peer_interface_addr[3], wpa_s->go_params->peer_interface_addr[4], wpa_s->go_params->peer_interface_addr[5]);
     }
 
-   
     if (client == 0) //GO Role
     {
         GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group Started roleid=%d is GO, ssid=%s, ssid->mode=%d p=%s, >> notify host>> ",
@@ -5372,7 +5862,23 @@ void ti_driver_p2p_group_started(struct wpa_supplicant *wpa_s, struct wpa_ssid *
 
         pDrv->ssid_len = ssid->ssid_len;
         os_memcpy(pDrv->ssid, ssid->ssid, ssid->ssid_len);
-        CmeP2pGroupStartedNotify(wpa_s, ssid->bssid, TRUE);
+
+        CmeP2pGroupStartedNotify(wpa_s, pDrv->macAddr, TRUE);
+    }
+    else
+    {
+        GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group Started roleid=%d is Client",
+            pDrv->roleId);
+        if (CmeStationFlowIsSMIdle())
+        {
+            if (0 != CmeStationFlowSM(CME_STA_NETWORK_SEARCH_EVENT, CmeStationFlow_GetCurrentUser()))
+            {
+                GTRACE(GRP_CME,"CME: ERROR: CmeStationFlowSM tried to set state managed in STA flow SM and failed!! ");
+                CME_PRINT_REPORT_ERROR("\r\nCME: ERROR: CmeStationFlowSM tried to set state managed in STA flow SM and failed!! ");
+                ASSERT_GENERAL(0);
+            }
+        }
+        
     }
 }
 
@@ -5389,54 +5895,32 @@ void ti_driver_p2p_group_removed(struct wpa_supplicant *wpa_s)
     RoleType_e roleType = pDrv->roleType;
 
     CME_PRINT_REPORT("\n\r P2P Group REMOVED roleType:%d",roleType);
-
-    if (ROLE_IS_TYPE_P2P(roleType))
-    {
-        gP2pGroupRoleType = NOT_IN_GROUP;
-    }
-    
     GTRACE(GRP_DRIVER_CC33, "ti_driver: P2P Group REMOVED roleid=%d roleType=%d, wpa_s=%p",
             pDrv->roleId, roleType, wpa_s);
 
-    if (ROLE_P2P_GO == roleType)
+    if (ROLE_IS_TYPE_P2P(roleType))
     {
-        uint32_t roleId;
-        struct wpa_supplicant *wpa_sta;
-        struct wpa_supplicant *wpa_device;
+        struct wpa_supplicant *wpa_s;
 
-        //supplicant will call hostapd_interface_deinit
-        //and deactivate AP like role interface
-        // like cme_deactivate_ap_role()
+        gP2pGroupRoleType = NOT_IN_GROUP;
+        gP2pGroupRole = P2P_GROUP_ROLE_NONE;
 
-        //We must return device parent priv if to be sta priv if
-        //1. get STA priv if
-        roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_STA);
-        GTRACE(GRP_DRIVER_CC33, "ti_driver: p2p group remove - get roleId of STA interface %d", roleId);
-        wpa_sta = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
-        //2. get device roleid
-        roleId = drv_getRoleIdFromType(gpSupplicantGlobals, ROLE_DEVICE); 
-        if (roleId != INVALID_ROLE_ID)
+        //init p2p module globals
+        gCmeP2pInfo.p2pFindStopping = FALSE;
+        gCmeP2pInfo.p2pConnectPending = FALSE;
+
+        // release connection related flags on device role
+        wpa_s = drv_getP2pDeviceSupplicant();
+        if (wpa_s == NULL)
         {
-            //get device priv interface
-            wpa_device = drv_getIfaceFromRoleID(gpSupplicantGlobals, roleId);
-            //update device parent if
-            wpa_device->parent = wpa_sta; //assert
+            CME_PRINT_REPORT_ERROR("\n\r Could not retrive p2p device drv! ");
         }
         else
         {
-            GTRACE(GRP_DRIVER_CC33, "ti_driver: DEVICE IF DOESN'T EXIST!");
-            //assert?
+            cmeP2pClearAll();
         }
-
-    }
-    else if (ROLE_P2P_CL == pDrv->roleType)
-    {
-        pDrv->ops->change_type(pDrv, ROLE_STA);
-    }
-
-    //notify host that group was removed 
-    if (ROLE_IS_TYPE_P2P(roleType))
-    {
+        
+        //notify host that group was removed 
         CmeP2pGroupRemovedNotify(roleType);
     }
 }
@@ -5477,6 +5961,8 @@ const struct wpa_driver_ops wpa_driver_ti_ops =
     .associate = ti_driver_associate,
     .get_bssid = ti_driver_get_bssid,
     .get_ssid = ti_driver_get_ssid,
+    .add_pmkid = ti_driver_add_pmkid,
+
 
     // P2P & STA based
     .remain_on_channel = ti_driver_start_remain_on_channel,

@@ -9,7 +9,9 @@
 #ifndef AES_H
 #define AES_H
 
+#if !defined(AES_BLOCK_SIZE)// defined also on mbedtls
 #define AES_BLOCK_SIZE 16
+#endif
 
 void * aes_encrypt_init(const u8 *key, size_t len);
 int aes_encrypt(void *ctx, const u8 *plain, u8 *crypt);

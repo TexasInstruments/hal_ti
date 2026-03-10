@@ -54,6 +54,8 @@ extern ti_driver_ifData_t *gpDriverIfDataDev; //TIWLAN_DEV_NAME_P2PDEV
 
 extern TUdata *gUdataCB;
 
+extern p2pGroupRole_e gP2pGroupRole;
+
 // ============================================================================
 //      Modules private definitions
 // ============================================================================
@@ -86,6 +88,14 @@ RoleType_e drv_getDrvRoleType(ti_driver_ifData_t *apDrv)
     if (!os_strcmp(apDrv->iface, NETIF_NAME(TIWLAN_DEV_NAME_P2P_CL)))
         return ROLE_P2P_CL;
 
+    if (!os_strcmp(apDrv->iface, NETIF_NAME(TIWLAN_DEV_NAME_P2P)))
+    {
+        if (gP2pGroupRole == P2P_GROUP_ROLE_GO)
+            return ROLE_P2P_GO;
+        else
+            return ROLE_P2P_CL;
+    }
+
     return ROLE_TYPE_NONE;
 }
 
@@ -104,6 +114,14 @@ ti_driver_ifData_t * drv_getDriverData(const char *ifname)
 
     if (0 == os_strcmp(ifname, NETIF_NAME(TIWLAN_DEV_NAME_P2P_GO)))
         return (gpDriverIfDataAp);
+        
+    if (0 == os_strcmp(ifname, NETIF_NAME(TIWLAN_DEV_NAME_P2P)))
+    {
+        if(gP2pGroupRole == P2P_GROUP_ROLE_GO)
+            return (gpDriverIfDataAp);
+        else
+            return (gpDriverIfDataSta);
+    }
 
     return NULL;
 }

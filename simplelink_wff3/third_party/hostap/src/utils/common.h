@@ -57,9 +57,7 @@ static inline unsigned int bswap_32(unsigned int v)
 // TI cc33xx compilation
 #ifdef CONFIG_TI_COMPILER
 #include <time.h>
-#if !defined(__time_t_defined)
-#define __time_t_defined 1
-#endif
+#define  __time_t_defined
 #define __BIG_ENDIAN 4321
 #define __LITTLE_ENDIAN 1234
 #ifdef __ARM_BIG_ENDIAN
@@ -137,14 +135,16 @@ typedef signed short s16;
 typedef signed  char s8;
 
 #ifndef bswap_16
-#define bswap_16(a) ((((u16) (a) << 8) & 0xff00) | (((u16) (a) >> 8) & 0xff))
+//#define bswap_16(a) ((((u16) (a) << 8) & 0xff00) | (((u16) (a) >> 8) & 0xff))
+#define bswap_16(a) __builtin_bswap16(a)
 #endif
 
 #ifndef bswap_32
-#define bswap_32(a) ((((u32) (a) << 24) & 0xff000000) | \
-		     (((u32) (a) << 8) & 0xff0000) | \
-     		     (((u32) (a) >> 8) & 0xff00) | \
-     		     (((u32) (a) >> 24) & 0xff))
+// #define bswap_32(a) ((((u32) (a) << 24) & 0xff000000) | \
+// 		     (((u32) (a) << 8) & 0xff0000) | \
+//      		     (((u32) (a) >> 8) & 0xff00) | \
+//      		     (((u32) (a) >> 24) & 0xff))
+#define bswap_32(a) __builtin_bswap32(a)				 
 #endif
 
 
@@ -626,9 +626,7 @@ void int_array_concat(int **res, const int *a);
 void int_array_sort_unique(int *a);
 void int_array_add_unique(int **res, int a);
 
-#if !defined(ARRAY_SIZE)
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#endif
 
 void str_clear_free(char *str);
 void bin_clear_free(void *bin, size_t len);

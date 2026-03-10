@@ -55,8 +55,7 @@
 // to get interface type.
 #define TIWLAN_DEV_NAME_STA		"ti_sta"
 #define TIWLAN_DEV_NAME_SAP		"ti_sap"
-//#define TIWLAN_DEV_NAME_P2PDEV 	"ti_p2pdev" //p2p-dev-ti_sta
-#define TIWLAN_DEV_NAME_P2PDEV  "p2p-dev-ti_sta"
+#define TIWLAN_DEV_NAME_P2PDEV 	"ti_p2pdev" //p2p-dev-ti_sta
 #define TIWLAN_DEV_NAME_P2P 	"ti_p2p"	// either P2P CL or P2P GO
 #define TIWLAN_DEV_NAME_P2P_GO 	"ti_p2p_go"
 #define TIWLAN_DEV_NAME_P2P_CL 	"ti_p2p_cl"		
@@ -290,6 +289,15 @@ RoleType_e drv_getRoleTypeFromRoleId(struct wpa_global *apGlobal, uint32_t aRole
 struct wpa_supplicant * drv_getIfaceFromRoleID(struct wpa_global *apGlobal, uint32_t aRoleID);
 
 
+/* ----------------------------------------------------------------------------
+ drv_getP2pDeviceSupplicant
+      Search for p2p device interface
+
+ Parameters: IN None
+
+ Retrun:  pointer to wpa supplicant instance
+---------------------------------------------------------------------------- */
+ struct wpa_supplicant* drv_getP2pDeviceSupplicant(void);
 /* ----------------------------------------------------------------------------
  drv_handleScanCompleteEvent
       This function forwards the notification of connection scan completion to

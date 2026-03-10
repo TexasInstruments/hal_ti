@@ -37,8 +37,7 @@ enum {
 #define wpa_debug_open_file(p) do { } while (0)
 #define wpa_debug_close_file() do { } while (0)
 #define wpa_debug_setup_stdout() do { } while (0)
-//#define wpa_dbg(args...) do { } while (0)
-#define wpa_dbg(ctx, level, fmt, args...) printf (fmt "\n", ##args)
+#define wpa_dbg(args...) do { } while (0)
 
 static inline int wpa_debug_reopen_file(void)
 {

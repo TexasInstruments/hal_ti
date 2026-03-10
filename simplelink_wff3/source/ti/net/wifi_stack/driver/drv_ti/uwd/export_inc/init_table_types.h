@@ -94,18 +94,18 @@
 /* Regulatoty Domain init table*/
 typedef struct
 {
-	uint8_t	band;
-    uint8_t    TxPower;
-    uint8_t    DfsChannel;
-	uint8_t    NumOfChannels;
-	uint8_t    Channel[REG_DOMAIN_MAX_CHAN_NUM];
-}RegDomainChan_t;
+	uint8_t band;
+    uint8_t TxPower;
+    uint8_t DfsChannel;
+	uint8_t NumOfChannels;
+	uint8_t Channel[REG_DOMAIN_MAX_CHAN_NUM];
+} RegDomainChan_t;
 
 typedef struct
 {
 	char             CountryStr[REG_DOMAIN_COUNTRY_STR_LEN];
     RegDomainChan_t  DomainReg;
-}RegDomainInfoRow_t;
+} RegDomainInfoRow_t;
 
 
 

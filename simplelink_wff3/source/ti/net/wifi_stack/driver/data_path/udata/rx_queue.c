@@ -61,6 +61,7 @@
 #include "gtrace.h"
 #include "tx_ctrl.h"
 #include "wlan_links.h"
+#include "errors.h"
 /************************ static definitions **************************************/
 
 #define BA_SESSION_ID_NONE                                  0xff
@@ -702,18 +703,25 @@ static uint32_t RxQueue_CfgRxBaPolicy(TRxQueueBaDataBase *pTidDataBase,
                                       uint8_t uTid,
                                       uint8_t uState)
 {
-    CommandParamContol_t *cmd;
-    Cfg_t   *cmdParams;
-    cmd = os_malloc(sizeof(CommandParamContol_t));
-    cmdParams= (Cfg_t *)&(cmd->commandParam.param);
+    CommandParamContol_t *cmd = NULL;
+    Cfg_t cmdParams;
     RxBaSessionCfg_t baSessionCfg;
+    
+    cmd = os_malloc(sizeof(CommandParamContol_t));
+    if (cmd == NULL)
+    {
+        return WlanError(WLAN_ERROR_SEVERITY__MID,
+                         WLAN_ERROR_MODULE__TRANSPORT,
+                         WLAN_ERROR_TYPE__MALLOC);
+    }
+    os_memset(cmd, 0x0, sizeof(CommandParamContol_t));
+    os_memset(&cmdParams, 0x0, sizeof(Cfg_t));
 
-    cmd->nabHeader.opcode = CMD_CONFIGURE;
+    cmd->nabHeader.opcode       = CMD_CONFIGURE;
     cmd->nabHeader.sync_pattern = HOST_SYNC_PATTERN;
     cmd->commandParam.cmdID     = CMD_CONFIGURE;
-    cmdParams->id             = BA_SESSION_RX_SETUP;
-    cmdParams->length         = sizeof(RxBaSessionCfg_t);
-
+    cmdParams.id                = BA_SESSION_RX_SETUP;
+    cmdParams.length            = sizeof(RxBaSessionCfg_t);
 
     baSessionCfg.linkId = uHlid;
     baSessionCfg.tid = uTid;
@@ -729,7 +737,9 @@ static uint32_t RxQueue_CfgRxBaPolicy(TRxQueueBaDataBase *pTidDataBase,
     }
     baSessionCfg.win_size = pTidDataBase->uTidWinSize;
 
-    os_memcpy(&(cmdParams->ex.RxBaSession), &baSessionCfg, cmdParams->length);
+    /* Copy the data to the FW command */
+    os_memcpy(&(cmdParams.ex.RxBaSession), &baSessionCfg, cmdParams.length);
+    os_memcpy(cmd->commandParam.param, &cmdParams, sizeof(Cfg_t));
 
     cmd->nabHeader.len = ALIGNN_TO_4(sizeof(NAB_header_t) + sizeof(cmd->commandParam.cmdID) + sizeof(Cfg_t));
 

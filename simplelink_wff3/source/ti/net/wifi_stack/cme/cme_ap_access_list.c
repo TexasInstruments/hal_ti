@@ -52,7 +52,6 @@
 #include "gtrace.h"
 #include "errors.h"
 #include "wlan_if.h"
-
 // Prototypes
 BOOLEAN CME_IsEntryInArrList(u8* pList, u8 numEntriesInList,  u8* pEntry, u8 entryLen, uint8_t* index);
 int32_t CME_DelMacFromList(uint8_t* pMacAddress,uint32_t index, BOOLEAN UpdateFlash);
@@ -100,7 +99,6 @@ int32_t CME_BwListSetParameter(BOOLEAN CalledFromHost,
                              void* pNewValue)
 {
     HOOK(HOOK_IN_CME_AP_ACCESS_LIST);
-
     return 0;
 #if 0 // TODO:  need to implement
     int32_t status;
