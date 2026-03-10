@@ -45,6 +45,8 @@ set(SOURCES_DRIVERLIB
   i2c.c
   udma.c
   adc.c
+  lpcmp.c
+  ioc.c
 )
 
 list(TRANSFORM SOURCES_DRIVERLIB PREPEND driverlib/)
