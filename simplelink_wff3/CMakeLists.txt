@@ -13,6 +13,9 @@ if(CONFIG_HAS_CC35XX_SDK)
     zephyr_compile_definitions(DeviceFamily_CC35XX ${COMPILER})
     zephyr_compile_definitions(CC35XX)
     zephyr_compile_definitions(CONFIG_DYNAMIC_DPL_OBJECTS)
+    if(CONFIG_WIFI_TI_CC35XX_TX_CTRL_BLK_NUM)
+      zephyr_compile_definitions(CTRL_BLK_ENTRIES_NUM=${CONFIG_WIFI_TI_CC35XX_TX_CTRL_BLK_NUM})
+    endif()
     zephyr_include_directories(
       .
       source
@@ -41,6 +44,7 @@ if(CONFIG_HAS_CC35XX_SDK)
       kernel/zephyr/dpl/SemaphoreP_zephyr.c
       kernel/zephyr/dpl/TaskP_zephyr.c
       kernel/zephyr/dpl/QueueP_zephyr.c
+      kernel/zephyr/dpl/MutexP_zephyr.c
 
       source/ti/drivers/UART2.c
       source/ti/drivers/uart2/UART2WFF3.c
@@ -91,10 +95,14 @@ if(CONFIG_HAS_CC35XX_SDK)
       )
     endif()
     if(CONFIG_WIFI_TI_CC35XX)
+      zephyr_include_directories(
+        kernel/zephyr/dpl
+      )
       zephyr_library_sources(
         kernel/zephyr/dpl/osi_dpl.c
         kernel/zephyr/dpl/osi_filesystem.c
         kernel/zephyr/dpl/osi_term.c
+        kernel/zephyr/dpl/ti_flash_map_config.c
       )
     endif()
   endif()
