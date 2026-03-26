@@ -62,8 +62,8 @@ uint32_t heapDbg_alloc_fail = 0;
 int64_t heapDbg_total_alloc = 0;
 #endif
 
-// ClockP tick period, in microseconds convert to mSEC
-#define ClockP_TICK_PERIOD_MS      ( ClockP_getSystemTickPeriod() * 1000 )
+// ClockP ticks per millisecond — avoids ClockP_getSystemTickPeriod()*1000 overflow.
+#define ClockP_TICK_PERIOD_MS      (CONFIG_SYS_CLOCK_TICKS_PER_SEC / 1000U)
 
 /*******************************************************************************
 
@@ -75,7 +75,7 @@ int64_t heapDbg_total_alloc = 0;
 */
 uint32_t TICK_TO_mSEC(uint32_t Tick)
 {
-    return ((Tick) / ClockP_TICK_PERIOD_MS);
+    return ((Tick) * 1000U / CONFIG_SYS_CLOCK_TICKS_PER_SEC);
 }
 
 /*!
@@ -83,7 +83,7 @@ uint32_t TICK_TO_mSEC(uint32_t Tick)
 */
 uint32_t mSEC_TO_TICK(uint32_t mSec)
 {
-    return ((mSec) * (ClockP_TICK_PERIOD_MS));
+    return ((mSec) * CONFIG_SYS_CLOCK_TICKS_PER_SEC / 1000U);
 }
 
 /*!
@@ -468,6 +468,11 @@ void *os_malloc(size_t size)
 	return shared_multi_heap_alloc(SMH_REG_ATTR_NON_CACHEABLE, size);
 }
 
+void os_free(void *ptr)
+{
+	shared_multi_heap_free(ptr);
+}
+
 void *os_realloc(void *ptr, size_t newsize)
 {
 	void *p;
@@ -515,11 +520,6 @@ void *os_zalloc(size_t size)
 		(void)memset(p, 0, size);
 	}
 	return p;
-}
-
-void os_free(void *ptr)
-{
-	shared_multi_heap_free(ptr);
 }
 
 #ifdef COLLECT_HEAP_DEBUG_INFO //OSPREY_MX-17
