@@ -29,106 +29,507 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <osi_kernel.h>
+#include <string.h>
+#include <zephyr/kernel.h>
+#include <zephyr/init.h>
+#include <zephyr/fs/nvs.h>
+#include <zephyr/storage/flash_map.h>
+#include <zephyr/drivers/flash.h>
+#include <zephyr/logging/log.h>
 
-#define RAM_CONTAINER
+#define FW_SLOT1_DEV    FIXED_PARTITION_DEVICE(wifi_fw_slot1_partition)
+#define FW_SLOT1_OFFSET FIXED_PARTITION_OFFSET(wifi_fw_slot1_partition)
+#define FW_SLOT2_DEV    FIXED_PARTITION_DEVICE(wifi_fw_slot2_partition)
+#define FW_SLOT2_OFFSET FIXED_PARTITION_OFFSET(wifi_fw_slot2_partition)
 
-#ifdef RAM_CONTAINER
-#include "containers.h"
-#endif
+LOG_MODULE_REGISTER(osi_filesystem, CONFIG_LOG_DEFAULT_LEVEL);
 
-/*!
-    \brief the below functions are needed for file management of the upper mac.
-           currently only supported file is the WiFi part firmware bin file.
-           in the sitara AM243x launchpad, the firmware bin is saved in a specific flash offset.
+#define ATTRIBUTE __attribute__((used))
 
-           those functions are redirected from fxxx to osi_fxxx in the linker command (--symbol_map=fread=osi_fread).
-           if already have system that use fopen fclose fread etc. this file should not be compiled in.
-*/
-#define ATTRIBUTE __attribute__ ((used))
-#define FW_OFFSET_IN_FLASH (0x800000)
-#define RAM_OFFSET_IN_FLASH (0x900000)
+/*
+ * NVS item IDs - direct mapping from TI's NVOCMP item IDs.
+ */
+#define NVS_ID_BLE_OUR_SEC      0x01
+#define NVS_ID_BLE_PEER_SEC     0x02
+#define NVS_ID_BLE_CCCD         0x03
+#define NVS_ID_WLAN_CONN_POL    0x04
+#define NVS_ID_WLAN_PROFILES    0x05
+#define NVS_ID_WLAN_FAST_CONN   0x06
+
+/*
+ * GPE (General Purpose Entity) flash format constants.
+ */
+#define GPE_MANIFEST_IMAGE_START_OFFSET 0xFFC
+#define GPE_MANIFEST_INTEGRITY_LEN      0x10
+#define GPE_HEADER_MAGIC_NUM            0x690c47c2
+#define GPE_PROTECTED_TLV_MAGIC_NUM     0x6908
+#define CONF_BIN_TLV_TYPE               0x00B2
+#define GPE_MANIFEST_TLV_TYPE           0x00A0
+
+/* Default FW data offset within the GPE slot */
+#define FW_GPE_DATA_OFFSET_DEFAULT      0x101c
+
+
+typedef enum {
+	OSI_FILE_CONNECTIVITY_FW_SLOT_1,
+	OSI_FILE_CONNECTIVITY_FW_SLOT_2,
+	OSI_FILE_CONF,
+	OSI_FILE_RAMBTLR,
+	OSI_FILE_BLE_OUR_SEC,
+	OSI_FILE_BLE_PEER_SEC,
+	OSI_FILE_BLE_CCCD,
+	OSI_FILE_WLAN_CONNECTION_POLICY,
+	OSI_FILE_WLAN_PROFILE,
+	OSI_FILE_WLAN_FAST_CONNECT,
+} osiInternalType_e;
+
+typedef struct {
+	osiInternalType_e ftype;
+	void *ptr;
+} osiFileP_t;
+
+typedef struct {
+	uint32_t ihMagic;
+	uint32_t ihLoadAddr;
+	uint16_t ihHdrSize;
+	uint16_t ihProtectTlvSize;
+	uint32_t ihImgSize;
+	uint32_t ihFlags;
+} gpeManifestHeader_t;
+
+typedef struct {
+	uint16_t itMagic;
+	uint16_t itTlvTot;
+} gpeTlvInfo_t;
+
+typedef struct {
+	uint16_t itType;
+	uint16_t itLen;
+} gpeTlvManifestHeader_t;
+
+typedef struct {
+	uint16_t itType;
+	uint16_t reserved;
+	uint32_t tlvTablePointerShift;
+} gpeTlvManifestTableLine_t;
+
+typedef struct {
+	uint16_t itType;
+	uint16_t itLen;
+} gpeTlvHeader_t;
+
+#define IS_NV_FILE(t) ((t) >= OSI_FILE_BLE_OUR_SEC && (t) <= OSI_FILE_WLAN_FAST_CONNECT)
+
+
+/* Static file handle for cc35xx-conf. */
+static osiFileP_t conf_file = {
+	.ftype = OSI_FILE_CONF,
+};
+
+/* Runtime offset of conf.bin within vendor_image_partition */
+static off_t conf_flash_offset;
+static bool conf_flash_found;
+
+/* Module state */
+static struct nvs_fs wifi_nvs;
+static uint32_t active_fw_slot = OSI_FLASH_CONNECTIVITY_FW_SLOT_1;
+static uint32_t fw_gpe_data_offset = FW_GPE_DATA_OFFSET_DEFAULT;
+
+/* NVS ID lookup table indexed by osiInternalType_e */
+static const uint16_t nvs_id_map[] = {
+	[OSI_FILE_BLE_OUR_SEC]            = NVS_ID_BLE_OUR_SEC,
+	[OSI_FILE_BLE_PEER_SEC]           = NVS_ID_BLE_PEER_SEC,
+	[OSI_FILE_BLE_CCCD]               = NVS_ID_BLE_CCCD,
+	[OSI_FILE_WLAN_CONNECTION_POLICY] = NVS_ID_WLAN_CONN_POL,
+	[OSI_FILE_WLAN_PROFILE]           = NVS_ID_WLAN_PROFILES,
+	[OSI_FILE_WLAN_FAST_CONNECT]      = NVS_ID_WLAN_FAST_CONN,
+};
+
+/*
+ * GPE TLV parser
+ * This function gets the offset to the protected TLV manifest
+ * zone within a flash GPE.
+ */
+static int32_t osi_get_protected_tlv_manifest_hdr(const struct device *dev,
+						   gpeTlvManifestHeader_t *tlv_mhdr,
+						   uint32_t *hdr_offset)
+{
+	gpeManifestHeader_t gpe_hdr;
+	gpeTlvInfo_t tlv_info;
+	uint32_t offset, magic;
+
+	/* Verify GPE magic sentinel at manifest + 0x1C */
+	if (flash_read(dev, GPE_MANIFEST_IMAGE_START_OFFSET + 0x1C,
+		       &magic, sizeof(magic)) != 0 ||
+	    magic != GPE_HEADER_MAGIC_NUM) {
+		return -1;
+	}
+
+	/* Read GPE manifest header at 0xFFC (magic field unreliable) */
+	offset = GPE_MANIFEST_IMAGE_START_OFFSET;
+	if (flash_read(dev, offset, &gpe_hdr, sizeof(gpe_hdr)) != 0) {
+		return -1;
+	}
+
+	if (gpe_hdr.ihProtectTlvSize == 0) {
+		return -1;
+	}
+
+	/* Protected TLV zone: after header + image data */
+	offset += gpe_hdr.ihHdrSize + gpe_hdr.ihImgSize;
+
+	if (flash_read(dev, offset, &tlv_info, sizeof(tlv_info)) != 0 ||
+	    tlv_info.itMagic != GPE_PROTECTED_TLV_MAGIC_NUM) {
+		return -1;
+	}
+
+	/* Read manifest TLV header */
+	offset += sizeof(gpeTlvInfo_t);
+	if (flash_read(dev, offset, tlv_mhdr, sizeof(*tlv_mhdr)) != 0 ||
+	    tlv_mhdr->itType != GPE_MANIFEST_TLV_TYPE) {
+		return -1;
+	}
+
+	*hdr_offset = offset;
+	return 0;
+}
+
+/*
+ * This function iterates a GPE TLV zone (either protected or
+ * not) and extracts a requested TLV.
+ */
+static int32_t osi_find_tlv_in_manifest(const struct device *dev,
+					uint32_t manifest_hdr_offset,
+					gpeTlvManifestHeader_t *tlv_mhdr,
+					uint16_t requested_type,
+					uint32_t *requested_offset)
+{
+	gpeTlvManifestTableLine_t line;
+	uint32_t table_offset, tlv_start;
+	uint16_t count;
+
+	table_offset = manifest_hdr_offset + sizeof(gpeTlvManifestHeader_t);
+	count = tlv_mhdr->itLen / sizeof(gpeTlvManifestTableLine_t);
+	tlv_start = table_offset + tlv_mhdr->itLen;
+
+	for (uint16_t i = 0; i < count; i++) {
+		if (flash_read(dev, table_offset, &line, sizeof(line)) != 0) {
+			return -1;
+		}
+
+		if (line.itType == requested_type) {
+			*requested_offset = tlv_start + line.tlvTablePointerShift;
+			return 0;
+		}
+
+		table_offset += sizeof(gpeTlvManifestTableLine_t);
+	}
+
+	return -1;
+}
+
+/*
+ * This function gets the cc35xx-conf.bin file offset within the
+ * vendor image GPE slot.
+ */
+static void osi_conf_flash_init(void)
+{
+	const struct device *dev;
+	gpeTlvManifestHeader_t tlv_mhdr;
+	uint32_t manifest_offset, conf_tlv_offset;
+
+	dev = FIXED_PARTITION_DEVICE(vendor_image_partition);
+	if (!device_is_ready(dev)) {
+		LOG_ERR("vendor_image flash not ready");
+		return;
+	}
+
+	if (osi_get_protected_tlv_manifest_hdr(dev, &tlv_mhdr,
+					       &manifest_offset) != 0) {
+		LOG_ERR("GPE manifest parse failed");
+		return;
+	}
+
+	if (osi_find_tlv_in_manifest(dev, manifest_offset, &tlv_mhdr,
+				     CONF_BIN_TLV_TYPE,
+				     &conf_tlv_offset) != 0) {
+		LOG_ERR("CONF_BIN TLV not found in manifest");
+		return;
+	}
+
+	/* Skip TLV header to get to conf data */
+	conf_flash_offset = conf_tlv_offset + sizeof(gpeTlvHeader_t);
+	conf_flash_found = true;
+
+	LOG_DBG("cc35xx-conf loaded from flash GPE at 0x%x",
+		(unsigned int)conf_flash_offset);
+}
+
+/*
+ * Initialize the NVS filesystem on the wifi-nvs partition.
+ */
+static int osi_nvs_init(void)
+{
+	int rc;
+	struct flash_pages_info info;
+
+	/* Find conf in flash GPE */
+	osi_conf_flash_init();
+
+	wifi_nvs.flash_device = FIXED_PARTITION_DEVICE(wifi_nvs_partition);
+	if (!device_is_ready(wifi_nvs.flash_device)) {
+		LOG_ERR("NVS flash device not ready");
+		return -ENODEV;
+	}
+
+	wifi_nvs.offset = FIXED_PARTITION_OFFSET(wifi_nvs_partition);
+
+	rc = flash_get_page_info_by_offs(wifi_nvs.flash_device, wifi_nvs.offset,
+					 &info);
+	if (rc) {
+		LOG_ERR("Failed to get flash page info: %d", rc);
+		return rc;
+	}
+
+	wifi_nvs.sector_size = info.size;
+	wifi_nvs.sector_count = FIXED_PARTITION_SIZE(wifi_nvs_partition) / info.size;
+
+	rc = nvs_mount(&wifi_nvs);
+	if (rc) {
+		LOG_ERR("NVS mount failed: %d", rc);
+		return rc;
+	}
+
+	return 0;
+}
+
+/*
+ * Allocate a file handle for an NV-backed file.
+ */
+static FILE *open_nv_file(osiInternalType_e ftype)
+{
+	osiFileP_t *f;
+
+	f = k_malloc(sizeof(osiFileP_t));
+	if (!f) {
+		return NULL;
+	}
+
+	f->ftype = ftype;
+	return (FILE *)f;
+}
+
+int ATTRIBUTE osi_fset(osiFileSetType containerType, void *params)
+{
+	if (containerType == OSI_FILESYSTEM_SET_CONNECTIVITY_FW_CONTAINER) {
+		osiFlashFwSlot_e slot = *(osiFlashFwSlot_e *)params;
+
+		if (slot == OSI_FLASH_CONNECTIVITY_FW_SLOT_1 ||
+		    slot == OSI_FLASH_CONNECTIVITY_FW_SLOT_2) {
+			active_fw_slot = slot;
+		}
+	}
+
+	return 0;
+}
+
+int ATTRIBUTE osi_fget(osiFileGetType containerType, void *params)
+{
+	if (containerType == OSI_FILESYSTEM_GET_CONNECTIVITY_FW_CONTAINER) {
+		*(osiFlashFwSlot_e *)params = active_fw_slot;
+	}
+
+	return 0;
+}
 
 int ATTRIBUTE osi_fclose(FILE *_fp)
 {
-    return 0;
+	osiFileP_t *f = (osiFileP_t *)_fp;
+
+	if (!f) {
+		return -EINVAL;
+	}
+
+	if (f != &conf_file) {
+		k_free(f);
+	}
+	return 0;
 }
 
-
-FILE * ATTRIBUTE osi_fopen(const char *_fname, const char *_mode)
+FILE *ATTRIBUTE osi_fopen(const char *_fname, const char *_mode)
 {
-#ifdef RAM_CONTAINER
-    if(strcmp("rambtlr",_fname) == 0)
-    {
-        return (FILE *)(NULL);
-    }
-    else if(strcmp("fw",_fname) == 0)
-    {
-        return (FILE *)(gFWbuffer);
-    }
-    else if(strcmp("cc33xx-conf",_fname) == 0)
-    {
-        return (FILE *)(gINIbuffer);
-    }
-    return (FILE *)(NULL);
+	osiFileP_t *f;
 
-#else
-    if(strcmp("rambtlr",_fname) == 0)
-    {
-        return (FILE *)(RAM_OFFSET_IN_FLASH);
-    }
-    else if(strcmp("fw",_fname) == 0)
-    {
-        return (FILE *)(FW_OFFSET_IN_FLASH);
-    }
-    return (FILE *)(NULL);
-#endif
+	if (strcmp("rambtlr", _fname) == 0) {
+		f = k_malloc(sizeof(osiFileP_t));
+		if (!f) {
+			return NULL;
+		}
+		f->ftype = OSI_FILE_RAMBTLR;
+		f->ptr = NULL;
+		return (FILE *)f;
+	}
+
+	if (strcmp("fw", _fname) == 0) {
+		f = k_malloc(sizeof(osiFileP_t));
+		if (!f) {
+			return NULL;
+		}
+
+		if (active_fw_slot == OSI_FLASH_CONNECTIVITY_FW_SLOT_1) {
+			f->ftype = OSI_FILE_CONNECTIVITY_FW_SLOT_1;
+		} else {
+			f->ftype = OSI_FILE_CONNECTIVITY_FW_SLOT_2;
+		}
+
+		f->ptr = NULL;
+		return (FILE *)f;
+	}
+
+	if (strcmp("cc35xx-conf", _fname) == 0) {
+		return (FILE *)&conf_file;
+	}
+
+	/* NV-backed files */
+	if (strcmp("our_sec", _fname) == 0) {
+		return open_nv_file(OSI_FILE_BLE_OUR_SEC);
+	}
+	if (strcmp("peer_sec", _fname) == 0) {
+		return open_nv_file(OSI_FILE_BLE_PEER_SEC);
+	}
+	if (strcmp("cccd", _fname) == 0) {
+		return open_nv_file(OSI_FILE_BLE_CCCD);
+	}
+	if (strcmp("conn_p", _fname) == 0) {
+		return open_nv_file(OSI_FILE_WLAN_CONNECTION_POLICY);
+	}
+	if (strcmp("profiles", _fname) == 0) {
+		return open_nv_file(OSI_FILE_WLAN_PROFILE);
+	}
+	if (strcmp(".fast", _fname) == 0) {
+		return open_nv_file(OSI_FILE_WLAN_FAST_CONNECT);
+	}
+
+	LOG_WRN("Unknown file: %s", _fname);
+	return NULL;
 }
 
 size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp)
 {
+	osiFileP_t *f = (osiFileP_t *)_fp;
+	const struct device *fw_dev;
+	off_t fw_base;
+	int ret;
 
-#ifdef RAM_CONTAINER
-    memcpy(_ptr,(void *)((uint32_t)(_fp) + offset),len);
-    return len;
-#else
-    if(Flash_read(gFlashHandle[CONFIG_FLASH0], (size_t)(_fp) + offset, _ptr, len) == 0)
-    {
-        return(len);
-    }
-    else
-    {
-        return 0;
-    }
-#endif
+	if (!f) {
+		return 0;
+	}
+
+	if (f->ftype == OSI_FILE_RAMBTLR) {
+		/* RAM bootloader - memcpy from ptr if available */
+		if (f->ptr) {
+			memcpy(_ptr, (void *)((uintptr_t)(f->ptr) + offset), len);
+			return len;
+		}
+		return 0;
+	}
+
+	if (f->ftype == OSI_FILE_CONF) {
+		if (!conf_flash_found) {
+			LOG_ERR("Conf not found in flash GPE");
+			return 0;
+		}
+		ret = flash_read(
+			FIXED_PARTITION_DEVICE(vendor_image_partition),
+			conf_flash_offset + offset, _ptr, len);
+		if (ret < 0) {
+			LOG_ERR("Conf flash read failed: %d", ret);
+			return 0;
+		}
+		return len;
+	}
+
+	if (f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_1 ||
+	    f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_2) {
+		fw_dev = (f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_1)
+			 ? FW_SLOT1_DEV : FW_SLOT2_DEV;
+		fw_base = (f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_1)
+			  ? FW_SLOT1_OFFSET : FW_SLOT2_OFFSET;
+
+		ret = flash_read(fw_dev, fw_base + fw_gpe_data_offset + offset,
+				 _ptr, len);
+		if (ret < 0) {
+			LOG_ERR("Flash read FW failed: %d", ret);
+			return 0;
+		}
+		return len;
+	}
+
+	if (IS_NV_FILE(f->ftype)) {
+		uint16_t nvs_id = nvs_id_map[f->ftype];
+		ssize_t bytes = nvs_read(&wifi_nvs, nvs_id, _ptr, len);
+
+		if (bytes < 0) {
+			LOG_DBG("NVS read id=0x%02x failed: %zd", nvs_id, bytes);
+			return 0;
+		}
+		return (size_t)bytes;
+	}
+
+	return 0;
 }
 
-size_t osi_fwrite(const void *_ptr, size_t _size, size_t _count, register FILE *_fp)//
+size_t osi_fwrite(const void *_ptr, size_t _size, size_t _count, FILE *_fp)
 {
-    assert(0);
+	osiFileP_t *f = (osiFileP_t *)_fp;
 
-    return 0;
+	if (!f) {
+		return 0;
+	}
+
+	if (IS_NV_FILE(f->ftype)) {
+		uint16_t nvs_id = nvs_id_map[f->ftype];
+		size_t total = _size * _count;
+		ssize_t bytes = nvs_write(&wifi_nvs, nvs_id, _ptr, total);
+
+		if (bytes < 0) {
+			LOG_ERR("NVS write id=0x%02x failed: %zd", nvs_id, bytes);
+			return 0;
+		}
+		return total;
+	}
+
+	LOG_WRN("Write not supported for file type %d", f->ftype);
+	return 0;
 }
 
-
-/*!
-    \brief initialize the SPI module
-    \param data - input buffer
-    \param length - length in bytes to read
-    \return 0 - success, -1 - failed
-    \note
-    1. if initializing all the MCU drivers at the beginning of the world, this function can stay empty.
-       this function is called in the wlan_start and will stay initialized even if used wlan_stop
-    2. the SPI must have the following parameters
-       - master
-       - 4 pin mode SPI
-       - chip select active low
-       - polarity 0 phase 0
-       - max frequency 40000000Hz
-       - data block 32bits
-    \warning
-*/
-size_t ATTRIBUTE osi_filelength(const char * FileName)
+int osi_fremove(FILE *_fp)
 {
-    return 0;
+	osiFileP_t *f = (osiFileP_t *)_fp;
+
+	if (!f) {
+		return -1;
+	}
+
+	if (IS_NV_FILE(f->ftype)) {
+		uint16_t nvs_id = nvs_id_map[f->ftype];
+		int ret = nvs_delete(&wifi_nvs, nvs_id);
+
+		if (ret < 0) {
+			LOG_ERR("NVS delete id=0x%02x failed: %d", nvs_id, ret);
+			return -1;
+		}
+		return 0;
+	}
+
+	return 0;
 }
+
+size_t ATTRIBUTE osi_filelength(const char *FileName)
+{
+	return 0;
+}
+
+SYS_INIT(osi_nvs_init, POST_KERNEL, CONFIG_WIFI_TI_CC35XX_NVS_INIT_PRIORITY);
