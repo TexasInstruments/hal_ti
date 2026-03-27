@@ -9,8 +9,10 @@ set(SOURCES_DRIVERLIB
     lrfd.c
     setup.c
     spi.c
+    systimer.c
     uart.c
     udma.c
+    ioc.c
 )
 
 list(TRANSFORM SOURCES_DRIVERLIB PREPEND driverlib/)

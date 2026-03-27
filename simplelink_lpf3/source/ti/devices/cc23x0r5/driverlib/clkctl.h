@@ -3,7 +3,7 @@
  *
  *  Description:    Defines and prototypes for the CLKCTL module.
  *
- *  Copyright (c) 2025 Texas Instruments Incorporated
+ *  Copyright (c) 2025-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -89,6 +89,7 @@ extern "C" {
 //
 //*****************************************************************************
 
+#ifdef DRIVERLIB_DEBUG
 //*****************************************************************************
 //
 //! \internal
@@ -103,10 +104,11 @@ extern "C" {
 //! otherwise.
 //
 //*****************************************************************************
-__STATIC_INLINE bool CLKCTLBaseValid(uint32_t base)
+static bool CLKCTLBaseValid(uint32_t base)
 {
     return (base == CLKCTL_BASE);
 }
+#endif
 
 //*****************************************************************************
 //
@@ -138,8 +140,8 @@ __STATIC_INLINE void CLKCTLEnable(uint32_t base, uint32_t peripheral)
     // Check the arguments
     ASSERT(CLKCTLBaseValid(base));
 
-    // Read-modify-write the set bit
-    HWREG(base + CLKCTL_O_CLKENSET0) |= peripheral;
+    // Write the set bit
+    HWREG(base + CLKCTL_O_CLKENSET0) = peripheral;
 }
 
 //*****************************************************************************
@@ -172,8 +174,8 @@ __STATIC_INLINE void CLKCTLDisable(uint32_t base, uint32_t peripheral)
     // Check the arguments
     ASSERT(CLKCTLBaseValid(base));
 
-    // Read-modify-write the clear bit
-    HWREG(base + CLKCTL_O_CLKENCLR0) |= peripheral;
+    // Write the clear bit
+    HWREG(base + CLKCTL_O_CLKENCLR0) = peripheral;
 }
 
 //*****************************************************************************
@@ -187,7 +189,7 @@ __STATIC_INLINE void CLKCTLDisable(uint32_t base, uint32_t peripheral)
 __STATIC_INLINE void CLKCTLEnableLrfdClock(void)
 {
     // Enable LRFD module clock
-    HWREG( CLKCTL_BASE + CLKCTL_O_CLKENSET0 ) = CLKCTL_CLKENSET0_LRFD;
+    HWREG(CLKCTL_BASE + CLKCTL_O_CLKENSET0) = CLKCTL_CLKENSET0_LRFD;
 
     // Wait for LRFD clock to be enabled. It is not expected that the LRFD clock
     // will ever be disabled, but this will add sufficient delay before
@@ -205,7 +207,27 @@ __STATIC_INLINE void CLKCTLEnableLrfdClock(void)
 //*****************************************************************************
 __STATIC_INLINE void CLKCTLDisableLrfdClock(void)
 {
-    HWREG( CLKCTL_BASE + CLKCTL_O_CLKENCLR0 ) = CLKCTL_CLKENCLR0_LRFD;
+    HWREG(CLKCTL_BASE + CLKCTL_O_CLKENCLR0) = CLKCTL_CLKENCLR0_LRFD;
+}
+
+//*****************************************************************************
+//
+//! \brief Enable Flash LDO to be off in IDLE
+//
+//*****************************************************************************
+__STATIC_INLINE void CLKCTLEnableFlashLdoOffInIdle(void)
+{
+    HWREG( CLKCTL_BASE + CLKCTL_O_IDLECFG ) = CLKCTL_IDLECFG_MODE_LDO_OFF;
+}
+
+//*****************************************************************************
+//
+//! \brief Disable Flash LDO to be off in IDLE
+//
+//*****************************************************************************
+__STATIC_INLINE void CLKCTLDisableFlashLdoOffInIdle(void)
+{
+    HWREG( CLKCTL_BASE + CLKCTL_O_IDLECFG ) = CLKCTL_IDLECFG_MODE_LDO_ON;
 }
 
 //*****************************************************************************

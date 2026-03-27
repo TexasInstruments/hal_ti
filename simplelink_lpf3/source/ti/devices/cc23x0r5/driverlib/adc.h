@@ -266,6 +266,9 @@ extern "C" {
 //! \brief Conversion overflow
 #define ADC_INT_OVIFG ADC_IMASK0_OVIFG
 
+//! \brief Max comparator settling time
+#define ADC_DEBUG1_CTRL_MAX_COMP_SETTLE_TIME (0x3 << 9)
+
 //*****************************************************************************
 //
 // API Functions and prototypes
@@ -551,22 +554,6 @@ __STATIC_INLINE void ADCDisableDmaTrigger(void)
 
 //*****************************************************************************
 //
-//! \brief Triggers an ADC conversion
-//!
-//! This function manually triggers an ADC conversion sequence, based on the
-//! settings in the control registers in the start and stop range. See
-//! \ref ADCSetMemctlRange and \ref ADCSetSequence
-//!
-//! \note It takes a minimum of 9 system-clock cycles for the BUSY-bit
-//! in the STATUS register to go high after calling this function.
-//!
-//! \return None
-//
-//*****************************************************************************
-extern void ADCManualTrigger(void);
-
-//*****************************************************************************
-//
 //! \brief Read conversion result from ADC
 //!
 //! This function blocks until a conversion is done, and returns data
@@ -792,125 +779,23 @@ __STATIC_INLINE void ADCClearInterrupt(uint32_t intFlags)
     HWREG(ADC_BASE + ADC_O_ICLR0) = intFlags;
 }
 
-
 //*****************************************************************************
 //
-//! \brief Enable DMA trigger for data transfer.
+//! \brief Increase settling time for comparator output.
 //!
-//! This function enables DMA trigger for data transfer. DMAEN bit is cleared by hardware
-//! based on DMA done signal at the end of data transfer. Software has to re-enable DMAEN
-//! bit for ADC to generate DMA triggers.
+//! Set bits 9-10 in ADC:DEBUG1:CTRL to increase settling time for the
+//! comparator output. This will reduce the error rate of ADC conversions.
+//! This is a workaround for the ADC errata: 'ADC_09', documented at:
+//! https://www.ti.com/lit/er/swrz134e/swrz134e.pdf or
+//! https://www.ti.com/lit/er/swrz161a/swrz161a.pdf
 //!
 //! \return None
 //
 //*****************************************************************************
-__STATIC_INLINE void ADCEnableDMATrigger(void)
+__STATIC_INLINE void ADCIncreaseComparatorSettlingTime(void)
 {
-    HWREG(ADC_BASE + ADC_O_CTL2) |= ADC_CTL2_DMAEN;
-}
-
-//*****************************************************************************
-//
-//! \brief Enables individual ADC interrupt sources for DMA Trigger Event Publisher (INT_EVENT2).
-//!
-//! This function enables the indicated ADC interrupt sources (INT_EVENT2).
-//!
-//! \param intFlags is the bit mask of the interrupt sources to be enabled.
-//! The parameter is the bitwise OR of any of the following:
-//! - ADC_INT_MEMRES_N (\ref ADC_INT_MEMRES_00, \ref ADC_INT_MEMRES_01, etc)
-//!
-//! \return None
-//
-//*****************************************************************************
-__STATIC_INLINE void ADCEnableDMAInterrupt(uint32_t intFlags)
-{
-    // Enable the specified interrupts.
-    HWREG(ADC_BASE + ADC_O_IMASK2) |= intFlags;
-}
-
-//*****************************************************************************
-//
-//! \brief Disables individual ADC interrupt sources for DMA Trigger Event Publisher (INT_EVENT2).
-//!
-//! This function disables the indicated ADC interrupt sources (INT_EVENT2).
-//!
-//! \param intFlags is the bit mask of the interrupt sources to be disabled.
-//! The parameter is the bitwise OR of any of the following:
-//! - ADC_INT_MEMRES_N (\ref ADC_INT_MEMRES_00, \ref ADC_INT_MEMRES_01, etc)
-//!
-//! \return None
-//
-//*****************************************************************************
-__STATIC_INLINE void ADCDisableDMAInterrupt(uint32_t intFlags)
-{
-    // Disable the specified interrupts.
-    HWREG(ADC_BASE + ADC_O_IMASK2) &= ~(intFlags);
-}
-
-//*****************************************************************************
-//
-//! \brief Gets the current raw interrupt status for DMA Trigger Event Publisher (INT_EVENT2).
-//!
-//! This function returns the raw interrupt status for the ADC (INT_EVENT2).
-//!
-//! \return Returns the current interrupt status, enumerated as a bit field of:
-//! - ADC_INT_MEMRES_N (\ref ADC_INT_MEMRES_00, \ref ADC_INT_MEMRES_01, etc)
-//
-//*****************************************************************************
-__STATIC_INLINE uint32_t ADCRawDMAInterruptStatus(void)
-{
-    return (HWREG(ADC_BASE + ADC_O_RIS2));
-}
-
-//*****************************************************************************
-//
-//! \brief Gets the current masked interrupt status for DMA Trigger Event Publisher (INT_EVENT2).
-//!
-//! This function returns the masked interrupt status for the ADC (INT_EVENT2).
-//!
-//! \return Returns the current interrupt status, enumerated as a bit field of:
-//! - ADC_INT_MEMRES_N (\ref ADC_INT_MEMRES_00, \ref ADC_INT_MEMRES_01, etc)
-//
-//*****************************************************************************
-__STATIC_INLINE uint32_t ADCMaskedDMAInterruptStatus(void)
-{
-    return (HWREG(ADC_BASE + ADC_O_MIS2));
-}
-
-//*****************************************************************************
-//
-//! \brief Clears ADC interrupt sources for DMA Trigger Event Publisher (INT_EVENT2).
-//!
-//! The specified ADC interrupt sources are cleared, so that they no longer
-//! assert. This function must be called in the interrupt handler to keep the
-//! interrupt from being recognized again immediately upon exit.
-//!
-//! \note Due to write buffers and synchronizers in the system it may take several
-//! clock cycles from a register write clearing an event in a module and until the
-//! event is actually cleared in the NVIC of the system CPU. It is recommended to
-//! clear the event source early in the interrupt service routine (ISR) to allow
-//! the event clear to propagate to the NVIC before returning from the ISR.
-//! At the same time, an early event clear allows new events of the same type to be
-//! pended instead of ignored if the event is cleared later in the ISR.
-//! It is the responsibility of the programmer to make sure that enough time has passed
-//! before returning from the ISR to avoid false re-triggering of the cleared event.
-//! A simple, although not necessarily optimal, way of clearing an event before
-//! returning from the ISR is:
-//! -# Write to clear event (interrupt source). (buffered write)
-//! -# Dummy read from the event source module. (making sure the write has propagated)
-//! -# Wait two system CPU clock cycles (user code or two NOPs). (allowing cleared event to propagate through any
-//! synchronizers)
-//!
-//! \param intFlags is a bit mask of the interrupt sources to be cleared.
-//! - ADC_INT_MEMRES_N (\ref ADC_INT_MEMRES_00, \ref ADC_INT_MEMRES_01, etc)
-//!
-//! \return None
-//
-//*****************************************************************************
-__STATIC_INLINE void ADCClearDMAInterrupt(uint32_t intFlags)
-{
-    // Clear the requested interrupt sources
-    HWREG(ADC_BASE + ADC_O_ICLR2) = intFlags;
+    /* It is sufficient to use the OR operator since the complete field will be set. */
+    HWREG(ADC_BASE + ADC_O_DEBUG1) |= ADC_DEBUG1_CTRL_MAX_COMP_SETTLE_TIME;
 }
 
 //*****************************************************************************

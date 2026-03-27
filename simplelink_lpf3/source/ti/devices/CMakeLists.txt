@@ -1,2 +1,2 @@
 add_subdirectory_ifdef(CONFIG_HAS_CC23X0_SDK cc23x0r5)
-add_subdirectory_ifdef(CONFIG_HAS_CC27XX_SDK cc27xx)
+add_subdirectory_ifdef(CONFIG_HAS_CC27XX_SDK cc27xxx10)

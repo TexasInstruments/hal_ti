@@ -221,34 +221,6 @@ void ADCSetTriggerPolicy(uint32_t triggerPolicy, uint32_t index)
 
 //*****************************************************************************
 //
-// Triggers an ADC conversion
-//
-//*****************************************************************************
-void ADCManualTrigger(void)
-{
-    uint32_t tempCtl;
-
-    /* Enable conversion. This arms the peripheral and can now be triggered */
-    HWREG(ADC_BASE + ADC_O_CTL0) |= ADC_CTL0_ENC_ON;
-
-    /* Read current control register */
-    tempCtl = HWREG(ADC_BASE + ADC_O_CTL1);
-
-    /* Clear trigger-related fields */
-    tempCtl &= ~(ADC_CTL1_SAMPMODE_M | ADC_CTL1_SC_M | ADC_CTL1_TRIGSRC_M);
-
-    /* Set sampling-mode to automatic, and trigger source to software */
-    tempCtl |= ADC_CTL1_SAMPMODE_AUTO | ADC_CTL1_TRIGSRC_SOFTWARE;
-
-    /* Write back control register */
-    HWREG(ADC_BASE + ADC_O_CTL1) = tempCtl;
-
-    /* Trigger a conversion */
-    HWREG(ADC_BASE + ADC_O_CTL1) |= ADC_CTL1_SC_START;
-}
-
-//*****************************************************************************
-//
 // Set start and stop control registers
 //
 //*****************************************************************************
