@@ -2773,4 +2773,16 @@ static inline int mbedtls_svc_key_id_is_null(mbedtls_svc_key_id_t key)
 
 /**@}*/
 
+/** HSM Asset Store persistence level. */
+#define PSA_KEY_PERSISTENCE_HSM_ASSET_STORE     ((psa_key_persistence_t) 0x80)
+
+/** HSM Asset Store location. */
+#define PSA_KEY_LOCATION_HSM_ASSET_STORE        ((psa_key_location_t) 0x000001)
+
+/** HSM Asset Store lifetime. */
+#define PSA_KEY_LIFETIME_ASSET_STORE \
+    (PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION( \
+        PSA_KEY_PERSISTENCE_HSM_ASSET_STORE, \
+        PSA_KEY_LOCATION_HSM_ASSET_STORE))
+
 #endif /* PSA_CRYPTO_VALUES_H */
