@@ -19,9 +19,7 @@
 #include "osi_kernel.h"
 #include "control_cmd_fw.h"
 #ifdef CC35XX
-#include <third_party/psa_crypto/include/psa/crypto.h>
-#include <third_party/psa_crypto/include/psa/crypto_types.h>
-#include <third_party/psa_crypto/include/psa/crypto_values.h>
+#include <psa/crypto.h>
 #endif
 
 /*****************************************************************************/
