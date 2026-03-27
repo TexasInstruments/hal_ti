@@ -55,6 +55,9 @@ custom.radioConfigble.codeExportConfig.$name              = "ti_devices_radiocon
 scripting.suppress("This PHY property has no effect on the exported code \\(no corresponding RCL command selected\\)\\.", custom.radioConfigble, "subPhy");
 scripting.suppress("This PHY property has no effect on the exported code \\(no corresponding RCL command selected\\)\\.", custom.radioConfigble, "codedTxRate");
 
+const Board = scripting.addModule("/ti/drivers/Board");
+Board.generateInitializationFunctions = false;
+Board.generateBoardInit = false;
 
 const BatteryMonitor = scripting.addModule("/ti/drivers/BatteryMonitor");
 const BatMonSupportLPF3 = scripting.addModule("/ti/drivers/batterymonitor/BatMonSupportLPF3");

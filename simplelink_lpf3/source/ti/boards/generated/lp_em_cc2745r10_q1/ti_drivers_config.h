@@ -19,14 +19,11 @@
 #define CONFIG_SYSCONFIG_PREVIEW
 
 #define CONFIG_LP_EM_CC2745R10_Q1
-#ifndef DeviceFamily_CC27XX
-#define DeviceFamily_CC27XX
+#ifndef DeviceFamily_CC27XXX10
+#define DeviceFamily_CC27XXX10
 #endif
 
 #include <ti/devices/DeviceFamily.h>
-
-/* RCL feature configuration file */
-#include <ti/drivers/rcl/zephyr/rcl_feature_config.h>
 
 #include <stdint.h>
 
@@ -34,6 +31,25 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+
+/*
+ *  ======== Key Store ========
+ */
+
+#define KEYSTORE_VOLATILE_MEMORY_POOL_SIZE 680
+
+#define KEYSTORE_VOLATILE_SLOT_COUNT       0
+#define KEYSTORE_ASSET_STORE_SLOT_COUNT    3
+#define KEYSTORE_PERSISTENT_SLOT_COUNT     3
+#define KEYSTORE_TOTAL_SLOT_COUNT          6
+
+#define KEYSTORE_PERSISTENT_NUM_KEYS       23
+
+    #define KEYSTORE_FLASH_OFFSET          942080
+    #define KEYSTORE_FLASH_SIZE            8192
+
 
 /*
  *  ======== ECDH ========
@@ -45,18 +61,36 @@ extern const uint_least8_t              CONFIG_ECDH_0_CONST;
 
 
 /*
- *  ======== GPIO ========
+ *  ======== RNG ========
  */
-/* The range of pins available on this device */
-extern const uint_least8_t GPIO_pinLowerBound;
-extern const uint_least8_t GPIO_pinUpperBound;
 
-/* LEDs are active high */
-#define CONFIG_GPIO_LED_ON  (1)
-#define CONFIG_GPIO_LED_OFF (0)
+#define CONFIG_TI_DRIVERS_RNG_COUNT     0
 
-#define CONFIG_LED_ON  (CONFIG_GPIO_LED_ON)
-#define CONFIG_LED_OFF (CONFIG_GPIO_LED_OFF)
+#define RNG_POOL_BYTE_SIZE 
+
+
+
+/*
+ *  ======== Board_init ========
+ *  Perform all required TI-Drivers initialization
+ *
+ *  This function should be called once at a point before any use of
+ *  TI-Drivers.
+ */
+extern void Board_init(void);
+
+/*
+ *  ======== Board_initGeneral ========
+ *  (deprecated)
+ *
+ *  Board_initGeneral() is defined purely for backward compatibility.
+ *
+ *  All new code should use Board_init() to do any required TI-Drivers
+ *  initialization _and_ use <Driver>_init() for only where specific drivers
+ *  are explicitly referenced by the application.  <Driver>_init() functions
+ *  are idempotent.
+ */
+#define Board_initGeneral Board_init
 
 #ifdef __cplusplus
 }

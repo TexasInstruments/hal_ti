@@ -9,14 +9,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef DeviceFamily_CC27XX
-#define DeviceFamily_CC27XX
+#ifndef DeviceFamily_CC27XXX10
+#define DeviceFamily_CC27XXX10
 #endif
 
 #include <ti/devices/DeviceFamily.h>
 
 #include "ti_drivers_config.h"
-
 
 /*
  *  =============================== ECDH ===============================
@@ -27,34 +26,24 @@
 
 #define CONFIG_ECDH_COUNT 1
 
-ECDHLPF3SW_Object ecdhLpf3swObjects[CONFIG_ECDH_COUNT];
+ECDHLPF3SW_Object ECDHLPF3SW_objects[CONFIG_ECDH_COUNT];
 
 /*
- *  ======== ecdhLpf3swHWAttrs ========
+ *  ======== ECDHLPF3SWHWAttrs ========
  */
-const ECDHLPF3SW_HWAttrs ecdhLpf3swHWAttrs[CONFIG_ECDH_COUNT] = {
+const ECDHLPF3SW_HWAttrs ECDHLPF3SW_hwAttrs[CONFIG_ECDH_COUNT] = {
     {0},
 };
 
 const ECDH_Config ECDH_config[CONFIG_ECDH_COUNT] = {
     {   /* CONFIG_ECDH_0 */
-        .object         = &ecdhLpf3swObjects[CONFIG_ECDH_0],
-        .hwAttrs        = &ecdhLpf3swHWAttrs[CONFIG_ECDH_0]
+        .object  = &ECDHLPF3SW_objects[CONFIG_ECDH_0],
+        .hwAttrs = &ECDHLPF3SW_hwAttrs[CONFIG_ECDH_0]
     },
 };
 
 const uint_least8_t CONFIG_ECDH_0_CONST = CONFIG_ECDH_0;
 const uint_least8_t ECDH_count = CONFIG_ECDH_COUNT;
-/*
- *  =============================== GPIO ===============================
- */
-
-#include <ti/drivers/GPIO.h>
-
-/* The range of pins available on this device */
-const uint_least8_t GPIO_pinLowerBound = 0;
-const uint_least8_t GPIO_pinUpperBound = 28;
-
 /*
  *  =============================== Power ===============================
  */

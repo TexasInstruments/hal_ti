@@ -70,10 +70,10 @@ static const uint32_t LRF_commonRegConfigAdcNoise[] =
     0x00470014,                     //     RFE_COMMON_RAM.LDOSETTLE      RFE_COMMON_RAM.DIVLDOIOFF
     0x0005002E,                     //     RFE_COMMON_RAM.DCOSETTLE      RFE_COMMON_RAM.CHRGSETTLE
     0x0000FE00,                     //     RFE_COMMON_RAM.IFAMPRFLDODEFAULT RFE_COMMON_RAM.IFAMPRFLDOTX
-    0x68406001,                     //   RAM 32-bit region (start address = 0x6840, count = 2)
+    0x68446001,                     //   RAM 32-bit region (start address = 0x6844, count = 2)
     0x00220051,                     //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
     0x00000045,                     //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
-    0x684A4001                      //   RAM zero region (start address = 0x1684A, count = 2)
+    0x684E4001                      //   RAM zero region (start address = 0x1684E, count = 2)
 };
 
 
@@ -110,11 +110,6 @@ const LRF_Config LRF_configAdcNoise = {
 //  PHY abbreviation/ID: ble
 //  PHY definition file: ble_bt5_1m_2m_coded_cc27xx.json
 // ****************************************************************
-
-// PARAMETER SUMMARY
-
-// Default sub-PHY: 1_mbps
-// Coded rate in TX: s8
 
 
 
@@ -182,7 +177,7 @@ static const uint32_t LRF_commonRegConfig[] =
     0x00470014,                     //     RFE_COMMON_RAM.LDOSETTLE      RFE_COMMON_RAM.DIVLDOIOFF
     0x0005002E,                     //     RFE_COMMON_RAM.DCOSETTLE      RFE_COMMON_RAM.CHRGSETTLE
     0x0000FE00,                     //     RFE_COMMON_RAM.IFAMPRFLDODEFAULT RFE_COMMON_RAM.IFAMPRFLDOTX
-    0x684A4001                      //   RAM zero region (start address = 0x1684A, count = 2)
+    0x684E4001                      //   RAM zero region (start address = 0x1684E, count = 2)
 };
 
 // Configuration: Sub-PHY = 1 Mbps, 2 Mbps
@@ -208,7 +203,7 @@ static const uint32_t LRF_subPhy1Mbps2MbpsRegConfig[] =
     0x0000017F,                     //     -                             LRFDMDM.DEMC1BE2
     0x24D42000,                     //   HW 32-bit region (start address = 0x24D4, count = 1)
     0x00540004,                     //     LRFDMDM.DEMD2XB0              LRFDMDM.DEMDSXB0
-    0x68446000,                     //   RAM 32-bit region (start address = 0x6844, count = 1)
+    0x68486000,                     //   RAM 32-bit region (start address = 0x6848, count = 1)
     0x00000045                      //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
 };
 
@@ -224,7 +219,7 @@ static const uint32_t LRF_subPhy1MbpsCodedRegConfig[] =
     0x20E00387,                     //     LRFDMDM.DEMMISC0
     0x21240A18,                     //     LRFDMDM.SPARE0
     0x00007000,                     //   RAM sparse region (address/value pairs, count = 1)
-    0x68400051                      //     RFE_COMMON_RAM.PHYRSSIOFFSET
+    0x68440051                      //     RFE_COMMON_RAM.PHYRSSIOFFSET
 };
 
 // Configuration: Sub-PHY = 2 Mbps, Coded
@@ -249,7 +244,7 @@ static const uint32_t LRF_subPhy1MbpsRegConfig[] =
     0x30A4A246,                     //     LRFDRFE.SPARE2
     0x00007001,                     //   RAM sparse region (address/value pairs, count = 2)
     0x20200000,                     //     PBE_BLE5_RAM.PHY
-    0x684275F8,                     //     RFE_COMMON_RAM.SPARE0SHADOW
+    0x684675F8,                     //     RFE_COMMON_RAM.SPARE0SHADOW
     0x20265002,                     //   RAM 16-bit region (start address = 0x2026, count = 3)
     0x0186018E,                     //     PBE_BLE5_RAM.PRERXIFS         PBE_BLE5_RAM.PRETXIFS
     0x00000226                      //     -                             PBE_BLE5_RAM.RXTIMEOUT
@@ -276,7 +271,7 @@ static const uint32_t LRF_subPhy2MbpsRegConfig[] =
     0x20265002,                     //   RAM 16-bit region (start address = 0x2026, count = 3)
     0x018C01B2,                     //     PBE_BLE5_RAM.PRERXIFS         PBE_BLE5_RAM.PRETXIFS
     0x000001C2,                     //     -                             PBE_BLE5_RAM.RXTIMEOUT
-    0x68406000,                     //   RAM 32-bit region (start address = 0x6840, count = 1)
+    0x68446000,                     //   RAM 32-bit region (start address = 0x6844, count = 1)
     0x55FA004C                      //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
 };
 
@@ -319,7 +314,7 @@ static const uint32_t LRF_subPhyCodedRegConfig[] =
     0x01B10002,                     //     PBE_BLE5_RAM.PRETXIFS500K     PBE_BLE5_RAM.PHY
     0x01980044,                     //     PBE_BLE5_RAM.PRETXIFS         PBE_BLE5_RAM.TXIFS500KADJ
     0x0884012C,                     //     PBE_BLE5_RAM.RXTIMEOUT        PBE_BLE5_RAM.PRERXIFS
-    0x68446000,                     //   RAM 32-bit region (start address = 0x6844, count = 1)
+    0x68486000,                     //   RAM 32-bit region (start address = 0x6848, count = 1)
     0x00010027                      //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
 };
 

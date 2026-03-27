@@ -46,16 +46,6 @@ const uint_least8_t CONFIG_ECDH_0_CONST = CONFIG_ECDH_0;
 const uint_least8_t ECDH_count = CONFIG_ECDH_COUNT;
 
 /*
- *  =============================== GPIO ===============================
- */
-
-#include <ti/drivers/GPIO.h>
-
-/* The range of pins available on this device */
-const uint_least8_t GPIO_pinLowerBound = 0;
-const uint_least8_t GPIO_pinUpperBound = 25;
-
-/*
  *  =============================== Power ===============================
  */
 #include <ti/drivers/Power.h>

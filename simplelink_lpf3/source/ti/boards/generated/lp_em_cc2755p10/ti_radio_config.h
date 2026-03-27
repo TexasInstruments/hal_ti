@@ -184,14 +184,14 @@ extern const LRF_Config LRF_configAdcNoise;
 // 0x6836     RFE_COMMON_RAM    DCOSETTLE            [9:0]      VAL                0x005             
 // 0x6838     RFE_COMMON_RAM    IFAMPRFLDOTX         [15:9]     TRIM               0x7F              
 // 0x683A     RFE_COMMON_RAM    IFAMPRFLDODEFAULT    [15:9]     TRIM               0x00              
-// 0x6840     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              
-// 0x6842     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x0022            
-// 0x6844     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            
-// 0x6846     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               
-// 0x684A     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              
-// 0x684A     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              
-// 0x684C     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              
-// 0x684C     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              
+// 0x6844     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              
+// 0x6846     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x0022            
+// 0x6848     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            
+// 0x684A     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               
+// 0x684E     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              
+// 0x684E     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              
+// 0x6850     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              
+// 0x6850     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              
 
 // ****************************************************************
 //  PHY name:            1 Mbps / 2 Mbps / Coded
@@ -208,15 +208,9 @@ extern const LRF_Config LRF_configAdcNoise;
 
 
 // Regulatory domains (for channel specific TX output power limitation)
-#ifndef RCL_REGULATORY_DOMAIN_ETSI
-#define RCL_REGULATORY_DOMAIN_ETSI                    0x01U
-#endif
-#ifndef RCL_REGULATORY_DOMAIN_FCC
-#define RCL_REGULATORY_DOMAIN_FCC                     0x02U
-#endif
-#ifndef RCL_REGULATORY_DOMAIN_MIIT
-#define RCL_REGULATORY_DOMAIN_MIIT                    0x04U
-#endif
+#define RCL_REGULATORY_DOMAIN_ETSI                    0x01
+#define RCL_REGULATORY_DOMAIN_FCC                     0x02
+#define RCL_REGULATORY_DOMAIN_MIIT                    0x04
 
 
 // LRF data structures
@@ -529,14 +523,14 @@ extern const LRF_Config LRF_config;
 // 0x6836     RFE_COMMON_RAM    DCOSETTLE            [9:0]      VAL                0x005             0x005             0x005             
 // 0x6838     RFE_COMMON_RAM    IFAMPRFLDOTX         [15:9]     TRIM               0x7F              0x7F              0x7F              
 // 0x683A     RFE_COMMON_RAM    IFAMPRFLDODEFAULT    [15:9]     TRIM               0x00              0x00              0x00              
-// 0x6840     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              0x4C              0x51              
-// 0x6842     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x75F8            0x55FA            -                 
-// 0x6844     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            0x0045            0x0027            
-// 0x6846     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               0x0               0x1               
-// 0x684A     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              0x00              0x00              
-// 0x684A     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              0x00              0x00              
-// 0x684C     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              0x00              0x00              
-// 0x684C     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              0x00              0x00              
+// 0x6844     RFE_COMMON_RAM    PHYRSSIOFFSET        [7:0]      VAL                0x51              0x4C              0x51              
+// 0x6846     RFE_COMMON_RAM    SPARE0SHADOW         [15:0]     VAL                0x75F8            0x55FA            -                 
+// 0x6848     RFE_COMMON_RAM    SPARE1SHADOW         [15:0]     VAL                0x0045            0x0045            0x0027            
+// 0x684A     RFE_COMMON_RAM    AGCINFO              [0]        MODE               0x0               0x0               0x1               
+// 0x684E     RFE_COMMON_RAM    PATRIM01             [12:8]     VAL1               0x00              0x00              0x00              
+// 0x684E     RFE_COMMON_RAM    PATRIM01             [4:0]      VAL0               0x00              0x00              0x00              
+// 0x6850     RFE_COMMON_RAM    PATRIM23             [12:8]     VAL3               0x00              0x00              0x00              
+// 0x6850     RFE_COMMON_RAM    PATRIM23             [4:0]      VAL2               0x00              0x00              0x00              
 // Address    Module            Register             Bit(s)     Field              Value (s8)        Value (s2)        
 // -----------------------------------------------------------------------------------------------------------------
 // 0x2128     LRFDMDM           SPARE1               [15:0]     VAL                0x0000            0x0001            
