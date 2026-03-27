@@ -21,8 +21,12 @@ set(SOURCES_RCL_LPF3
     wrappers/RCL_AdcNoise.c
 
     # HAL
-    hal/cc23x0/hal_cc23x0.c
-    LRFCC23X0.c
+    hal/RCLLPF3_Hal.c
+
+    # LRF
+    lrf/LRFLPF3.c
+    lrf/LRFLPF3_FIFO.c
+    lrf/LRFLPF3_Interface_Generic.c
 
     # RCL feature configuration file
     zephyr/rcl_feature_config.c

@@ -112,7 +112,9 @@ typedef enum
 /* Forward declarations */
 int_fast16_t PowerCC23X0_notify(uint_fast16_t eventType);
 static void PowerCC23X0_oscillatorISR(uintptr_t arg);
+#ifndef __ZEPHYR__
 static void PowerCC23X0_rtcISR(uintptr_t arg);
+#endif
 static void PowerCC23X0_enterStandby(void);
 static void PowerCC23X0_setDependencyCount(Power_Resource resourceId, uint8_t count);
 bool PowerCC23X0_isValidResourceId(Power_Resource resourceId);
@@ -1675,6 +1677,7 @@ static void PowerCC23X0_oscillatorISR(uintptr_t arg)
 /*
  *  ======== PowerCC23X0_rtcISR ========
  */
+#ifndef __ZEPHYR__
 static void PowerCC23X0_rtcISR(uintptr_t arg)
 {
     /* We should never get here since we will just use the interrupt to wake
@@ -1683,6 +1686,7 @@ static void PowerCC23X0_rtcISR(uintptr_t arg)
      */
     HWREG(RTC_BASE + RTC_O_ICLR) = HWREG(RTC_BASE + RTC_O_MIS);
 }
+#endif
 
 /*
  *  ======== PowerCC23X0_startHFXT ========

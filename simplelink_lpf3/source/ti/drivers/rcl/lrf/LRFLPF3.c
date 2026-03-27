@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== LRFCC23X0.c ========
+ *  ======== LRFLPF3.c ========
  */
 
 #include <stdint.h>
@@ -40,6 +40,8 @@
 #include <ti/drivers/rcl/RCL_Scheduler.h>
 #include <ti/drivers/rcl/RCL_Command.h>
 #include <ti/drivers/rcl/RCL_Feature.h>
+#include <ti/drivers/rcl/hal/RCL_Hal.h>
+
 #include <ti/log/Log.h>
 #include <ti/drivers/dpl/HwiP.h>
 
@@ -56,11 +58,11 @@
 /* Definitions for trim */
 #define LRF_TRIM_NORMAL_BW    0
 #define LRF_TRIM_HIGH_BW      1                 /* Revision >= 4 only */s
-#define LRF_TRIM_MIN_VERSION_FULL_FEATURES  4    /* Only AppTrims revision 4 and above has all features */
-#define LRF_TRIM_VERSION_DCOLDO_TEMPERATURE_COMPENSATION 8 /* Only AppTrims revision 8 and above have DCOLDO temperature compensation */
+#define LRF_TRIM_MIN_VERSION_FULL_FEATURES  4U    /* Only AppTrims revision 4 and above has all features */
+#define LRF_TRIM_VERSION_DCOLDO_TEMPERATURE_COMPENSATION 8U /* Only AppTrims revision 8 and above have DCOLDO temperature compensation */
 
 /* RCL-335: Some CC23X0R5 devices (State D) have an error in the programmed RSSI offset */
-#define LRF_TRIM_VERSION_RSSIOFFSET_ISSUE_CC23X0R5 4     /* AppTrims revision with issue in rssiOffset field */
+#define LRF_TRIM_VERSION_RSSIOFFSET_ISSUE_CC23X0R5 4U     /* AppTrims revision with issue in rssiOffset field */
 #define LRF_TRIM_LIMIT_RSSIOFFSET_ISSUE_CC23X0R5  (-4)   /* If rssiOffset is less or equal to this, apply correction */
 #define LRF_TRIM_CORRECTION_RSSIOFFSET_ISSUE_CC23X0R5 5  /* Correction to apply to devices with wrong RSSI offset */
 
@@ -83,7 +85,7 @@
 /* Factor which is only needed for DCOLDOSECOND */
 #define LRF_DCOLDOSECOND_FACTOR 2
 /* This constant shifted 24 bits to approximates to 1/9 */
-#define DIV_BY_NINE_CONSTANT 1864135
+#define DIV_BY_NINE_CONSTANT 1864135U
 /* Offest values in the DCOLDO compensation calculations */
 #define LRF_DCOLDO_OFFSET_HIGH_TEMP 16
 #define LRF_DCOLDO_OFFSET_LOW_TEMP 9
@@ -94,16 +96,16 @@
 /* Nominal temperature (degrees C) for offset definitions */
 #define LRF_TEMPERATURE_NOM 25
 
-#define LRF_DCDC_IPEAK_RF_ACTIVITY  3
+#define LRF_DCDC_IPEAK_RF_ACTIVITY  3U
 
 /* Only the lower 8-bits of the LRFDPBE_O_GPOCTRL are supported */
-#define LRF_PBE_GPOCTRL_MASK 0xFF
+#define LRF_PBE_GPOCTRL_MASK 0xFFU
 
 /* Set the LRFDRFE_O_SPARE5[14] bit to enable PA ESD protection */
 #define LRF_CC27XX_RFE_SPARE5_PA_20DBM_ESD_CTRL_SET                      ((uint32_t)(0x1 << 14U))
 #define LRF_CC27XX_PA_ESD_PROTECTION_VDDS_THRESHOLD_MV                   ((uint16_t)3635)
 #define LRF_CC27XX_HIGH_PA_MODE                                          ((uint16_t)0x3)
-#define LRF_CC27XX_RETRIEVE_PA_MODE_FROM_RAW_VALUE(txPowerRawValue)      (((uint16_t)(txPowerRawValue) >> 11) & 0x3)
+#define LRF_CC27XX_RETRIEVE_PA_MODE_FROM_RAW_VALUE(txPowerRawValue)      (((uint16_t)(txPowerRawValue) >> 11) & 0x3U)
 
 /* Set the LRFDRFE_O_SPARE5[13] bit to enable RTRIM Tx temperature compensation */
 #define LRF_CC27XX_RFE_SPARE5_RTRIM_TX_COMP_BITMASK                      ((uint32_t)(0x1 << 13U))
@@ -140,11 +142,9 @@ static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimD
 static uint32_t LRF_findExtTrim1TrimAdjustment(uint32_t temperatureDiff, uint32_t tempThreshFactor, uint32_t maxAdjustment);
 static int32_t LRF_findExtTrim0TrimAdjustment(int32_t temperature, int32_t tempCompFactor, int32_t offset);
 static uint32_t LRF_scaleFreqWithHFXTOffset(uint32_t frequency);
-static void LRF_writeFifoPtr(uint32_t value, uintptr_t regAddr);
-static void LRF_writeFifoPtrs(uint32_t value, uintptr_t regAddr0, uintptr_t regAddr1);
 static void LRF_temperatureNotification(int16_t currentTemperature);
 static void LRF_applyAntennaSelection(void);
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 static inline bool LRF_requirePaEsdProtection(void);
 #endif
 
@@ -164,10 +164,7 @@ static struct {
 /* Required time from enabling refsys to synth programming */
 #define LRF_REFSYS_ENABLE_TIME RCL_SCHEDULER_SYSTIM_US(30)
 
-/* Status to tell if the RX FIFO is already in a deallocated state (SRP and RP being the same) */
-static bool rxFifoDeallocated = true;
-
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 /* Stores the previous DCDC IPEAK setting to be set after RF activity */
 static uint8_t dcdcIpeakRestoreSetting;
 #endif
@@ -189,7 +186,7 @@ const LRF_CoexConfiguration lrfCoexConfiguration __attribute__((weak)) =
 
 /* Regulatory mask to use if no other configuration is provided through SysConfig or other file.
  * This default configuration disables the use of power limitation tables. */
-uint8_t rclRegulatoryMask __attribute__((weak)) = 0x00;
+const uint8_t rclRegulatoryMask __attribute__((weak)) = 0x00;
 
 /* Bit mask indicating which bits in LRFDPBE_GPOCTRL register are written
  * This is the configuration supposed to not change during runtime and allowed
@@ -267,11 +264,11 @@ LRF_SetupResult LRF_setupRadio(const LRF_Config *lrfConfig, uint16_t phyFeatures
         /* Invalidate RSSI value to cover the case in which no RX has run before. */
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_RSSI) = LRF_RSSI_INVALID;
         /* Set PBE to writing FIFO commands to FCMD */
-        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD) = ((LRFDPBE_BASE + LRFDPBE_O_FCMD) & 0x0FFF) >> 2;
+        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD) = ((LRFDPBE_BASE + LRFDPBE_O_FCMD) & 0x0FFFU) >> 2;
         /* Turn off coex grant signal in RFE */
         LRF_disableCoexGrant();
         /* Check if a default value needs to be set for LRFDPBE_O_GPOCTRL */
-        if (rclPbeGpoMask != 0)
+        if (rclPbeGpoMask != 0U)
         {
             LRF_applyAntennaSelection();
         }
@@ -316,7 +313,7 @@ static void LRF_applyTrim(const LRF_TrimDef *trimDef, const LRF_SwConfig *swConf
 
     if (trimDef != NULL)
     {
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM01) = trimDef->trim0.pa2trim01;
         HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PATRIM23) = trimDef->trim4.pa2trim23;
 #else
@@ -334,7 +331,7 @@ static void LRF_applyTrim(const LRF_TrimDef *trimDef, const LRF_SwConfig *swConf
         HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMIQMC0)   =  trimDef->trim4.demIQMC0;
 
         /* Write trim to shadow registers */
-        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_IFAMPRFLDODEFAULT) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_IFAMPRFLDO) & LRFDRFE_IFAMPRFLDO_TRIM_M;
+        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_IFAMPRFLDODEFAULT) = HWREGH_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_IFAMPRFLDO) & LRFDRFE_IFAMPRFLDO_TRIM_M;
 
         LRF_setTrimCommon(trimDef, swConfig);
         LRF_temperatureCompensateTrim(trimDef);
@@ -381,7 +378,7 @@ static void LRF_setTrimCommon(const LRF_TrimDef *trimDef, const LRF_SwConfig *sw
         {
             /* Use different setting of dither settings compared to the rest of the IFADC0 register. */
             HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_IFADC0) = (HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_IFADC0) & ~(LRFDRFE_IFADC0_DITHEREN_M | LRFDRFE_IFADC0_DITHERTRIM_M)) |
-                (trimDef->trimVariant[bwIndexDither].ifadc0 & (LRFDRFE_IFADC0_DITHEREN_M | LRFDRFE_IFADC0_DITHERTRIM_M));
+                ((uint32_t) trimDef->trimVariant[bwIndexDither].ifadc0 & (LRFDRFE_IFADC0_DITHEREN_M | LRFDRFE_IFADC0_DITHERTRIM_M));
         }
     }
 }
@@ -391,8 +388,8 @@ static void LRF_setTemperatureTrim(const LRF_TrimDef *trimDef)
     if (trimDef != NULL)
     {
         /* Remove trim fields from registers with temperature compensation */
-        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) & (~RFE_COMMON_RAM_DIVLDOF_VOUTTRIM_M);
-        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) & (~RFE_COMMON_RAM_DIVLDOI_VOUTTRIM_M);
+        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) = (uint16_t) (HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) & (~RFE_COMMON_RAM_DIVLDOF_VOUTTRIM_M));
+        HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) = (uint16_t) (HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) & (~RFE_COMMON_RAM_DIVLDOI_VOUTTRIM_M));
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO)              = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO) & (~LRFDRFE_TDCLDO_VOUTTRIM_M);
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCO)                 = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCO) & (~LRFDRFE_DCO_TAILRESTRIM_M);
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0)             = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DCOLDO0) &  (~(LRFDRFE_DCOLDO0_SECONDTRIM_M | LRFDRFE_DCOLDO0_FIRSTTRIM_M));
@@ -416,7 +413,7 @@ static void LRF_setTemperatureTrim(const LRF_TrimDef *trimDef)
 /* Adjustment per step of RTRIM at highest temperature */
 #define LRF_RTRIM_HIGH_TEMP_ADJ_FACTOR 1U
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 /* Maximum allowed value (saturation value) for RTRIM. For CC27XX devices saturate at the maximum allowed value in FCFG. Ref. RCL-1071 */
 #define LRF_DEFAULT_RTRIM_MAX 15U
 #else
@@ -434,14 +431,14 @@ static void LRF_setTemperatureTrim(const LRF_TrimDef *trimDef)
 
 /* Bit masks and positions in SPARE0 and SPARE1 */
 /* RFE_SPARE0: Fast AGC only */
-#define RFE_SPARE0_LOW_GAIN_BM  0x000F
-#define RFE_SPARE0_LOW_GAIN     0
-#define RFE_SPARE0_HIGH_GAIN_BM 0x00F0
-#define RFE_SPARE0_HIGH_GAIN    4
+#define RFE_SPARE0_LOW_GAIN_BM  0x000FU
+#define RFE_SPARE0_LOW_GAIN     0U
+#define RFE_SPARE0_HIGH_GAIN_BM 0x00F0U
+#define RFE_SPARE0_HIGH_GAIN    4U
 /* RFE_SPARE1: Fast AGC: Threshold. Standard AGC: Magnitude */
 /* These fields have the same position in the register */
-#define RFE_SPARE1_AGC_VALUE_BM 0x000FF
-#define RFE_SPARE1_AGC_VALUE    0
+#define RFE_SPARE1_AGC_VALUE_BM 0x000FFU
+#define RFE_SPARE1_AGC_VALUE    0U
 
 static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
 {
@@ -452,7 +449,7 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     int32_t agcValOffset = 0;
     int32_t agcHighGainOffset = 0;
     int32_t agcLowGainOffset = 0;
-    int32_t temperature = hal_get_temperature();
+    int16_t temperature = RCL_Hal_getTemperature();
 
     lrfPhyState.lastTrimTemperature = temperature;
 
@@ -460,13 +457,13 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     {
         LRF_Trim_tempLdoRtrim tempLdoRtrim = trimDef->trim3.fields.lrfdrfeExtTrim1.tempLdoRtrim;
 
-        int32_t tempThreshLow = LRF_TEMPERATURE_MIN + tempLdoRtrim.tThrl * (1 << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP);
-        int32_t tempThreshHigh = LRF_TEMPERATURE_MAX - tempLdoRtrim.tThrh * (1 << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP);
+        int16_t tempThreshLow = LRF_TEMPERATURE_MIN + (int16_t) (tempLdoRtrim.tThrl * (1U << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP));
+        int16_t tempThreshHigh = LRF_TEMPERATURE_MAX - (int16_t) (tempLdoRtrim.tThrh * (1U << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP));
 
         /* Adjust values for extreme temperatures */
         if (temperature < tempThreshLow)
         {
-            uint32_t temperatureDiff = tempThreshLow - temperature;
+            uint32_t temperatureDiff = (uint32_t) (tempThreshLow - temperature);
             divLdoTempOffset = LRF_findExtTrim1TrimAdjustment(temperatureDiff, tempLdoRtrim.tThrl,
                 LRF_DIVLDO_LOW_TEMP_ADJ_FACTOR * tempLdoRtrim.divLdoMinOffset);
             tdcLdoTempOffset = LRF_findExtTrim1TrimAdjustment(temperatureDiff, tempLdoRtrim.tThrl,
@@ -476,13 +473,17 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
         }
         else if (temperature > tempThreshHigh)
         {
-            uint32_t temperatureDiff = temperature - tempThreshHigh;
+            uint32_t temperatureDiff = (uint32_t) (temperature - tempThreshHigh);
             divLdoTempOffset = LRF_findExtTrim1TrimAdjustment(temperatureDiff, tempLdoRtrim.tThrh,
                 LRF_DIVLDO_HIGH_TEMP_ADJ_FACTOR * tempLdoRtrim.divLdoMaxOffset);
             tdcLdoTempOffset = LRF_findExtTrim1TrimAdjustment(temperatureDiff, tempLdoRtrim.tThrh,
                 LRF_TDCLDO_HIGH_TEMP_ADJ_FACTOR * tempLdoRtrim.tdcLdoMaxOffset);
             rtrimTempOffset = LRF_findExtTrim1TrimAdjustment(temperatureDiff, tempLdoRtrim.tThrh,
                 LRF_RTRIM_HIGH_TEMP_ADJ_FACTOR * tempLdoRtrim.rtrimMaxOffset);
+        }
+        else
+        {
+            /* Do nothing */
         }
 
         rssiTempOffset = LRF_findExtTrim0TrimAdjustment(temperature, trimDef->trim3.fields.lrfdrfeExtTrim0.rssiTcomp, 0);
@@ -508,7 +509,7 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     uint32_t divLdoVoutTrim = trimDef->trim1.fields.divLdo.voutTrim;
 
     /* Most significant bit is inverted */
-    divLdoVoutTrim ^= 0x40;
+    divLdoVoutTrim ^= 0x40U;
 
     divLdoVoutTrim += divLdoTempOffset;
 
@@ -518,7 +519,7 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
         divLdoVoutTrim = (LRFDRFE_DIVLDO_VOUTTRIM_ONES >> LRFDRFE_DIVLDO_VOUTTRIM_S);
     }
     /* Write back with most signigicant bit inverted back */
-    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) | ((divLdoVoutTrim ^ 0x40) << RFE_COMMON_RAM_DIVLDOF_VOUTTRIM_S);
+    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOF) | (((uint16_t) divLdoVoutTrim ^ 0x40U) << RFE_COMMON_RAM_DIVLDOF_VOUTTRIM_S);
 
     /* Add offset to initial value */
     divLdoVoutTrim += HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOIOFF);
@@ -529,14 +530,14 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
         divLdoVoutTrim = (LRFDRFE_DIVLDO_VOUTTRIM_ONES >> LRFDRFE_DIVLDO_VOUTTRIM_S);
     }
     /* Write back with most signigicant bit inverted back */
-    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) | ((divLdoVoutTrim ^ 0x40) << RFE_COMMON_RAM_DIVLDOI_VOUTTRIM_S);
+    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_DIVLDOI) | (((uint16_t) divLdoVoutTrim ^ 0x40U) << RFE_COMMON_RAM_DIVLDOI_VOUTTRIM_S);
 
     uint32_t tdcLdoVoutTrim = trimDef->trim1.fields.tdcLdo.voutTrim;
 
-    if (tdcLdoTempOffset > 0)
+    if (tdcLdoTempOffset > 0U)
     {
         /* Most significant bit is inverted */
-        tdcLdoVoutTrim ^= 0x40;
+        tdcLdoVoutTrim ^= 0x40U;
 
         tdcLdoVoutTrim += tdcLdoTempOffset;
 
@@ -547,7 +548,7 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
         }
 
         /* Invert back */
-        tdcLdoVoutTrim ^= 0x40;
+        tdcLdoVoutTrim ^= 0x40U;
     }
     /* Write back */
     HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO) = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_TDCLDO) | (tdcLdoVoutTrim << LRFDRFE_TDCLDO_VOUTTRIM_S);
@@ -607,18 +608,18 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     rssiOffset += rssiTempOffset;
 
     /* Apply PHY specific offset */
-    rssiOffset += HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PHYRSSIOFFSET);
+    rssiOffset += (int32_t) HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_PHYRSSIOFFSET);
 
     /* Store in HW register */
-    HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_RSSIOFFSET) = rssiOffset;
+    HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_RSSIOFFSET) = (uint32_t) rssiOffset;
 
     if (((HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_AGCINFO) & RFE_COMMON_RAM_AGCINFO_MODE_M) >> RFE_COMMON_RAM_AGCINFO_MODE_S) == (RFE_COMMON_RAM_AGCINFO_MODE_FAST >> RFE_COMMON_RAM_AGCINFO_MODE_S))
     {
         uint32_t spare0Val = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_SPARE0SHADOW);
         if (agcHighGainOffset != 0 || agcLowGainOffset != 0)
         {
-            int32_t lowGain = (spare0Val & RFE_SPARE0_LOW_GAIN_BM) >> RFE_SPARE0_LOW_GAIN;
-            int32_t highGain = (spare0Val & RFE_SPARE0_HIGH_GAIN_BM) >> RFE_SPARE0_HIGH_GAIN;
+            int32_t lowGain = (int32_t) ((spare0Val & RFE_SPARE0_LOW_GAIN_BM) >> RFE_SPARE0_LOW_GAIN);
+            int32_t highGain = (int32_t) ((spare0Val & RFE_SPARE0_HIGH_GAIN_BM) >> RFE_SPARE0_HIGH_GAIN);
             if (agcLowGainOffset != 0)
             {
                 lowGain += agcLowGainOffset;
@@ -626,7 +627,7 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
                 {
                     lowGain = 0;
                 }
-                if (lowGain > (RFE_SPARE0_LOW_GAIN_BM >> RFE_SPARE0_LOW_GAIN))
+                if (lowGain > (int32_t) (RFE_SPARE0_LOW_GAIN_BM >> RFE_SPARE0_LOW_GAIN))
                 {
                     lowGain = (RFE_SPARE0_LOW_GAIN_BM >> RFE_SPARE0_LOW_GAIN);
                 }
@@ -638,13 +639,13 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
                 {
                     highGain = 0;
                 }
-                if (highGain > (RFE_SPARE0_HIGH_GAIN_BM >> RFE_SPARE0_HIGH_GAIN))
+                if (highGain > (int32_t) (RFE_SPARE0_HIGH_GAIN_BM >> RFE_SPARE0_HIGH_GAIN))
                 {
                     highGain = (RFE_SPARE0_HIGH_GAIN_BM >> RFE_SPARE0_HIGH_GAIN);
                 }
             }
             spare0Val = (spare0Val & ~(RFE_SPARE0_LOW_GAIN_BM | RFE_SPARE0_HIGH_GAIN_BM)) |
-                (lowGain << RFE_SPARE0_LOW_GAIN) | (highGain << RFE_SPARE0_HIGH_GAIN);
+                (uint32_t) (lowGain << RFE_SPARE0_LOW_GAIN) | (uint32_t) (highGain << RFE_SPARE0_HIGH_GAIN);
         }
         HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE0) = spare0Val;
     }
@@ -652,24 +653,24 @@ static void LRF_temperatureCompensateTrim(const LRF_TrimDef *trimDef)
     uint32_t spare1Val = HWREGH_READ_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_SPARE1SHADOW);
     if (agcValOffset != 0)
     {
-        int32_t agcVal = (spare1Val & RFE_SPARE1_AGC_VALUE_BM) >> RFE_SPARE1_AGC_VALUE;
+        int32_t agcVal = (int32_t) ((spare1Val & RFE_SPARE1_AGC_VALUE_BM) >> RFE_SPARE1_AGC_VALUE);
         agcVal += agcValOffset;
         if (agcVal < 0)
         {
             agcVal = 0;
         }
-        if (agcVal > (RFE_SPARE1_AGC_VALUE_BM >> RFE_SPARE1_AGC_VALUE))
+        if (agcVal > (int32_t) (RFE_SPARE1_AGC_VALUE_BM >> RFE_SPARE1_AGC_VALUE))
         {
             agcVal = (RFE_SPARE1_AGC_VALUE_BM >> RFE_SPARE1_AGC_VALUE);
         }
-        spare1Val = (spare1Val & ~RFE_SPARE1_AGC_VALUE_BM) | (agcVal << RFE_SPARE1_AGC_VALUE);
+        spare1Val = (uint32_t) ((spare1Val & ~RFE_SPARE1_AGC_VALUE_BM) | ((uint32_t) agcVal << RFE_SPARE1_AGC_VALUE));
     }
     HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE1) = spare1Val;
 }
 
 /* Represent 1/3 with the approximation LRF_ONE_THIRD_MANTISSA * 2^(-LRF_ONE_THIRD_NEG_EXP) */
 #define LRF_ONE_THIRD_MANTISSA 21845U /* (round(1/3 * 2^16)) */
-#define LRF_ONE_THIRD_NEG_EXP  16
+#define LRF_ONE_THIRD_NEG_EXP  16U
 /* Calculate temperature compensation for the fields in lrfdrfeExtTrim1 */
 /* temperatureDiff: absolute difference from calculated temperature threshold */
 /* tempThreshFactor: Temperature Threshold field as defined in the trim spec:
@@ -692,18 +693,18 @@ static uint32_t LRF_findExtTrim1TrimAdjustment(uint32_t temperatureDiff, uint32_
         case 1:
             /* tempThreshFactor = 1:
                adjustment = round((temperatureDiff * maxAdjustment) / (1 * 2^LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP)) */
-            adjustment = ((temperatureDiff * maxAdjustment) + (1 << (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP - 1))) >> LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP;
+            adjustment = ((temperatureDiff * maxAdjustment) + (1U << (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP - 1U))) >> LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP;
             break;
         case 2:
             /* tempThreshFactor = 2:
                adjustment = round((temperatureDiff * maxAdjustment) / (2 * 2^LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP)) */
-            adjustment = ((temperatureDiff * maxAdjustment) + (1 << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP)) >> (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP + 1);
+            adjustment = ((temperatureDiff * maxAdjustment) + (1U << LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP)) >> (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP + 1U);
             break;
         case 3:
             /* tempThreshFactor = 3:
                adjustment = round((temperatureDiff * maxAdjustment) / (3 * 2^LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP))
                Use approximation with multiplication to avoid performing division */
-            adjustment = ((temperatureDiff * maxAdjustment * LRF_ONE_THIRD_MANTISSA) + (1 << (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP + LRF_ONE_THIRD_NEG_EXP - 1)))
+            adjustment = ((temperatureDiff * maxAdjustment * LRF_ONE_THIRD_MANTISSA) + (1U << (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP + LRF_ONE_THIRD_NEG_EXP - 1U)))
                 >> (LRF_EXTTRIM1_TEMPERATURE_SCALE_EXP + LRF_ONE_THIRD_NEG_EXP);
             break;
     }
@@ -742,10 +743,10 @@ static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimD
         int32_t offsetDcoLdoSecond = 0;
         if ((temperature >= LRF_TEMPERATURE_NOM + LRF_DCOLDO_DEADBAND) || (temperature <=  LRF_TEMPERATURE_NOM - LRF_DCOLDO_DEADBAND))
         {
-            int32_t dcoldoSecondMaxOffset = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoSecondMaxOffset;
-            int32_t dcoldoSecondMinOffset = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoSecondMinOffset;
-            int32_t dcoldoFirstMaxOffset  = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoFirstMaxOffset;
-            int32_t dcoldoFirstMinOffset  = trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoFirstMinOffset;
+            int32_t dcoldoSecondMaxOffset = (int32_t) trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoSecondMaxOffset;
+            int32_t dcoldoSecondMinOffset = (int32_t) trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoSecondMinOffset;
+            int32_t dcoldoFirstMaxOffset  = (int32_t) trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoFirstMaxOffset;
+            int32_t dcoldoFirstMinOffset  = (int32_t) trimDef->trim3.fields.lrfdrfeExtTrim1.dcoldoOffset.dcoldoFirstMinOffset;
 
             int32_t tempDiff = LRF_TEMPERATURE_NOM - temperature;
             int32_t upperSaturationFirst;
@@ -763,7 +764,7 @@ static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimD
                 offsetDcoLdoSecond = (int32_t) ((((tempDiff-LRF_DCOLDO_DEADBAND) * LRF_DCOLDOSECOND_FACTOR * dcoldoSecondMinOffset) + LRF_DCOLDO_OFFSET_LOW_TEMP) * DIV_BY_NINE_CONSTANT) >> LRF_DCOLDO_SHIFT_LOW_TEMP;
                 offsetDcoLdoFirst  = (int32_t) ((((tempDiff-LRF_DCOLDO_DEADBAND) * dcoldoFirstMinOffset) + LRF_DCOLDO_OFFSET_LOW_TEMP)  * DIV_BY_NINE_CONSTANT) >> LRF_DCOLDO_SHIFT_LOW_TEMP;
                 upperSaturationSecond = dcoldoSecondMinOffset * LRF_DCOLDOSECOND_LOW_TEMP_ADJ_FACTOR;
-                upperSaturationFirst  = (dcoldoFirstMinOffset * LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_MUL) >> LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_S;;
+                upperSaturationFirst  = (dcoldoFirstMinOffset * LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_MUL) >> LRF_DCOLDOFIRST_LOW_TEMP_ADJ_FACTOR_S;
             }
 
             /* Saturate values if out of bounds */
@@ -789,27 +790,27 @@ static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimD
         /* Get trim values to add offset */
         trimDcoldo0Val = trimDef->trim2.dcoLdo0;
         uint32_t secondTrimVal = (trimDcoldo0Val & LRFDRFE_DCOLDO0_SECONDTRIM_M) >> LRFDRFE_DCOLDO0_SECONDTRIM_S;
-        int32_t firstTrimVal = (trimDcoldo0Val & LRFDRFE_DCOLDO0_FIRSTTRIM_M) >> LRFDRFE_DCOLDO0_FIRSTTRIM_S;
+        int32_t firstTrimVal = (int32_t) ((trimDcoldo0Val & LRFDRFE_DCOLDO0_FIRSTTRIM_M) >> LRFDRFE_DCOLDO0_FIRSTTRIM_S);
 
         /* Sign extend DCOLDO0:FIRSTTRIM since it is a negative value */
-        firstTrimVal = ((firstTrimVal << (32 - LRFDRFE_DCOLDO0_FIRSTTRIM_W )) >> (32 - LRFDRFE_DCOLDO0_FIRSTTRIM_W));
+        firstTrimVal = ((firstTrimVal << (int32_t) (32U - LRFDRFE_DCOLDO0_FIRSTTRIM_W )) >> (int32_t) (32U - LRFDRFE_DCOLDO0_FIRSTTRIM_W));
 
         /* Invert bit 3 and 5 to decode the SECONDTRIM value */
         uint32_t secondTrimValDecoded = secondTrimVal ^ LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK;
 
         /* Add offset to trim values */
-        uint32_t newSecondTrimVal = secondTrimValDecoded + offsetDcoLdoSecond;
+        uint32_t newSecondTrimVal = secondTrimValDecoded + (uint32_t) offsetDcoLdoSecond;
 
         /* The voltage output of DCOLDO0:FIRSTTRIM has a negative slope where the minimum trim value gives the maximum output voltage.
         For this reason we need to subtract the temperature offset instead of adding it. */
         int32_t newFirstTrimVal =  firstTrimVal - offsetDcoLdoFirst;
 
-        /* DCOLDO0.SECONDTRIM is saturated at 63U */
+        /* DCOLDO0.SECONDTRIM is saturated at LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE */
         if (newSecondTrimVal > LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE)
         {
             newSecondTrimVal = LRF_TRIM_DCOLDO0_SECONDTRIM_MAX_STATE;
         }
-        /* DCOLDO0.FIRSTTRIM is saturated at -8 since it is a negative value */
+        /* DCOLDO0.FIRSTTRIM is saturated at LRF_TRIM_DCOLDO0_FIRSTTRIM_MIN_STATE since it is a negative value */
         if (newFirstTrimVal < LRF_TRIM_DCOLDO0_FIRSTTRIM_MIN_STATE)
         {
             newFirstTrimVal = LRF_TRIM_DCOLDO0_FIRSTTRIM_MIN_STATE;
@@ -819,7 +820,7 @@ static void LRF_temperatureCompensateDcoldo(int32_t temperature, const LRF_TrimD
         uint32_t newSecondTrimValCoded = newSecondTrimVal ^ LRF_TRIM_DCOLDO0_SECONDTRIM_CODED_BITS_MASK;
 
         /* Write offseted trim values to their register */
-        trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_FIRSTTRIM_M) | ((newFirstTrimVal << LRFDRFE_DCOLDO0_FIRSTTRIM_S) &  LRFDRFE_DCOLDO0_FIRSTTRIM_M );
+        trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_FIRSTTRIM_M) | (((uint32_t) (newFirstTrimVal) << LRFDRFE_DCOLDO0_FIRSTTRIM_S) &  LRFDRFE_DCOLDO0_FIRSTTRIM_M );
         trimDcoldo0Val = (trimDcoldo0Val & ~LRFDRFE_DCOLDO0_SECONDTRIM_M) | (newSecondTrimValCoded << LRFDRFE_DCOLDO0_SECONDTRIM_S);
     }
     else
@@ -833,8 +834,8 @@ void LRF_enable(void)
 {
     /* Set MSGBOX register to 0 */
     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_MSGBOX) = 0;
-#ifdef DeviceFamily_CC27XX
-    dcdcIpeakRestoreSetting = hal_set_dcdc_ipeak_setting(LRF_DCDC_IPEAK_RF_ACTIVITY);
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    dcdcIpeakRestoreSetting = RCL_Hal_setDcdcIpeakSetting(LRF_DCDC_IPEAK_RF_ACTIVITY);
 #endif
 
     /* Initialize and enable PBE TOPsm and FIFO */
@@ -856,8 +857,8 @@ void LRF_enable(void)
 
 void LRF_disable(void)
 {
-#ifdef DeviceFamily_CC27XX
-    hal_set_dcdc_ipeak_setting(dcdcIpeakRestoreSetting);
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    (void) RCL_Hal_setDcdcIpeakSetting(dcdcIpeakRestoreSetting);
 #endif
 
     /* Request PBE powerdown */
@@ -886,272 +887,9 @@ void LRF_waitForTopsmReady(void)
 {
     /* Make sure PBE is finished booting */
     /* This poll should be quick as long as the TOPsms have been reset and enabled */
-    while (HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_MSGBOX) == 0)
+    while (HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_MSGBOX) == 0U)
     {
     }
-}
-
-uint32_t LRF_prepareRxFifo(void)
-{
-    uint32_t fifoSize;
-    /* Reset RXFIFO. NOTE: Only allowed while PBE is not running, ref. RCL-367 */
-    HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_FCMD) = (LRFDPBE_FCMD_DATA_RXFIFO_RESET >> LRFDPBE_FCMD_DATA_S);
-    /* Set up RXFIFO without auto commit or deallocate */
-    HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG0) = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG0) & (~(LRFDPBE_FCFG0_RXADEAL_M | LRFDPBE_FCFG0_RXACOM_M));
-    /* Read writable bytes, which is the FIFO size */
-    fifoSize = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFWRITABLE);
-    /* Write SRP to 0. This sets no available space for writing; to be updated
-       by calling LRF_setRxFifoEffSz().
-       This write can be done without protection since PBE is not allowed to be
-       running here, ref RCL-367 */
-    HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFSRP) = 0;
-    rxFifoDeallocated = false;
-
-    return fifoSize;
-}
-
-uint32_t LRF_prepareTxFifo(void)
-{
-    /* Reset TXFIFO. NOTE: Only allowed while PBE is not running, ref. RCL-367 */
-    HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_FCMD) = (LRFDPBE_FCMD_DATA_TXFIFO_RESET >> LRFDPBE_FCMD_DATA_S);
-    /* Set up TXFIFO with auto commit, without auto deallocate */
-    uint32_t fcfg0 = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG0);
-    fcfg0 &= ~LRFDPBE_FCFG0_TXADEAL_M;
-    fcfg0 |=  LRFDPBE_FCFG0_TXACOM_M;
-    HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG0) = fcfg0;
-    /* Return writable bytes, which is the FIFO size */
-    return HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFWRITABLE);
-}
-
-uint32_t LRF_peekRxFifo(int32_t offset)
-{
-    int32_t index = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP) + offset;
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG4) & LRFDPBE_FCFG4_RXSIZE_M) >> LRFDPBE_FCFG4_RXSIZE_S) << 2;
-    if (index >= fifosz)
-    {
-        index -= fifosz;
-    }
-
-    return HWREG_READ_LRF(LRFD_BUFRAM_BASE + (HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG3) << 2) + index);
-}
-
-uint32_t LRF_peekTxFifo(int32_t offset)
-{
-    int32_t index = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFRP) + offset;
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG2) & LRFDPBE_FCFG2_TXSIZE_M) >> LRFDPBE_FCFG2_TXSIZE_S) << 2;
-    if (index >= fifosz)
-    {
-        index -= fifosz;
-    }
-    return HWREG_READ_LRF(LRFD_BUFRAM_BASE + (HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG1) << 2) + index);
-}
-
-uint8_t *LRF_getTxFifoWrAddr(int32_t offset)
-{
-    int32_t index = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFWP) + offset;
-    return (uint8_t *) (TXF_UNWRAPPED_BASE_ADDR + (HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG1) << 2) + index);
-}
-
-/* Use the workaround of RCL-367 to write the FIFO pointer register with
- * address regAddr to the given value. This allows PBE to protect against
- * writing FCMD at the same time */
-static void LRF_writeFifoPtr(uint32_t value, uintptr_t regAddr)
-{
-    /* Run in protected region to avoid unnecessary delays */
-    uintptr_t key = HwiP_disable();
-    /* Direct PBE to write FIFO commands to FSTAT register to make them ignored */
-    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD) = ((LRFDPBE_BASE + LRFDPBE_O_FSTAT) & 0x0FFF) >> 2;
-    /* Wait a little so that PBE has time to finish any pending command writes */
-    /* Do the wait by dummy reads of FIFOCMDADD */
-    (void) HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD);
-    (void) HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD);
-    /* Write to specified register */
-    HWREG_WRITE_LRF(regAddr) = value;
-    /* Set PBE back to writing FIFO commands to FCMD */
-    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD) = ((LRFDPBE_BASE + LRFDPBE_O_FCMD) & 0x0FFF) >> 2;
-
-    HwiP_restore(key);
-}
-
-/* Use the workaround of RCL-367 to write both FIFO pointer registers with
- * addresses regAddr0 and regAddr1 to the given value. This allows PBE to
- * protect against writing FCMD at the same time */
-static void LRF_writeFifoPtrs(uint32_t value, uintptr_t regAddr0, uintptr_t regAddr1)
-{
-    /* Run in protected region to avoid unnecessary delays */
-    uintptr_t key = HwiP_disable();
-    /* Direct PBE to write FIFO commands to FSTAT register to make them ignored */
-    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD) = ((LRFDPBE_BASE + LRFDPBE_O_FSTAT) & 0x0FFF) >> 2;
-    /* Wait a little so that PBE has time to finish any pending command writes */
-    /* Do the wait by dummy reads of FIFOCMDADD */
-    (void) HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD);
-    (void) HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD);
-    /* Write to specified registers */
-    HWREG_WRITE_LRF(regAddr0) = value;
-    HWREG_WRITE_LRF(regAddr1) = value;
-    /* Set PBE back to writing FIFO commands to FCMD */
-    HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_FIFOCMDADD) = ((LRFDPBE_BASE + LRFDPBE_O_FCMD) & 0x0FFF) >> 2;
-
-
-    HwiP_restore(key);
-}
-
-void LRF_skipTxFifoWords(uint32_t wordLength)
-{
-    int32_t index = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFRP) + (wordLength * 4);
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG2) & LRFDPBE_FCFG2_TXSIZE_M) >> LRFDPBE_FCFG2_TXSIZE_S) << 2;
-    if (index >= fifosz)
-    {
-        index -= fifosz;
-    }
-    LRF_writeFifoPtr(index, (LRFDPBE_BASE + LRFDPBE_O_TXFRP));
-}
-
-void LRF_discardRxFifoWords(uint32_t wordLength)
-{
-    int32_t index = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP) + (wordLength * 4);
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG4) & LRFDPBE_FCFG4_RXSIZE_M) >> LRFDPBE_FCFG4_RXSIZE_S) << 2;
-    if (index >= fifosz)
-    {
-        index -= fifosz;
-    }
-    /* Write updated pointer to rp and srp */
-    LRF_writeFifoPtrs(index, (LRFDPBE_BASE + LRFDPBE_O_RXFRP), (LRFDPBE_BASE + LRFDPBE_O_RXFSRP));
-    /* RX FIFO is now deallocated */
-    rxFifoDeallocated = true;
-}
-
-void LRF_readRxFifoWords(uint32_t *data32, uint32_t wordLength)
-{
-    /* Due to RCL-367, the packet is read from memory, and the read pointer is updated afterwards */
-    /* Pointer to unwrapped FIFO RAM representation */
-    uint32_t fifoStart = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG3) & LRFDPBE_FCFG3_RXSTRT_M) >> LRFDPBE_FCFG3_RXSTRT_S) << 2;
-    uint32_t readPointer = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP) & ~0x0003;
-    volatile uint32_t *fifoReadPtr = (volatile uint32_t *) (RXF_UNWRAPPED_BASE_ADDR + fifoStart + readPointer);
-
-    /* [RCL-515 WORKAROUND]: Protect the first memory write on BLE High PG1.x due to the hardware bugs */
-#ifdef DeviceFamily_CC27XX
-    ASM_4_NOPS();
-#endif //DeviceFamily_CC27XX
-    for (uint32_t i = 0; i < wordLength; i++) {
-        *data32++ = *fifoReadPtr++;
-    }
-    /* Update read pointer */
-    int32_t index = readPointer + (wordLength * 4);
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG4) & LRFDPBE_FCFG4_RXSIZE_M) >> LRFDPBE_FCFG4_RXSIZE_S) << 2;
-    if (index >= fifosz)
-    {
-        index -= fifosz;
-    }
-    LRF_writeFifoPtr(index, (LRFDPBE_BASE + LRFDPBE_O_RXFRP));
-    /* RP was moved, so RX FIFO is not deallocated */
-    rxFifoDeallocated = false;
-}
-
-void LRF_writeTxFifoWords(const uint32_t *data32, uint32_t wordLength)
-{
-    /* Due to RCL-367, the packet is written to memory, and the write pointer is updated afterwards */
-    /* Pointer to unwrapped FIFO RAM representation */
-    uint32_t fifoStart = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG1) & LRFDPBE_FCFG1_TXSTRT_M) >> LRFDPBE_FCFG1_TXSTRT_S) << 2;
-    uint32_t writePointer = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFWP) & ~0x0003;
-    volatile uint32_t *fifoWritePtr = (volatile uint32_t *) (TXF_UNWRAPPED_BASE_ADDR + fifoStart + writePointer);
-
-    /* [RCL-515 WORKAROUND]: Protect the first memory write on BLE High PG1.x due to the hardware bugs */
-#ifdef DeviceFamily_CC27XX
-    ASM_4_NOPS();
-#endif //DeviceFamily_CC27XX
-    for (uint32_t i = 0; i < wordLength; i++) {
-        *fifoWritePtr++ = *data32++;
-    }
-    /* Update write pointer */
-    int32_t index = writePointer + (wordLength * 4);
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG2) & LRFDPBE_FCFG2_TXSIZE_M) >> LRFDPBE_FCFG2_TXSIZE_S) << 2;
-    if (index >= fifosz)
-    {
-        index -= fifosz;
-    }
-    LRF_writeFifoPtr(index, (LRFDPBE_BASE + LRFDPBE_O_TXFWP));
-}
-
-void LRF_setRxFifoEffSz(uint32_t maxSz)
-{
-    uint32_t fifoSz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG4) & LRFDPBE_FCFG4_RXSIZE_M) >> LRFDPBE_FCFG4_RXSIZE_S) << 2;
-    if (maxSz >= fifoSz)
-    {
-        /* Deallocate RX FIFO to get no additional FIFO restriction */
-        /* Due to RCL-367, the operation is done with a FIFO pointer register write */
-        if (!rxFifoDeallocated)
-        {
-            /* We should not do this write if the FIFO was already deallocated, as it would move the SRP one full round */
-            LRF_writeFifoPtr(HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP), (LRFDPBE_BASE + LRFDPBE_O_RXFSRP));
-            rxFifoDeallocated = true;
-        }
-    }
-    else {
-        uint32_t newSrp;
-        /* A limit of 0 can't be achieved through manipulating SRP. For all practical purposes, a limit of 1 has the same effect. */
-        if (maxSz == 0)
-        {
-            maxSz = 1;
-        }
-
-        newSrp = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP) + maxSz;
-        if (newSrp >= fifoSz)
-        {
-            newSrp -= fifoSz;
-        }
-        /* The new SRP value will always be a write forward in the FIFO */
-        /* Do not write if the value is the same as before, as this will be
-            interpreted by the FIFO HW as going a full round forward */
-
-        if (HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFSRP) != newSrp)
-        {
-            LRF_writeFifoPtr(newSrp, (LRFDPBE_BASE + LRFDPBE_O_RXFSRP));
-            /* SRP is now different from RP, so RX FIFO is not deallocated */
-            rxFifoDeallocated = false;
-        }
-    }
-}
-
-/*
- *  ======== LRF_peekRxFifoWords ========
- */
-void LRF_peekRxFifoWords(uint32_t *data32, uint32_t wordLength, uint32_t startRp)
-{
-    uint32_t fifoStart = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG3) & LRFDPBE_FCFG3_RXSTRT_M) >> LRFDPBE_FCFG3_RXSTRT_S) << 2;
-    uint32_t *dataEntry = (uint32_t *) (RXF_UNWRAPPED_BASE_ADDR + fifoStart + startRp);
-#ifdef DeviceFamily_CC27XX
-    ASM_4_NOPS();
-#endif //DeviceFamily_CC27XX
-    for (uint32_t i = 0; i < wordLength; i++)
-    {
-        *data32++ = *dataEntry++;
-    }
-}
-
-/*
- *  ======== LRF_getUncommittedFifoStatus ========
- */
-uint32_t LRF_getUncommittedFifoStatus(uint32_t *currentRp)
-{
-    /* Find information  on RX FIFO */
-    int32_t fifosz = ((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG4) & LRFDPBE_FCFG4_RXSIZE_M) >> LRFDPBE_FCFG4_RXSIZE_S) << 2;
-
-    uintptr_t key = HwiP_disable();
-    /* Check RX FIFO read and write pointers */
-    int32_t rp = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP);
-    int32_t wp = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFWP);
-    HwiP_restore(key);
-
-    /* Find number of bytes written to FIFO (including uncommitted) */
-    int32_t ptrDiff = wp - rp;
-    if (ptrDiff < 0)
-    {
-        ptrDiff += fifosz;
-    }
-
-    *currentRp = (uint32_t)rp;
-    return (uint32_t) ptrDiff;
 }
 
 /* (FXTALINVL + (FXTALINVH << 16)) = round(2^67/48e6) */
@@ -1182,7 +920,7 @@ static uint32_t LRF_findPllMBase(uint32_t frequency)
     pllMBase += tmpPllMBase;
 
     /* Divide by 2 with rounding to get pllMBase = frequency / fxtal * 2^18 */
-    pllMBase += 1;
+    pllMBase += 1U;
     pllMBase >>= 1;
 
     return pllMBase;
@@ -1190,30 +928,30 @@ static uint32_t LRF_findPllMBase(uint32_t frequency)
 
 static uint32_t countLeadingZeros(uint16_t value)
 {
-   int numZeros = 0;
-   if (value >= 0x0100) {
-      value >>= 8;
+   uint32_t numZeros = 0;
+   if (value >= 0x0100U) {
+      value >>= 8U;
    }
    else {
-      numZeros += 8;
+      numZeros += 8U;
    }
-   if (value >= 0x10) {
-      value >>= 4;
-   }
-   else {
-      numZeros += 4;
-   }
-   if (value >= 0x04) {
-      value >>= 2;
+   if (value >= 0x10U) {
+      value >>= 4U;
    }
    else {
-      numZeros += 2;
+      numZeros += 4U;
    }
-   if (value >= 0x02) {
+   if (value >= 0x04U) {
+      value >>= 2U;
+   }
+   else {
+      numZeros += 2U;
+   }
+   if (value >= 0x02U) {
        /* No need to shift down value since this is the last step */
    }
    else {
-      numZeros += 1;
+      numZeros += 1U;
    }
    return numZeros;
 }
@@ -1223,16 +961,16 @@ static uint32_t LRF_findCalM(uint32_t frequency, uint32_t prediv)
     /* Find 2^47 / fref = 2^47 * prediv / fxtal */
     uint32_t frefInv = (fXtalInv.word[1] >> 4) * prediv;
     /* Round to 2^31 * prediv / fxtal */
-    frefInv += 1 << 15;
+    frefInv += 1U << 15;
     frefInv >>= 16;
 
     uint32_t calM;
     /* Find calM = frequency / fref (no fractional bits) */
     /* First, find calM = frequency / fref * 2^(31-15)) */
-    calM = frefInv * ((frequency + (1 << 14)) >> 15);
+    calM = frefInv * ((frequency + (1U << 14)) >> 15);
 
     /* Divide by 2^16 with rounding to get calM = frequency / fref */
-    calM += 1 << 15;
+    calM += 1U << 15;
     calM >>= 16;
 
     return calM;
@@ -1250,11 +988,11 @@ static uint32_t LRF_findFoff(int32_t frequencyOffset, uint32_t invSynthFreq)
     else {
         if (frequencyOffset < 0)
         {
-            absFrequencyOffset = -frequencyOffset;
+            absFrequencyOffset = (uint32_t) -frequencyOffset;
         }
         else
         {
-            absFrequencyOffset = frequencyOffset;
+            absFrequencyOffset = (uint32_t) frequencyOffset;
         }
         /* Calculate 2^41 * abs(frequencyOffset) / synthFrequency */
         absFrequencyOffset = (absFrequencyOffset + (1U << 5)) >> 6;
@@ -1264,18 +1002,18 @@ static uint32_t LRF_findFoff(int32_t frequencyOffset, uint32_t invSynthFreq)
         /* Re-intruduce sign */
         if (frequencyOffset < 0)
         {
-            fOffRes = -absFrequencyOffset;
+            fOffRes = -(int32_t) absFrequencyOffset;
         }
         else
         {
-            fOffRes = absFrequencyOffset;
+            fOffRes = (int32_t) absFrequencyOffset;
         }
 
         return (((uint32_t)fOffRes) & LRFDRFE_MOD1_FOFF_M);
     }
 }
 
-#define NUM_TX_FILTER_TAPS 24
+#define NUM_TX_FILTER_TAPS 24U
 /* deviation in Hz */
 /* invSynthFreq = 2^51 / synthFrequency */
 static void LRF_programShape(const LRF_TxShape *txShape, uint32_t deviation, uint32_t invSynthFreq)
@@ -1285,7 +1023,7 @@ static void LRF_programShape(const LRF_TxShape *txShape, uint32_t deviation, uin
     {
         union {
             uint8_t  b[NUM_TX_FILTER_TAPS];
-            uint32_t w[NUM_TX_FILTER_TAPS/4];
+            uint32_t w[NUM_TX_FILTER_TAPS/4U];
         } filterCoeff;
         /* Find deviation * 2^29/fs * 2^10 */
         uint32_t deviationFactor1 = ((deviation >> 12) * invSynthFreq) +
@@ -1293,9 +1031,9 @@ static void LRF_programShape(const LRF_TxShape *txShape, uint32_t deviation, uin
         /* Find deviation * 2^29/fs * scale / 2^16 */
         uint32_t scale = txShape->scale;
         uint32_t deviationFactor2 = ((((deviationFactor1 >> 15) * scale) >> 1) +
-                                     (((deviationFactor1 & 0x7FFF) * scale) >> 16) + (1 << 4)) >> 5;
+                                     (((deviationFactor1 & 0x7FFFU) * scale) >> 16) + (1U << 4)) >> 5;
         /* Find shapeGain and scaling */
-        int32_t shapeGain = 8 - countLeadingZeros(deviationFactor2 >> 11);
+        int32_t shapeGain = (int32_t) (8U - countLeadingZeros((uint16_t) (deviationFactor2 >> 11)));
         if (shapeGain < 0)
         {
             shapeGain = 0;
@@ -1307,15 +1045,15 @@ static void LRF_programShape(const LRF_TxShape *txShape, uint32_t deviation, uin
         }
         for (uint32_t i = 0; i < NUM_TX_FILTER_TAPS - startCoeff; i++)
         {
-            filterCoeff.b[i + startCoeff] =
-                ((deviationFactor2 * txShape->coeff[i]) + (1 << (18 + shapeGain))) >> (19 + shapeGain);
+            filterCoeff.b[i + startCoeff] = (uint8_t) (
+                ((deviationFactor2 * txShape->coeff[i]) + (1U << (18U + (uint32_t) shapeGain))) >> (19U + (uint32_t) shapeGain));
         }
 
         /* [RCL-515 WORKAROUND]: Protect the first memory write on BLE High PG1.x due to the hardware bugs */
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         ASM_4_NOPS();
-#endif //DeviceFamily_CC27XX
-        for (int i = 0; i <  NUM_TX_FILTER_TAPS / 4; i++)
+#endif
+        for (uint32_t i = 0; i <  NUM_TX_FILTER_TAPS / 4U; i++)
         {
             *((unsigned long*) (LRFDRFE32_BASE + LRFDRFE32_O_DTX1_DTX0) + i) = filterCoeff.w[i];
         }
@@ -1324,14 +1062,14 @@ static void LRF_programShape(const LRF_TxShape *txShape, uint32_t deviation, uin
             /* TODO: Scale by adjusting the symbol mapping */
             shapeGain = 3;
         }
-        HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_MOD0) = (HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_MOD0) & ~LRFDRFE_MOD0_SHPGAIN_M) | (shapeGain << LRFDRFE_MOD0_SHPGAIN_S);
+        HWREG_WRITE_LRF(LRFDRFE_BASE + LRFDRFE_O_MOD0) = (HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_MOD0) & ~LRFDRFE_MOD0_SHPGAIN_M) | (uint32_t) (shapeGain << LRFDRFE_MOD0_SHPGAIN_S);
     }
 }
 
 static uint32_t LRF_findLog2Bde1(uint32_t demmisc3)
 {
     uint32_t log2Bde1;
-    if ((demmisc3 & LRFDMDM_DEMMISC3_BDE1FILTMODE_M) != 0)
+    if ((demmisc3 & LRFDMDM_DEMMISC3_BDE1FILTMODE_M) != 0U)
     {
         log2Bde1 = 0;
     }
@@ -1346,15 +1084,15 @@ static uint32_t LRF_findLog2Bde1(uint32_t demmisc3)
    Calculate Q as pllMBase * pre
    Normalize Q to 28 bits and do the same normalization to P */
 /* Multiplication factor from P formula */
-#define P_FACTOR 9
+#define P_FACTOR 9U
 /* Shift from P formula */
-#define P_SHIFT 4
+#define P_SHIFT 4U
 /* Right shift of PLL M to allow 32-bit calculation */
-#define Q_MAGN_SHIFT 6
+#define Q_MAGN_SHIFT 6U
 /* Number of bits in P and Q */
-#define FRAC_NUM_BITS 28
+#define FRAC_NUM_BITS 28U
 /* Number of extra bits in an uint32_t compared to the P and Q HW registers */
-#define FRAC_EXTRA_BITS (32 - FRAC_NUM_BITS)
+#define FRAC_EXTRA_BITS (32U - FRAC_NUM_BITS)
 static uint32_t LRF_programPQ(uint32_t pllMBase)
 {
     bool roundingError = false;
@@ -1368,12 +1106,12 @@ static uint32_t LRF_programPQ(uint32_t pllMBase)
     uint32_t log2PdifDecim = (demmisc3 & LRFDMDM_DEMMISC3_PDIFDECIM_M) >> LRFDMDM_DEMMISC3_PDIFDECIM_S;
     int32_t leftShiftP;
 
-    leftShiftP = log2Bde1 + log2PdifDecim + P_SHIFT;
+    leftShiftP = (int32_t) (log2Bde1 + log2PdifDecim + P_SHIFT);
 
     uint32_t demFracP = rateWord * bde2;
     if (demFracP > (uint32_t)((1ULL << 32) / P_FACTOR))
     {
-        if ((demFracP & 1) != 0)
+        if ((demFracP & 1U) != 0U)
         {
             roundingError = true;
         }
@@ -1384,10 +1122,10 @@ static uint32_t LRF_programPQ(uint32_t pllMBase)
 
     /* Preliminary calculation to find scaling factor - round PLLM upwards to ensure no overflow
        in final calculation */
-    uint32_t demFracQ = ((pllMBase + ((1 << Q_MAGN_SHIFT) - 1)) >> Q_MAGN_SHIFT) * pre;
-    uint32_t num0Q = countLeadingZeros(demFracQ >> 16);
+    uint32_t demFracQ = ((pllMBase + ((1U << Q_MAGN_SHIFT) - 1U)) >> Q_MAGN_SHIFT) * pre;
+    uint32_t num0Q = countLeadingZeros((uint16_t) (demFracQ >> 16));
 
-    int32_t pllMShift = Q_MAGN_SHIFT + FRAC_EXTRA_BITS - num0Q;
+    int32_t pllMShift = (int32_t) (Q_MAGN_SHIFT + FRAC_EXTRA_BITS - num0Q);
     uint32_t pllMBaseRounded;
     if (pllMShift <= 0)
     {
@@ -1401,10 +1139,10 @@ static uint32_t LRF_programPQ(uint32_t pllMBase)
     else
     {
         /* Scale PLLM to allow Q to fit */
-        pllMBaseRounded = (pllMBase + (1U << (pllMShift - 1))) >> pllMShift;
+        pllMBaseRounded = (pllMBase + (1U << ((uint32_t) pllMShift - 1U))) >> (uint32_t) pllMShift;
         demFracQ = pllMBaseRounded * pre;
         /* Multiply PLLM back (rounding is now applied) */
-        pllMBaseRounded <<= pllMShift;
+        pllMBaseRounded <<= (uint32_t) pllMShift;
         leftShiftP -= pllMShift;
     }
 
@@ -1415,7 +1153,7 @@ static uint32_t LRF_programPQ(uint32_t pllMBase)
     else
     {
         /* Check if right shift of P introduces rounding error */
-        if ((demFracP & ((1 << -leftShiftP) - 1)) != 0)
+        if ((demFracP & ((1U << -leftShiftP) - 1U)) != 0U)
         {
             roundingError = true;
         }
@@ -1435,15 +1173,15 @@ static uint32_t LRF_programPQ(uint32_t pllMBase)
         Log_printf(LogModule_RCL, Log_VERBOSE, "LRF_programPQ: PLLM base rounded from %08X to %08X to fit in fractional resampler", pllMBase, pllMBaseRounded);
     }
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     /* Check if shadow register for downsampler coefficient P is in use */
-    if ((HWREG_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_BAUDCOMP) & LRFDMDM_BAUDCOMP_FRAC_SHADOW) != 0)
+    if ((HWREG_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_BAUDCOMP) & LRFDMDM_BAUDCOMP_FRAC_SHADOW) != 0U)
     {
         /* Write downsampler coefficient P to shadow registers for new Rx operations to restore */
         HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMCOHR3) = demFracP & 0x0000FFFFU;
         HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMCOHR4) = demFracP >> 16;
     }
-#endif /* DeviceFamily_CC27XX */
+#endif
 
     HWREG_WRITE_LRF(LRFDMDM32_BASE + LRFDMDM32_O_DEMFRAC1_DEMFRAC0) = demFracP;
     HWREG_WRITE_LRF(LRFDMDM32_BASE + LRFDMDM32_O_DEMFRAC3_DEMFRAC2) = demFracQ;
@@ -1459,41 +1197,41 @@ static void LRF_programCMixN(int32_t rxIntFrequency, uint32_t invSynthFreq)
     uint32_t absRxIntFrequency;
     if (rxIntFrequency < 0)
     {
-        absRxIntFrequency = -rxIntFrequency;
+        absRxIntFrequency = (uint32_t) (-rxIntFrequency);
     }
     else
     {
-        absRxIntFrequency = rxIntFrequency;
+        absRxIntFrequency =  (uint32_t) rxIntFrequency;
     }
 
-    absRxIntFrequency = (absRxIntFrequency + (1 << 5)) >> 6;
+    absRxIntFrequency = (absRxIntFrequency + (1U << 5)) >> 6;
     /* Find 2^41 * abs(rxIntFrequency) / synthFrequency */
     uint32_t cMixN = absRxIntFrequency * invSynthFreq;
     /* Find 2^37 * abs(rxIntFrequency) / synthFrequency * 9 */
-    cMixN = ((cMixN + (1 << 3)) >> 4) * 9;
+    cMixN = ((cMixN + (1U << 3)) >> 4) * 9U;
 
     /* Find 2^(15 + log2Bde1) * abs(rxIntFrequency) / synthFrequency * 9 */
-    uint32_t rightShift = (37 - 15) - LRF_findLog2Bde1(HWREG_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMMISC3));
-    cMixN = (cMixN + (1 << (rightShift - 1))) >> rightShift;
+    uint32_t rightShift = (37U - 15U) - LRF_findLog2Bde1(HWREG_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMMISC3));
+    cMixN = (cMixN + (1U << (rightShift - 1U))) >> rightShift;
 
     int32_t signedCMixN;
     /* Use inverse sign */
     if (rxIntFrequency > 0)
     {
-        signedCMixN = -cMixN;
+        signedCMixN = -(int32_t) cMixN;
     }
     else
     {
-        signedCMixN = cMixN;
+        signedCMixN = (int32_t) cMixN;
     }
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         /* Workaround (RCL-489): Invert RX frequency programmed to account for swapped I and Q signals in CC27xx PG1.0
          * TODO: May be swapped back for later PGs
          */
     signedCMixN = -signedCMixN;
 #endif
 
-    cMixN = (uint32_t)(signedCMixN & LRFDMDM_DEMMISC0_CMIXN_M);
+    cMixN = (uint32_t) signedCMixN & LRFDMDM_DEMMISC0_CMIXN_M;
     HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMMISC0) = cMixN;
     HWREG_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_SPARE3) = cMixN;
 }
@@ -1508,26 +1246,26 @@ void LRF_programFrequency(uint32_t frequency, bool tx)
        that is a prerequisite for switching without recalibration. */
     if (tx)
     {
-        synthFrequency = frequency - swConfig->txFrequencyOffset;
+        synthFrequency = frequency - (uint32_t) swConfig->txFrequencyOffset;
     }
     else
     {
-        synthFrequency = frequency - swConfig->rxFrequencyOffset
-            - swConfig->rxIntFrequency;
+        synthFrequency = frequency - (uint32_t) swConfig->rxFrequencyOffset
+            - (uint32_t) swConfig->rxIntFrequency;
     }
 
     /* Compensate desired frequency for temperature-dependent offset in HFXT, if any */
     uint32_t synthFrequencyCompensated = LRF_scaleFreqWithHFXTOffset(synthFrequency);
 
     /* Frequency divided by 2^16, rounded */
-    uint32_t frequencyDiv2_16 = (synthFrequency + (1 << 15)) >> 16;
+    uint32_t frequencyDiv2_16 = (synthFrequency + (1U << 15)) >> 16;
 
     /* Start calculating 2^47/frequency (approximated as 2^31/(synthFrequency/2^16)) */
     HWREG_WRITE_LRF(LRFDRFE32_BASE + LRFDRFE32_O_DIVIDEND) = 1U << 31;
     HWREG_WRITE_LRF(LRFDRFE32_BASE + LRFDRFE32_O_DIVISOR) = frequencyDiv2_16;
 
     /* Write approximate freuency to RFE */
-    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_K5) = frequencyDiv2_16;
+    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_K5) = (uint16_t) frequencyDiv2_16;
 
     /* Find setting for coarse and mid calibration */
     uint32_t precalSetting = HWREG_READ_LRF(LRFDRFE32_BASE + LRFDRFE32_O_PRE3_PRE2);
@@ -1571,14 +1309,14 @@ void LRF_programFrequency(uint32_t frequency, bool tx)
     HWREG_WRITE_LRF(LRFDRFE32_BASE + LRFDRFE32_O_PLLM1) = ((pllMBaseCompensated * precal1) << LRFDRFE32_PLLM1_VAL_S);
 
     /* Read out division result to find invSynthFreq */
-    while ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DIVSTA) & LRFDRFE_DIVSTA_STAT_M) != 0)
+    while ((HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_DIVSTA) & LRFDRFE_DIVSTA_STAT_M) != 0U)
     {
     }
     uint32_t invSynthFreq = HWREG_READ_LRF(LRFDRFE32_BASE + LRFDRFE32_O_QUOTIENT);
 
     /* Calculate intermediate frequencies */
-    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_RXIF) = LRF_findFoff(swConfig->rxFrequencyOffset, invSynthFreq);
-    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_TXIF) = LRF_findFoff(swConfig->txFrequencyOffset, invSynthFreq);
+    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_RXIF) = (uint16_t) LRF_findFoff(swConfig->rxFrequencyOffset, invSynthFreq);
+    HWREGH_WRITE_LRF(LRFD_RFERAM_BASE + RFE_COMMON_RAM_O_TXIF) = (uint16_t) LRF_findFoff(swConfig->txFrequencyOffset, invSynthFreq);
 
     /* Calculate CMIXN */
     LRF_programCMixN(swConfig->rxIntFrequency, invSynthFreq);
@@ -1594,7 +1332,7 @@ uint32_t LRF_enableSynthRefsys(void)
     /* Enable REFSYS if not already done. If it is enabled now, we need to make sure that start
        time is late enough */
     uint32_t atstref = HWREG_READ_LRF(LRFDRFE32_BASE + LRFDRFE32_O_ATSTREF);
-    if ((atstref & LRFDRFE32_ATSTREF_BIAS_M) == 0)
+    if ((atstref & LRFDRFE32_ATSTREF_BIAS_M) == 0U)
     {
         /* Bias not already enabled - enable it now */
         HWREG_WRITE_LRF(LRFDRFE32_BASE + LRFDRFE32_O_ATSTREF) = atstref | LRFDRFE32_ATSTREF_BIAS_M;
@@ -1658,8 +1396,8 @@ void LRF_initializeMaxRssi(int8_t initRssi)
 
 void LRF_setRawTxPower(uint32_t value, uint32_t temperatureCoefficient)
 {
-    lrfPhyState.rawTxPower.value.rawValue = value;
-    lrfPhyState.rawTxPower.tempCoeff = temperatureCoefficient;
+    lrfPhyState.rawTxPower.value.rawValue = (uint16_t) value;
+    lrfPhyState.rawTxPower.tempCoeff = (uint8_t) temperatureCoefficient;
     lrfPhyState.rawTxPower.power = LRF_TxPower_Use_Raw;
 }
 
@@ -1705,8 +1443,8 @@ void LRF_programTemperatureCompensatedTxPower(void)
 {
     LRF_TxPowerTable_Entry txPowerEntry = lrfPhyState.currentTxPower;
     uint8_t tempCoeff = txPowerEntry.tempCoeff;
-    int32_t temperature = hal_get_temperature();
-#ifdef DeviceFamily_CC27XX
+    int32_t temperature = RCL_Hal_getTemperature();
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     if (rclFeatureControl.enableTxOutputPowerCompensation)
     {
         LRF_SwParam *swParam = (LRF_SwParam *) swParamList;
@@ -1763,7 +1501,7 @@ void LRF_programTemperatureCompensatedTxPower(void)
     }
 #endif
 
-    if (tempCoeff != 0)
+    if (tempCoeff != 0U)
     {
         int32_t ib = txPowerEntry.value.ib;
         /* Linear adjustment of IB field as a function of temperature, scaled
@@ -1771,26 +1509,26 @@ void LRF_programTemperatureCompensatedTxPower(void)
         ib += ((temperature - LRF_TXPOWER_REFERENCE_TEMPERATURE) * (int32_t) tempCoeff)
             / LRF_TXPOWER_TEMPERATURE_SCALING;
         /* Saturate IB */
-        if (ib < (int32_t) RFE_PA0_IB_MIN_USED)
+        if (ib <  RFE_PA0_IB_MIN_USED)
         {
             ib = RFE_PA0_IB_MIN_USED;
         }
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         /* TODO: See RCL-444. Use LRFDRFE_PA1_IB_MAX for CC27XX. */
-        if (ib > (int32_t) (LRFDRFE_PA1_IB_MAX >> LRFDRFE_PA1_IB_S))
+        if (ib > (LRFDRFE_PA1_IB_MAX >> LRFDRFE_PA1_IB_S))
         {
-            ib = LRFDRFE_PA1_IB_MAX >> LRFDRFE_PA1_IB_S;
+            ib =  (LRFDRFE_PA1_IB_MAX >> LRFDRFE_PA1_IB_S);
         }
 #else
-        if (ib > (int32_t) (LRFDRFE_PA0_IB_MAX >> LRFDRFE_PA0_IB_S))
+        if (ib > (LRFDRFE_PA0_IB_MAX >> LRFDRFE_PA0_IB_S))
         {
-            ib = LRFDRFE_PA0_IB_MAX >> LRFDRFE_PA0_IB_S;
+            ib = (LRFDRFE_PA0_IB_MAX >> LRFDRFE_PA0_IB_S);
         }
 #endif
-        txPowerEntry.value.ib = ib;
+        txPowerEntry.value.ib = (uint16_t) ib;
     }
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     if (rclFeatureControl.enablePaEsdProtection && (txPowerEntry.value.mode == LRF_CC27XX_HIGH_PA_MODE))
     {
         if (LRF_requirePaEsdProtection())
@@ -1810,7 +1548,7 @@ LRF_TxPowerResult LRF_programTxPower(LRF_TxPowerTable_Index powerLevel, uint32_t
         LRF_SwParam *swParam = (LRF_SwParam *) swParamList;
         LRF_TxPowerTable_Index adjustedTxPowerLevel = powerLevel;
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         if (powerLevel.rawValue != LRF_TxPower_Use_Raw.rawValue)
         {
             /* Perform frequency specific output power limiting */
@@ -1854,7 +1592,7 @@ LRF_TxPowerResult LRF_programTxPower(LRF_TxPowerTable_Index powerLevel, uint32_t
                 /* Perform VDDS compensation. Use BATMON to measure VDDS voltage and determine if output Tx power needs to be compensated */
                 if (adjustedTxPowerLevel.rawValue >= LRF_TxPower_Use_Vdds_Comp.rawValue)
                 {
-                    uint16_t vdds = hal_get_vdds_voltage();
+                    uint16_t vdds = RCL_Hal_getVddsVoltage();
 
                     if ((vdds <= LRF_CC27XX_VDDS_THRESHOLD_0) && (swParam->trimDef->trim11.vddsComp.fields.r0 != 0xF))
                     {
@@ -1881,7 +1619,7 @@ LRF_TxPowerResult LRF_programTxPower(LRF_TxPowerTable_Index powerLevel, uint32_t
                 /* Perform temperature coefficient compensation by measuring temperature and checking for valid FCFG values  */
                 if (swParam->trimDef->trim11.tempCoeffComp.value != 0xFFFF)
                 {
-                    int32_t temperature = hal_get_temperature();
+                    int32_t temperature = RCL_Hal_getTemperature();
                     int32_t tempCoeffCompFactor = 0;
 
                     /* FCFG field corresponding to nomTmp needs to be converted from 4-bit sign-magnitude to a signed 8-bit representation */
@@ -1913,7 +1651,8 @@ LRF_TxPowerResult LRF_programTxPower(LRF_TxPowerTable_Index powerLevel, uint32_t
                 }
             }
         }
-#endif //DeviceFamily_CC27XX
+#endif //if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+
         LRF_TxPowerTable_Entry txPowerEntry = LRF_TxPowerTable_findValue(swParam->txPowerTable, adjustedTxPowerLevel);
         if (txPowerEntry.value.rawValue != LRF_TxPowerTable_INVALID_VALUE.rawValue)
         {
@@ -1933,7 +1672,7 @@ static uint32_t LRF_scaleFreqWithHFXTOffset(uint32_t frequency)
     /* Get HFXT ratio from HFTRACKCTL register. This will have been
      * updated by the power driver if compensation is enabled and the temperature has drifted beyond the threshold.
      */
-    uint32_t ratio = hal_get_hfxt_ratio();
+    uint32_t ratio = RCL_Hal_getHfxtRatio();
 
     /* If temperature compensation is disabled, or temperature has not drifted,
      * the ratio will have its reset-value of 0x400000. In this case, do not perform scaling of input frequency
@@ -1951,13 +1690,13 @@ static uint32_t LRF_scaleFreqWithHFXTOffset(uint32_t frequency)
      * Instead of performing 64-bit multiplication and shifting, the multiplier and multiplicand are divided into
      * half-words which are multiplied, added, and shifted appropriately.
      */
-    if (ratio != hal_get_hfxt_ratio_default())
+    if (ratio != RCL_Hal_getHfxtRatioDefault())
     {
         uint32_t ah = frequency >> 16;      /* Multiplier high half-word */
-        uint32_t al = frequency & 0xFFFF;   /* Multiplier low half-word */
+        uint32_t al = frequency & 0xFFFFU;   /* Multiplier low half-word */
 
         uint32_t bh = ratio >> 16;          /* Multiplicand high half-word */
-        uint32_t bl = ratio & 0xFFFF;       /* Multiplicand low half-word */
+        uint32_t bl = ratio & 0xFFFFU;       /* Multiplicand low half-word */
 
         /* Perform standard long multiplication where each "digit" is a half-word
          * https://en.wikipedia.org/wiki/Multiplication_algorithm
@@ -1979,7 +1718,7 @@ static void LRF_temperatureNotification(int16_t currentTemperature)
 {
     (void) currentTemperature;
     /* Post event to tell handler that radio operation should be restarted */
-    RCL_Scheduler_postEvent(rclSchedulerState.currCmd, RCL_EventSilentlyRestartRadio);
+    (void) RCL_Scheduler_postEvent(rclSchedulerState.currCmd, RCL_EventSilentlyRestartRadio);
 }
 
 /*
@@ -1989,9 +1728,9 @@ void LRF_enableTemperatureMonitoring(void)
 {
     if (rclFeatureControl.enableTemperatureMonitoring)
     {
-        if (rclTemperatureThreshold != 0)
+        if (rclTemperatureThreshold != 0U)
         {
-            hal_set_temperature_notification(lrfPhyState.lastTrimTemperature, rclTemperatureThreshold, LRF_temperatureNotification);
+            RCL_Hal_setTemperatureNotification(lrfPhyState.lastTrimTemperature, rclTemperatureThreshold, LRF_temperatureNotification);
         }
     }
 }
@@ -2003,7 +1742,7 @@ void LRF_disableTemperatureMonitoring(void)
 {
     if (rclFeatureControl.enableTemperatureMonitoring)
     {
-        hal_stop_temperature_notification();
+        RCL_Hal_stopTemperatureNotification();
     }
 }
 
@@ -2016,7 +1755,7 @@ void LRF_updateTemperatureCompensation(uint32_t rfFrequency, bool tx)
     {
         LRF_SwParam *swParam = (LRF_SwParam *) swParamList;
         /* Allow SWTCXO updates and adjust HFXT with missed updates */
-        hal_power_release_swtcxo_update_constraint();
+        RCL_Hal_powerReleaseSwTcxoUpdateConstraint();
         /* Set RF frequency word based on updated HFXT value */
         LRF_programFrequency(rfFrequency, tx);
         /* Re-calculate temperature dependent trims */
@@ -2026,7 +1765,7 @@ void LRF_updateTemperatureCompensation(uint32_t rfFrequency, bool tx)
         /* Set new limit for temperature monitoring */
         LRF_enableTemperatureMonitoring();
         /* Stop SWTCXO updates again */
-        hal_power_set_swtcxo_update_constraint();
+        RCL_Hal_powerSetSwTcxoUpdateConstraint();
     }
 }
 
@@ -2043,7 +1782,7 @@ int16_t LRF_getLastTrimTemperature(void)
  */
 void LRF_setAntennaSelection(uint32_t value)
 {
-    rclPbeGpoVal = value & LRF_PBE_GPOCTRL_MASK;
+    rclPbeGpoVal = (uint8_t) (value & LRF_PBE_GPOCTRL_MASK);
 }
 
 /*
@@ -2057,7 +1796,7 @@ static void LRF_applyAntennaSelection(void)
     HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_GPOCTRL) = pbeGpoVal;
 }
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 /*
  * ======== LRF_requirePaEsdProtection ========
  */
@@ -2065,9 +1804,9 @@ static inline bool LRF_requirePaEsdProtection(void)
 {
     /* To read the VDDS voltage from the BATMON, ensure that BatMonSupportLPF3_init()
      * has been called beforehand. This is guaranteed by the execution of
-     * hal_temperature_init() during the RCL initialization sequence.
+     * RCL_Hal_temperature_init() during the RCL initialization sequence.
      */
-    const uint16_t vddsRead = hal_get_vdds_voltage();
+    const uint16_t vddsRead = RCL_Hal_getVddsVoltage();
     return (vddsRead >= LRF_CC27XX_PA_ESD_PROTECTION_VDDS_THRESHOLD_MV);
 }
 
@@ -2077,7 +1816,7 @@ static inline bool LRF_requirePaEsdProtection(void)
 void LRF_updatePaEsdProtection(void)
 {
     /* PA ESD protection is only applicable when the 20dBm PA mode is enabled */
-    uint16_t txPowerRawValue = HWREG_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE5);
+    uint16_t txPowerRawValue = HWREGH_READ_LRF(LRFDRFE_BASE + LRFDRFE_O_SPARE5);
     if (LRF_CC27XX_RETRIEVE_PA_MODE_FROM_RAW_VALUE(txPowerRawValue) != LRF_CC27XX_HIGH_PA_MODE)
     {
         return;

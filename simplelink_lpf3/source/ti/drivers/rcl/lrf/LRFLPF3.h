@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ti_drivers_LRFCC2340_h__include
-#define ti_drivers_LRFCC2340_h__include
+#ifndef ti_drivers_rcl_lrf_LRFLPF3__include
+#define ti_drivers_rcl_lrf_LRFLPF3__include
 
 #include <stdint.h>
 #include <stddef.h>
@@ -41,14 +41,15 @@
 #include DeviceFamily_constructPath(inc/hw_lrfdpbe.h)
 #include DeviceFamily_constructPath(inc/hw_lrfddbell.h)
 #include DeviceFamily_constructPath(inc/pbe_generic_regdef_regs.h)
-
+#include <ti/drivers/Power.h>
 #include <ti/drivers/rcl/RCL_Types.h>
+#include <ti/drivers/rcl/hal/RCL_Hal.h>
 
 /** @brief Type for tx power configuration.
  *
  * Register value to be written to registers, prior to temperature compensation
  */
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 typedef union
 {
     struct {
@@ -247,7 +248,7 @@ typedef struct {
     uint32_t word[2];
 } LRF_DoubleWord;
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 typedef struct {
     union {
         struct {
@@ -280,7 +281,7 @@ typedef struct {
         uint16_t value;
     };
 } LRF_Trim_tempCoeffComp;
-#endif //DeviceFamily_CC27XX
+#endif //DeviceFamily_PARENT_CC27XX
 
 typedef union {
     struct {
@@ -290,7 +291,7 @@ typedef union {
                 uint16_t trim           : 5;
                 uint16_t zero           : 11;
             } pa0;
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
             // Trim values for PA (mode0, mode1)
             struct {    // length: 2B
                 uint16_t trim0           : 5;
@@ -308,7 +309,7 @@ typedef union {
         } atstRefH;
     } fields;
     struct {
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         uint16_t pa2trim01;
 #else
         uint16_t pa0;
@@ -491,7 +492,7 @@ typedef union {
                     // Value is read by RF Core FW during RF Core initialization
             uint16_t iqmc           : 16;
         } syntDiv0;
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         // Trim values for PA (mode2, mode3)
         struct {    // length: 2B
             uint16_t trim2           : 5;
@@ -511,7 +512,7 @@ typedef union {
         int8_t   rssiOffset;
         uint8_t  trimCompleteN;
         uint16_t demIQMC0;
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
         uint16_t pa2trim23;
 #else
         uint16_t res1;
@@ -521,7 +522,7 @@ typedef union {
     uint32_t data;
 } LRF_Trim4;
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 typedef union {
     struct {
         LRF_Trim_vddsComp vddsComp;
@@ -531,7 +532,7 @@ typedef union {
     };
     uint32_t data;
 } LRF_Trim11;
-#endif //DeviceFamily_CC27XX
+#endif //DeviceFamily_PARENT_CC27XX
 
 /* This definition is used instead of the definition from hw_fcfg.h to accommodate implementation
    and cut parameters not relevant to LRF */
@@ -545,10 +546,10 @@ typedef struct {
     LRF_Trim_Variant    trimVariant[LRF_TRIM_NUM_VARIANTS];
     LRF_Trim3           trim3;
     LRF_Trim4           trim4;
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     uint32_t            reserved1[15];
     LRF_Trim11          trim11;
-#endif //DeviceFamily_CC27XX
+#endif //DeviceFamily_PARENT_CC27XX
 } LRF_TrimDef;
 
 /**
@@ -622,11 +623,6 @@ static inline void LRF_hardStop(void)
     /* LRF does not need to do anything special after hard stop is sent */
 }
 
-static inline uint32_t LRF_getTxFifoWritable(void)
-{
-    return HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFWRITABLE);
-}
-
 /**
  * @brief Programs current TX power setting in radio with temperature compensation
  */
@@ -663,7 +659,7 @@ void LRF_initializeMaxRssi(int8_t initRssi);
  */
 static inline void LRF_setRclClockEnable(uint16_t mask)
 {
-    hal_set_rcl_clock_enable(mask);
+    RCL_Hal_setRclClockEnable(mask);
 }
 
 /**
@@ -674,7 +670,7 @@ static inline void LRF_setRclClockEnable(uint16_t mask)
  */
 static inline void LRF_clearRclClockEnable(uint16_t mask)
 {
-    hal_clear_rcl_clock_enable(mask);
+    RCL_Hal_clearRclClockEnable(mask);
 }
 
 /**
@@ -762,7 +758,7 @@ int16_t LRF_getLastTrimTemperature(void);
  */
 void LRF_setAntennaSelection(uint32_t value);
 
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 /**
  * @brief Update the PA ESD protection configuration
  *
@@ -781,35 +777,4 @@ void LRF_setAntennaSelection(uint32_t value);
 void LRF_updatePaEsdProtection();
 #endif
 
-/* Temporarily added definitions until https://jira.itg.ti.com/browse/TIDRIVERS-6489 is implemented */
-#ifndef NO_DRIVERS
-#include <ti/drivers/Power.h>
-
-#ifdef DeviceFamily_CC27XX
-#define LRF_POWER_PERIPH_VALUE(x) (PowerCC27XX_PERIPH_GROUP_LRFD | (x))
-#else
-#define LRF_POWER_PERIPH_VALUE(x) (PowerCC23X0_PERIPH_GROUP_LRFD | (x))
-#endif
-
-#ifdef PowerLPF3_PERIPH_LRFD_BUFRAM
-#error "Remove local definition in LRFCC23X0.h and rely on Power driver's definition"
-#else
-#define PowerLPF3_PERIPH_LRFD_BUFRAM LRF_POWER_PERIPH_VALUE(LRFDDBELL_CLKCTL_BUFRAM_S)
-#endif
-
-#ifdef PowerLPF3_PERIPH_LRFD_MDM
-#error "Remove local definition in LRFCC23X0.h and rely on Power driver's definition"
-#else
-#define PowerLPF3_PERIPH_LRFD_MDM    LRF_POWER_PERIPH_VALUE(LRFDDBELL_CLKCTL_MDM_S)
-#endif
-
-#ifdef PowerLPF3_PERIPH_LRFD_TRC
-#error "Remove local definition in LRFCC23X0.h and rely on Power driver's definition"
-#else
-#define PowerLPF3_PERIPH_LRFD_TRC    LRF_POWER_PERIPH_VALUE(LRFDDBELL_CLKCTL_TRC_S)
-#endif
-/* End of temporarily added definitions */
-
-#endif
-
-#endif
+#endif /* ti_drivers_rcl_lrf_LRFLPF3__include */

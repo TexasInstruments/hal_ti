@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- *  ======== hal_cc23x0rx.c ========
+ *  ======== RCLLPF3_Hal.c ========
  */
 
 #include <ti/drivers/Power.h>
@@ -55,12 +55,12 @@
 
 #include <ti/log/Log.h>
 
-#include <ti/drivers/rcl/hal/hal.h>
+#include <ti/drivers/rcl/hal/RCL_Hal.h>
 
 #ifndef SOCFPGA
 /* FPGA doesn't support Standby */
-static int hal_power_post_notify_fxn(unsigned int eventType, uintptr_t eventArg, uintptr_t clientArg);
-static void hal_temperature_post_notify_fxn(int16_t currentTemperature,
+static int RCL_Hal_powerPostNotifyFxn(unsigned int eventType, uintptr_t eventArg, uintptr_t clientArg);
+static void RCL_Hal_temperaturePostNotifyFxn(int16_t currentTemperature,
                                             int16_t thresholdTemperature,
                                             uintptr_t clientArg,
                                             Temperature_NotifyObj *notifyObject);
@@ -69,7 +69,7 @@ static Power_NotifyObj powerEnterStandbyObj;
 #endif
 static Temperature_NotifyObj temperatureChangeNotifyObj = {0};
 
-static void hal_cancel_lrfd_systim0(void);
+static void RCL_Hal_cancelLrfdSystim0(void);
 
 #define RCL_DEFAULT_HFTRACKCTL_RATIO    CKMD_HFTRACKCTL_RATIO_REF48M
 
@@ -107,12 +107,12 @@ static void RF_commandHwi(uintptr_t a)
     }
 }
 
-uint32_t hal_get_command_ifg_reg(void)
+uint32_t RCL_Hal_getCommandIfgReg(void)
 {
     uint32_t dbellIrq;
     /* Using masked interrupt */
     dbellIrq = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_MIS0);
-    /* Remove SYSTIM 0 and 1 interrupts, as they should be handled by hal_check_clear_timer_compare() */
+    /* Remove SYSTIM 0 and 1 interrupts, as they should be handled by RCL_Hal_checkClearTimerCompare() */
     dbellIrq &= ~(LRFDDBELL_MIS0_SYSTIM0_M | LRFDDBELL_MIS0_SYSTIM1_M);
     /* Clear interrupts (unmasked only) */
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = dbellIrq;
@@ -120,7 +120,7 @@ uint32_t hal_get_command_ifg_reg(void)
     return dbellIrq;
 }
 
-uint32_t hal_get_dispatch_ifg_reg(void)
+uint32_t RCL_Hal_getDispatchIfgReg(void)
 {
     uint32_t dbellIrq;
     /* Using masked interrupt */
@@ -134,29 +134,29 @@ uint32_t hal_get_dispatch_ifg_reg(void)
 /*
  * Initialize RCL interrupt handlers
  */
-void hal_init_fsm(void (*dispatchFsmCb)(void), void (*schedFsmCb)(void),
+void RCL_Hal_initFsm(void (*dispatchFsmCb)(void), void (*schedFsmCb)(void),
                   void (*commandFsmCb)(void))
 {
     HwiP_Params hp;
     HwiP_Params_init(&hp);
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     hp.priority = INT_PRI_LEVEL4;
 #else
     hp.priority = INT_PRI_LEVEL2;
 #endif
-    HwiP_construct(&schedHwi, INT_CPUIRQ4, RF_schedHwi, &hp);
-#ifdef DeviceFamily_CC27XX
+    (void) HwiP_construct(&schedHwi, INT_CPUIRQ4, RF_schedHwi, &hp);
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     hp.priority = INT_PRI_LEVEL2;
 #else
     hp.priority = INT_PRI_LEVEL1;
 #endif
-    HwiP_construct(&dispatchHwi, INT_LRFD_IRQ1, RF_dispatchHwi,  &hp);
-#ifdef DeviceFamily_CC27XX
+    (void) HwiP_construct(&dispatchHwi, INT_LRFD_IRQ1, RF_dispatchHwi,  &hp);
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     hp.priority = INT_PRI_LEVEL1;
 #else
     hp.priority = INT_PRI_LEVEL0;
 #endif
-    HwiP_construct(&commandHwi, INT_LRFD_IRQ0, RF_commandHwi,  &hp);
+    (void) HwiP_construct(&commandHwi, INT_LRFD_IRQ0, RF_commandHwi,  &hp);
 
     halDispatchFsmCb = dispatchFsmCb;
     halSchedFsmCb = schedFsmCb;
@@ -167,27 +167,27 @@ void hal_init_fsm(void (*dispatchFsmCb)(void), void (*schedFsmCb)(void),
 }
 
 
-void hal_trigger_command_fsm(void)
+void RCL_Hal_triggerCommandFsm(void)
 {
     /* Software trig command FSM */
     HwiP_post(INT_LRFD_IRQ0);
 }
 
-void hal_trigger_dispatch_fsm(void)
+void RCL_Hal_triggerDispatchFsm(void)
 {
     /* Software trig dispatch IRQ */
     HwiP_post(INT_LRFD_IRQ1);
 }
 
-void hal_trigger_scheduler_fsm(void)
+void RCL_Hal_triggerSchedulerFsm(void)
 {
     /* Software schedule IRQ */
     HwiP_post(INT_CPUIRQ4);
 }
 
-uint32_t hal_get_current_time(void)
+uint32_t RCL_Hal_getCurrentTime(void)
 {
-    return HWREG(SYSTIM_BASE + SYSTIM_O_TIME250N);
+    return (uint32_t) HWREG(SYSTIM_BASE + SYSTIM_O_TIME250N);
 }
 
 enum {
@@ -196,12 +196,12 @@ enum {
     SYSTIM_CH2_STOP = 3,  /* Hard stop time */
 } channel2usage = SYSTIM_CH2_SETUP;
 
-void hal_enable_setup_time_irq(void)
+void RCL_Hal_enableSetupTimeIrq(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM0_M;
 }
 
-void hal_setup_setup_time(uint32_t time)
+void RCL_Hal_setupSetupTime(uint32_t time)
 {
     channel2usage = SYSTIM_CH2_SETUP;
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
@@ -214,7 +214,7 @@ void hal_setup_setup_time(uint32_t time)
 #endif
 }
 
-void hal_setup_start_time(uint32_t time)
+void RCL_Hal_setupStartTime(uint32_t time)
 {
     channel2usage = SYSTIM_CH2_START;
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
@@ -222,7 +222,7 @@ void hal_setup_start_time(uint32_t time)
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM0_M;
 }
 
-void hal_setup_hard_stop_time(uint32_t time)
+void RCL_Hal_setupHardStopTime(uint32_t time)
 {
     channel2usage = SYSTIM_CH2_STOP;
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
@@ -230,29 +230,29 @@ void hal_setup_hard_stop_time(uint32_t time)
     /* Interrupt is not always needed, as event will be handled by PBE */
 }
 
-void hal_enable_hard_stop_time_irq(void)
+void RCL_Hal_enableHardStopTimeIrq(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM0_M;
 }
 
-void hal_disable_hard_stop_time_irq(void)
+void RCL_Hal_disableHardStopTimeIrq(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & ~LRFDDBELL_IMASK0_SYSTIM0_M;
 }
 
-void hal_setup_graceful_stop_time(uint32_t time)
+void RCL_Hal_setupGracefulStopTime(uint32_t time)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM1_M;
     HWREG(SYSTIM_BASE + SYSTIM_O_CH3CC) = time;
     /* Interrupt is not always needed, as event will be handled by PBE */
 }
 
-void hal_enable_graceful_stop_time_irq(void)
+void RCL_Hal_enableGracefulStopTimeIrq(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM1_M;
 }
 
-static void hal_cancel_lrfd_systim0(void)
+static void RCL_Hal_cancelLrfdSystim0(void)
 {
     HWREG(SYSTIM_BASE + SYSTIM_O_CH2CC) = 0;
     HWREG(SYSTIM_BASE + SYSTIM_O_CH2CFG) = SYSTIM_CH2CFG_MODE_CAPT;
@@ -265,22 +265,22 @@ static void hal_cancel_lrfd_systim0(void)
 #endif
 }
 
-void hal_cancel_setup_time(void)
+void RCL_Hal_cancelSetupTime(void)
 {
-    hal_cancel_lrfd_systim0();
+    RCL_Hal_cancelLrfdSystim0();
 }
 
-void hal_cancel_start_time(void)
+void RCL_Hal_cancelStartTime(void)
 {
-    hal_cancel_lrfd_systim0();
+    RCL_Hal_cancelLrfdSystim0();
 }
 
-void hal_cancel_hard_stop_time(void)
+void RCL_Hal_cancelHardStopTime(void)
 {
-    hal_cancel_lrfd_systim0();
+    RCL_Hal_cancelLrfdSystim0();
 }
 
-void hal_cancel_graceful_stop_time(void)
+void RCL_Hal_cancelGracefulStopTime(void)
 {
     HWREG(SYSTIM_BASE + SYSTIM_O_CH3CC) = 0;
     HWREG(SYSTIM_BASE + SYSTIM_O_CH3CFG) = SYSTIM_CH3CFG_MODE_CAPT;
@@ -288,7 +288,7 @@ void hal_cancel_graceful_stop_time(void)
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) =  HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & ~LRFDDBELL_IMASK0_SYSTIM1_M;
 }
 
-void hal_enable_clk_buffer(void)
+void RCL_Hal_enableClkBuffer(void)
 {
 #ifndef SOCFPGA
     /* FPGA doesn't support standby */
@@ -296,7 +296,7 @@ void hal_enable_clk_buffer(void)
 #endif
 }
 
-void hal_setup_sync_found_cap(void)
+void RCL_Hal_setupSyncFoundCap(void)
 {
     /* SRAT sync found repeat capture config */
     /* Route event_ibus(21) (mdm) to DBELL input (capt_sources[0]) */
@@ -307,14 +307,14 @@ void hal_setup_sync_found_cap(void)
     HWREG(SYSTIM_BASE + SYSTIM_O_CH4CFG) |= SYSTIM_CH4CFG_INP_RISE | SYSTIM_CH4CFG_MODE_CAPT | SYSTIM_CH4CFG_REARM_EN;
 }
 
-HalTimerEvent hal_check_clear_timer_compare(void)
+HalTimerEvent RCL_Hal_checkClearTimerCompare(void)
 {
     HalTimerEvent event = HAL_TIMER_EVT_NONE;
 
     uint32_t mis0 = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_MIS0);
 
     /* Start or hard-stop takes priority, meaning hard-stop takes priority over graceful. */
-    if (mis0 & LRFDDBELL_MIS0_SYSTIM0_M)
+    if ((mis0 & LRFDDBELL_MIS0_SYSTIM0_M) != 0U)
     {
         HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & (~LRFDDBELL_IMASK0_SYSTIM0_M);
         HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
@@ -338,68 +338,73 @@ HalTimerEvent hal_check_clear_timer_compare(void)
                 break;
         }
     }
-    else if (mis0 & LRFDDBELL_MIS0_SYSTIM1_M)
+    else if ((mis0 & LRFDDBELL_MIS0_SYSTIM1_M) != 0U)
     {
         HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & (~LRFDDBELL_IMASK0_SYSTIM1_M);
         HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM1_M;
         event = HAL_TIMER_EVT_GRACEFUL_STOP;
     }
+    else
+    {
+        /* Do nothing */
+    }
+
     return event;
 }
 
-void hal_init_dispatch_radio_interrupts(uint32_t mask)
+void RCL_Hal_initDispatchRadioInterrupts(uint32_t mask)
 {
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR1) = ~0;
+    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR1) = UINT32_MAX;
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK1) = mask;
 }
 
-void hal_enable_command_radio_interrupt(uint32_t mask)
+void RCL_Hal_enableCommandRadioInterrupt(uint32_t mask)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) =
         HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | mask;
 }
 
-void hal_clear_command_radio_interrupt(uint32_t mask)
+void RCL_Hal_clearCommandRadioInterrupt(uint32_t mask)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = mask;
 }
 
-void hal_disable_command_radio_interrupt(uint32_t mask)
+void RCL_Hal_disableCommandRadioInterrupt(uint32_t mask)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) =
             HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & ~mask;
 }
 
-void hal_disable_all_command_radio_interrupts(void)
+void RCL_Hal_disableAllCommandRadioInterrupts(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = 0;
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = ~0;
+    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = UINT32_MAX;
 }
 
-void hal_disable_all_dispatch_radio_interrupts(void)
+void RCL_Hal_disableAllDispatchRadioInterrupts(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK1) = 0;
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR1) = ~0;
+    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR1) = UINT32_MAX;
 }
 
-void hal_set_rcl_clock_enable(uint16_t mask)
+void RCL_Hal_setRclClockEnable(uint16_t mask)
 {
     uintptr_t key = HwiP_disable();
     LRFDSetClockDependency(mask, LRFD_CLK_DEP_RCL);
     HwiP_restore(key);
 }
 
-void hal_clear_rcl_clock_enable(uint16_t mask)
+void RCL_Hal_clearRclClockEnable(uint16_t mask)
 {
     uintptr_t key = HwiP_disable();
     LRFDReleaseClockDependency(mask, LRFD_CLK_DEP_RCL);
     HwiP_restore(key);
 }
 
-uint8_t hal_set_dcdc_ipeak_setting(uint8_t setting)
+uint8_t RCL_Hal_setDcdcIpeakSetting(uint8_t setting)
 {
     /* Read previous value so that it can be restored later */
-    uint8_t previousIpeakSetting = (HWREG(SYS0_BASE + SYS0_O_TMUTE4) & SYS0_TMUTE4_IPEAK_M) >> SYS0_TMUTE4_IPEAK_S;
+    uint8_t previousIpeakSetting = (uint8_t) (HWREG(SYS0_BASE + SYS0_O_TMUTE4) & SYS0_TMUTE4_IPEAK_M) >> SYS0_TMUTE4_IPEAK_S;
     /* Run in protected region to ensure no interrupt comes in between the writes */
     uintptr_t key = HwiP_disable();
     /*
@@ -408,7 +413,7 @@ uint8_t hal_set_dcdc_ipeak_setting(uint8_t setting)
     */
     HWREG(SYS0_BASE + SYS0_O_MUNLOCK) = SYS0_MUNLOCK_KEY_UNLOCK;
     /* Set IPEAK value */
-    HWREG(SYS0_BASE + SYS0_O_TMUTE4) = (HWREG(SYS0_BASE + SYS0_O_TMUTE4) & ~SYS0_TMUTE4_IPEAK_M) | ((setting << SYS0_TMUTE4_IPEAK_S) & SYS0_TMUTE4_IPEAK_M);
+    HWREG(SYS0_BASE + SYS0_O_TMUTE4) = (HWREG(SYS0_BASE + SYS0_O_TMUTE4) & ~SYS0_TMUTE4_IPEAK_M) | (((uint32_t) setting << SYS0_TMUTE4_IPEAK_S) & SYS0_TMUTE4_IPEAK_M);
     /* Lock the mutable registers by writing something other than the key */
     HWREG(SYS0_BASE + SYS0_O_MUNLOCK) = SYS0_MUNLOCK_KEY_LOCK;
     HwiP_restore(key);
@@ -416,7 +421,7 @@ uint8_t hal_set_dcdc_ipeak_setting(uint8_t setting)
 }
 
 #ifndef SOCFPGA
-static int hal_power_post_notify_fxn(unsigned int eventType, uintptr_t eventArg, uintptr_t clientArg)
+static int RCL_Hal_powerPostNotifyFxn(unsigned int eventType, uintptr_t eventArg, uintptr_t clientArg)
 {
     (void) eventArg;
 
@@ -432,43 +437,47 @@ static int hal_power_post_notify_fxn(unsigned int eventType, uintptr_t eventArg,
         {
             rclPowerNotify(RCL_POWER_STANDBY_ENTER);
         }
+        else
+        {
+            /* Do nothing */
+        }
     }
     return (Power_NOTIFYDONE);
 }
 #endif
 
-void hal_power_set_standby_constraint(void)
+void RCL_Hal_powerSetStandbyConstraint(void)
 {
     /* Note: The power driver requires that setting and releasing constraints come in pairs */
 #ifndef SOCFPGA /* FPGA doesn't support standby */
-    Power_setConstraint(PowerLPF3_DISALLOW_STANDBY);
-    Log_printf(LogModule_RCL, Log_INFO, "hal_power_set_standby_constraint: Power constraints set");
+    (void) Power_setConstraint(PowerLPF3_DISALLOW_STANDBY);
+    Log_printf(LogModule_RCL, Log_INFO, "RCL_Hal_powerSetStandbyConstraint: Power constraints set");
 #endif
 }
 
-void hal_power_release_standby_constraint(void)
+void RCL_Hal_powerReleaseStandbyConstraint(void)
 {
     /* Note: The power driver requires that setting and releasing constraints come in pairs */
 
 #ifndef SOCFPGA /* FPGA doesn't support standby */
-    Power_releaseConstraint(PowerLPF3_DISALLOW_STANDBY);
-    Log_printf(LogModule_RCL, Log_INFO, "hal_power_release_standby_constraint: Power constraints released");
+    (void) Power_releaseConstraint(PowerLPF3_DISALLOW_STANDBY);
+    Log_printf(LogModule_RCL, Log_INFO, "RCL_Hal_powerReleaseStandbyConstraint: Power constraints released");
 #endif
 }
 
-void hal_power_set_swtcxo_update_constraint(void)
+void RCL_Hal_powerSetSwTcxoUpdateConstraint(void)
 {
     /* Note: The power driver requires that setting and releasing constraints come in pairs */
 #ifndef SOCFPGA /* FPGA doesn't support standby */
-    Power_setConstraint(PowerLPF3_DISALLOW_SWTCXO);
+    (void) Power_setConstraint(PowerLPF3_DISALLOW_SWTCXO);
 #endif
 }
 
-void hal_power_release_swtcxo_update_constraint(void)
+void RCL_Hal_powerReleaseSwTcxoUpdateConstraint(void)
 {
     /* Note: The power driver requires that setting and releasing constraints come in pairs */
 #ifndef SOCFPGA /* FPGA doesn't support standby */
-    Power_releaseConstraint(PowerLPF3_DISALLOW_SWTCXO);
+    (void) Power_releaseConstraint(PowerLPF3_DISALLOW_SWTCXO);
     /* If all constraints are now released, perform any update that may have happened while SWTCXO was disallowed */
     if (Power_getConstraintCount(PowerLPF3_DISALLOW_SWTCXO) == 0)
     {
@@ -477,16 +486,16 @@ void hal_power_release_swtcxo_update_constraint(void)
 #endif
 }
 
-void hal_power_open(void (*rclPowerNotifyFunction)(RCL_PowerEvent))
+void RCL_Hal_powerOpen(void (*rclPowerNotifyFunction)(RCL_PowerEvent))
 {
 #ifndef SOCFPGA
    /* Register power notification functions */
-    Power_registerNotify(&powerEnterStandbyObj, PowerLPF3_ENTERING_STANDBY, hal_power_post_notify_fxn, (uintptr_t)rclPowerNotifyFunction);
-    Power_registerNotify(&powerAwakeStandbyObj, PowerLPF3_AWAKE_STANDBY, hal_power_post_notify_fxn, (uintptr_t)rclPowerNotifyFunction);
+    (void) Power_registerNotify(&powerEnterStandbyObj, PowerLPF3_ENTERING_STANDBY, RCL_Hal_powerPostNotifyFxn, (uintptr_t)rclPowerNotifyFunction);
+    (void) Power_registerNotify(&powerAwakeStandbyObj, PowerLPF3_AWAKE_STANDBY, RCL_Hal_powerPostNotifyFxn, (uintptr_t)rclPowerNotifyFunction);
 #endif
 }
 
-void hal_power_close(void)
+void RCL_Hal_powerClose(void)
 {
 #ifndef SOCFPGA
     /* Unregister power notification objects */
@@ -495,38 +504,38 @@ void hal_power_close(void)
 #endif
 }
 
-void hal_temperature_init(void)
+void RCL_Hal_temperatureInit(void)
 {
     Temperature_init();
 }
 
 /* Make function weak to allow tests to override reported temperature */
-__attribute__((weak)) int16_t hal_get_temperature(void)
+__attribute__((weak)) int16_t RCL_Hal_getTemperature(void)
 {
     return Temperature_getTemperature();
 }
 
 /* Make function weak to allow tests to override reported VDDS voltage */
-__attribute__((weak)) uint16_t hal_get_vdds_voltage(void)
+__attribute__((weak)) uint16_t RCL_Hal_getVddsVoltage(void)
 {
     return BatteryMonitor_getVoltage();
 }
 
-uint32_t hal_get_hfxt_ratio(void)
+uint32_t RCL_Hal_getHfxtRatio(void)
 {
-    return (HWREG(CKMD_BASE + CKMD_O_HFTRACKCTL) & CKMD_HFTRACKCTL_RATIO_M) >> CKMD_HFTRACKCTL_RATIO_S;
+    return (uint32_t) (HWREG(CKMD_BASE + CKMD_O_HFTRACKCTL) & CKMD_HFTRACKCTL_RATIO_M) >> CKMD_HFTRACKCTL_RATIO_S;
 }
 
-uint32_t hal_get_hfxt_ratio_default(void)
+uint32_t RCL_Hal_getHfxtRatioDefault(void)
 {
-#ifdef DeviceFamily_CC27XX
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     return 0x00200000U;
 #else
     return RCL_DEFAULT_HFTRACKCTL_RATIO;
 #endif
 }
 
-static void hal_temperature_post_notify_fxn(int16_t currentTemperature,
+static void RCL_Hal_temperaturePostNotifyFxn(int16_t currentTemperature,
                                             int16_t thresholdTemperature,
                                             uintptr_t clientArg,
                                             Temperature_NotifyObj *notifyObject)
@@ -541,19 +550,19 @@ static void hal_temperature_post_notify_fxn(int16_t currentTemperature,
     }
 }
 
-void hal_set_temperature_notification(int16_t currentTemperature, uint16_t temperatureRange, void (*rclTemperatureNotify)(int16_t))
+void RCL_Hal_setTemperatureNotification(int16_t currentTemperature, uint16_t temperatureRange, void (*rclTemperatureNotify)(int16_t))
 {
     /* Register the notification again with updated thresholds. Notification thresholds must be crossed to
      * trigger, so the upper and lower limits are decreased by 1 to maintain a range of +/- delta.
      */
-    Temperature_registerNotifyRange(&temperatureChangeNotifyObj,
-                                    currentTemperature + temperatureRange - 1,
-                                    currentTemperature - temperatureRange + 1,
-                                    hal_temperature_post_notify_fxn,
-                                    (uintptr_t) rclTemperatureNotify);
+    (void) Temperature_registerNotifyRange(&temperatureChangeNotifyObj,
+                                            currentTemperature + (int16_t)temperatureRange - 1,
+                                            currentTemperature - (int16_t)temperatureRange + 1,
+                                            RCL_Hal_temperaturePostNotifyFxn,
+                                            (uintptr_t) rclTemperatureNotify);
 }
 
-void hal_stop_temperature_notification(void)
+void RCL_Hal_stopTemperatureNotification(void)
 {
-    Temperature_unregisterNotify(&temperatureChangeNotifyObj);
+    (void) Temperature_unregisterNotify(&temperatureChangeNotifyObj);
 }

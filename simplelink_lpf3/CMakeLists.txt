@@ -90,15 +90,15 @@ endif()
 if(CONFIG_HAS_CC27XX_SDK)
 
   if(CONFIG_SOC_CC2745R10_Q1)
-    zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
+    zephyr_compile_definitions(DeviceFamily_CC27XXX10 ${COMPILER})
   endif()
 
   if(CONFIG_SOC_CC2755R10)
-    zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
+    zephyr_compile_definitions(DeviceFamily_CC27XXX10 ${COMPILER})
   endif()
 
   if(CONFIG_SOC_CC2755P10)
-    zephyr_compile_definitions(DeviceFamily_CC27XX ${COMPILER})
+    zephyr_compile_definitions(DeviceFamily_CC27XXX10 ${COMPILER})
   endif()
 
   zephyr_include_directories(

@@ -40,7 +40,9 @@
 #include <ti/drivers/dpl/ClockP.h>
 #include <ti/drivers/dpl/DebugP.h>
 
+#ifndef __ZEPHYR__
 #include <ti/drivers/ITM.h>
+#endif
 #include <ti/drivers/Power.h>
 #include <ti/drivers/power/PowerCC27XX.h>
 #include <ti/drivers/Temperature.h>
@@ -115,7 +117,9 @@ typedef enum
 /* Forward declarations */
 int_fast16_t PowerCC27XX_notify(uint_fast16_t eventType);
 static void PowerCC27XX_oscillatorISR(uintptr_t arg);
+#ifndef __ZEPHYR__
 static void PowerCC27XX_rtcISR(uintptr_t arg);
+#endif
 static void PowerCC27XX_enterStandby(void);
 static void PowerCC27XX_setDependencyCount(Power_Resource resourceId, uint8_t count);
 bool PowerCC27XX_isValidResourceId(Power_Resource resourceId);
@@ -1751,6 +1755,7 @@ static void PowerCC27XX_oscillatorISR(uintptr_t arg)
 /*
  *  ======== PowerCC27XX_rtcISR ========
  */
+#ifndef __ZEPHYR__
 static void PowerCC27XX_rtcISR(uintptr_t arg)
 {
     /* We should never get here since we will just use the interrupt to wake
@@ -1759,7 +1764,7 @@ static void PowerCC27XX_rtcISR(uintptr_t arg)
      */
     HWREG(RTC_BASE + RTC_O_ICLR) = HWREG(RTC_BASE + RTC_O_MIS);
 }
-
+#endif
 /*
  *  ======== PowerCC27XX_startHFXT ========
  * It should be ensured that the system does not vector to the CKMD interrupt
