@@ -39,14 +39,16 @@
 #include <zephyr/drivers/flash.h>
 #include <zephyr/logging/log.h>
 
+#ifdef CONFIG_WIFI_TI_CC33XX
+#include <cc33xx_fw_blobs.h>
+#endif /* CONFIG_WIFI_TI_CC33XX */
+
 #define FW_SLOT1_DEV    FIXED_PARTITION_DEVICE(wifi_fw_slot1_partition)
 #define FW_SLOT1_OFFSET FIXED_PARTITION_OFFSET(wifi_fw_slot1_partition)
 #define FW_SLOT2_DEV    FIXED_PARTITION_DEVICE(wifi_fw_slot2_partition)
 #define FW_SLOT2_OFFSET FIXED_PARTITION_OFFSET(wifi_fw_slot2_partition)
 
 LOG_MODULE_REGISTER(osi_filesystem, CONFIG_LOG_DEFAULT_LEVEL);
-
-#define ATTRIBUTE __attribute__((used))
 
 /*
  * NVS item IDs - direct mapping from TI's NVOCMP item IDs.
@@ -128,14 +130,19 @@ static osiFileP_t conf_file = {
 	.ftype = OSI_FILE_CONF,
 };
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 /* Runtime offset of conf.bin within vendor_image_partition */
 static off_t conf_flash_offset;
 static bool conf_flash_found;
+#endif /* CONFIG_HAS_CC35XX_SDK */
+
 
 /* Module state */
 static struct nvs_fs wifi_nvs;
 static uint32_t active_fw_slot = OSI_FLASH_CONNECTIVITY_FW_SLOT_1;
+#ifdef CONFIG_HAS_CC35XX_SDK
 static uint32_t fw_gpe_data_offset = FW_GPE_DATA_OFFSET_DEFAULT;
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 /* NVS ID lookup table indexed by osiInternalType_e */
 static const uint16_t nvs_id_map[] = {
@@ -147,6 +154,7 @@ static const uint16_t nvs_id_map[] = {
 	[OSI_FILE_WLAN_FAST_CONNECT]      = NVS_ID_WLAN_FAST_CONN,
 };
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 /*
  * GPE TLV parser
  * This function gets the offset to the protected TLV manifest
@@ -266,6 +274,7 @@ static void osi_conf_flash_init(void)
 	LOG_DBG("cc35xx-conf loaded from flash GPE at 0x%x",
 		(unsigned int)conf_flash_offset);
 }
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 /*
  * Initialize the NVS filesystem on the wifi-nvs partition.
@@ -275,8 +284,10 @@ static int osi_nvs_init(void)
 	int rc;
 	struct flash_pages_info info;
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 	/* Find conf in flash GPE */
 	osi_conf_flash_init();
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 	wifi_nvs.flash_device = FIXED_PARTITION_DEVICE(wifi_nvs_partition);
 	if (!device_is_ready(wifi_nvs.flash_device)) {
@@ -368,7 +379,11 @@ FILE *ATTRIBUTE osi_fopen(const char *_fname, const char *_mode)
 			return NULL;
 		}
 		f->ftype = OSI_FILE_RAMBTLR;
+#ifdef CONFIG_HAS_CC35XX_SDK
 		f->ptr = NULL;
+#else
+		f->ptr = (void*)gRAMbootBuffer;
+#endif /* CONFIG_HAS_CC35XX_SDK */
 		return (FILE *)f;
 	}
 
@@ -384,12 +399,22 @@ FILE *ATTRIBUTE osi_fopen(const char *_fname, const char *_mode)
 			f->ftype = OSI_FILE_CONNECTIVITY_FW_SLOT_2;
 		}
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 		f->ptr = NULL;
+#else
+		f->ptr = (void*)gFWbuffer;
+#endif /* CONFIG_HAS_CC35XX_SDK */
 		return (FILE *)f;
 	}
 
 	if (strcmp("cc35xx-conf", _fname) == 0) {
-		return (FILE *)&conf_file;
+		f = &conf_file;
+#ifdef CONFIG_HAS_CC35XX_SDK
+		f->ptr = NULL;
+#else
+		f->ptr = (void*)gINIbuffer;
+#endif /* CONFIG_HAS_CC35XX_SDK */
+		return (FILE *)f;
 	}
 
 	/* NV-backed files */
@@ -419,9 +444,11 @@ FILE *ATTRIBUTE osi_fopen(const char *_fname, const char *_mode)
 size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp)
 {
 	osiFileP_t *f = (osiFileP_t *)_fp;
+#ifdef CONFIG_HAS_CC35XX_SDK
 	const struct device *fw_dev;
 	off_t fw_base;
 	int ret;
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 	if (!f) {
 		return 0;
@@ -437,6 +464,11 @@ size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp)
 	}
 
 	if (f->ftype == OSI_FILE_CONF) {
+		if (f->ptr) {
+			memcpy(_ptr, (void *)((uintptr_t)(f->ptr) + offset), len);
+			return len;
+		}
+#ifdef CONFIG_HAS_CC35XX_SDK
 		if (!conf_flash_found) {
 			LOG_ERR("Conf not found in flash GPE");
 			return 0;
@@ -449,10 +481,16 @@ size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp)
 			return 0;
 		}
 		return len;
+#endif /* CONFIG_HAS_CC35XX_SDK */
 	}
 
 	if (f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_1 ||
 	    f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_2) {
+		if (f->ptr) {
+			memcpy(_ptr, (void *)((uintptr_t)(f->ptr) + offset), len);
+			return len;
+		}
+#ifdef CONFIG_HAS_CC35XX_SDK
 		fw_dev = (f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_1)
 			 ? FW_SLOT1_DEV : FW_SLOT2_DEV;
 		fw_base = (f->ftype == OSI_FILE_CONNECTIVITY_FW_SLOT_1)
@@ -465,6 +503,7 @@ size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp)
 			return 0;
 		}
 		return len;
+#endif /* CONFIG_HAS_CC35XX_SDK */
 	}
 
 	if (IS_NV_FILE(f->ftype)) {
@@ -532,4 +571,4 @@ size_t ATTRIBUTE osi_filelength(const char *FileName)
 	return 0;
 }
 
-SYS_INIT(osi_nvs_init, POST_KERNEL, CONFIG_WIFI_TI_CC35XX_NVS_INIT_PRIORITY);
+SYS_INIT(osi_nvs_init, POST_KERNEL, CONFIG_WIFI_TI_CC3XXX_NVS_INIT_PRIORITY);

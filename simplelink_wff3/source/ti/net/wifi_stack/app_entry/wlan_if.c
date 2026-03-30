@@ -76,7 +76,9 @@ Bool_e g_wait_p2p_scan_complete = FALSE;
 OsiSyncObj_t p2p_find_stopped_syncObj = NULL;
 #endif // CC35XX
 
+#ifdef CONFIG_WIFI_TI_CC35XX
 #define WLAN_PROTECTION
+#endif /* CONFIG_WIFI_TI_CC35XX */
 
 extern StartRoleApps_t gRoleAppsParams;
 extern TFwEvent *gFwEvent;
@@ -905,22 +907,24 @@ int Wlan_Start(WlanEventHandlerCB_t eventHandlerCB)
     }
     set_finish_wlan_start();
 
-    ret = l2_cfg_GetStaHeSupport();
-    if (ret != WLAN_RET_CODE_OK)
-    {
-        return ret;
-    }
-    //get L2 support 5Ghz
-    {
-        extern Bool32 gL2Support5Ghz;
-        uint8_t is5GhzSupported = 0;
-        ret = l2_cfg_get5GhzSupport(&is5GhzSupported);
-        if (ret != WLAN_RET_CODE_OK)
-        {
-            return ret;
-        }
-        gL2Support5Ghz = (is5GhzSupported) ? TRUE : FALSE;
-    }   
+#ifdef CONFIG_WIFI_TI_CC35XX
+     ret = l2_cfg_GetStaHeSupport();
+     if (ret != WLAN_RET_CODE_OK)
+     {
+         return ret;
+     }
+     //get L2 support 5Ghz
+     {
+         extern Bool32 gL2Support5Ghz;
+         uint8_t is5GhzSupported = 0;
+         ret = l2_cfg_get5GhzSupport(&is5GhzSupported);
+         if (ret != WLAN_RET_CODE_OK)
+         {
+             return ret;
+         }
+         gL2Support5Ghz = (is5GhzSupported) ? TRUE : FALSE;
+     }
+#endif /* CONFIG_WIFI_TI_CC35XX */
 
     gWlanState = TRUE;
     return OSI_OK;

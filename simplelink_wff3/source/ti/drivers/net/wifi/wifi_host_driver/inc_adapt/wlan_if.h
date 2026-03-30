@@ -1555,10 +1555,8 @@ typedef struct
     uint16_t maxChannel;
     uint8_t  numOfChannels;
     uint32_t chanBitmap;
-#ifdef CC35XX
-    uint8_t  customIndex; // This param is used in CC35xx only
-    uint8_t  resetEntry;  // This param is used in CC35xx only
-#endif
+    uint8_t  customIndex;
+    uint8_t  resetEntry;
 } WlanSetRegDomainCustomEntry_t;
 
 typedef struct

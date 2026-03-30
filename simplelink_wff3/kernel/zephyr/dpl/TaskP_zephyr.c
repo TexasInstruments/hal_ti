@@ -9,10 +9,12 @@
 
 #include <zephyr/sys/__assert.h>
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 #include <inc/hw_types.h>
 #include <inc/hw_ints.h>
 
 #include <driverlib/interrupt.h>
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 #include <kernel/zephyr/dpl/dpl.h>
 #include <ti/drivers/dpl/TaskP.h>
@@ -82,6 +84,7 @@ void TaskP_Params_init(TaskP_Params *params)
 /*
  *  ======== TaskP_create ========
  */
+
 TaskP_Handle TaskP_create(TaskP_Function fxn, const TaskP_Params *params)
 {
     k_tid_t task_tid;
@@ -94,17 +97,17 @@ TaskP_Handle TaskP_create(TaskP_Function fxn, const TaskP_Params *params)
 
         /* TaskP uses inversed priority to Zephyr */
         task_tid = k_thread_create(task, task_stack,
-                            K_THREAD_STACK_SIZEOF(task_stack),
+                            params->stackSize,
                             (k_thread_entry_t) fxn,
                             params->arg, NULL, NULL,
                             (0 - params->priority), 0, K_NO_WAIT);
         if(task_tid != NULL)
         {
             k_thread_name_set(task_tid, params->name);
+            return ((TaskP_Handle)task);
         }
     }
-
-    return ((TaskP_Handle)task);
+    return NULL;
 }
 
 /*

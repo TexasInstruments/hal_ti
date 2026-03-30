@@ -9,10 +9,12 @@
 #include <assert.h>
 #include <zephyr/sys/__assert.h>
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 #include <inc/hw_types.h>
 #include <inc/hw_ints.h>
 
 #include <driverlib/interrupt.h>
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 #include <kernel/zephyr/dpl/dpl.h>
 #include <ti/drivers/dpl/MessageQueueP.h>

@@ -8,6 +8,7 @@
 #include <zephyr/sys/__assert.h>
 #include <ti/drivers/dpl/HwiP.h>
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 #include <inc/hw_types.h>
 #include <inc/hw_ints.h>
 
@@ -202,6 +203,7 @@ void HwiP_disableInterrupt(int interruptNum)
 {
     irq_disable(interruptNum - 16);
 }
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 uintptr_t HwiP_disable(void)
 {
@@ -217,6 +219,7 @@ void HwiP_restore(uintptr_t key)
     irq_unlock(key);
 }
 
+#ifdef CONFIG_HAS_CC35XX_SDK
 void HwiP_post(int interruptNum)
 {
     IntSetPend((uint32_t)interruptNum);
@@ -309,3 +312,4 @@ bool HwiP_inSwi(void)
 
     return (false);
 }
+#endif /* CONFIG_HAS_CC35XX_SDK */

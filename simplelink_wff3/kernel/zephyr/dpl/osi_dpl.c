@@ -62,9 +62,6 @@ uint32_t heapDbg_alloc_fail = 0;
 int64_t heapDbg_total_alloc = 0;
 #endif
 
-// ClockP ticks per millisecond — avoids ClockP_getSystemTickPeriod()*1000 overflow.
-#define ClockP_TICK_PERIOD_MS      (CONFIG_SYS_CLOCK_TICKS_PER_SEC / 1000U)
-
 /*******************************************************************************
 
     MISCELLANEOUS

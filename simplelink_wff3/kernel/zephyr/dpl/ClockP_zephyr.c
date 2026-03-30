@@ -42,10 +42,12 @@
 #include <ti/drivers/dpl/HwiP.h>
 
 /* Driverlib includes*/
+#ifdef CONFIG_HAS_CC35XX_SDK
 #include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(inc/hw_types.h)
 #include DeviceFamily_constructPath(inc/hw_memmap.h)
 #include DeviceFamily_constructPath(inc/hw_systim.h)
+#endif /* CONFIG_HAS_CC35XX_SDK */
 
 /** Max number of ClockP ticks into the future supported by this ClockP
  * implementation.
