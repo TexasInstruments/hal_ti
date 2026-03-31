@@ -32,6 +32,7 @@
 
 set(SOURCES_DRIVERLIB
   aes_gcc.s
+  chipinfo.c
   ckmd.c
   cpu.c
   evtsvt.c
