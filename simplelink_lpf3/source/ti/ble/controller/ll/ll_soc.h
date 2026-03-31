@@ -1,23 +1,21 @@
 /******************************************************************************
 
- @file  ctrl_opt_ble_health.c
+ @file  ll_soc.h
 
- @brief Implementation of the feature wrapper functions that direct to the full
-        feature implementations.
-        Enabling the feature by linking the wrapper functions to the real
-        implementations defined in the library.
+ @brief SoC-specific tuning parameters for the BLE Link Layer.
 
-        Usage:
-        Include this file in the build only when the feature is enabled.
-        Add to the project BLE_HEALTH defines
-        The real functions must be implemented in the linked library.
+        The defines in this file are intentionally named with the
+        SOC_ prefix to signal that their values differ across
+        device families and must not be treated as fixed constants.
+        Any addition here should be accompanied by a comment explaining
+        which hardware characteristic drives the per-SoC difference.
 
  Group: WCS, BTS
  Target Device: cc23xx
 
  ******************************************************************************
  
- Copyright (c) 2025-2026, Texas Instruments Incorporated
+ Copyright (c) 2026, Texas Instruments Incorporated
 
  All rights reserved not granted herein.
  Limited License.
@@ -77,62 +75,39 @@
  
  
  *****************************************************************************/
+#ifndef LL_SOC_H
+#define LL_SOC_H
 
-#include "ti/ble/stack_util/lib_opt/opt_dependencies.h"
-#include "ti/ble/stack_util/lib_opt/ctrl_stub_ble_health.h"
+#include <ti/devices/DeviceFamily.h>
+#include "ti/ble/controller/ll/ll_ble.h"
 
-#if defined(BLE_HEALTH)
+/*******************************************************************************
+ * SOC-SPECIFIC CONSTANTS
+ *
+ * CC27XX  - Hardware DRBG and faster CPU allow a tighter offset.
+ * Default - All other platforms (CC23X0, ...) use software DRBG or have a
+ *           slower CPU, requiring a larger lead time before the first CS subevent.
+ */
 
+/* Minimum CS event offset (in units of 0.625 ms) from the ACL anchor point
+ * to the start of the first CS subevent. The value must satisfy the spec
+ * minimum (500 us) and must be large enough for the SoC's processing
+ * pipeline (DRBG generation, step buffer fill, RCL command setup). */
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    #define SOC_CS_OWN_OFFSET_MIN    1500
+#else
+    #define SOC_CS_OWN_OFFSET_MIN    3000
+#endif
 
+/* Lead time (in RAT ticks) added to the current time when scheduling the
+ * first CS test subevent anchor point. Must cover the full SW path from
+ * test-command reception to RCL submission, including DRBG step generation.
+ * CC27XX: 500 us is sufficient for hardware DRBG platforms.
+ * Default: software DRBG and slower CPU require 1.5 ms. */
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    #define SOC_CS_TEST_ANCHOR_LEAD_TIME    RAT_TICKS_IN_500US
+#else
+    #define SOC_CS_TEST_ANCHOR_LEAD_TIME    RAT_TICKS_IN_1_5MS
+#endif
 
-uint8_t OPT_llDbgInf_addSchedRec(taskInfo_t* const llTask)
-{
-    return llDbgInf_addSchedRec(llTask);
-}
-
-uint8_t OPT_DbgInf_addSchedRec(DbgInf_schedNewRec_t* const newRec)
-{
-    return DbgInf_addSchedRec(newRec);
-}
-
-uint8_t OPT_DbgInf_addConnEst(uint16_t connId, uint8_t connRole, uint8_t encEnabled)
-{
-    return DbgInf_addConnEst(connId, connRole, encEnabled);
-}
-
-uint8_t OPT_llDbgInf_addConnTerm(uint16_t connHandle, uint8_t reasonCode)
-{
-    return llDbgInf_addConnTerm(connHandle, reasonCode);
-}
-
-uint8_t OPT_DbgInf_addConnTerm(DbgInf_connTermRec_t* const newRec)
-{
-    return DbgInf_addConnTerm(newRec);
-}
-
-uint8_t OPT_DbgInf_addErrorRec(uint16_t newError)
-{
-    return DbgInf_addErrorRec(newError);
-}
-
-int32_t OPT_DbgInf_init(uint16_t domainBitmap)
-{
-    return DbgInf_init(domainBitmap);
-}
-
-int32_t OPT_DbgInf_clear(uint16_t domainBitmap)
-{
-    return DbgInf_clear(domainBitmap);
-}
-
-uint16_t OPT_DbgInf_get(uint8_t* const pBuf, uint16_t len, uint16_t reqDomainBitmap)
-{
-    return DbgInf_get(pBuf, len, reqDomainBitmap);
-}
-
-int32_t OPT_DbgInf_halt(void)
-{
-    return DbgInf_halt();
-}
-
-#endif /* defined(BLE_HEALTH) */
+#endif /* LL_SOC_H */

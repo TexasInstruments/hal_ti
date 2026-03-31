@@ -1,6 +1,6 @@
 /******************************************************************************
 
- @file  ctrl_opt_rssi_monitor.c
+ @file  ctrl_opt_coex.c
 
  @brief Implementation of the feature wrapper functions that direct to the full
         feature implementations.
@@ -9,7 +9,7 @@
 
         Usage:
         Include this file in the build only when the feature is enabled.
-        Add to the project RSSI_MONITOR defines
+        Add to the project USE_COEX defines
         The real functions must be implemented in the linked library.
 
  Group: WCS, BTS
@@ -79,90 +79,65 @@
  *****************************************************************************/
 
 #include "ti/ble/stack_util/lib_opt/opt_dependencies.h"
-#include "ti/ble/stack_util/lib_opt/ctrl_stub_rssi_monitor.h"
+#include "ti/ble/stack_util/lib_opt/ctrl_stub_coex.h"
 
-#if defined(RSSI_MONITOR)
+#if defined(USE_COEX)
 
 
 
-llStatus_t OPT_LL_RssiMon_Open(void)
+RCL_CmdBle5Advertiser OPT_RCL_CmdBle5Advertiser_init(void)
 {
-    return LL_RssiMon_Open();
+    return LL_COEX_RCL_CmdBle5Advertiser_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_Close(void)
+RCL_CmdBle5AuxAdvertiser OPT_RCL_CmdBle5AuxAdvertiser_init(void)
 {
-    return LL_RssiMon_Close();
+    return LL_COEX_RCL_CmdBle5AuxAdvertiser_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_GetRssiStat(uint8_t connId, int8_t* pRssiStat)
+RCL_CmdBle5PeriodicAdvertiser OPT_RCL_CmdBle5PeriodicAdvertiser_init(void)
 {
-    return LL_RssiMon_GetRssiStat(connId, pRssiStat);
+    return LL_COEX_RCL_CmdBle5PeriodicAdvertiser_DefaultRuntime();
 }
 
-llRssiMonCbHandle_t OPT_LL_RssiMon_Reg(uint8_t connId, int8_t lowRssiThresh, int8_t highRssiThresh, pfnRssiMonThreshCB_t pfnCB)
+RCL_CmdBle5Initiator OPT_RCL_CmdBle5Initiator_init(void)
 {
-    return LL_RssiMon_Reg(connId, lowRssiThresh, highRssiThresh, pfnCB);
+    return LL_COEX_RCL_CmdInitiator_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_Unreg(llRssiMonCbHandle_t regHandle)
+RCL_CmdBle5Scanner OPT_RCL_CmdBle5Scanner_init(void)
 {
-    return LL_RssiMon_Unreg(regHandle);
+    return LL_COEX_RCL_CmdScanner_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_UnregByConnId(uint8_t connId)
+RCL_CmdBle5PeriodicScanner OPT_RCL_CmdBle5PeriodicScanner_init(void)
 {
-    return LL_RssiMon_UnregByConnId(connId);
+    return LL_COEX_RCL_CmdPeriodicScanner_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_SetConfig(int8_t incomeRssiWeight, uint8_t minRssiSamples)
+RCL_CmdBle5Connection OPT_RCL_CmdBle5Connection_init(void)
 {
-    return LL_RssiMon_SetConfig(incomeRssiWeight, minRssiSamples);
+    return LL_COEX_RCL_CmdBle5Connection_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_GetConfig(int8_t* pIncomeRssiWeight, uint8_t* pMinRssiSamples)
+RCL_CmdBle5GenericRx OPT_RCL_CmdBle5GenericRx_init(void)
 {
-    return LL_RssiMon_GetConfig(pIncomeRssiWeight, pMinRssiSamples);
+    return LL_COEX_RCL_CmdBle5GenericRx_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_Execute(uint8_t connId)
+RCL_CmdBle5GenericTx OPT_RCL_CmdBle5GenericTx_init(void)
 {
-    return LL_RssiMon_Execute(connId);
+    return LL_COEX_RCL_CmdBle5GenericTx_DefaultRuntime();
 }
 
-llStatus_t OPT_LL_RssiMon_ClearConnData(uint8_t connId)
+RCL_CtxGenericTx OPT_RCL_CtxGenericTx_init(void)
 {
-    return LL_RssiMon_ClearConnData(connId);
+    return LL_COEX_RCL_CtxGenericTx_DefaultRuntime();
 }
 
-void OPT_HCI_EXT_RssiMon_ReportCB(uint8_t handle, int8_t threshPass)
+RCL_CmdBle5ChAssessment OPT_RCL_CmdBle5ChAssessment_init(void)
 {
-    HCI_EXT_RssiMon_ReportCB(handle, threshPass);
+    return LL_COEX_RCL_CmdBle5ChAssessment_DefaultRuntime();
 }
 
-hciStatus_t OPT_hci_ext_RssiMon_RegCmd(uint16_t connHandle, int8_t lowRssiThresh, int8_t highRssiThresh)
-{
-    return hci_ext_RssiMon_RegCmd(connHandle, lowRssiThresh, highRssiThresh);
-}
-
-hciStatus_t OPT_hci_ext_RssiMon_UnregCmd(llRssiMonCbHandle_t regHandle)
-{
-    return hci_ext_RssiMon_UnregCmd(regHandle);
-}
-
-hciStatus_t OPT_hci_ext_RssiMon_SetConfigCmd(int8_t incomeRssiWeight, uint8_t minRssiSamples)
-{
-    return hci_ext_RssiMon_SetConfigCmd(incomeRssiWeight, minRssiSamples);
-}
-
-hciStatus_t OPT_hci_ext_RssiMon_GetConfigCmd(void)
-{
-    return hci_ext_RssiMon_GetConfigCmd();
-}
-
-hciStatus_t OPT_hci_ext_RssiMon_GetRssiStatCmd(uint16_t connHandle)
-{
-    return hci_ext_RssiMon_GetRssiStatCmd(connHandle);
-}
-
-#endif /* defined(RSSI_MONITOR) */
+#endif /* defined(USE_COEX) */

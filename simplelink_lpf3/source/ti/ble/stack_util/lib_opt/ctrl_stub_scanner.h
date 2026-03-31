@@ -102,13 +102,11 @@ extern uint8_t llCheckScanPriority(uint16_t taskID, uint8_t connPriority);
 extern uint8_t LL_IsScannerWithRandomAddress(void);
 extern void llUpdateScannSecTaskTimeGap(uint32_t* timeGap);
 extern void llUpdateTimeGapForScanWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime);
-extern llStatus_t HCI_TL_set_scan_param(uint16_t opcode, uint8_t* pHciParams, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
-extern llStatus_t HCI_TL_set_ext_scan_param(uint16_t opcode, uint8_t* pHciParams, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
-extern llStatus_t HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
-extern llStatus_t HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 extern void llStopCurrentScan(void);
 extern void llCmdScanStartedEventHandle(void);
-extern void hci_tl_initScanCallbacks(void);
+extern void HCI_InitScanCallbacks(void);
+extern hciStatus_t hciCmdParserLegacyScanner(uint8_t* pData, uint16_t cmdOpCode);
+extern hciStatus_t hciCmdParserScanner(uint8_t* pData, uint16_t cmdOpCode);
 
 
 // Wrapper functions for the feature implementations
@@ -128,12 +126,10 @@ uint8_t OPT_llCheckScanPriority(uint16_t taskID, uint8_t connPriority);
 uint8_t OPT_LL_IsScannerWithRandomAddress(void);
 void OPT_llUpdateScannSecTaskTimeGap(uint32_t* timeGap);
 void OPT_llUpdateTimeGapForScanWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime);
-llStatus_t OPT_HCI_TL_set_scan_param(uint16_t opcode, uint8_t* pHciParams, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
-llStatus_t OPT_HCI_TL_set_ext_scan_param(uint16_t opcode, uint8_t* pHciParams, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
-llStatus_t OPT_HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
-llStatus_t OPT_HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams);
 void OPT_llStopCurrentScan(void);
 void OPT_llCmdScanStartedEventHandle(void);
-void OPT_hci_tl_initScanCallbacks(void);
+void OPT_HCI_InitScanCallbacks(void);
+hciStatus_t OPT_hciCmdParserLegacyScanner(uint8_t* pData, uint16_t cmdOpCode);
+hciStatus_t OPT_hciCmdParserScanner(uint8_t* pData, uint16_t cmdOpCode);
 
 #endif /* CTRL_SCANNER_H_ */

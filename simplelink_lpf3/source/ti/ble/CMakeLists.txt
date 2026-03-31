@@ -113,6 +113,17 @@ if (CONFIG_BT_PER_ADV_SYNC_TRANSFER_RECEIVER)
     -DUSE_PAST_RECEIVER
   )
 endif()
+if (CONFIG_BT_CHANNEL_SOUNDING)
+  zephyr_compile_definitions(
+    -DCHANNEL_SOUNDING
+  )
+endif()
+if (CONFIG_BT_CTLR_COEX_TICKER)
+  zephyr_compile_definitions(
+    -DUSE_COEX
+  )
+endif()
+
 
 zephyr_compile_definitions(
   -DCONTROLLER_ONLY
@@ -125,6 +136,8 @@ zephyr_compile_definitions(
 
 # BLE files that are used for library optimizations and should be part of the application
 zephyr_library_sources(
+  app_util/config/src/ble_config_zephyr.c
+  app_util/config/src/hci_supported_cmd.c
   stack_util/lib_opt/src/ctrl_opt_past_receiver.c
   stack_util/lib_opt/src/ctrl_opt_past_sender.c
   stack_util/lib_opt/src/ctrl_opt_pawr_scan.c
@@ -136,19 +149,24 @@ zephyr_library_sources(
   stack_util/lib_opt/src/ctrl_opt_connectable.c
   stack_util/lib_opt/src/ctrl_opt_scanner.c
   stack_util/lib_opt/src/ctrl_opt_power_control.c
-  stack_util/lib_opt/src/ctrl_opt_rssi_monitor.c
-  stack_util/lib_opt/src/ctrl_opt_health_check.c
   stack_util/lib_opt/src/ctrl_opt_adv_conn.c
   stack_util/lib_opt/src/ctrl_opt_adv_nconn.c
   stack_util/lib_opt/src/ctrl_opt_ae.c
   stack_util/lib_opt/src/ctrl_opt_adaptivity.c
   stack_util/lib_opt/src/ctrl_opt_vendor_specific_cmd.c
   stack_util/lib_opt/src/ctrl_opt_ext_vendor_specific_cmd.c
+  stack_util/lib_opt/src/ctrl_opt_pawr_advertiser.c
+  stack_util/lib_opt/src/ctrl_opt_coex.c
+  # The following ctrl_opt features are TI proprietary and not included in Zephyr builds:
   #stack_util/lib_opt/src/ctrl_opt_ble_health.c
-  #stack_util/lib_opt/src/ctrl_opt_adaptivity.c
   #stack_util/lib_opt/src/ctrl_opt_legacy_cmd.c
-  app_util/config/src/ble_config_zephyr.c
-  app_util/config/src/hci_supported_cmd.c
+  #stack_util/lib_opt/src/ctrl_opt_cm.c
+  #stack_util/lib_opt/src/ctrl_opt_connection_handover.c
+  #stack_util/lib_opt/src/ctrl_opt_dmm.c
+  #stack_util/lib_opt/src/ctrl_opt_dmm_dynamic_priority.c
+  #stack_util/lib_opt/src/ctrl_opt_ts_periodic.c
+  #stack_util/lib_opt/src/ctrl_opt_health_check.c
+  #stack_util/lib_opt/src/ctrl_opt_rssi_monitor.c
 )
 
 function(add_prebuilt_library lib_name prebuilt_path)

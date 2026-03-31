@@ -93,7 +93,7 @@ extern "C"
 /*******************************************************************************
  * INCLUDES
  */
-#include <ti/drivers/rcl/RCL.h>
+#include <ti/drivers/RCL.h>
 #include "ti/ble/stack_util/bcomdef.h"
 /*******************************************************************************
  * MACROS
@@ -146,7 +146,6 @@ extern "C"
 // Task State
 #define LL_TASK_STATE_INACTIVE                   0
 #define LL_TASK_STATE_ACTIVE                     1
-#define LL_TASK_STATE_UNDEFINED                  0xFF
 
 // Save State Data
 #define ACCESS_ADDR_LEN                          4
@@ -261,7 +260,7 @@ extern RCL_Command *llSchedulerGetCsCmd( void );
 extern taskInfo_t *llGetTask( uint16 llTaskID );
 extern uint8       llGetTaskState( uint16 llTaskID );
 extern uint8       llActiveTask( uint16 llTaskID );
-extern uint8       llGetActiveTasks( void );
+extern uint16      llGetActiveTasks( void );
 uint16_t           llGetCurTaskID( void );
 extern uint8       llGetNumTasks( void );
 extern void        llSetupRatCompare( taskInfo_t *llTask );

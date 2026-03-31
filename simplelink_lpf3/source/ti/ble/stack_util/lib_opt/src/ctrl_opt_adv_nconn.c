@@ -215,4 +215,9 @@ void OPT_hci_tl_initAdvCallbacks(void)
     hci_tl_initAdvCallbacks();
 }
 
+void OPT_llCmdAdvStartedEventHandle(void)
+{
+    llCmdAdvStartedEventHandle();
+}
+
 #endif /* defined(CTRL_ADV_NCONN_CFG) */

@@ -1,16 +1,10 @@
 /******************************************************************************
 
- @file  ctrl_opt_dmm.c
+ @file  ll_pawr_common.h
 
- @brief Implementation of the feature wrapper functions that direct to the full
-        feature implementations.
-        Enabling the feature by linking the wrapper functions to the real
-        implementations defined in the library.
-
-        Usage:
-        Include this file in the build only when the feature is enabled.
-        Add to the project USE_DMM defines
-        The real functions must be implemented in the linked library.
+ @brief This file contains the Link Layer (LL) types, constants,
+        API's etc. for the Bluetooth Low Energy (BLE) Controller
+        Periodic Advertising with Responses Common definitions.
 
  Group: WCS, BTS
  Target Device: cc23xx
@@ -78,41 +72,75 @@
  
  *****************************************************************************/
 
-#include "ti/ble/stack_util/lib_opt/opt_dependencies.h"
-#include "ti/ble/stack_util/lib_opt/ctrl_stub_dmm.h"
+/*********************************************************************
+ *
+ * WARNING!!!
+ *
+ * THE API'S FOUND IN THIS FILE ARE FOR INTERNAL STACK USE ONLY!
+ * FUNCTIONS SHOULD NOT BE CALLED DIRECTLY FROM APPLICATIONS, AND ANY
+ * CALLS TO THESE FUNCTIONS FROM OUTSIDE OF THE STACK MAY RESULT IN
+ * UNEXPECTED BEHAVIOR.
+ *
+ */
 
-#if defined(USE_DMM)
+#ifndef LL_PAWR_COMMON_H
+#define LL_PAWR_COMMON_H
 
-
-
-RCL_CommandStatus OPT_RCL_Command_submit(RCL_Handle h, RCL_Command_Handle c)
+#ifdef __cplusplus
+extern "C"
 {
-    return DMMSch_RCL_Command_submit(h, c);
-}
+#endif
 
-RCL_CommandStatus OPT_RCL_Command_pend(RCL_Command_Handle c)
-{
-    return DMMSch_RCL_Command_pend(c);
-}
+/*******************************************************************************
+* INCLUDES
+******************************************************************************/
+#include <stdint.h>
 
-RCL_CommandStatus OPT_RCL_Command_stop(RCL_Command_Handle c, RCL_StopType stopType)
-{
-    return DMMSch_RCL_Command_stop(c, stopType);
-}
+/*******************************************************************************
+* MACROS
+******************************************************************************/
 
-RCL_Handle OPT_RCL_open(RCL_Client* c, const LRF_Config* lrfConfig)
-{
-    return DMMSch_RCL_open(c, lrfConfig);
-}
+/*******************************************************************************
+* CONSTANTS
+******************************************************************************/
 
-void OPT_RCL_close(RCL_Handle h)
-{
-    DMMSch_RCL_close(h);
-}
+// PAwR ACAD
+#define ACAD_PAWR_TYPE                          0x32
+#define LL_ACAD_TYPE_INDEX                      1
+#define ACAD_PAWR_LEN                           9
 
-void OPT_RCL_init(void)
-{
-    DMMSch_RCL_init();
-}
+// PAwR info index
+#define LL_PAWR_RSPAA_INDEX                     0
+#define LL_PAWR_SUBEVENT_NUM_INDEX              4
+#define LL_PAWR_SUBEVENT_INTERVAL_INDEX         5
+#define LL_PAWR_RSP_SLOT_DELAY_INDEX            6
+#define LL_PAWR_RSP_SLOT_SPACING_INDEX          7
 
-#endif /* defined(USE_DMM) */
+// Invalid value for subevent
+#define LL_PAWR_INVALID_SUBEVENT                0xFF
+
+// Max subevent number
+#define LL_PAWR_MAX_SUBEVENT_NUM                0x7F
+
+/*******************************************************************************
+* TYPEDEFS
+******************************************************************************/
+
+/*******************************************************************************
+* LOCAL VARIABLES
+******************************************************************************/
+
+/*******************************************************************************
+* GLOBAL VARIABLES
+******************************************************************************/
+
+/*******************************************************************************
+* Functions
+******************************************************************************/
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* LL_PAWR_SCAN_H */

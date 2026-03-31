@@ -94,13 +94,14 @@ extern "C"
 * INCLUDES
 ******************************************************************************/
 #include <stdint.h>
-#include <ti/drivers/rcl/RCL.h>
+#include <ti/drivers/RCL.h>
 #include <ti/drivers/rcl/commands/ble5.h>
 #include "ti/ble/controller/ll/ll_ble.h"
 #include "ti/ble/controller/ll/ll_al.h"
 #include "ti/ble/controller/ll/ll_common.h"
 #include "ti/ble/controller/ll/ll_ae.h"
 #include "ti/ble/controller/ll/ll_privacy.h"
+#include "ti/ble/controller/ll/ll_pawr_common.h"
 
 /*******************************************************************************
 * MACROS
@@ -145,7 +146,7 @@ typedef struct
     uint32_t eventCounter;      // Event counter of the last periodic advertising event received.
     void    *chanMapCurrent;    // pointer to channel map.
     uint32_t accessAddr;        // pointer to access address.
-} llPAwRPostProcessIn_t;
+} llPAwRSPostProcessIn_t;
 
 typedef struct
 {
@@ -154,7 +155,7 @@ typedef struct
     int32_t  *relGracefulStopTime;   // Relative soft stop time for the next periodic advertising subevent.
     uint16_t *eventCounter;          // Event counter of the next periodic advertising event.
     uint8_t  *channel;               //  Channel to use for the next periodic advertising subevent.
-} llPAwRPostProcessOut_t;
+} llPAwRSPostProcessOut_t;
 
 /*
  * llPAwRSyncInfo_t
@@ -253,6 +254,14 @@ typedef struct
   uint16_t                            lastEvent;             // Number of last Event that was proccessed
   rspNode_t                           *pRspDataHead;         // Linked list of response data info
 } llPAwRParamsSet_t;
+
+/*******************************************************************************
+* Functions
+******************************************************************************/
+
+/**********************************************************************
+ * API's FUNCTIONS
+ */
 
 /*******************************************************************************
  * @fn          LL_PAwRS_SetFeatureBit
@@ -413,7 +422,7 @@ bool LL_PAwRS_IsACADPAwR(uint8_t* pACAD);
  *
  * @return      None.
  */
-void LL_PAwRS_PostProcess(const llPAwRPostProcessIn_t *pPadvParamsIn, llPAwRPostProcessOut_t *pPadvParamsOut, uint8_t *pPAwRParams);
+void LL_PAwRS_PostProcess(const llPAwRSPostProcessIn_t *pPadvParamsIn, llPAwRSPostProcessOut_t *pPadvParamsOut, uint8_t *pPAwRParams);
 
 /*******************************************************************************
  * @fn          LL_PAwRS_BuildConnRspPkt
@@ -605,6 +614,27 @@ uint32_t LL_PAWRS_GetRspPktTxCmd(uint8_t* pPAwRParams);
  */
 void LL_PAwRS_UpdateRspDataCmdIfNeeded(uint8_t* pPAwRParams, uint16_t eventCounter, void* chanMapCurrent,
                                        uint32_t accessAddress, uint32_t absStartTime, uint16_t eventInterval);
+
+/*******************************************************************************
+ * @fn          LL_PAwRS_UpdateConnParams
+ *
+ * @brief       This function updates the periodic scanner context connection parameters.
+ *              It checks if a connection already exists with the peer device using
+ *              llConnExist. If a connection exists, it sets ignoreConnectReq to TRUE
+ *              in the periodic scanner context, otherwise sets it to FALSE.
+ *
+ * input parameters
+ *
+ * @param       addrType - Address type of the peer device.
+ * @param       addr     - Pointer to the peer device address.
+ *
+ * output parameters
+ *
+ * @param       pCtx     - Pointer to the RCL periodic scanner context to update.
+ *
+ * @return      None.
+ */
+void LL_PAwRS_UpdateConnParams(uint8_t addrType, uint8_t* addr, RCL_CtxPeriodicScanner* pCtx);
 
 /*******************************************************************************
  * @fn          LL_PAwRS_ChooseRspPktOrSubeventSync

@@ -165,26 +165,6 @@ void OPT_llUpdateTimeGapForScanWindow(taskInfo_t* secTask, llConnState_t* nextCo
     llUpdateTimeGapForScanWindow(secTask, nextConnPtr, secCmd, timeGap, curTime);
 }
 
-llStatus_t OPT_HCI_TL_set_scan_param(uint16_t opcode, uint8_t* pHciParams, aeSetScanParamCmd_t* hci_tl_cmdScanParams)
-{
-    return HCI_TL_set_scan_param(opcode, pHciParams, hci_tl_cmdScanParams);
-}
-
-llStatus_t OPT_HCI_TL_set_ext_scan_param(uint16_t opcode, uint8_t* pHciParams, aeSetScanParamCmd_t* hci_tl_cmdScanParams)
-{
-    return HCI_TL_set_ext_scan_param(opcode, pHciParams, hci_tl_cmdScanParams);
-}
-
-llStatus_t OPT_HCI_TL_set_ext_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams)
-{
-    return HCI_TL_set_ext_scan_enable(opcode, pHciParams, hci_tl_cmdScanEnable, hci_tl_cmdScanParams);
-}
-
-llStatus_t OPT_HCI_TL_set_scan_enable(uint16_t opcode, uint8_t* pHciParams, aeEnableScanCmd_t* hci_tl_cmdScanEnable, aeSetScanParamCmd_t* hci_tl_cmdScanParams)
-{
-    return HCI_TL_set_scan_enable(opcode, pHciParams, hci_tl_cmdScanEnable, hci_tl_cmdScanParams);
-}
-
 void OPT_llStopCurrentScan(void)
 {
     llStopCurrentScan();
@@ -195,9 +175,19 @@ void OPT_llCmdScanStartedEventHandle(void)
     llCmdScanStartedEventHandle();
 }
 
-void OPT_hci_tl_initScanCallbacks(void)
+void OPT_HCI_InitScanCallbacks(void)
 {
-    hci_tl_initScanCallbacks();
+    HCI_InitScanCallbacks();
+}
+
+hciStatus_t OPT_hciCmdParserLegacyScanner(uint8_t* pData, uint16_t cmdOpCode)
+{
+    return hciCmdParserLegacyScanner(pData, cmdOpCode);
+}
+
+hciStatus_t OPT_hciCmdParserScanner(uint8_t* pData, uint16_t cmdOpCode)
+{
+    return hciCmdParserScanner(pData, cmdOpCode);
 }
 
 #endif /* defined(CTRL_SCANNER_CFG) */
