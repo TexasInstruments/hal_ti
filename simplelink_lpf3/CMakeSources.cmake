@@ -54,7 +54,7 @@ set(SOURCES_DRIVERS_CC23X0
     cryptoutils/cryptokey/CryptoKeyPlaintext.c
     cryptoutils/ecc/ECCInitLPF3SW.c
     cryptoutils/ecc/ECCParamsLPF3SW.c
-    cryptoutils/sharedresources/CryptoResourceLPF3.c
+    cryptoutils/sharedresources/CryptoResourceXXF3.c
     cryptoutils/utils/CryptoUtils.c
     ECDH.c
     ecdh/ECDHLPF3SW.c
@@ -68,7 +68,7 @@ set(SOURCES_DRIVERS_CC27XX
     cryptoutils/cryptokey/CryptoKeyPlaintext.c
     cryptoutils/ecc/ECCInitLPF3SW.c
     cryptoutils/ecc/ECCParamsLPF3SW.c
-    cryptoutils/sharedresources/CryptoResourceLPF3.c
+    cryptoutils/sharedresources/CryptoResourceXXF3.c
     cryptoutils/utils/CryptoUtils.c
     ECDH.c
     ecdh/ECDHLPF3SW.c

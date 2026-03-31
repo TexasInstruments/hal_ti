@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023, Texas Instruments Incorporated
+ * Copyright (c) 2022-2025, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,41 +29,41 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** ============================================================================
- *  @file       CryptoResourceLPF3.h
- *
- *  @brief      Shared resources to arbitrate access to the AES engine
- *
- */
 
-#ifndef ti_drivers_cryptoutils_sharedresources_CryptoResourceLPF3__include
-#define ti_drivers_cryptoutils_sharedresources_CryptoResourceLPF3__include
+#ifndef ti_drivers_cryptoutils_ecc_ECCParamsTFM_s__include
+#define ti_drivers_cryptoutils_ecc_ECCParamsTFM_s__include
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include <ti/drivers/dpl/SemaphoreP.h>
-#include <ti/drivers/dpl/HwiP.h>
+#include <ti/drivers/cryptoutils/ecc/ECCParams.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Crypto driver semaphore used to synchronize accesses to the AES engine */
-extern SemaphoreP_Struct CryptoResourceLPF3_accessSemaphore;
-extern SemaphoreP_Struct CryptoResourceLPF3_operationSemaphore;
+/*!
+ *  @brief  Returns a pointer to curve params stored in secure memory
+ *
+ *  @param  curveParams  Points to curve param struct provided by non-secure
+ *                       code which references a curve by its name.
+ *  @return Pointer to the curve params stored in secure memory.
+ */
+const ECCParams_CurveParams *ECCParams_s_getCurveParams(const ECCParams_CurveParams *curveParams);
 
-extern volatile bool CryptoResourceLPF3_pollingFlag;
-
-extern HwiP_Struct CryptoResourceLPF3_hwi;
-
-void CryptoResourceLPF3_constructRTOSObjects(void);
-void CryptoResourceLPF3_destructRTOSObjects(void);
-bool CryptoResourceLPF3_acquireLock(uint32_t timeout);
-void CryptoResourceLPF3_releaseLock(void);
+/*!
+ *  @brief  Veneer to extract the curve generator point from an ecliptic curve
+ *          description.
+ *
+ *  @note   See ECCParams_s_getUncompressedGeneratorPoint() in ECCParam.h for full
+ *          description, parameters, and return values. PSA_ERROR_PROGRAMMER_ERROR
+ *          is an additional return value.
+ *
+ *  @retval PSA_ERROR_PROGRAMMER_ERROR if any args point to secure addresses.
+ */
+int_fast16_t ECCParams_s_getUncompressedGeneratorPoint(const ECCParams_CurveParams *curveParams,
+                                                       uint8_t *buffer,
+                                                       size_t length);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ti_drivers_cryptoutils_sharedresources_CryptoResourceLPF3__include */
+#endif /* ti_drivers_cryptoutils_ecc_ECCParamsTFM_s__include */
