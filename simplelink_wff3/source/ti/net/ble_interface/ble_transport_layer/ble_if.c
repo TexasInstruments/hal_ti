@@ -29,6 +29,7 @@ ble_if_cb_t bleIfCb;
 OsiSyncObj_t bleInitEventSyncObj;
 #define HCI_VE_EVENT_CODE 0xFF
 #define HCI_VE_BLE_INIT_DONE 0x042A
+#define HCI_VE_MIN_EVENT_LEN 5
 
 /*****************************************************************************/
 /* IMPLEMENTATION                                                            */
@@ -106,6 +107,10 @@ int BleIf_EventCbRegister(ble_event_cb_t cb)
 
 int BleIf_VendorEventHandler(uint8_t* data, uint16_t len)
 {
+    if (len < HCI_VE_MIN_EVENT_LEN) {
+        return FALSE;
+    }
+
     uint8_t eventCode = data[1];
     uint16_t eventOpcode = (data[3] << 8) | data[4];
 
