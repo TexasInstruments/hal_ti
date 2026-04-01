@@ -30,3 +30,6 @@
 
 add_subdirectory_ifdef(CONFIG_HAS_CC23X0_SDK cc23x0r5)
 add_subdirectory_ifdef(CONFIG_HAS_CC27XX_SDK cc27xx)
+if(CONFIG_HAS_CC23X0_SDK OR CONFIG_HAS_CC27XX_SDK)
+  include(CMakeSources.cmake)
+endif()
