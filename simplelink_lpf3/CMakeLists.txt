@@ -32,6 +32,7 @@
 
 add_subdirectory(source/ti/devices)
 add_subdirectory(source/ti/boards)
+add_subdirectory(source/ti/log)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
 
