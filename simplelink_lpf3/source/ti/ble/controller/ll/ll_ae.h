@@ -579,9 +579,11 @@
 // Margin time is rf and controller process time in rat ticks (empirical calculation)
 #define PERIODIC_ADV_MARGIN_TIME_RAT_TICKS                  2400 + RAT_TICKS_FOR_SCHED_PROCESS_TIME // 800 usec
 #define PERIODIC_SCAN_MARGIN_TIME_RAT_TICKS                 1600 + RAT_TICKS_FOR_SCHED_PROCESS_TIME // 600 usec
-#define EXT_ADV_MARGIN_TIME_RAT_TICKS                       2800 // 700 usec
-#define EXT_SCAN_MARGIN_TIME_RAT_TICKS                      2400 // 350 usec
-#define EXT_INIT_MARGIN_TIME_RAT_TICKS                      2400 // 350 usec
+// NOTE: EXT_SCAN/INIT_MARGIN are used only by llCheckRfCmdPreemption (task OTA duration
+// overhead). Scheduling gate margins in llUpdateScannSecTaskTimeGap and
+// llUpdateTimeGapForInitiator use LL_SCHED_OVERHEAD (ll_scheduler.h) instead.
+#define EXT_SCAN_MARGIN_TIME_RAT_TICKS                      2400 // 600 usec
+#define EXT_INIT_MARGIN_TIME_RAT_TICKS                      2400 // 600 usec
 
 // Optional status for process packet in scanner role
 typedef enum {
@@ -1502,6 +1504,7 @@ typedef struct
   uint8        scanMode;                            // flag to indicate if currently scanning
   //
   uint32       scanStartTime;                       // start time of scanner event
+  uint32       scanEndTime;                         // absolute deadline of the current scan window
   uint32       scanPeriodLeft;                      // Period - Duration
   uint8        scanStartState;                      // flag to indicate start state
   uint8        timingFlag;                          // flag to indicate duration or period end

@@ -101,7 +101,7 @@ extern void LL_EXT_SetQOSParameters_scan(uint8_t taskType, uint32_t paramVal, ll
 extern uint8_t llCheckScanPriority(uint16_t taskID, uint8_t connPriority);
 extern uint8_t LL_IsScannerWithRandomAddress(void);
 extern void llUpdateScannSecTaskTimeGap(uint32_t* timeGap);
-extern void llUpdateTimeGapForScanWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime);
+extern void llAdjustScanStartTimeForConnWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime);
 extern void llStopCurrentScan(void);
 extern void llCmdScanStartedEventHandle(void);
 extern void HCI_InitScanCallbacks(void);
@@ -125,7 +125,7 @@ void OPT_LL_EXT_SetQOSParameters_scan(uint8_t taskType, uint32_t paramVal, llPer
 uint8_t OPT_llCheckScanPriority(uint16_t taskID, uint8_t connPriority);
 uint8_t OPT_LL_IsScannerWithRandomAddress(void);
 void OPT_llUpdateScannSecTaskTimeGap(uint32_t* timeGap);
-void OPT_llUpdateTimeGapForScanWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime);
+void OPT_llAdjustScanStartTimeForConnWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime);
 void OPT_llStopCurrentScan(void);
 void OPT_llCmdScanStartedEventHandle(void);
 void OPT_HCI_InitScanCallbacks(void);

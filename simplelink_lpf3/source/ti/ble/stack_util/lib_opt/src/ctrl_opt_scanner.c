@@ -160,9 +160,9 @@ void OPT_llUpdateScannSecTaskTimeGap(uint32_t* timeGap)
     llUpdateScannSecTaskTimeGap(timeGap);
 }
 
-void OPT_llUpdateTimeGapForScanWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime)
+void OPT_llAdjustScanStartTimeForConnWindow(taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime)
 {
-    llUpdateTimeGapForScanWindow(secTask, nextConnPtr, secCmd, timeGap, curTime);
+    llAdjustScanStartTimeForConnWindow(secTask, nextConnPtr, secCmd, timeGap, curTime);
 }
 
 void OPT_llStopCurrentScan(void)

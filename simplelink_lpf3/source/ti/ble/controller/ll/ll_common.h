@@ -1927,7 +1927,7 @@ void                 llAlignToNextEvent( llConnState_t *connPtr );
 void                 llGetAdvChanPDU( uint8 *, uint8 *, uint8 *, uint8 *, uint8 *, int8 * );
 void                 llSecTaskInitiatorHandle( taskInfo_t* secTask, RCL_Command* secCmd, llConnState_t* nextConnPtr, uint32_t* timeGap, uint32_t curTime );
 void                 llUpdateTimeGapForInitiator( uint32_t* timeGap );
-void                 llUpdateTimeGapForScanWindow( taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime );
+void                 llAdjustScanStartTimeForConnWindow( taskInfo_t* secTask, llConnState_t* nextConnPtr, RCL_Command* secCmd, uint32_t* timeGap, uint32_t curTime );
 void                 LL_GetConnTxUsageParams( llTxUsageParams_t *pConnTxParams );
 uint32_t             llConnCalculatePacketTime( uint16_t octets, uint8_t llPhy, uint8_t llPhyOpts );
 

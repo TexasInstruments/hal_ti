@@ -220,4 +220,9 @@ void OPT_llCmdAdvStartedEventHandle(void)
     llCmdAdvStartedEventHandle();
 }
 
+hciStatus_t OPT_hciCmdParserLegacyAdvertiser(uint8_t* pData, uint16_t cmdOpCode)
+{
+    return hciCmdParserLegacyAdvertiser(pData, cmdOpCode);
+}
+
 #endif /* defined(CTRL_ADV_NCONN_CFG) */

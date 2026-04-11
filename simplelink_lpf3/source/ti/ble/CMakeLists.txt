@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Texas Instruments Incorporated
+# Copyright (c) 2025 - 2026, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ set(SCAN_CFG          0x04)
 set(INIT_CFG          0x08)
 set(CTRL_CONFIG       0)
 
+# BT controller configurations
 if (CONFIG_BT_HCI_RAW)
   math(EXPR CTRL_CONFIG "${CTRL_CONFIG} | ${ADV_NCONN_CFG} | ${ADV_CONN_CFG} | ${SCAN_CFG} | ${INIT_CFG}")
   zephyr_compile_definitions(
@@ -49,7 +50,6 @@ if (CONFIG_BT_HCI_RAW)
     -DUSE_PERIODIC_ADV
     -DUSE_PERIODIC_SCAN
     -DVENDOR_SPECIFIC_CMD
-    -DEXT_VENDOR_SPECIFIC_CMD
     -DUSE_PAST_RECEIVER
     -DUSE_PAST_SENDER
     -DUSE_PAWR_SCAN
@@ -124,6 +124,18 @@ if (CONFIG_BT_CTLR_COEX_TICKER)
   )
 endif()
 
+# BT TI vendor-specific configurations
+if (CONFIG_BT_CTLR_TI_LEGACY_CMD)
+  zephyr_compile_definitions(
+    -DLEGACY_CMD
+  )
+endif()
+if (CONFIG_BT_CTLR_TI_EXT_VS_CMD)
+  zephyr_compile_definitions(
+    -DEXT_VENDOR_SPECIFIC_CMD
+  )
+endif()
+
 
 zephyr_compile_definitions(
   -DCONTROLLER_ONLY
@@ -134,40 +146,8 @@ zephyr_compile_definitions(
   -DCTRL_CONFIG=${CTRL_CONFIG}
 )
 
-# BLE files that are used for library optimizations and should be part of the application
-zephyr_library_sources(
-  app_util/config/src/ble_config_zephyr.c
-  app_util/config/src/hci_supported_cmd.c
-  stack_util/lib_opt/src/ctrl_opt_past_receiver.c
-  stack_util/lib_opt/src/ctrl_opt_past_sender.c
-  stack_util/lib_opt/src/ctrl_opt_pawr_scan.c
-  stack_util/lib_opt/src/ctrl_opt_padv.c
-  stack_util/lib_opt/src/ctrl_opt_pscan.c
-  stack_util/lib_opt/src/ctrl_opt_cs.c
-  stack_util/lib_opt/src/ctrl_opt_cs_test.c
-  stack_util/lib_opt/src/ctrl_opt_initiator.c
-  stack_util/lib_opt/src/ctrl_opt_connectable.c
-  stack_util/lib_opt/src/ctrl_opt_scanner.c
-  stack_util/lib_opt/src/ctrl_opt_power_control.c
-  stack_util/lib_opt/src/ctrl_opt_adv_conn.c
-  stack_util/lib_opt/src/ctrl_opt_adv_nconn.c
-  stack_util/lib_opt/src/ctrl_opt_ae.c
-  stack_util/lib_opt/src/ctrl_opt_adaptivity.c
-  stack_util/lib_opt/src/ctrl_opt_vendor_specific_cmd.c
-  stack_util/lib_opt/src/ctrl_opt_ext_vendor_specific_cmd.c
-  stack_util/lib_opt/src/ctrl_opt_pawr_advertiser.c
-  stack_util/lib_opt/src/ctrl_opt_coex.c
-  # The following ctrl_opt features are TI proprietary and not included in Zephyr builds:
-  #stack_util/lib_opt/src/ctrl_opt_ble_health.c
-  #stack_util/lib_opt/src/ctrl_opt_legacy_cmd.c
-  #stack_util/lib_opt/src/ctrl_opt_cm.c
-  #stack_util/lib_opt/src/ctrl_opt_connection_handover.c
-  #stack_util/lib_opt/src/ctrl_opt_dmm.c
-  #stack_util/lib_opt/src/ctrl_opt_dmm_dynamic_priority.c
-  #stack_util/lib_opt/src/ctrl_opt_ts_periodic.c
-  #stack_util/lib_opt/src/ctrl_opt_health_check.c
-  #stack_util/lib_opt/src/ctrl_opt_rssi_monitor.c
-)
+# Include source file list
+include(BleAppCMakeLists.txt)
 
 function(add_prebuilt_library lib_name prebuilt_path)
   add_library(${lib_name} STATIC IMPORTED GLOBAL)

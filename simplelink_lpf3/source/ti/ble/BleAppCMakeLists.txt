@@ -1,0 +1,55 @@
+# Copyright (c) 2026, Texas Instruments Incorporated
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# *  Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+# *  Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# *  Neither the name of Texas Instruments Incorporated nor the names of
+#    its contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+# PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+# OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+# OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+# EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# BLE files that are used for library optimizations and should be part of the application
+zephyr_library_sources(
+  app_util/config/src/ble_config_zephyr.c
+  app_util/config/src/hci_supported_cmd.c
+  stack_util/lib_opt/src/ctrl_opt_padv.c
+  stack_util/lib_opt/src/ctrl_opt_pscan.c
+  stack_util/lib_opt/src/ctrl_opt_pawr_scan.c
+  stack_util/lib_opt/src/ctrl_opt_pawr_advertiser.c
+  stack_util/lib_opt/src/ctrl_opt_cs.c
+  stack_util/lib_opt/src/ctrl_opt_cs_test.c
+  stack_util/lib_opt/src/ctrl_opt_initiator.c
+  stack_util/lib_opt/src/ctrl_opt_connectable.c
+  stack_util/lib_opt/src/ctrl_opt_scanner.c
+  stack_util/lib_opt/src/ctrl_opt_power_control.c
+  stack_util/lib_opt/src/ctrl_opt_adv_conn.c
+  stack_util/lib_opt/src/ctrl_opt_adv_nconn.c
+  stack_util/lib_opt/src/ctrl_opt_ae.c
+  stack_util/lib_opt/src/ctrl_opt_adaptivity.c
+  stack_util/lib_opt/src/ctrl_opt_past_sender.c
+  stack_util/lib_opt/src/ctrl_opt_past_receiver.c
+  stack_util/lib_opt/src/ctrl_opt_vendor_specific_cmd.c
+  stack_util/lib_opt/src/ctrl_opt_ext_vendor_specific_cmd.c
+  stack_util/lib_opt/src/ctrl_opt_coex.c
+  stack_util/lib_opt/src/ctrl_opt_legacy_cmd.c
+)

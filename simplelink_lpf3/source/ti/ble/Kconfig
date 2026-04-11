@@ -1,0 +1,19 @@
+# Copyright (c) 2026 Texas Instruments Incorporated
+# SPDX-License-Identifier: Apache-2.0
+
+config BT_CTLR_TI_LEGACY_CMD
+	bool "TI BLE Controller Legacy HCI Commands"
+	default y
+	help
+	  Enable support for legacy HCI commands in the TI BLE controller
+	  (e.g., HCI_LE_Set_Advertising_Parameters, HCI_LE_Set_Scan_Parameters).
+	  Disable this option to reduce code size if legacy commands are not needed.
+
+config BT_CTLR_TI_EXT_VS_CMD
+	bool "TI BLE Controller Extended Vendor Specific Commands"
+	default y if BT_HCI_RAW
+	default n
+	help
+	  Enable support for extended vendor specific HCI commands in the
+	  TI BLE controller. Disable this option to reduce code size if
+	  extended vendor specific commands are not needed.
