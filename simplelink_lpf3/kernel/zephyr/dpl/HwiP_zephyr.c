@@ -85,13 +85,13 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
     }
 
     /*
-     * Currently only support INT_CPUIRQ0 (Batmon), INT_CPUIRQ1 (SwiP), INT_CPUIRQ3 (Oscillator ISR),
-     * INT_CPUIRQ16 (Batmon ISR), INT_CPUIRQ4 (RCL Scheduler ISR), INT_LRFD_IRQ0
-     * (RCL Command Handler ISR) and INT_LRFD_IRQ1 (RCL Dispatcher ISR)
+     * For CC23X0/CC27XX devices, currently only INT_CPUIRQ0 (Unused), INT_CPUIRQ1 (SwiP/Unused),
+     * INT_CPUIRQ3 (Oscillator ISR), INT_CPUIRQ16 (ClockP and power policy), INT_CPUIRQ4 (RCL Scheduler ISR),
+     * INT_LRFD_IRQ0 (RCL Command Handler ISR) and INT_LRFD_IRQ1 (RCL Dispatcher ISR) are supported.
      */
     __ASSERT((INT_CPUIRQ0 == interruptNum) || (INT_CPUIRQ1 == interruptNum) || (INT_CPUIRQ2 == interruptNum) || (INT_CPUIRQ3 == interruptNum) ||
-                 (INT_CPUIRQ4 == interruptNum) || (INT_CPUIRQ16 == interruptNum) || (INT_LRFD_IRQ0 == interruptNum) ||
-                 (INT_LRFD_IRQ1 == interruptNum),
+                 (INT_CPUIRQ4 == interruptNum) || (INT_CPUIRQ16 == interruptNum) ||
+                 (INT_LRFD_IRQ0 == interruptNum) || (INT_LRFD_IRQ1 == interruptNum),
              "Unexpected interruptNum: %d\r\n",
              interruptNum);
 

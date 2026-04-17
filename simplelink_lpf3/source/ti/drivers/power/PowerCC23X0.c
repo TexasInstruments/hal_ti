@@ -300,8 +300,10 @@ static ClockP_Struct hfxtAmpCompClock;
 
 /* Non-static Globals */
 
-/* Interrupt for ClockP and Power policy */
-HwiP_Struct clockHwi;
+#ifndef __ZEPHYR__
+    /* Interrupt for ClockP and Power policy */
+    HwiP_Struct clockHwi;
+#endif /* ZEPHYR */
 
 /* ****************** Power APIs ******************** */
 
@@ -363,7 +365,7 @@ int_fast16_t Power_init(void)
      * mux one of the configurable lines to the CKM.
      * CPUIRQ16 is dedicated to this purpose.
      *
-     * In Zephyr, the timer driver takes this IRQ before this function is called
+     * In Zephyr, ClockP takes this IRQ before this function is called
      * which mean that this muxing will prevent the timer interrupt, causing
      * the kernel not to tick.
      */

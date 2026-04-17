@@ -68,9 +68,9 @@ extern "C" {
  *  NoRTOS:   32 (biggest of the HW-specific ClockP instance structs)
  *  BIOS 7.x: 36
  *  FreeRTOS: 68
- *  Zephyr:   80
+ *  Zephyr:   32
  */
-#define ClockP_STRUCT_SIZE (80)
+#define ClockP_STRUCT_SIZE (32)
 
 /*!
  *  @brief    ClockP structure.
