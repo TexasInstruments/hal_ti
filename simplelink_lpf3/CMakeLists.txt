@@ -35,7 +35,7 @@ add_subdirectory(source/ti/boards)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
 
-if(NOT CONFIG_HAS_CC35XX_SDK)
+if(NOT CONFIG_BT_HCI_TI_CC3XXX)
   add_subdirectory_ifdef(CONFIG_BT source/ti/ble)
 endif()
 
