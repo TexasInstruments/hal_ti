@@ -22,23 +22,23 @@
  */
 
 #include <ti/drivers/ECDH.h>
-#include <ti/drivers/ecdh/ECDHXXF3HSM.h>
+#include <ti/drivers/ecdh/ECDHLPF3SW.h>
 
 #define CONFIG_ECDH_COUNT 1
 
-ECDHXXF3HSM_Object ECDHXXF3HSM_objects[CONFIG_ECDH_COUNT];
+ECDHLPF3SW_Object ECDHLPF3SW_objects[CONFIG_ECDH_COUNT];
 
 /*
- *  ======== ECDHXXF3HSMHWAttrs ========
+ *  ======== ECDHLPF3SWHWAttrs ========
  */
-const ECDHXXF3HSM_HWAttrs ECDHXXF3HSM_hwAttrs[CONFIG_ECDH_COUNT] = {
+const ECDHLPF3SW_HWAttrs ECDHLPF3SW_hwAttrs[CONFIG_ECDH_COUNT] = {
     {0},
 };
 
 const ECDH_Config ECDH_config[CONFIG_ECDH_COUNT] = {
     {   /* CONFIG_ECDH_0 */
-        .object  = &ECDHXXF3HSM_objects[CONFIG_ECDH_0],
-        .hwAttrs = &ECDHXXF3HSM_hwAttrs[CONFIG_ECDH_0]
+        .object  = &ECDHLPF3SW_objects[CONFIG_ECDH_0],
+        .hwAttrs = &ECDHLPF3SW_hwAttrs[CONFIG_ECDH_0]
     },
 };
 
