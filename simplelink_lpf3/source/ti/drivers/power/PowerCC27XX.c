@@ -2579,6 +2579,9 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
 {
     uint32_t sysTimerIMASK;
     uint32_t sysTimerARMSET;
+    uint32_t rtcCH0CC8U;
+    uint32_t rtcARMSET;
+    uint32_t rtcIMASK;
     uint32_t sysTimerTimeouts[SYSTIMER_CHANNEL_COUNT];
     int_fast16_t result = Power_SOK;
 
@@ -2593,6 +2596,18 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
 
     /* Store SysTimer timeouts */
     memcpy(sysTimerTimeouts, (void *)(SYSTIM_BASE + SYSTIM_O_CH0CCSR), sizeof(sysTimerTimeouts));
+
+    /* Read back current RTC compare value. */
+    rtcCH0CC8U = HWREG(RTC_BASE + RTC_O_CH0CC8U);
+
+    /* Read the armed state of the RTC. */
+    rtcARMSET = HWREG(RTC_BASE + RTC_O_ARMSET);
+
+    /* Read the interrupt mask of the RTC. */
+    rtcIMASK = HWREG(RTC_BASE + RTC_O_IMASK);
+
+    /* Interrupt must be unmasked as CPU requires RTC compare event to wakeup. */
+    HWREG(RTC_BASE + RTC_O_IMSET) = RTC_IMSET_EV0_SET;
 
     /* Switch CPUIRQ16 in event fabric to RTC.
      * Since the CC27XX only has limited interrupt lines, we need to switch the
@@ -2644,6 +2659,32 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
 
     /* Switch CPUIRQ16 in event fabric back to SysTimer */
     EVTSVTConfigureEvent(EVTSVT_SUB_CPUIRQ16, EVTSVT_PUB_SYSTIM0);
+
+    /* Restore RTC compare value. Writing into compare register
+     * automatically arms the RTC for compare events.
+     */
+    HWREG(RTC_BASE + RTC_O_CH0CC8U) = rtcCH0CC8U;
+
+    /* If RTC was not armed before sleep. */
+    if( (rtcARMSET & RTC_ARMSET_CH0_M) == RTC_ARMSET_CH0_NOEFF )
+    {
+        /* Disarm the RTC */
+        HWREG(RTC_BASE + RTC_O_ARMCLR) = RTC_ARMCLR_CH0_CLR;
+
+        /* Clear the RTC wakeup event */
+        HWREG(RTC_BASE + RTC_O_ICLR) = RTC_ICLR_EV0_CLR;
+    }
+
+    if( ( rtcIMASK & RTC_IMASK_EV0_M ) == RTC_IMASK_EV0_EN )
+    {
+        /* If interrupt was masked, enable the interrupt mask. */
+        HWREG(RTC_BASE + RTC_O_IMSET) = RTC_IMSET_EV0_SET;
+    }
+    else
+    {
+        /* If interrupt was unmasked, clear the interrupt mask. */
+        HWREG(RTC_BASE + RTC_O_IMCLR) = RTC_IMCLR_EV0_CLR;
+    }
 
     /* When waking up from standby, the SysTimer may not have
      * synchronised with the RTC by now. Wait for SysTimer
