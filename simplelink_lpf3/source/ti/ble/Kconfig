@@ -17,3 +17,19 @@ config BT_CTLR_TI_EXT_VS_CMD
 	  Enable support for extended vendor specific HCI commands in the
 	  TI BLE controller. Disable this option to reduce code size if
 	  extended vendor specific commands are not needed.
+
+config BT_TI_SWAT_TEST_MODE
+	bool "TI BLE SWAT Test Mode (Internal TI Test Lab Only)"
+	depends on BT_HCI_RAW
+	default n
+	help
+	  Enable special test mode for TI SWAT (Software Automation Test) lab.
+	  When enabled, vendor-specific LE meta events are NOT converted to
+	  HCI Command Complete events, allowing direct testing of vendor-specific
+	  event handling in the TI test lab.
+
+	  This option should ONLY be enabled for internal TI testing and
+	  validation purposes. It is NOT intended for production use or
+	  customer applications.
+
+	  Default: n (disabled)
