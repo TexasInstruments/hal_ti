@@ -20,7 +20,8 @@
 /**
  * \brief Incomplete list of 16-bit Service Class UUIDs.
  *
- * \par This data type indicates that the advertising or scan response data contains
+ * \par Description
+ * This data type indicates that the advertising or scan response data contains
  * an incomplete list of 16-bit Service Class UUIDs. Additional UUIDs may be
  * available but are not included in the current data.
  */
@@ -37,7 +38,8 @@
 /**
  * \brief Complete list of 16-bit Service Class UUIDs.
  *
- * \par This data type indicates that the advertising or scan response data contains
+ * \par Description
+ * This data type indicates that the advertising or scan response data contains
  * a complete list of 16-bit Service Class UUIDs. No additional UUIDs are expected
  * beyond those included in the current data.
  */
@@ -205,7 +207,8 @@
 /**
  * \brief Platform Initialization complete callback
  *
- * \par Callback for notifying that PL has been initialized.
+ * \par Description
+ * Callback for notifying that PL has been initialized.
  *
  * \param err API_SUCESS on success or (negative) error code otherwise.
  *
@@ -216,7 +219,8 @@ typedef void (*PL_INIT_COMPLETE_CB)(UINT16 err, void * blob);
 /**
  * \brief platform MTU exchange complete callback
  *
- * \par Callback for notifying the result of the MTU exchange operation.
+ * \par Description
+ * Callback for notifying the result of the MTU exchange operation.
  *
  * \param peer_addr Pointer to the Bluetooth address of the peer device.
  * \param mtu Negotiated MTU size if the exchange was successful, or default MTU size otherwise.
@@ -227,7 +231,8 @@ typedef void (*PL_MTU_EXCHANGE_COMPLETE_CB)(BT_ESL_BD_ADDR* peer_addr, UINT16 mt
 /**
  * \brief Parameters for configuring periodic advertising.
  *
- * \par This structure defines the parameters used to configure periodic advertising,
+ * \par Description
+ * This structure defines the parameters used to configure periodic advertising,
  * including intervals, subevent details, and response slot timings.
  */
 typedef struct _BT_ESL_PERIODIC_ADV_PARAMS
@@ -261,7 +266,8 @@ typedef struct _BT_ESL_PERIODIC_ADV_PARAMS
 /**
  * \brief Register OTS callback for ESL.
  *
- * \par This function registers a callback for OTS operations in the ESL context.
+ * \par Description
+ * This function registers a callback for OTS operations in the ESL context.
  *
  * \param [in] bd_addr Pointer to the Bluetooth address of the ESL device.
  * \param [in] result  Status of the discovery operation.
@@ -271,7 +277,8 @@ typedef void (*BT_ESL_OTS_DISCOVERY_COMPLETE) (BT_ESL_BD_ADDR * bd_addr, UINT16 
 /**
  * \brief Callback for OTS image upload completion.
  *
- * \par This function is called when an image upload operation is completed.
+ * \par Description
+ * This function is called when an image upload operation is completed.
  *
  * \param [in] bd_addr Pointer to the Bluetooth address of the ESL device.
  * \param [in] state State of the image upload operation.
@@ -297,7 +304,8 @@ typedef struct _BT_ESL_OTS_CALLBACK
 /**
  * \brief OTS server object selected callback for ESL Tag
  *
- * \par This function is called when an object is selected on the OTS server.
+ * \par Description
+ * This function is called when an object is selected on the OTS server.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device that selected the object.
  * \param image_index Index of the selected image.
@@ -307,7 +315,8 @@ typedef void (*IMAGE_SELECTED_CB)(BT_ESL_BD_ADDR *bd_addr, UCHAR image_index);
 /**
  * \brief OTS server image upload complete callback for ESL Tag
  *
- * \par This function is called when an image upload is completed on the OTS server.
+ * \par Description
+ * This function is called when an image upload is completed on the OTS server.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device that uploaded the image.
  * \param image_index Index of the uploaded image.
@@ -319,7 +328,8 @@ typedef API_RESULT (*IMAGE_WRITE_CB) (BT_ESL_BD_ADDR *bd_addr, UCHAR image_index
 /**
  * \brief OTS server callback structure for ESL Tag
  *
- * \par This structure contains callbacks for image selection and image upload completion.
+ * \par Description
+ * This structure contains callbacks for image selection and image upload completion.
  */
 typedef struct _BT_ESL_OTS_SERVER_CALLBACK
 {
@@ -368,7 +378,8 @@ typedef struct _BT_ESL_OTS_METADATA
 /**
  * \brief Initializes the ESL platform layer.
  *
- * \par This function initializes the ESL platform layer and starts the Bluetooth stack.
+ * \par Description
+ * This function initializes the ESL platform layer and starts the Bluetooth stack.
  *
  * \param cb Callback function to notify the upper layer about the initialization result.
  *
@@ -379,7 +390,8 @@ API_RESULT BT_esl_init_pl(PL_INIT_COMPLETE_CB cb);
 /**
  * \brief Creates a connection with a specified device.
  *
- * \par This function initiates a connection with the specified device using the provided
+ * \par Description
+ * This function initiates a connection with the specified device using the provided
  * Bluetooth address.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to connect.
@@ -391,7 +403,8 @@ API_RESULT BT_esl_create_connection_pl(BT_ESL_BD_ADDR * bd_addr);
 /**
  * \brief Disconnects from a connected device.
  *
- * \par This function initiates a disconnection from the specified device.
+ * \par Description
+ * This function initiates a disconnection from the specified device.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to disconnect.
  *
@@ -402,7 +415,8 @@ API_RESULT BT_esl_disconnect_pl(BT_ESL_BD_ADDR * bd_addr);
 /**
  * \brief Gets the current absolute time in milliseconds.
  *
- * \par This function fetches the current absolute time..
+ * \par Description
+ * This function fetches the current absolute time..
  *
  * \return The current absolute time in milliseconds as a UINT32.
  */
@@ -411,7 +425,8 @@ UINT32 BT_esl_get_current_time_pl(void);
 /**
  * \brief Sets the current absolute time.
  *
- * \par This function sets the current absolute time.
+ * \par Description
+ * This function sets the current absolute time.
  *
  * \param current_absolute_time The absolute time in milliseconds to set.
  */
@@ -420,7 +435,8 @@ void BT_esl_set_current_time_pl(UINT32 current_absolute_time);
 /**
  * \brief Initiates an MTU exchange with a connected device.
  *
- * \par This function initiates the GATT MTU exchange procedure for a device specified
+ * \par Description
+ * This function initiates the GATT MTU exchange procedure for a device specified
  * by its Bluetooth address.
  *
  * \param peer_addr Pointer to the Bluetooth address of the device.
@@ -439,7 +455,8 @@ API_RESULT BT_esl_gatt_exchange_mtu_pl
 /**
  * \brief Encrypts data using the provided key material.
  *
- * \par This function encrypts the input payload using the specified key material.
+ * \par Description
+ * This function encrypts the input payload using the specified key material.
  * The encrypted output is stored in the provided buffer.
  *
  * \param key_material Pointer to the key material used for encryption.
@@ -460,7 +477,8 @@ API_RESULT BT_esl_encrypt_data_pl
 /**
  * \brief Decrypts encrypted data using the provided key material.
  *
- * \par This function decrypts the input encrypted payload using the specified key material.
+ * \par Description
+ * This function decrypts the input encrypted payload using the specified key material.
  * The decrypted output is stored in the provided buffer.
  *
  * \param key_material Pointer to the key material used for decryption.
@@ -484,7 +502,8 @@ API_RESULT BT_esl_decrypt_data_pl
 /**
  * \brief Initiates pairing/bonding with a connected device.
  *
- * \par This function initiates the SMP pairing procedure with the specified device
+ * \par Description
+ * This function initiates the SMP pairing procedure with the specified device
  * to establish a bonded connection for secure communication.
  *
  * \param peer_addr Pointer to the Bluetooth address of the device to pair with.
@@ -498,7 +517,8 @@ API_RESULT BT_esl_start_pairing_pl(BT_ESL_BD_ADDR * peer_addr);
 /**
  * \brief Unpairs a device.
  *
- * \par This function unpairs the specified device, removing any bonded information.
+ * \par Description
+ * This function unpairs the specified device, removing any bonded information.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to unpair.
  *
@@ -509,7 +529,8 @@ API_RESULT BT_esl_unpair_pl(BT_ESL_BD_ADDR * bd_addr);
 /**
  * \brief Checks if a device is bonded.
  *
- * \par This function checks if the device with the given Bluetooth address is bonded.
+ * \par Description
+ * This function checks if the device with the given Bluetooth address is bonded.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to check.
  * \param is_bonded BT_ESL_TRUE if the device is bonded, BT_ESL_FALSE otherwise.
@@ -525,7 +546,8 @@ API_RESULT BT_esl_device_is_bonded_pl
 /**
  * \brief Finds an advertising element in the provided advertising data.
  *
- * \par This function searches for an advertising element of the specified type
+ * \par Description
+ * This function searches for an advertising element of the specified type
  * within the given advertising data buffer and copies the element's data
  * into the provided buffer.
  *
@@ -550,7 +572,8 @@ API_RESULT BT_esl_find_ad_element_pl
 /**
  * \brief Registers the OTS callback for ESL.
  *
- * \par This function registers the OTS callback for ESL operations.
+ * \par Description
+ * This function registers the OTS callback for ESL operations.
  *
  * \param callback Pointer to the OTS callback structure.
  *
@@ -561,7 +584,8 @@ API_RESULT BT_esl_register_ots_callback_pl(BT_ESL_OTS_CALLBACK * callback);
 /**
  * \brief Discovers the OTS service on a specified device.
  *
- * \par This function initiates the discovery of the OTS service on the device specified by its Bluetooth address.
+ * \par Description
+ * This function initiates the discovery of the OTS service on the device specified by its Bluetooth address.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to discover.
  *
@@ -572,7 +596,8 @@ API_RESULT BT_esl_discover_ots_pl(BT_ESL_BD_ADDR * bd_addr);
 /**
  * \brief Configure the CCCD of OTS chars(OACP/OLCP) on a specified device.
  *
- * \par This function Configure the CCCD of OTS chars(OACP/OLCP) on a specified device.
+ * \par Description
+ * This function Configure the CCCD of OTS chars(OACP/OLCP) on a specified device.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to discover.
  *
@@ -583,7 +608,8 @@ API_RESULT BT_esl_config_ots_pl(BT_ESL_BD_ADDR * bd_addr);
 /**
  * \brief Upload image to ESL by Image_Index
  *
- * \par This function uploads image data to the ESL image slot specified by image_index.
+ * \par Description
+ * This function uploads image data to the ESL image slot specified by image_index.
  * It reads the Max_Image_Index from the ESL Image Information characteristic, checks bounds,
  * selects the corresponding OTS object, and writes the image data.
  *
@@ -604,7 +630,8 @@ API_RESULT BT_esl_upload_image_pl
 /**
  * \brief Starts a passive BLE scan to discover devices.
  *
- * \par Starts any ongoing scan and starts a new passive scan.
+ * \par Description
+ * Starts any ongoing scan and starts a new passive scan.
  *
  * \return BT_ESL_API_SUCCESS if the scan starts successfully, BT_ESL_API_FAILURE otherwise.
  */
@@ -613,7 +640,8 @@ API_RESULT BT_esl_start_scan_pl(void);
 /**
  * \brief Stops an ongoing BLE scan.
  *
- * \par This function stops any active BLE scan operation.
+ * \par Description
+ * This function stops any active BLE scan operation.
  *
  * \return BT_ESL_API_SUCCESS if the scan is stopped successfully, BT_ESL_API_FAILURE otherwise.
  */
@@ -622,7 +650,8 @@ API_RESULT BT_esl_stop_scan_pl(void);
 /**
  * \brief Initiates a connection using PAwR.
  *
- * \par This function starts the connection procedure using PAwR with the specified device.
+ * \par Description
+ * This function starts the connection procedure using PAwR with the specified device.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to connect.
  * \param subevent Subevent number to be used for the connection.
@@ -634,7 +663,8 @@ API_RESULT BT_esl_pawr_connect_pl(BT_ESL_BD_ADDR * bd_addr, UCHAR subevent);
 /**
  * \brief Starts periodic advertising with the specified parameters.
  *
- * \par This function initializes and starts a periodic advertising set using the provided
+ * \par Description
+ * This function initializes and starts a periodic advertising set using the provided
  * parameters.
  *
  * \param padv_params Structure containing the periodic advertising parameters.
@@ -649,7 +679,8 @@ API_RESULT BT_esl_start_periodic_adv_pl(BT_ESL_PERIODIC_ADV_PARAMS padv_params);
 /**
  * \brief Stops periodic advertising and deletes the advertising set.
  *
- * \par This function stops both extended and periodic advertising for the current advertising set
+ * \par Description
+ * This function stops both extended and periodic advertising for the current advertising set
  * and deletes the advertising set to free resources.
  *
  * \return BT_ESL_API_SUCCESS if periodic advertising is stopped and the advertising set is deleted successfully,
@@ -660,7 +691,8 @@ API_RESULT BT_esl_stop_periodic_adv_pl(void);
 /**
  * \brief Sets subevent data for periodic advertising.
  *
- * \par This function configures subevent data for periodic advertising.
+ * \par Description
+ * This function configures subevent data for periodic advertising.
  *
  * \param subevent_data_params Pointer to an array of subevent data parameters.
  * \param num_subevents Number of subevents to configure.
@@ -676,7 +708,8 @@ API_RESULT BT_esl_set_subevent_data_pl
 /**
  * \brief Performs periodic advertising information transfer.
  *
- * \par This function initiates a periodic advertising information transfer
+ * \par Description
+ * This function initiates a periodic advertising information transfer
  * on a device specified by its Bluetooth address.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to perform the transfer.
@@ -693,7 +726,8 @@ API_RESULT BT_esl_padv_set_info_transfer_pl
 /**
  * \brief Discovers the ESL service on a connected device.
  *
- * \par This function initiates GATT service discovery for the ESL service on a device
+ * \par Description
+ * This function initiates GATT service discovery for the ESL service on a device
  * specified by its Bluetooth address.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to discover the ESL service.
@@ -705,7 +739,8 @@ API_RESULT BT_esl_discover_esl_service_pl(BT_ESL_BD_ADDR * bd_addr);
 /**
  * \brief Reads a GATT characteristic from a connected device.
  *
- * \par This function initiates a GATT read operation for a specific attribute handle
+ * \par Description
+ * This function initiates a GATT read operation for a specific attribute handle
  * on a device specified by its Bluetooth address.
  *
  * \param peer_addr Pointer to the Bluetooth address of the device to read the characteristic.
@@ -724,7 +759,8 @@ API_RESULT BT_esl_gatt_read_characteristic_pl
 /**
  * \brief Writes data to a GATT characteristic on a connected device.
  *
- * \par This function initiates a GATT write operation for a specific attribute handle
+ * \par Description
+ * This function initiates a GATT write operation for a specific attribute handle
  * on a device specified by its Bluetooth address.
  *
  * \param peer_addr Pointer to the Bluetooth address of the device to write the characteristic.
@@ -745,7 +781,8 @@ API_RESULT BT_esl_gatt_write_characteristic_pl
 /**
  * \brief Writes data to a GATT characteristic on a connected device without expecting a response.
  *
- * \par This function initiates a GATT write operation for a specific attribute handle
+ * \par Description
+ * This function initiates a GATT write operation for a specific attribute handle
  * on a device specified by its Bluetooth address. The operation does not expect
  * a response from the device.
  *
@@ -767,7 +804,8 @@ API_RESULT BT_esl_gatt_write_without_response_pl
 /**
  * \brief Writes to a CCCD (Client Characteristic Configuration Descriptor).
  *
- * \par This function initiates a GATT write operation for a specific CCCD handle
+ * \par Description
+ * This function initiates a GATT write operation for a specific CCCD handle
  * on a device specified by its Bluetooth address.
  *
  * \param peer_addr Pointer to the Bluetooth address of the device to write the CCCD.
@@ -788,7 +826,8 @@ API_RESULT BT_esl_gatt_write_cccd_pl
 /**
  * \brief Discovers the DIS service on a specified device.
  *
- * \par This function initiates the discovery of the DIS service on the device specified by its Bluetooth address.
+ * \par Description
+ * This function initiates the discovery of the DIS service on the device specified by its Bluetooth address.
  *
  * \param bd_addr Pointer to the Bluetooth address of the device to discover.
  *
@@ -813,7 +852,8 @@ void BT_esl_set_preferred_conn_interval_pl(UINT16 interval_min, UINT16 interval_
 /**
  * \brief Initializes the OTS server for ESL Tag
  *
- * \par This function initializes the OTS server instance and sets up the OTS callbacks.
+ * \par Description
+ * This function initializes the OTS server instance and sets up the OTS callbacks.
  *
  * \return return BT_ESL_API_SUCCESS on success, BT_ESL_API_FAILURE on failure.
  */
@@ -822,7 +862,8 @@ API_RESULT BT_esl_ots_init_pl(void);
 /**
  * \brief Registers the OTS server callback for ESL Tag
  *
- * \par This function registers the OTS server callback for ESL Tag operations.
+ * \par Description
+ * This function registers the OTS server callback for ESL Tag operations.
  *
  * \param callback Pointer to the OTS server callback structure.
  *
@@ -833,7 +874,8 @@ API_RESULT BT_esl_register_ots_server_callback_pl(BT_ESL_OTS_SERVER_CALLBACK *ca
 /**
  * \brief Creates OTS objects for ESL Tag
  *
- * \par This function creates OTS objects for ESL Tag based on the provided metadata.
+ * \par Description
+ * This function creates OTS objects for ESL Tag based on the provided metadata.
  *
  * \param no_of_objects Number of objects to create.
  * \param obj_meta_data Reference to the array of metadata for the objects.
@@ -849,7 +891,8 @@ API_RESULT BT_esl_ots_create_obj_pl
 /**
  * \brief Updates the complete name of the ESL image object.
  *
- * \par This function sets the complete name for the ESL image object after upload.
+ * \par Description
+ * This function sets the complete name for the ESL image object after upload.
  *
  * \param complete_name Pointer to the name string.
  * \param length Length of the name string.
@@ -861,7 +904,8 @@ API_RESULT BT_esl_update_complete_name_pl(UCHAR * complete_name, UINT16 length);
 /**
  * \brief Starts BLE advertising for ESL Tag.
  *
- * \par This function initiates BLE advertising for the ESL Tag role.
+ * \par Description
+ * This function initiates BLE advertising for the ESL Tag role.
  *
  * \return BT_ESL_API_SUCCESS on success, BT_ESL_API_FAILURE on failure.
  */
@@ -870,7 +914,8 @@ API_RESULT BT_esl_start_advertise_pl(void);
 /**
  * \brief Stops BLE advertising for ESL Tag.
  *
- * \par This function stops any ongoing BLE advertising for the ESL Tag role.
+ * \par Description
+ * This function stops any ongoing BLE advertising for the ESL Tag role.
  *
  * \return BT_ESL_API_SUCCESS on success, BT_ESL_API_FAILURE on failure.
  */
@@ -879,7 +924,8 @@ API_RESULT BT_esl_stop_advertise_pl(void);
 /**
  * \brief Synchronizes ESL Tag with subevent configuration.
  *
- * \par This function initiates synchronization with the specified subevent configuration.
+ * \par Description
+ * This function initiates synchronization with the specified subevent configuration.
  *
  * \param periodic_adv_properties Properties of the periodic advertising.
  * \param num_subevents Number of subevents.
@@ -897,7 +943,8 @@ API_RESULT BT_esl_sync_with_subevent_pl
 /**
  * \brief Sets response data for a specific subevent and slot.
  *
- * \par This function sets the response data to be sent during a specific subevent and slot.
+ * \par Description
+ * This function sets the response data to be sent during a specific subevent and slot.
  *
  * \param periodic_event_counter Counter value for the periodic event.
  * \param request_subevent Subevent index for the request.
@@ -921,7 +968,8 @@ API_RESULT BT_esl_set_response_data_pl
 /**
  * \brief Terminates synchronization with the ESL AP.
  *
- * \par This function stops synchronization with the Access Point.
+ * \par Description
+ * This function stops synchronization with the Access Point.
  *
  * \return BT_ESL_API_SUCCESS if termination is successful, BT_ESL_API_FAILURE otherwise.
  */
@@ -930,7 +978,8 @@ API_RESULT BT_esl_terminate_sync_pl(void);
 /**
  * \brief Unsubscribes from PAwR sync transfer.
  *
- * \par This function unsubscribes the ESL Tag from periodic advertising sync transfer.
+ * \par Description
+ * This function unsubscribes the ESL Tag from periodic advertising sync transfer.
  *
  * \param peer_bd_address Pointer to the Bluetooth address of the peer device.
  *
@@ -944,7 +993,8 @@ API_RESULT BT_esl_padv_sync_transfer_unsubscribe_pl
 /**
  * \brief Subscribes to PAwR sync transfer.
  *
- * \par This function subscribes the ESL Tag to periodic advertising sync transfer.
+ * \par Description
+ * This function subscribes the ESL Tag to periodic advertising sync transfer.
  *
  * \param peer_bd_address Pointer to the Bluetooth address of the peer device.
  *
@@ -958,7 +1008,8 @@ API_RESULT BT_esl_padv_sync_transfer_subscribe_pl
 /**
  * \brief Sends a GATT notification to a connected device.
  *
- * \par This function sends a GATT notification with the specified data.
+ * \par Description
+ * This function sends a GATT notification with the specified data.
  *
  * \param peer_addr Pointer to the Bluetooth address of the peer device.
  * \param data Pointer to the data to be notified.

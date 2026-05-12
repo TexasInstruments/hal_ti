@@ -209,6 +209,47 @@ typedef EM_thread_cond_type                     BT_ESL_CONDVAR_TYPE;
 /** Timer handle */
 typedef EM_timer_handle                         BT_ESL_TIMER_HANDLE;
 
+/**
+ * Dynamic configuration of ESL.
+ *  Used only if 'BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY' is defined.
+ */
+#ifdef BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY
+typedef struct _BT_ESL_DYNAMIC_CONFIG
+{
+#ifdef BT_ESL_SUPPORT_AP_ROLE
+    /** Max no of groups supported */
+    UCHAR config_BT_ESL_MAX_GROUPS_SUPPORTED;
+
+    /** Max no of tags per group supported */
+    UCHAR config_BT_ESL_MAX_ESL_TAGS_SUPPORTED;
+
+    /** Max displays supported */
+    UCHAR config_BT_ESL_MAX_DISPLAY_SUPPORTED;
+
+    /** Max led supported */
+    UCHAR config_BT_ESL_MAX_LED_SUPPORTED;
+
+    /** Max sensors supported */
+    UCHAR config_BT_ESL_MAX_SENSOR_SUPPORTED;
+
+    /** Max Image supported */
+    UCHAR config_BT_ESL_MAX_IMAGE_SUPPORTED;
+
+    /** Max no of responses for one subevent */
+    UCHAR config_BT_ESL_MAX_NO_OF_RESPONSE;
+
+    /** configuration timeout */
+    UCHAR config_BT_ESL_AP_CONFIG_TIMEOUT;
+
+    /** Max no of sync retries */
+    UCHAR config_BT_ESL_AP_MAX_SYNC_RETRY_COUNT;
+
+    /** Sync retry Interval */
+    UINT32 config_BT_ESL_AP_SYNC_RETRY_INTERVAL_MS;
+#endif /* BT_ESL_SUPPORT_AP_ROLE */
+} BT_ESL_DYNAMIC_CONFIG;
+#endif /* BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY */
+
 /** \} */
 
 /** \} */
@@ -816,10 +857,104 @@ typedef EM_timer_handle                         BT_ESL_TIMER_HANDLE;
 #define BT_ESL_alloc_mem(size)    EM_alloc_mem(size)
 #define BT_ESL_free_mem(ptr)      EM_free_mem(ptr)
 
-/** Macro to fetch the current value of corresponding Mesh Configuration */
-#define BT_ESL_CONFIG_LIMITS(x) (x)
+
+#ifdef BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY
+/** Macro to Configure Limits */
+#ifdef BT_ESL_SUPPORT_AP_ROLE
+#define BT_ESL_INIT_DYNAMIC_CONFIG_LIMITS(x)                                                 \
+       {                                                                                     \
+           (x)->config_BT_ESL_MAX_GROUPS_SUPPORTED      = BT_ESL_MAX_GROUPS_SUPPORTED;       \
+           (x)->config_BT_ESL_MAX_ESL_TAGS_SUPPORTED    = BT_ESL_MAX_ESL_TAGS_SUPPORTED;     \
+           (x)->config_BT_ESL_MAX_DISPLAY_SUPPORTED     = BT_ESL_MAX_DISPLAY_SUPPORTED;      \
+           (x)->config_BT_ESL_MAX_LED_SUPPORTED         = BT_ESL_MAX_LED_SUPPORTED;          \
+           (x)->config_BT_ESL_MAX_SENSOR_SUPPORTED      = BT_ESL_MAX_SENSOR_SUPPORTED;       \
+           (x)->config_BT_ESL_MAX_IMAGE_SUPPORTED       = BT_ESL_MAX_IMAGE_SUPPORTED;        \
+           (x)->config_BT_ESL_MAX_NO_OF_RESPONSE        = BT_ESL_MAX_NO_OF_RESPONSE;         \
+           (x)->config_BT_ESL_AP_CONFIG_TIMEOUT         = BT_ESL_AP_CONFIG_TIMEOUT;          \
+           (x)->config_BT_ESL_AP_SYNC_RETRY_INTERVAL_MS = BT_ESL_AP_SYNC_RETRY_INTERVAL_MS;  \
+           (x)->config_BT_ESL_AP_MAX_SYNC_RETRY_COUNT   = BT_ESL_AP_MAX_SYNC_RETRY_COUNT;    \
+       }
+#else /* BT_ESL_SUPPORT_AP_ROLE */
+#define BT_ESL_INIT_DYNAMIC_CONFIG_LIMITS(x)
+#endif /* BT_ESL_SUPPORT_AP_ROLE */
+
+/** Macro to get Configured Limits */
+#define BT_ESL_DYNAMIC_CONFIG_LIMITS(x)  \
+        bt_esl_dynamic_config.config_##x
 
 /** ESL Dynamic Global Array Definition Macro */
+#define BT_ESL_DEFINE_GLOBAL_ARRAY(type, var, s) \
+        type * var
+
+/** ESL Dynamic Global Array Declaration Macro */
+#define BT_ESL_DECLARE_GLOBAL_ARRAY(type, var, s) \
+        extern type * var
+
+/** ESL Dynamic Global Array Initialization Macro */
+#define BT_ESL_INIT_GLOBAL_ARRAY(type, var, s, i)                 \
+        {                                                         \
+            (var) = (type *)BT_ESL_alloc_mem((s) * sizeof(type)); \
+            EM_debug_trace(                                       \
+            BT_MODULE_ID_ESL,                                     \
+            "[ESL_GA]Allocated %lu bytes for %s. Ptr: %p\n",      \
+            ((unsigned long)(s) * sizeof(type)),                  \
+            #var, (void *)(var));                                 \
+            BT_ESL_mem_set((var), (i), ((s) * sizeof(type)));     \
+        }
+
+/** ESL Dynamic Global Array De-Initialization Macro */
+#define BT_ESL_DEINIT_GLOBAL_ARRAY(type, var, s)       \
+        {                                              \
+            if (NULL != (var))                         \
+            {                                          \
+                EM_debug_trace(                        \
+                BT_MODULE_ID_ESL,                      \
+                "[ESL_GA]Freeing %s with Allocated Ptr: %p\n", \
+                #var, (void *)(var));                  \
+                BT_ESL_free_mem((var));                \
+                (var) = NULL;                          \
+            }                                          \
+        }
+
+/** ESL Dynamic Local Array Definition Macro */
+#define BT_ESL_DEFINE_LOCAL_ARRAY(type, var, s) \
+        type * var
+
+/** ESL Dynamic Local Array Declaration Macro */
+#define BT_ESL_DECLARE_LOCAL_ARRAY(type, var, s) \
+        extern type * var
+
+/** ESL Dynamic Local Array Initialization Macro */
+#define BT_ESL_INIT_LOCAL_ARRAY(type, var, s, i)                  \
+        {                                                         \
+            (var) = (type *)BT_ESL_alloc_mem((s) * sizeof(type)); \
+            EM_debug_trace(                                       \
+            BT_MODULE_ID_ESL,                                     \
+            "[ESL_LA]: Allocated %lu bytes for %s. Ptr: %p\n",    \
+            ((unsigned long)(s) * sizeof(type)),                  \
+            #var, (void *)(var));                                 \
+            BT_ESL_mem_set((var), (i), ((s) * sizeof(type)));     \
+        }
+
+/** ESL Dynamic Local Array De-Initialization Macro */
+#define BT_ESL_DEINIT_LOCAL_ARRAY(type, var, s)        \
+        {                                              \
+            if (NULL != (var))                         \
+            {                                          \
+                EM_debug_trace(                        \
+                BT_MODULE_ID_ESL,                      \
+                "[ESL_LA]Freeing %s with Allocated Ptr: %p\n", \
+                #var, (void *)(var));                  \
+                BT_ESL_free_mem((var));                \
+                (var) = NULL;                          \
+            }                                          \
+        }
+
+#else /* BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY */
+/** Macro to get Configured Limits */
+#define BT_ESL_DYNAMIC_CONFIG_LIMITS(x) (x)
+
+/** ESL Static Global Array Definition Macro */
 #define BT_ESL_DEFINE_GLOBAL_ARRAY(type, var, s) \
         type var[(s)]
 
@@ -848,6 +983,7 @@ typedef EM_timer_handle                         BT_ESL_TIMER_HANDLE;
 
 /** ESL Dynamic Global Array De-Initialization Macro */
 #define BT_ESL_DEINIT_LOCAL_ARRAY(type, var, s)
+#endif /* BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY */
 
 /* Unreferenced variable macro to avoid compilation warnings */
 #define BT_ESL_IGNORE_UNUSED_PARAM(v) (void)(v)
@@ -884,7 +1020,9 @@ extern "C" {
  *  initializes all the internal modules and data structures.
  *
  *  \param [in] blob
- *             this parameter shall be NULL and ignored by the API.
+ *             this parameter shall be \ref BT_ESL_DYNAMIC_CONFIG
+ *             only if \ref BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY is defined
+ *             else NULL.
  */
 void BT_esl_init
      (

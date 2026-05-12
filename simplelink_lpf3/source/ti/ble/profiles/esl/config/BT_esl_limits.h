@@ -107,5 +107,44 @@
 #define BT_ESL_MAX_ESL_TAGS_SUPPORTED                                 255
 #endif
 
+/**
+ * BT_ESL_AP_MAX_SYNC_RETRY_COUNT
+ *
+ * Maximum number of retries for synchronization
+ */
+#ifdef BT_ESL_SUPPORT_AP_ROLE
+#if (CONFIG_BT_ESL_AP_MAX_SYNC_RETRY_COUNT >= 1) && (CONFIG_BT_ESL_AP_MAX_SYNC_RETRY_COUNT <= 10)
+#define BT_ESL_AP_MAX_SYNC_RETRY_COUNT CONFIG_BT_ESL_AP_MAX_SYNC_RETRY_COUNT
+#else
+#define BT_ESL_AP_MAX_SYNC_RETRY_COUNT                                5U
+#endif
+#endif /* BT_ESL_SUPPORT_AP_ROLE */
+
+/**
+ * BT_ESL_AP_SYNC_RETRY_INTERVAL_MS
+ *
+ * Sync retry Interval in milliseconds
+ */
+#ifdef BT_ESL_SUPPORT_AP_ROLE
+#if (CONFIG_BT_ESL_AP_SYNC_RETRY_INTERVAL_MS >= 1) && (CONFIG_BT_ESL_AP_SYNC_RETRY_INTERVAL_MS <= 10000)
+#define BT_ESL_AP_SYNC_RETRY_INTERVAL_MS CONFIG_BT_ESL_AP_SYNC_RETRY_INTERVAL_MS
+#else
+#define BT_ESL_AP_SYNC_RETRY_INTERVAL_MS                              2000U
+#endif
+#endif /* BT_ESL_SUPPORT_AP_ROLE */
+
+/**
+ * BT_ESL_AP_CONFIG_TIMEOUT
+ *
+ * Configuration Timeout in seconds
+ */
+#ifdef BT_ESL_SUPPORT_AP_ROLE
+#if (CONFIG_BT_ESL_AP_CONFIG_TIMEOUT >= 10) && (CONFIG_BT_ESL_AP_CONFIG_TIMEOUT <= 100)
+#define BT_ESL_AP_CONFIG_TIMEOUT CONFIG_BT_ESL_AP_CONFIG_TIMEOUT
+#else
+#define BT_ESL_AP_CONFIG_TIMEOUT                                      60U
+#endif
+#endif /* BT_ESL_SUPPORT_AP_ROLE */
+
 #endif /* _H_BT_ESL_LIMITS_ */
 

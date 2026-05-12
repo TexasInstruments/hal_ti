@@ -591,22 +591,28 @@
 #define BT_ESL_MAX_SENSOR_DATA_LEN                     15U
 
 /** Broadcast ESL ID */
-#define BT_ESL_BROADCAST_ESL_ID                       0xFFU
+#define BT_ESL_BROADCAST_ESL_ID                        0xFFU
 
 /**
  * Maximum ESL ID supported in ESL Address
- * (Refer .1.1.2 in ESL Bluetooth spec)
+ * (Refer 3.1.1.2 in ESL Bluetooth spec)
  */
-#define BT_ESL_MAX_ESL_ID_SUPPORTED                254U
+#define BT_ESL_MAX_ESL_ID_SUPPORTED                    254U
+
+/**
+ * Maximum Group ID supported in ESL Address
+ * (Refer 3.1.1.2 in ESL Bluetooth spec)
+ */
+#define BT_ESL_MAX_GROUP_ID_SUPPORTED                  127U
 
 /** Group ID Initialization value */
-#define BT_ESL_GROUP_ID_INIT_VAL                   0xFFU
+#define BT_ESL_GROUP_ID_INIT_VAL                       0xFFU
 
 /** ESL ID Initialization value */
-#define BT_ESL_ID_INIT_VAL                         0xFFU
+#define BT_ESL_ID_INIT_VAL                             0xFFU
 
 /** Maximum Advertising Data Length */
-#define BT_ESL_HCI_MAX_ADVERTISING_DATA_LENGTH        0x1FU
+#define BT_ESL_HCI_MAX_ADVERTISING_DATA_LENGTH         0x1FU
 /** \} */
 
 /**
@@ -1182,7 +1188,7 @@ typedef struct _BT_ESL_LED
 } BT_ESL_LED;
 
 /** ESL Sensor Type */
-typedef union _BT_ESL_SENSOR_TYPE
+typedef struct _BT_ESL_SENSOR_TYPE
 {
     /** 4 byte of ID that indicates a type of sensor */
     UINT32 type_32;
@@ -1206,8 +1212,8 @@ typedef struct _BT_ESL_SENSOR
 /** This structure contains the Sensor Information char value */
 typedef struct _BT_ESL_SENSOR_INFO
 {
-    /** List of ESL sensors */
-    BT_ESL_SENSOR esl_sensor[BT_ESL_MAX_SENSOR_SUPPORTED];
+    /** Reference to the list of ESL sensors */
+    BT_ESL_SENSOR * esl_sensor;
 
     /** Number Sensors supported by ESL */
     UCHAR            no_of_sensors;
@@ -1228,8 +1234,8 @@ typedef struct _BT_ESL_SENSOR_DATA
 /** This structure contains the LED Information char values */
 typedef struct _BT_ESL_LED_INFO
 {
-    /** List of ESL LEDs */
-    BT_ESL_LED esl_led[BT_ESL_MAX_LED_SUPPORTED];
+    /** Reference to the list of ESL LEDs */
+    BT_ESL_LED * esl_led;
 
     /** Number of LED's supported */
     UCHAR   no_of_leds;
@@ -1239,8 +1245,8 @@ typedef struct _BT_ESL_LED_INFO
 /** This structure contains the Display Information char value */
 typedef struct _BT_ESL_DISPLAY_INFO
 {
-    /** List of display supported by ESL */
-    BT_ESL_DISPLAY esl_display[BT_ESL_MAX_DISPLAY_SUPPORTED];
+    /** Reference to the list of display supported by ESL */
+    BT_ESL_DISPLAY * esl_display;
 
     /** Number of displays supported */
     UCHAR  no_of_displays;
@@ -1385,7 +1391,8 @@ typedef struct _BT_ESL_RSP
 /**
  * \brief ESL Application Connection Event Callback.
  *
- * \par ESL core calls the registered callback to indicate connection event
+ * \par Description
+ * ESL core calls the registered callback to indicate connection event
  * occurred to the application.
  *
  * \param esl_addr
@@ -1407,7 +1414,8 @@ typedef void (* CONNECTED_IND_CB)
 /**
  * \brief ESL Application Disconnection Event Callback.
  *
- * \par ESL core calls the registered callback to indicate Disconnection event
+ * \par Description
+ * ESL core calls the registered callback to indicate Disconnection event
  * occurred to the application.
  *
  * \param esl_addr
@@ -1425,7 +1433,8 @@ typedef void (* DISCONNECTED_IND_CB)
 /**
  * \brief ESL Application Discovery Event Callback.
  *
- * \par ESL core calls the registered callback to indicate Discovery event
+ * \par Description
+ * ESL core calls the registered callback to indicate Discovery event
  * occurred to the application.
  *
  * \param esl_addr
@@ -1447,7 +1456,8 @@ typedef void (* DISCOVERED_IND_CB)
 /**
  * \brief ESL Application Configuration Callback.
  *
- * \par ESL core calls the registered callback to indicate Configuration event
+ * \par Description
+ * ESL core calls the registered callback to indicate Configuration event
  * occurred to the application.
  *
  * \param esl_addr
@@ -1475,7 +1485,8 @@ typedef void (* CONFIGURED_IND_CB)
 /**
  * \brief ESL Application Synchronized Event Callback.
  *
- * \par ESL core calls the registered callback to indicate Synchronized event
+ * \par Description
+ * ESL core calls the registered callback to indicate Synchronized event
  * occurred to the application.
  *
  * \param esl_addr
@@ -1497,7 +1508,8 @@ typedef void (* SYNCHRONISED_IND_CB)
 /**
  * \brief ESL Application response in connection Event Callback.
  *
- * \par ESL core calls the registered callback to indicate response received in
+ * \par Description
+ * ESL core calls the registered callback to indicate response received in
  * connection event occurred to the application.
  *
  * \param esl_addr
@@ -1523,7 +1535,8 @@ typedef void (* RESPONSE_IND_CB)
 /**
  * \brief ESL Application response in synchronization Event Callback.
  *
- * \par ESL core calls the registered callback to indicate response received in
+ * \par Description
+ * ESL core calls the registered callback to indicate response received in
  * synchronization event occurred to the application.
  *
  * \param group_id
@@ -1553,7 +1566,8 @@ typedef void (* SYNCHRONISED_RESPONSE_IND_CB)
 /**
  * \brief ESL Application Device found Callback.
  *
- * \par ESL core calls the registered callback to indicate Device found in
+ * \par Description
+ * ESL core calls the registered callback to indicate Device found in
  * ADV reports occurred to the application.
  *
  * \param peer_add
@@ -1575,7 +1589,8 @@ typedef void (* ESL_DEVICE_FOUND_IND_CB)
 /**
  * \brief ESL Application Info Indication Callback.
  *
- * \par ESL core calls the registered callback to inform the upper layer
+ * \par Description
+ * ESL core calls the registered callback to inform the upper layer
  * about the GATT-Read Response received from an ESL Tag for the identified ESL
  * Characteristic.
  *
@@ -1667,7 +1682,8 @@ typedef struct _BT_ESL_AP_CONFIGURE_INFO
 /**
  * \brief ESL Application Tag Connection Event Callback.
  *
- * \par Called when LE connection is completed.
+ * \par Description
+ * Called when LE connection is completed.
  *
  * \param status
  *        Connection status.
@@ -1684,7 +1700,8 @@ typedef void (*ESL_CONNECT_IND_CB)
 /**
  * \brief ESL Application Tag Disconnection Event Callback.
  *
- * \par Called when LE disconnection is completed.
+ * \par Description
+ * Called when LE disconnection is completed.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -1697,7 +1714,8 @@ typedef void (*ESL_DISCONNECT_IND_CB)
 /**
  * \brief ESL Synchronization Complete Callback.
  *
- * \par Called when ESL is synchronized with AP.
+ * \par Description
+ * Called when ESL is synchronized with AP.
  *
  * \param status
  *        Synchronization status.
@@ -1714,7 +1732,8 @@ typedef void (*ESL_SYNCHRONIZED_IND_CB)
 /**
  * \brief ESL Unsynchronized Callback.
  *
- * \par Called when ESL loses synchronization with AP.
+ * \par Description
+ * Called when ESL loses synchronization with AP.
  * 1. When LE-ACL Link-Loss occurs
  * 2. When Periodic ADV Sync-Loss occurs
  *
@@ -1729,7 +1748,8 @@ typedef void (*ESL_UNSYNCHRONIZED_IND_CB)
 /**
  * \brief ESL Unassociated Callback.
  *
- * \par Called when ESL is unassociated from AP.
+ * \par Description
+ * Called when ESL is unassociated from AP.
  *
  * \param status
  *        Reason for transitioning to unassociated state.
@@ -1766,7 +1786,8 @@ typedef void (*ESL_SYNC_TERMINATED_IND_CB)
 /**
  * \brief ESL Read Info Request Callback.
  *
- * \par Called when below ESL info characteristic is read.
+ * \par Description
+ * Called when below ESL info characteristic is read.
  * > ESL Sensor Information
  * > ESL LED Information
  * > ESL Image Information
@@ -1787,7 +1808,8 @@ typedef void (*ESL_READ_ESL_INFO_IND_CB)
 /**
  * \brief ESL Write ESL Address Callback.
  *
- * \par Called when ESL address characteristic is written.
+ * \par Description
+ * Called when ESL address characteristic is written.
  *
  * \param status
  *        Write status.
@@ -1804,7 +1826,8 @@ typedef void (*ESL_WRITE_ESL_ADDR_IND_CB)
 /**
  * \brief ESL Write AP Sync Key Callback.
  *
- * \par Called when AP sync key material is written.
+ * \par Description
+ * Called when AP sync key material is written.
  *
  * \param status
  *        Write status.
@@ -1821,7 +1844,8 @@ typedef void (*ESL_WRITE_AP_SYNC_KEY_IND_CB)
 /**
  * \brief ESL Write Response Key Callback.
  *
- * \par Called when ESL response key material is written.
+ * \par Description
+ * Called when ESL response key material is written.
  *
  * \param status
  *        Write status.
@@ -1838,7 +1862,8 @@ typedef void (*ESL_WRITE_ESL_RSP_KEY_IND_CB)
 /**
  * \brief ESL Write Absolute Time Callback.
  *
- * \par Called when current absolute time is written.
+ * \par Description
+ * Called when current absolute time is written.
  *
  * \param current_abs_time
  *        Absolute time value.
@@ -1859,7 +1884,8 @@ typedef void (*ESL_WRITE_ABS_TIME_IND_CB)
 /**
  * \brief ESL Control Point Configuration Callback.
  *
- * \par Called when control point characteristic is configured.
+ * \par Description
+ * Called when control point characteristic is configured.
  *
  * \param char_id
  *        Characteristic ID.
@@ -1880,7 +1906,8 @@ typedef void (*ESL_CONTROL_POINT_CONFIGURED_IND_CB)
 /**
  * \brief ESL Configured Indication Callback.
  *
- * \par Called on successful configuration of ESL tag.
+ * \par Description
+ * Called on successful configuration of ESL tag.
  *      Configuration is complete when the following condition are met
  *      - ESL address is set
  *      - AP sync key is set
@@ -1899,7 +1926,8 @@ typedef void (*ESL_CONFIGURED_IND_CB)
 /**
  * \brief ESL LED Control Request Callback.
  *
- * \par Called when LED control command is received.
+ * \par Description
+ * Called when LED control command is received.
  *
  * \param data
  *        Command data.
@@ -1936,7 +1964,8 @@ typedef API_RESULT (*ESL_LED_CONTROL_CMD_CB)
 /**
  * \brief ESL Display Image Request Callback.
  *
- * \par Called when Display Image or Display Timed Image command is received.
+ * \par Description
+ * Called when Display Image or Display Timed Image command is received.
  *
  * \param data
  *        Command data.
@@ -1974,7 +2003,8 @@ typedef API_RESULT (*ESL_DISPLAY_IMAGE_CMD_CB)
 /**
  * \brief ESL Read Sensor Data Request Callback.
  *
- * \par Called when Read Sensor Data command is received.
+ * \par Description
+ * Called when Read Sensor Data command is received.
  *
  * \param data
  *        Command data.
@@ -2011,7 +2041,8 @@ typedef API_RESULT (*ESL_READ_SENSOR_DATA_CMD_CB)
 /**
  * \brief ESL Factory Reset Request Callback.
  *
- * \par Called when Factory Reset command is received.
+ * \par Description
+ * Called when Factory Reset command is received.
  *
  * \param command_source
  *        Source of the command (e.g., CP or sync packet).
@@ -2060,7 +2091,8 @@ typedef API_RESULT (*ESL_FACTORY_RESET_CMD_CB)
 /**
  * \brief ESL Unassociate From AP Request Callback.
  *
- * \par Called when Unassociate command is received.
+ * \par Description
+ * Called when Unassociate command is received.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -2097,7 +2129,8 @@ typedef API_RESULT (*ESL_UNASSOCIATE_FROM_AP_CMD_CB)
 /**
  * \brief ESL Service Reset Request Callback.
  *
- * \par Called when Service Reset command is received.
+ * \par Description
+ * Called when Service Reset command is received.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -2138,7 +2171,8 @@ typedef API_RESULT (*ESL_SERVICE_RESET_CMD_CB)
 /**
  * \brief ESL Refresh Image Request Callback.
  *
- * \par Called when Refresh Image command is received.
+ * \par Description
+ * Called when Refresh Image command is received.
  *
  * \param data
  *        Command data.
@@ -2175,7 +2209,8 @@ typedef API_RESULT (*ESL_REFRESH_IMAGE_CMD_CB)
 /**
  * \brief ESL Ping Request Callback.
  *
- * \par Called when Ping command is received.
+ * \par Description
+ * Called when Ping command is received.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -2212,7 +2247,8 @@ typedef API_RESULT (*ESL_PING_CMD_CB)
 /**
  * \brief ESL Update Complete Request Callback.
  *
- * \par Called when Update Complete command is received.
+ * \par Description
+ * Called when Update Complete command is received.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -2245,7 +2281,8 @@ typedef API_RESULT(*ESL_UPDATE_COMPLETE_CMD_CB)
 /**
  * \brief ESL Unknown Command Callback.
  *
- * \par Called when an unknown ESL command is received.
+ * \par Description
+ * Called when an unknown ESL command is received.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -2279,7 +2316,8 @@ typedef API_RESULT (*ESL_UNKNOWN_CMD_CB)
 /**
  * \brief ESL Vendor Specific Command Callback.
  *
- * \par Called when a vendor-specific command is received.
+ * \par Description
+ * Called when a vendor-specific command is received.
  *
  * \param blob
  *        Blob of \ref BT_ESL_BD_ADDR if any or NULL.
@@ -2570,7 +2608,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to get length from opcode
  *
- * \par Adding 2 to get (length from TLV + opcode(1 byte))
+ * \par Description
+ * Adding 2 to get (length from TLV + opcode(1 byte))
  * For Read Sensor Data: opcode is 0x10
  * total parameter for this opcode is 2 bytes.
  * parameter = (length + 1), 2 = (1 + 1). Hence length = 1,
@@ -2587,7 +2626,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to get control point command/response opcode base tag
  *
- * \par Macro to get base tag used for sensor value response and
+ * \par Description
+ * Macro to get base tag used for sensor value response and
  * vendor specific command/response.
  *
  * \param [in] x Opcode value
@@ -2612,7 +2652,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Check display info length
  *
- * \par Macro to check if the display info length is valid.
+ * \par Description
+ * Macro to check if the display info length is valid.
  * The length should be a multiple of 5.
  *
  * \param [in] len Length of the display info
@@ -2624,7 +2665,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Check Sensor info length
  *
- * \par Macro to check if the sensor info length is valid.
+ * \par Description
+ * Macro to check if the sensor info length is valid.
  * The length should be at least 3 or 5.
  *
  * \param [in] len Length of the sensor info
@@ -2636,7 +2678,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Initialize ESL Address
  *
- * \par This macro is used to initialize the ESL Address structure.
+ * \par Description
+ * This macro is used to initialize the ESL Address structure.
  *
  * \param [in] x Pointer to the ESL Address structure
  */
@@ -2649,7 +2692,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Initialize Key material
  *
- * \par This macro is used to initialize the key material structure.
+ * \par Description
+ * This macro is used to initialize the key material structure.
  *
  * \param [in] x Pointer to the key material structure
  */
@@ -2662,7 +2706,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Initialize Display Info
  *
- * \par This macro is used to initialize the display information structure.
+ * \par Description
+ * This macro is used to initialize the display information structure.
  *
  * \param [in] x Pointer to the display information structure
  */
@@ -2676,7 +2721,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Initialize LED Info
  *
- * \par This macro is used to initialize the LED information structure.
+ * \par Description
+ * This macro is used to initialize the LED information structure.
  *
  * \param [in] x Pointer to the LED information structure
  */
@@ -2690,7 +2736,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Initialize Sensor Info
  *
- * \par This macro is used to initialize the sensor information structure.
+ * \par Description
+ * This macro is used to initialize the sensor information structure.
  *
  * \param [in] x Pointer to the sensor information structure
  */
@@ -2711,7 +2758,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to initialize ESL attribute handles
  *
- * \par This macro initializes the ESL attribute handles to a predefined value.
+ * \par Description
+ * This macro initializes the ESL attribute handles to a predefined value.
  *
  * \param [in] x Pointer to the ESL attribute handles structure
  */
@@ -2732,7 +2780,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to initialize ESL TAG structure
  *
- * \par This macro initializes the ESL TAG structure to a predefined value.
+ * \par Description
+ * This macro initializes the ESL TAG structure to a predefined value.
  *
  * \param [in] x Pointer to the ESL TAG structure
  */
@@ -2741,9 +2790,32 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
             BT_ESL_INIT_ESL_ADDRESS(&((x)->esl_address));                    \
             BT_ESL_AP_INIT_ESL_ATTR_HANDLES(&((x)->esl_attr_handles));       \
             BT_ESL_INIT_BD_ADDR(&((x)->esl_bd_addr));                        \
-            (x)->sm_state= BT_ESL_AP_UNASSOCIATE;                            \
+            BT_ESL_AP_SET_ESL_TAG_STATE((x), BT_ESL_AP_UNASSOCIATE);         \
             (x)->config_state = BT_ESL_AP_CONFIGURATION_IDLE_STATE;          \
         }
+
+/**
+ * \brief Macro to get the State of an ESL Tag entry maintained by the AP.
+ *
+ * \param [in] x Pointer to the ESL TAG structure (\ref BT_ESL_TAG *)
+ * \return Current \c sm_state value of the ESL Tag entry
+ */
+#define BT_ESL_AP_GET_ESL_TAG_STATE(x)                                       \
+        ((x)->sm_state)
+
+/**
+ * \brief Macro to set the State of an ESL Tag entry maintained by the AP.
+ *
+ * \par Description
+ * This macro updates the \c sm_state field of the given \ref BT_ESL_TAG
+ * entry (within the AP's tag table) to the supplied state value.
+ *
+ * \param [in] x Pointer to the ESL TAG structure (\ref BT_ESL_TAG *)
+ * \param [in] s New state value (one of the AP States, e.g. \ref BT_ESL_AP_UNASSOCIATE,
+ *               \ref BT_ESL_AP_CONNECTED, \ref BT_ESL_AP_CONFIGURING, etc.)
+ */
+#define BT_ESL_AP_SET_ESL_TAG_STATE(x, s)                                    \
+        BT_ESL_AP_GET_ESL_TAG_STATE((x)) = (s);
 
 #endif /* BT_ESL_SUPPORT_AP_ROLE */
 
@@ -2774,7 +2846,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to update basic state
  *
- * \par These macros updates the basic state of the ESL tag by setting or clearing
+ * \par Description
+ * These macros updates the basic state of the ESL tag by setting or clearing
  * the specified bit.
  * Internally, it sets:
  * Bit position to be updated (in this case, the "Service Needed" bit)
@@ -2863,7 +2936,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to set sensor value response opcode
  *
- * \par This macro sets the sensor value response opcode by combining
+ * \par Description
+ * This macro sets the sensor value response opcode by combining
  * the length with the predefined sensor value constant.
  *
  * \param [in] l Length to be combined with the sensor value constant
@@ -2876,7 +2950,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to set Vendor Specific response opcode
  *
- * \par This macro sets the Vendor Specific response opcode by combining
+ * \par Description
+ * This macro sets the Vendor Specific response opcode by combining
  * the length with the predefined Vendor Specific response constant.
  *
  * \param [in] l Length to be combined with the Vendor Specific response constant
@@ -2889,7 +2964,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to check flashing pattern bits
  *
- * \par This macro checks if the specified bit position in the flashing pattern
+ * \par Description
+ * This macro checks if the specified bit position in the flashing pattern
  * is set or not.
  *
  * \param [in] v Flashing pattern value
@@ -2903,7 +2979,8 @@ typedef struct _BT_ESL_SUBEVENT_DATA_PARAMS
 /**
  * \brief Macro to initialize ESL instance
  *
- * \par This macro initializes the ESL instance by setting up the necessary
+ * \par Description
+ * This macro initializes the ESL instance by setting up the necessary
  * parameters and states.
  *
  * \param [in] x Pointer to the ESL instance structure
@@ -2979,7 +3056,8 @@ API_RESULT BT_esl_ap_scan_esl_device (/* IN */ UCHAR flag);
 /**
  *  \brief API to add ESL tag to the tag table
  *
- *  \par Description API to add ESL tag to the tag table
+ *  \par Description
+ *  API to add ESL tag to the tag table
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] peer_addr Reference to Peer address \ref BT_ESL_BD_ADDR
@@ -2995,7 +3073,8 @@ API_RESULT BT_esl_ap_add_esl_tag
 /**
  *  \brief API to remove ESL tag from tag table
  *
- *  \par Description API to remove ESL tag from tag table
+ *  \par Description
+ *  API to remove ESL tag from tag table
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3006,7 +3085,8 @@ API_RESULT BT_esl_ap_remove_esl_tag (/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to connect to ESL tag
  *
- *  \par Description API to connect to ESL tag
+ *  \par Description
+ *  API to connect to ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3017,7 +3097,8 @@ API_RESULT BT_esl_ap_connect_esl(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to disconnect an ESL tag
  *
- *  \par Description API to disconnect an ESL tag
+ *  \par Description
+ *  API to disconnect an ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3028,10 +3109,10 @@ API_RESULT BT_esl_ap_disconnect_esl(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to configure connected ESL tag
  *
- *  \par This Interface is to configure connected ESL tag
- *  This takes care of discovery, configure NTF of CP,
- *  write ESL address, write response key and sync key
- *  and write current absolute time.
+ *  \par Description
+ *  API to configure connected ESL tag
+ *  This takes care of discovery, configure NTF of CP, write ESL address,
+ *  write response key and sync key and write current absolute time.
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3042,7 +3123,8 @@ API_RESULT BT_esl_ap_config(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to discover ESL service characteristics of a ESL tag
  *
- *  \par API to discover ESL service characteristics of a ESL tag
+ *  \par Description
+ *  API to discover ESL service characteristics of a ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3053,7 +3135,8 @@ API_RESULT BT_esl_ap_discover_esl_service(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to get the current absolute time from ESL AP core
  *
- *  \par Description API to get the current absolute time from ESL AP core
+ *  \par Description
+ *  API to get the current absolute time from ESL AP core
  *
  *  \return Current absolute time or invalid value if failure.
  */
@@ -3062,9 +3145,9 @@ UINT32 BT_esl_ap_get_current_abs_time(void);
 /**
  *  \brief API to sync with ESL tag
  *
- *  \par Description API to sync with ESL tag
- *  This takes care of sending update complete command and
- *  initiate past procedure
+ *  \par Description
+ *  API to sync with ESL tag. This takes care of sending update complete
+ *  command and initiate past procedure
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3075,7 +3158,8 @@ API_RESULT BT_esl_ap_sync_with_esl(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to get ESL display information from ESL tag
  *
- *  \par Description API to get ESL display information from ESL tag
+ *  \par Description
+ *  API to get ESL display information from ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3086,7 +3170,8 @@ API_RESULT BT_esl_ap_get_display_information(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to get LED information from ESL tag
  *
- *  \par Description API to get LED information from ESL tag
+ *  \par Description
+ *  API to get LED information from ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3097,7 +3182,8 @@ API_RESULT BT_esl_ap_get_led_information(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to get sensor information from ESL tag
  *
- *  \par Description API to get sensor information from ESL tag
+ *  \par Description
+ *  API to get sensor information from ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3108,7 +3194,8 @@ API_RESULT BT_esl_ap_get_sensor_information(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to get image information from ESL tag
  *
- *  \par Description API to get image information from ESL tag
+ *  \par Description
+ *  API to get image information from ESL tag
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3119,7 +3206,8 @@ API_RESULT BT_esl_ap_get_image_information(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to send ping command
  *
- *  \par Description API to send ping command
+ *  \par Description
+ *  API to send ping command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] multiple_commands_flag Flag to set if Multiple ESL Commands
@@ -3136,7 +3224,8 @@ API_RESULT BT_esl_ap_send_ping
 /**
  *  \brief API to send Un-associate command
  *
- *  \par Description API to send Un-associate command
+ *  \par Description
+ *  API to send Un-associate command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] multiple_commands_flag Flag to set if Multiple ESL Commands
@@ -3153,7 +3242,8 @@ API_RESULT BT_esl_ap_send_unassociate
 /**
  *  \brief API to send service reset command
  *
- *  \par Description API to send service reset command
+ *  \par Description
+ *  API to send service reset command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] multiple_commands_flag Flag to set if Multiple ESL Commands
@@ -3170,7 +3260,8 @@ API_RESULT BT_esl_ap_send_service_reset
 /**
  *  \brief API to send factory reset command
  *
- *  \par Description API to send factory reset command
+ *  \par Description
+ *  API to send factory reset command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *
@@ -3184,7 +3275,8 @@ API_RESULT BT_esl_ap_send_factory_reset
 /**
  *  \brief API to send read sensor data command
  *
- *  \par Description API to send read sensor data command
+ *  \par Description
+ *  API to send read sensor data command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] sensor_index Index of the Sensor that is to be addressed
@@ -3203,7 +3295,8 @@ API_RESULT BT_esl_ap_send_read_sensor_data
 /**
  *  \brief API to send refresh display command
  *
- *  \par Description API to send refresh display command
+ *  \par Description
+ *  API to send refresh display command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] display_index Index of the Display that is to be addressed
@@ -3222,7 +3315,8 @@ API_RESULT BT_esl_ap_send_refresh_display
 /**
  *  \brief API to send display image command
  *
- *  \par Description API to send display image command
+ *  \par Description
+ *  API to send display image command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] display_index Index of the Display that is to be addressed
@@ -3243,7 +3337,8 @@ API_RESULT BT_esl_ap_send_display_image
 /**
  *  \brief API to send display timed image command
  *
- *  \par Description API to send display timed image command
+ *  \par Description
+ *  API to send display timed image command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] display_index Index of the Display that is to be addressed
@@ -3266,7 +3361,8 @@ API_RESULT BT_esl_ap_send_display_timed_image
 /**
  *  \brief API to send LED control command
  *
- *  \par Description API to send LED control command
+ *  \par Description
+ *  API to send LED control command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] led_index Index of LED
@@ -3291,7 +3387,8 @@ API_RESULT BT_esl_ap_send_led_control
 /**
  *  \brief API to send LED timed control command
  *
- *  \par Description API to send LED timed control command
+ *  \par Description
+ *  API to send LED timed control command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] led_index Index of LED
@@ -3320,7 +3417,8 @@ API_RESULT BT_esl_ap_send_led_timed_control
 /**
  *  \brief API to send vendor specific command
  *
- *  \par Description API to send vendor specific command
+ *  \par Description
+ *  API to send vendor specific command
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [in] opcode Vendor Specific Command Opcode
@@ -3344,7 +3442,8 @@ API_RESULT BT_esl_ap_send_vendor_specific_command
 /**
  *  \brief API to send commands in the ESL AP core command buffer
  *
- *  \par Description API to send commands in the ESL AP core command buffer
+ *  \par Description
+ *  API to send commands in the ESL AP core command buffer
  *
  *  \return \ref BT_ESL_API_SUCCESS or an error code indicating reason for failure
  */
@@ -3353,7 +3452,8 @@ API_RESULT BT_esl_ap_send_esl_command(void);
 /**
  *  \brief API to clear commands in the ESL AP core command buffer
  *
- *  \par Description API to clear commands in the ESL AP core command buffer
+ *  \par Description
+ *  API to clear commands in the ESL AP core command buffer
  *
  *  \return \ref BT_ESL_API_SUCCESS or an error code indicating reason for failure
  */
@@ -3362,7 +3462,8 @@ API_RESULT BT_esl_ap_clear_esl_command_buf(void);
 /**
  *  \brief API to Un-associate a ESL Tag
  *
- *  \par Description API to reset the ESL tag after the command unassociated
+ *  \par Description
+ *  API to reset the ESL tag after the command unassociated
  *  has been sent and disconnected
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
@@ -3374,7 +3475,8 @@ API_RESULT BT_esl_ap_post_unassociate(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to Factory Reset a ESL Tag
  *
- *  \par Description API to reset the ESL tag after the command factory reset
+ *  \par Description
+ *  API to reset the ESL tag after the command factory reset
  *  has been sent and disconnected
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
@@ -3386,7 +3488,8 @@ API_RESULT BT_esl_ap_post_factory_reset (/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief API to reset the ESL AP internally
  *
- *  \par Description API to Locally initiate reset of the ESL AP
+ *  \par Description
+ *  API to Locally initiate reset of the ESL AP
  *
  *  \return \ref BT_ESL_API_SUCCESS or an error code indicating reason for failure
  */
@@ -3395,7 +3498,8 @@ API_RESULT BT_esl_ap_reset(void);
 /**
  *  \brief API to reset the ESL Tag Internally/Locally
  *
- *  \par Description API to reset the ESL AP internally/Locally.
+ *  \par Description
+ *  API to reset the ESL AP internally/Locally.
  *  To be used in situations where Reset command need to be sent to the ESL Tag
  *  over the Air. For scenarios where ESL Tag is not responding or is found
  *  to be defective etc.
@@ -3409,7 +3513,8 @@ API_RESULT BT_esl_ap_reset_esl_tag(/* IN */ BT_ESL_ADDR * esl_addr);
 /**
  *  \brief Get ESL tag state
  *
- *  \par Description API to get the current state of the ESL tag.
+ *  \par Description
+ *  API to get the current state of the ESL tag.
  *
  *  \param [in] esl_addr Reference to ESL Address Structure \ref BT_ESL_ADDR
  *  \param [out] state Reference to variable to hold the ESL tag state
@@ -3422,6 +3527,48 @@ API_RESULT BT_esl_ap_get_esl_tag_state
                 /* OUT */ UCHAR       * state
            );
 
+/**
+ *  \brief Conditionally set ESL tag state (only if currently in expected state)
+ *
+ *  \par Description
+ *  API to update the current state of an ESL tag maintained
+ *  in the AP's tag table to \a new_state, but only when the tag's existing
+ *  state matches \a expected_state. Tags whose current state does not match
+ *  \a expected_state are left untouched.
+ *
+ *  Typical use-case: when the periodic advertising train is stopped, the
+ *  application/platform layer needs to demote only those tags that are
+ *  currently in \ref BT_ESL_AP_SYNCHRONIZED state to
+ *  \ref BT_ESL_AP_UNSYNCHRONIZED, without disturbing tags that are in
+ *  other states (e.g. \ref BT_ESL_AP_CONNECTED, \ref BT_ESL_AP_CONFIGURING,
+ *  \ref BT_ESL_AP_UNASSOCIATE).
+ *
+ *  \param [in] esl_addr      Reference to ESL Address Structure \ref BT_ESL_ADDR.
+ *                            If \c NULL is provided, every ESL tag entry in
+ *                            every group of the AP's tag table is evaluated
+ *                            (broadcast conditional set).
+ *  \param [in] expected_state State value the tag must currently be in for
+ *                             the update to occur. Must be one of the AP
+ *                             ESL Tag States (e.g. \ref BT_ESL_AP_SYNCHRONIZED).
+ *  \param [in] new_state     New state value to be assigned to qualifying
+ *                            ESL tag(s). Must be one of the AP ESL Tag States.
+ *
+ *  \return \ref BT_ESL_API_SUCCESS if the call completed successfully (note
+ *          that success is returned even if no tag matched
+ *          \a expected_state), or an error code indicating reason for
+ *          failure (invalid parameters, tag table not initialised, etc.).
+ *
+ *  \note This API directly updates the internal state of the ESL tag entry
+ *        in the AP tag table without any over-the-air procedure. It is
+ *        intended for recovery / housekeeping scenarios.
+ */
+API_RESULT BT_esl_ap_set_esl_tag_state
+           (
+                /* IN */ BT_ESL_ADDR * esl_addr,
+                /* IN */ UCHAR         expected_state,
+                /* IN */ UCHAR         new_state
+           );
+
 /** \} */
 
 /**
@@ -3432,7 +3579,8 @@ API_RESULT BT_esl_ap_get_esl_tag_state
 /**
  * \brief API to handle Adv report event
  *
- * \par This API is called when an advertisement report is received.
+ * \par Description
+ * This API is called when an advertisement report is received.
  *
  * \param [in] bd_addr Reference to the Bluetooth address of the device.
  * \param [in] adv_data Reference to the advertisement data.
@@ -3449,7 +3597,8 @@ void BT_esl_ap_adv_report_handler
 /**
  * \brief API to handle connection event
  *
- * \par This API is called when a connection event occurs.
+ * \par Description
+ * This API is called when a connection event occurs.
  *
  * \param [in] status Status of the connection event.
  * \param [in] peer_bd_addr Reference to the Bluetooth address of the peer device.
@@ -3465,7 +3614,8 @@ API_RESULT BT_esl_ap_connection_handler
 /**
  * \brief API to handle disconnection event
  *
- * \par This API is called when a disconnection event occurs.
+ * \par Description
+ * This API is called when a disconnection event occurs.
  *
  * \param [in] peer_bd_addr Reference to the Bluetooth address of the peer device.
  * \param [in] reason Reason for disconnection.
@@ -3480,7 +3630,8 @@ API_RESULT BT_esl_ap_disconnection_handler
 /**
  * \brief API to handle discovery complete event
  *
- * \par This API is called when the discovery of ESL attributes is complete.
+ * \par Description
+ * This API is called when the discovery of ESL attributes is complete.
  *
  * \param [in] bd_addr Pointer to the Bluetooth address of the device.
  * \param [in] esl_attr_handles Pointer to the ESL attribute handles structure.
@@ -3496,7 +3647,8 @@ API_RESULT BT_esl_ap_discovery_complete_handler
 /**
  * \brief API to handle write response
  *
- * \par This function is called when the GATT write operation completes.
+ * \par Description
+ * This function is called when the GATT write operation completes.
  *
  * \param [in] bd_addr Pointer to the Bluetooth address of the device.
  * \param [in] attr_handle The handle of the characteristic that was written.
@@ -3514,7 +3666,8 @@ API_RESULT BT_esl_ap_write_response_handler
 /**
  * \brief Handles the response of a GATT read operation.
  *
- * \par This function is called when the GATT read operation completes.
+ * \par Description
+ * This function is called when the GATT read operation completes.
  *
  * \param bd_addr Reference to the Bluetooth address of the device.
  * \param attr_handle The handle of the characteristic that was read.
@@ -3536,7 +3689,8 @@ API_RESULT BT_esl_ap_read_response_handler
 /**
  * \brief API to handle Notification
  *
- * \par This function is called when a notification is received.
+ * \par Description
+ * This function is called when a notification is received.
  *
  * \param [in] bd_addr Reference to the Bluetooth address of the device.
  * \param [in] attr_handle The handle of the characteristic that sent the notification.
@@ -3556,7 +3710,8 @@ API_RESULT BT_esl_ap_notification_handler
 /**
  * \brief Subevent data request handler
  *
- * \par This function is called when a subevent data request is received.
+ * \par Description
+ * This function is called when a subevent data request is received.
  *
  * \param [in] subevent_start The starting subevent index.
  * \param [in] subevent_count The number of subevents requested.
@@ -3572,7 +3727,8 @@ API_RESULT BT_esl_ap_subevent_data_request_handler
 /**
  * \brief periodic advertisement response handler
  *
- * \par This function is called when a periodic advertisement response is received.
+ * \par Description
+ * This function is called when a periodic advertisement response is received.
  *
  * \param [in] subevent The subevent index.
  * \param [in] response_slot The response slot index.
@@ -3611,7 +3767,8 @@ API_RESULT BT_esl_ap_response_event_handler
 /**
  *  \brief API to initialize the ESL tag core
  *
- *  \par Description API to initialize the ESL tag core
+ *  \par Description
+ *  API to initialize the ESL tag core
  *
  *  \param [in] esl_inst Reference to the ESL Instance Structure \ref BT_ESL_INSTANCE
  *
@@ -3622,7 +3779,8 @@ API_RESULT BT_esl_tag_init(/* IN */ BT_ESL_INSTANCE * esl_inst);
 /**
  *  \brief API to register callbacks for ESL tag events
  *
- *  \par Description API to register callbacks for ESL tag events
+ *  \par Description
+ *  API to register callbacks for ESL tag events
  *
  *  \param [in] esl_tag_cb Reference to the ESL Tag Callbacks Structure \ref BT_ESL_TAG_CALLBACKS
  *
@@ -3633,7 +3791,8 @@ API_RESULT BT_esl_tag_register_cb(/* IN */ BT_ESL_TAG_CALLBACKS * esl_tag_cb);
 /**
  *  \brief API to initiate disconnect to ESL AP
  *
- *  \par Description API to initiate disconnect to ESL AP
+ *  \par Description
+ *  API to initiate disconnect to ESL AP
  *
  *  \return \ref BT_ESL_API_SUCCESS or an error code indicating reason for failure
  */
@@ -3642,7 +3801,8 @@ API_RESULT BT_esl_tag_disconnect(void);
 /**
  *  \brief API to send basic state response
  *
- *  \par Description API to send basic state response
+ *  \par Description
+ *  API to send basic state response
  *
  *  \param [in] basic_state Basic State's Value
  *
@@ -3656,7 +3816,8 @@ API_RESULT BT_esl_tag_send_basic_state
 /**
  *  \brief API to send error response
  *
- *  \par Description API to send error response
+ *  \par Description
+ *  API to send error response
  *
  *  \param [in] error_code Reason/Code for Error Response
  *
@@ -3670,7 +3831,8 @@ API_RESULT BT_esl_tag_send_esl_error_response
 /**
  *  \brief API to send LED state response
  *
- *  \par Description API to send LED state response
+ *  \par Description
+ *  API to send LED state response
  *
  *  \param [in] led_index LED Index for which State Response to be sent
  *
@@ -3684,7 +3846,8 @@ API_RESULT BT_esl_tag_send_led_state
 /**
  *  \brief API to send display state response
  *
- *  \par Description API to send display state response
+ *  \par Description
+ *  API to send display state response
  *
  *  \param [in] display_index Display Index for which State Response to be sent
  *  \param [in] image_index Image Index for which State Response to be sent
@@ -3700,7 +3863,8 @@ API_RESULT BT_esl_tag_send_display_state
 /**
  *  \brief API to send sensor data response
  *
- *  \par Description API to send sensor data response
+ *  \par Description
+ *  API to send sensor data response
  *
  *  \param [in] sensor_index Index of Sensor for which response to be sent
  *  \param [in] sensor_data Sensor Data to be sent as response
@@ -3719,7 +3883,8 @@ API_RESULT BT_esl_tag_send_sensor_value
 /**
  *  \brief API to send vendor specific response
  *
- *  \par Description API to send vendor specific response
+ *  \par Description
+ *  API to send vendor specific response
  *
  *  \param [in] response_opcode Vendor Specific Response code
  *  \param [in] response_data Vendor Specific Response Data
@@ -3738,7 +3903,8 @@ API_RESULT BT_esl_tag_send_vendor_specific_response
 /**
  *  \brief API to setup ESL Tag Factory Reset
  *
- *  \par Description This API is used to remove all bonding information with
+ *  \par Description
+ *  This API is used to remove all bonding information with
  *  the AP, delete the values of the AP Sync Key Material, ESL Response
  *  Key Material, and ESL Address in internal storage; and
  *  delete all stored commands.(Refer section 3.9.2.4 in
@@ -3755,14 +3921,16 @@ API_RESULT BT_esl_tag_post_factory_reset(void);
 /**
  *  \brief API to reset the ESL tag
  *
- *  \par Description This interface is used to reset the ESL Tag
+ *  \par Description
+ *  This interface is used to reset the ESL Tag
  */
 void BT_esl_tag_reset(void);
 
 /**
  *  \brief API to update the max image supported
  *
- *  \par Description Interface to update the Maximum number of supported
+ *  \par Description
+ *  Interface to update the Maximum number of supported
  *  images in ESL Tag.
  *
  *  \param [in] num_of_images
@@ -3775,7 +3943,8 @@ void BT_esl_tag_update_max_image_supported(/* IN */ UCHAR num_of_images);
 /**
  *  \brief API to update Basic State
  *
- *  \par Description This API is used to update the Basic State of the ESL Tag.
+ *  \par Description
+ *  This API is used to update the Basic State of the ESL Tag.
  *
  *  \param [in] bit_pos Position of the bit in the Basic State to be updated.
  *
@@ -3788,7 +3957,8 @@ void BT_esl_tag_update_basic_state(UCHAR bit_pos, UCHAR flag);
 /**
  * \brief API to get the current Basic State of the ESL Tag
  *
- * \par Description This API is used to retrieve the current Basic State of the ESL Tag.
+ * \par Description
+ *  This API is used to retrieve the current Basic State of the ESL Tag.
  *
  * \return The current Basic State of the ESL Tag.
  */
@@ -3804,7 +3974,8 @@ UINT16 BT_esl_tag_get_basic_state(void);
 /**
  * \brief API to handle incoming write request for CCCD
  *
- * \par This function is called when a write request for
+ * \par Description
+ * This function is called when a write request for
  * the Client Characteristic Configuration Descriptor (CCCD) is received.
  *
  * \param [in] peer_addr Reference to the Bluetooth address of the peer device.
@@ -3824,7 +3995,8 @@ API_RESULT BT_esl_tag_write_cccd_handler
 /**
  * \brief API to handle incoming write request for a characteristic
  *
- * \par This function is called when a write request for a characteristic
+ * \par Description
+ * This function is called when a write request for a characteristic
  *
  * \param [in] peer_addr Reference to the Bluetooth address of the peer device.
  * \param [in] char_id Characteristic ID of the characteristic being written.
@@ -3845,7 +4017,8 @@ API_RESULT BT_esl_tag_write_request_handler
 /**
  * \brief API to handle incoming read request for a characteristic
  *
- * \par This function is called when a read request for a characteristic
+ * \par Description
+ * This function is called when a read request for a characteristic
  *
  * \param [in] peer_addr Reference to the Bluetooth address of the peer device.
  * \param [in] service_uuid UUID of the service containing the characteristic.
@@ -3872,7 +4045,8 @@ API_RESULT BT_esl_tag_read_request_handler
 /**
  * \brief API to handle HCI connection complete event
  *
- * \par This function is called when a connection to the ESL Access Point
+ * \par Description
+ * This function is called when a connection to the ESL Access Point
  * is established.
  *
  * \param [in] status Status of the connection.
@@ -3890,7 +4064,8 @@ API_RESULT BT_esl_tag_hci_connection_complete_handler
 /**
  * \brief API to handle periodic advertising sync transfer TX received event
  *
- * \par This function is called when the periodic advertising sync transfer
+ * \par Description
+ * This function is called when the periodic advertising sync transfer
  * TX received event occurs.
  *
  * \param [in] status Status of the sync transfer.
@@ -3910,7 +4085,8 @@ API_RESULT BT_esl_tag_padv_sync_tx_received_handler
 /**
  * \brief API to handle periodic advertising report event
  *
- * \par This function is called when a periodic advertising report event occurs.
+ * \par Description
+ * This function is called when a periodic advertising report event occurs.
  *
  * \param [in] padv_report_evt Reference to the periodic advertising report parameters.
  *
@@ -3925,7 +4101,8 @@ API_RESULT BT_esl_tag_periodic_adv_report_handler
 /**
  * \brief API to handle periodic advertising sync lost event
  *
- * \par This function is called when a periodic advertising sync lost event occurs
+ * \par Description
+ * This function is called when a periodic advertising sync lost event occurs
  *      or when sync is terminated
  *
  * \return BT_ESL_API_SUCCESS if the sync lost event is handled successfully,
@@ -3936,7 +4113,8 @@ API_RESULT BT_esl_tag_periodic_adv_sync_lost_handler(void);
 /**
  * \brief API to handle disconnect complete event
  *
- * \par This function is called when a disconnect complete event occurs.
+ * \par Description
+ * This function is called when a disconnect complete event occurs.
  *
  * \param [in] peer_address Reference to the Bluetooth address of the peer device.
  * \param [in] reason Reason for the disconnection.

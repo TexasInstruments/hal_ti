@@ -110,6 +110,22 @@
 #define BT_ESL_SUPPORT_VENDOR_SPECIFIC_COMMANDS
 #endif /* CONFIG_BT_ESL_VENDOR_SPECIFIC_COMMANDS */
 
+#if defined(CONFIG_BT_ESL_DYNAMIC_GLOBAL_CONFIGURATION)
+/**
+ *  BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY
+ *
+ *  This flag is used to enable support for Dynamic Configuration
+ *  of Limits within the ESL implementation. When this flag is enabled, the global arrays
+ *  can be resized dynamically at runtime to accommodate varying numbers of ESL related
+ *  parameters such as groups, tags, displays, LEDs, and sensors. This allows for greater
+ *  flexibility in the implementation, as the limits can be adjusted based on the specific
+ *  requirements of the application or environment.
+ *
+ *  Dependency: None.
+ */
+#define BT_ESL_HAVE_DYNAMIC_GLOBAL_ARRAY
+#endif /* CONFIG_BT_ESL_DYNAMIC_GLOBAL_CONFIGURATION */
+
 /* ----------------------------------------------------------------------- */
 /* ==== ESL Version Feature Flags ======================================== */
 /* ----------------------------------------------------------------------- */

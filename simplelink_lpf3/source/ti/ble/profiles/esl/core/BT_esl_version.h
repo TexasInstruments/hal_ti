@@ -62,7 +62,7 @@
  *  number, a change resulting in increment in sub-minor number will result in
  *  increment in minor number.
  */
-#define BT_ESL_MINOR_VERSION_NUMBER       2
+#define BT_ESL_MINOR_VERSION_NUMBER       3
 
 /**
  *  An increment in this number implies a trivial change, changes such as
@@ -70,7 +70,7 @@
  *  internal function/variable names etc. are viewed as changes that result in
  *  increment in this number.
  */
-#define BT_ESL_SUB_MINOR_VERSION_NUMBER   1
+#define BT_ESL_SUB_MINOR_VERSION_NUMBER   0
 
 /** \} */
 
