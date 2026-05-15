@@ -2462,11 +2462,6 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
     /* Store SysTimer timeouts */
     memcpy(sysTimerTimeouts, (void *)(SYSTIM_BASE + SYSTIM_O_CH0CCSR), sizeof(sysTimerTimeouts));
 
-    /* Get current time in 8us resolution. Must be done as close as possible to
-     * getting the SysTimer time above.
-     */
-    rtcCurrTime = HWREG(RTC_BASE + RTC_O_TIME8U);
-
     /* Get RTC channel armset state. */
     rtcARMSET = HWREG(RTC_BASE + RTC_O_ARMSET);
 
