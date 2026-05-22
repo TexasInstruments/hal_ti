@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2025, Texas Instruments Incorporated
+# Copyright (c) 2022-2026, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ zephyr_library_sources(
 )
 
 # RF patches
-if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
+if(CONFIG_RCL_DRIVER)
   zephyr_library_sources(
     ${SOURCES_RF_PATCHES}
     )

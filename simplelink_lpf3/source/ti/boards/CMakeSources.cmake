@@ -1,4 +1,4 @@
-# Copyright (c) 2024-2025, Texas Instruments Incorporated
+# Copyright (c) 2024-2026, Texas Instruments Incorporated
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,9 @@
 # OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-if(CONFIG_SIMPLELINK_F3_RADIO_DRIVER)
+if(CONFIG_RCL_DRIVER)
 
-    zephyr_library_sources_ifdef(CONFIG_SIMPLELINK_F3_RF_SETTING_PREGEN generated/${CONFIG_BOARD}/ti_radio_config.c)
+    zephyr_library_sources_ifdef(CONFIG_RCL_RF_SETTING_PREGEN generated/${CONFIG_BOARD}/ti_radio_config.c)
 
 endif()
 

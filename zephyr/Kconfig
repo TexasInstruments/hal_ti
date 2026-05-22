@@ -2,3 +2,4 @@
 # SPDX-License-Identifier: Apache-2.0
 
 rsource "../simplelink_lpf3/source/ti/ble/Kconfig"
+rsource "../simplelink_lpf3/source/ti/drivers/rcl/Kconfig"
