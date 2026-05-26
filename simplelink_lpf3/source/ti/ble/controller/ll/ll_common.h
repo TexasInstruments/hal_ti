@@ -2096,7 +2096,7 @@ uint8 llQueryTxQueue(uint32 addr);
 uint8 llValidateConnectIndPkt( uint8 * );
 
 // Check if there is a control procedure with instant active for a specific connection
-uint8 llCheckConnInstant(llConnState_t *connPtr);
+uint8 llConnIsInstantProcedurePending(llConnState_t *connPtr);
 
 // Removes the handover connection from activeConns list
 void llRemoveHandoverConn(uint8_t *activeConnsArray, uint8_t numActiveConns);

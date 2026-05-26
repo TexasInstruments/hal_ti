@@ -1432,6 +1432,7 @@ struct advSet_t
   uint16          otaTimeAuxAdv;                  // total OTA time in us per length and PHY
   uint16          otaTimeAuxAdvScan;              // total OTA time in us per length and PHY for first Scannable Aux
   uint8           minTimeAdj;                     // total OTA time modulo min offset
+  uint8_t         randAddrConfigured;             // Host defined random address for this advSet
 
   // Common Packet
   int8            txPowerValueDbm;                // tx power value in dBm
