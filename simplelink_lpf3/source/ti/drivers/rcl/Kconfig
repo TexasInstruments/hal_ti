@@ -64,20 +64,31 @@ config RCL_REGULATORY_DOMAIN_RUNTIME_MODIFIABLE
 
 endmenu
 
+config RCL_COEX_DT
+	bool
+	depends on	RCL_DRIVER || RCL_DRIVER_INTERNAL
+	default $(dt_nodelabel_enabled,ti_rcl_coex)
+	help
+		Automatically set when a ti_rcl_coex devicetree node exists and is enabled.
+		This symbol indicates that coexistence hardware configuration is available
+		in the devicetree. Used as a dependency for CONFIG_RCL_COEX.
+
 config RCL_COEX
 	bool "RF Coexistence support"
 	depends on	RCL_DRIVER || RCL_DRIVER_INTERNAL
+	depends on 	RCL_COEX_DT
 	depends on	DT_HAS_TI_RCL_COEX_THREE_WIRE_ENABLED || \
 				DT_HAS_TI_RCL_COEX_TWO_WIRE_GRANT_REQUEST_ENABLED || \
 				DT_HAS_TI_RCL_COEX_TWO_WIRE_PRIORITY_REQUEST_ENABLED || \
 				DT_HAS_TI_RCL_COEX_ONE_WIRE_GRANT_ENABLED || \
 				DT_HAS_TI_RCL_COEX_ONE_WIRE_REQUEST_ENABLED
+	default n
 	help
 		Enable RF coexistence support for BLE radio to coordinate with
 		external RF devices (WiFi or IEEE) using hardware signaling.
 
 		The coexistence mode is automatically detected from device tree
-		based on the compatible string of the ti_radio_coex node.
+		based on the compatible string of the ti_rcl_coex node.
 
 		Timing parameters (T1, T2) and GPIO pin assignments are configured
 		in device tree, not Kconfig.
@@ -89,18 +100,16 @@ config RCL_COEX
 			- One-Wire Grant: GRANT only
 			- One-Wire Request: REQUEST only
 
-if RCL_COEX
-
 config RCL_COEX_RUNTIME_MODIFIABLE
 	bool "Allow runtime modification of CoEx configuration"
+	depends on RCL_COEX
+	default n
 	help
 		If enabled, the lrfCoexConfiguration struct is non-const and the timing
 		parameters T1 or T2 can be modified at runtime (when no RCL commands are
 		running), if priority or request signal is used, respectively.
 
 		If disabled, the struct is const and placed in ROM, saving RAM.
-
-endif # RCL_COEX
 
 config RCL_PALNA
 	bool "Enable RCL observable PA/LNA signals"

@@ -41,6 +41,14 @@ extern const uint_least8_t              CONFIG_ECDH_0_CONST;
 #define CONFIG_ECDH_0                   0
 #define CONFIG_TI_DRIVERS_ECDH_COUNT    1
 
+/*
+ *  ======== RCL ========
+ */
+
+#if defined(CONFIG_RCL_COEX_RUNTIME_MODIFIABLE)
+#include <ti/drivers/rcl/LRF.h>
+extern LRF_CoexConfiguration lrfCoexConfiguration;
+#endif
 
 /*
  *  ======== Board_init ========
