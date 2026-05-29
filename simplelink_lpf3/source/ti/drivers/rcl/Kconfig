@@ -17,6 +17,17 @@ config RCL_DRIVER
 
 		Say Y for wireless applications.
 
+config RCL_DRIVER_INTERNAL
+	bool "Internal RCL driver source path (dev/test only)"
+	depends on HAS_CC23X0_SDK || HAS_CC27XX_SDK
+	depends on !RCL_DRIVER
+	default n
+	help
+		Selects the internal RCL path when RCL sources are provided by
+		an external build system.
+
+		Not intended for production or customer application configurations.
+
 config RCL_RF_SETTING_PREGEN
 	bool "Use pre-generated RF settings"
 	depends on RCL_DRIVER
@@ -32,7 +43,7 @@ config RCL_RF_SETTING_PREGEN
 		Say N only if providing custom RF settings.
 
 menu "Regulatory Domain Selection"
-	depends on RCL_DRIVER
+	depends on RCL_DRIVER || RCL_DRIVER_INTERNAL
 	depends on SOC_CC2755P10 || SOC_CC2755R10 || SOC_CC2745R10_Q1
 
 config RCL_REGULATORY_DOMAIN_ETSI
@@ -52,3 +63,52 @@ config RCL_REGULATORY_DOMAIN_RUNTIME_MODIFIABLE
 	default n
 
 endmenu
+
+config RCL_COEX
+	bool "RF Coexistence support"
+	depends on	RCL_DRIVER || RCL_DRIVER_INTERNAL
+	depends on	DT_HAS_TI_RCL_COEX_THREE_WIRE_ENABLED || \
+				DT_HAS_TI_RCL_COEX_TWO_WIRE_GRANT_REQUEST_ENABLED || \
+				DT_HAS_TI_RCL_COEX_TWO_WIRE_PRIORITY_REQUEST_ENABLED || \
+				DT_HAS_TI_RCL_COEX_ONE_WIRE_GRANT_ENABLED || \
+				DT_HAS_TI_RCL_COEX_ONE_WIRE_REQUEST_ENABLED
+	help
+		Enable RF coexistence support for BLE radio to coordinate with
+		external RF devices (WiFi or IEEE) using hardware signaling.
+
+		The coexistence mode is automatically detected from device tree
+		based on the compatible string of the ti_radio_coex node.
+
+		Timing parameters (T1, T2) and GPIO pin assignments are configured
+		in device tree, not Kconfig.
+
+		Supported modes:
+			- Three-Wire: REQUEST + PRIORITY + GRANT
+			- Two-Wire Grant+Request: REQUEST + GRANT
+			- Two-Wire Priority+Request: REQUEST + PRIORITY
+			- One-Wire Grant: GRANT only
+			- One-Wire Request: REQUEST only
+
+if RCL_COEX
+
+config RCL_COEX_RUNTIME_MODIFIABLE
+	bool "Allow runtime modification of CoEx configuration"
+	help
+		If enabled, the lrfCoexConfiguration struct is non-const and the timing
+		parameters T1 or T2 can be modified at runtime (when no RCL commands are
+		running), if priority or request signal is used, respectively.
+
+		If disabled, the struct is const and placed in ROM, saving RAM.
+
+endif # RCL_COEX
+
+config RCL_PALNA
+	bool "Enable RCL observable PA/LNA signals"
+	depends on RCL_DRIVER || RCL_DRIVER_INTERNAL
+	default n
+	help
+		Enable PA/LNA signals for radio operation observability. The PA signal
+		is active when there is an active transmission, and the LNA signal is
+		active when there is an active reception. These signals can be used for
+		debugging purposes or to trigger external hardware (e.g. a logic analyzer)
+		to capture radio activity.
