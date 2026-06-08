@@ -27,9 +27,6 @@ set(SOURCES_RCL_LPF3
     lrf/LRFLPF3.c
     lrf/LRFLPF3_FIFO.c
     lrf/LRFLPF3_Interface_Generic.c
-
-    # RCL feature configuration file
-    zephyr/rcl_feature_config.c
 )
 
 list(TRANSFORM SOURCES_RCL PREPEND source/ti/drivers/rcl/)
