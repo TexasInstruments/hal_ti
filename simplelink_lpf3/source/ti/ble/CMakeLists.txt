@@ -126,7 +126,7 @@ if (CONFIG_BT_CHANNEL_SOUNDING)
     -DCHANNEL_SOUNDING
   )
 endif()
-if (CONFIG_BT_CTLR_COEX_TICKER)
+if (CONFIG_RCL_COEX)
   zephyr_compile_definitions(
     -DUSE_COEX
   )
