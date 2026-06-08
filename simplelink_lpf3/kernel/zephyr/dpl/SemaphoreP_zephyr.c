@@ -8,6 +8,7 @@
 #include <zephyr/sys/__assert.h>
 #include <kernel/zephyr/dpl/dpl.h>
 #include <ti/drivers/dpl/SemaphoreP.h>
+#include <zephyr/tracing/tracking.h>
 
 /*
  * Zephyr kernel object pools:
@@ -152,11 +153,60 @@ SemaphoreP_Handle SemaphoreP_constructBinary(SemaphoreP_Struct *handle, unsigned
 
 void SemaphoreP_destruct(SemaphoreP_Struct *semP)
 {
-    struct k_sem *sem;
-
-    sem = (struct k_sem *)semP->data;
-    if (sem)
+    if (semP == NULL)
     {
-        k_sem_reset(sem);
+      return;
     }
+
+    struct k_sem *sem = (struct k_sem *)semP;
+
+    #ifdef CONFIG_OBJ_CORE_SEM
+        /* Verify if the semaphore exists */
+        if (sem->obj_core.type != NULL)
+        {
+            /* Remove the obj_core.node from obj_type_sem.list */
+            k_obj_core_unlink(K_OBJ_CORE(sem));
+        }
+    #endif
+
+         #if defined(CONFIG_TRACING_OBJECT_TRACKING) && defined(CONFIG_TRACING_SEMAPHORE)
+        {
+            /* Disable interrupts to protect the list from modification done from another context by a function such as k_sem_init() */
+            unsigned int key = irq_lock();
+            struct k_sem *prev = NULL;
+            struct k_sem *curr = _track_list_k_sem; /* curr starts in head of list */
+ 
+            /* traverse the entire list (until tail) */
+            while (curr != NULL)
+            {
+                /* When the semaphore is found */
+                if (curr == sem)
+                {
+                    /* Then the semaphore is in the head, never updated. Move the global head pointer to the next address of the node */
+                    if (prev == NULL)
+                    {
+                        /* Redirect the predecessor to the successor to erase node in between */
+                        /* The head now points to the next sem track address */
+                        _track_list_k_sem = SYS_PORT_TRACK_NEXT(sem);
+                    }
+                    else
+                    /* The semaphore is somewhere in the middle or in the tail, so bypass prev over sem connecting prev to the next address of the node. */
+                    /* prev points to curr/_track_list_k_sem therefore assigning _track_list_k_sem next addr (which has same k_sem struct) to sem->_obj_track_next. */
+                    {
+                        SYS_PORT_TRACK_NEXT(prev) = SYS_PORT_TRACK_NEXT(sem);
+                    }
+                    /* Set semaphore next pointer to NULL. */
+                    SYS_PORT_TRACK_NEXT(sem) = NULL;
+                    break;
+                }
+                /* Move the pointers one step forward searching for sem. */
+                prev = curr;
+                curr = SYS_PORT_TRACK_NEXT(curr);
+            }
+            /* Re-enable interrupts, when then list is consistent again */
+            irq_unlock(key);
+        }
+        #endif
+
+    k_sem_reset(sem);
 }

@@ -843,12 +843,20 @@ void RCL_closePowerNotifications(void)
  */
 RCL_Handle RCL_open(RCL_Client *c, const LRF_Config *lrfConfig)
 {
-    *c = (RCL_Client){ 0 };
+    /* If RCL_close() is not run before RCL_open() or isOpen is not zero-initialized */
+    if (c->isOpen)
+    {
+        return NULL;
+    }
+    c->pendCmd = NULL;
+    c->deferredRclEvents = (RCL_Events){ 0 };
+    c->lrfConfig = NULL;
 
     SemaphoreP_Params sp;
     SemaphoreP_Params_init(&sp);
     sp.mode = SemaphoreP_Mode_BINARY;
     (void) SemaphoreP_construct(&c->pendSem, 0, &sp);
+    c->isOpen = true;
 
     bool printLogs = false;
 
@@ -897,6 +905,13 @@ void RCL_close(RCL_Handle h)
 {
     /* Disable interrupts to ensure closing of radio */
     uintptr_t key;
+
+    /* If RCL_close() is called before RCL_open() */
+    if (!h->isOpen)
+    {
+        return;
+    }
+
     key = HwiP_disable();
 
     rclState.numClients -= 1U;
@@ -919,6 +934,9 @@ void RCL_close(RCL_Handle h)
         RCL_closePowerNotifications();
     }
     HwiP_restore(key);
+
+    SemaphoreP_destruct(&h->pendSem);
+    h->isOpen = false;
 
     return;
 }
