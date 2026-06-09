@@ -84,6 +84,18 @@ if(CONFIG_HAS_CC23X0_SDK)
         ${SOURCES_RCL}
         ${SOURCES_RCL_LPF3}
       )
+    # GCC/Clang/ArmClang workaround:
+    # LRF.c and ble_cs.c contain inline ARM asm
+    # that explicitly clobbers r7. When using -O0 compilation level, these
+    # compilers use r7 as frame pointer, so it's unavailable for inline asm.
+    # Omitting the frame pointer for these files avoids r7 conflicts. IAR is
+    # intentionally excluded because it uses different flags and asm semantics.
+    set_property(SOURCE
+        source/ti/drivers/rcl/LRF.c
+        source/ti/drivers/rcl/handlers/ble_cs.c
+        PROPERTY COMPILE_OPTIONS
+        "$<$<COMPILE_LANG_AND_ID:C,GNU,Clang,ARMClang>:-fomit-frame-pointer>"
+      )
   endif()
 
 endif()
@@ -127,6 +139,18 @@ if(CONFIG_HAS_CC27XX_SDK)
     zephyr_library_sources(
         ${SOURCES_RCL}
         ${SOURCES_RCL_LPF3}
+      )
+    # GCC/Clang/ArmClang workaround:
+    # LRF.c and ble_cs.c contain inline ARM asm
+    # that explicitly clobbers r7. When using -O0 compilation level, these
+    # compilers use r7 as frame pointer, so it's unavailable for inline asm.
+    # Omitting the frame pointer for these files avoids r7 conflicts. IAR is
+    # intentionally excluded because it uses different flags and asm semantics.
+    set_property(SOURCE
+        source/ti/drivers/rcl/LRF.c
+        source/ti/drivers/rcl/handlers/ble_cs.c
+        PROPERTY COMPILE_OPTIONS
+        "$<$<COMPILE_LANG_AND_ID:C,GNU,Clang,ARMClang>:-fomit-frame-pointer>"
       )
   endif()
 
