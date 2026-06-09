@@ -100,7 +100,7 @@ if(CONFIG_HAS_CC23X0_SDK)
 
 endif()
 
-if(CONFIG_HAS_CC27XX_SDK)
+if(CONFIG_HAS_CC27XXX10_SDK OR CONFIG_HAS_CC27XXX20_SDK)
 
   if(CONFIG_SOC_CC2745R10_Q1)
     zephyr_compile_definitions(DeviceFamily_CC27XXX10 ${COMPILER})
@@ -112,6 +112,10 @@ if(CONFIG_HAS_CC27XX_SDK)
 
   if(CONFIG_SOC_CC2755P10)
     zephyr_compile_definitions(DeviceFamily_CC27XXX10 ${COMPILER})
+  endif()
+
+  if(CONFIG_SOC_CC2755P20)
+    zephyr_compile_definitions(DeviceFamily_CC27XXX20 ${COMPILER})
   endif()
 
   zephyr_include_directories(

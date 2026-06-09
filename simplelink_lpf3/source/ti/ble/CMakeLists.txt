@@ -174,7 +174,7 @@ if(CONFIG_HAS_CC23X0_SDK)
   endif()
 endif()
 
-if(CONFIG_HAS_CC27XX_SDK)
+if(CONFIG_HAS_CC27XXX10_SDK OR CONFIG_HAS_CC27XXX20_SDK)
   add_prebuilt_library(blecontroller      lib/m33f/ble_controller.a)
   if(CONFIG_BT_ESL_TAG OR CONFIG_BT_ESL_AP)
     add_prebuilt_library(esl_core         lib/m33f/esl_core.a)

@@ -3,7 +3,7 @@
 
 config RCL_DRIVER
 	bool "Radio Control Layer (RCL)"
-	depends on HAS_CC23X0_SDK || HAS_CC27XX_SDK
+	depends on HAS_CC23X0_SDK || HAS_CC27XXX10_SDK || HAS_CC27XXX20_SDK
 	select ENTROPY_GENERATOR
 	default n if MCUBOOT
 	default y
@@ -19,7 +19,7 @@ config RCL_DRIVER
 
 config RCL_DRIVER_INTERNAL
 	bool "Internal RCL driver source path (dev/test only)"
-	depends on HAS_CC23X0_SDK || HAS_CC27XX_SDK
+	depends on HAS_CC23X0_SDK || HAS_CC27XXX20_SDK || HAS_CC27XXX20_SDK
 	depends on !RCL_DRIVER
 	default n
 	help
@@ -44,7 +44,7 @@ config RCL_RF_SETTING_PREGEN
 
 menu "Regulatory Domain Selection"
 	depends on RCL_DRIVER || RCL_DRIVER_INTERNAL
-	depends on SOC_CC2755P10 || SOC_CC2755R10 || SOC_CC2745R10_Q1
+	depends on SOC_CC2755P10 || SOC_CC2755R10 || SOC_CC2745R10_Q1 || SOC_CC2755P20
 
 config RCL_REGULATORY_DOMAIN_ETSI
 	bool "ETSI: European Telecommunications Standards Institute (Europe)"
