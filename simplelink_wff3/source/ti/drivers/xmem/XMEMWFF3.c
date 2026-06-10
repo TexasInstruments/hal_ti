@@ -75,9 +75,9 @@ static size_t sectorBaseMask; /* for efficient argument checking */
 static void *verifyBuf;       /*!< Write Pre/Post verify buffer */
 static uint8_t verifyBuffer[VERIFBUF_SIZE_IN_BYTES];
 static void *xmemDataToWriteBuf;                               /*!< Write  buffer */
-static uint8_t xmemDataToWriteBuffer[WRITE_SIZE_IN_BYTES + 4]; /*!< handling unaligned write */
+static uint8_t __attribute__((aligned(4))) xmemDataToWriteBuffer[WRITE_SIZE_IN_BYTES + 4]; /*!< handling unaligned write */
 static void *xmemDataToReadBuf;                                /*!< Read  buffer */
-static uint8_t xmemDataToReadBuffer[READ_SIZE_IN_BYTES + 4];   /*!< handling unaligned read */
+static uint8_t __attribute__((aligned(4))) xmemDataToReadBuffer[READ_SIZE_IN_BYTES + 4];   /*!< handling unaligned read */
 
 extern uint32_t _Boot_report_address;
 #define BOOT_REPORT_ADDR ((uint32_t)(&_Boot_report_address))

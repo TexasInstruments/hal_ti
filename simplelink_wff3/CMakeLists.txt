@@ -86,12 +86,16 @@ if(CONFIG_HAS_CC35XX_SDK)
         third_party/hsmddk/include/Kit/EIP130/TokenHelper/src/eip130_token_common.c
         third_party/hsmddk/include/Kit/EIP201/src/eip201.c
         third_party/hsmddk/include/Kit/Log/src/log.c
-        source/ti/drivers/aesecb/AESECBXXF3.c
-        source/ti/drivers/aesccm/AESCCMXXF3.c
-        source/ti/drivers/aesctr/AESCTRXXF3.c
         source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
         source/ti/drivers/TRNG.c
         source/ti/drivers/trng/TRNGXXF3HSM.c
+      )
+    endif()
+    if(CONFIG_CRYPTO_TI_CC35XX)
+      zephyr_library_sources(
+        source/ti/drivers/aesecb/AESECBXXF3.c
+        source/ti/drivers/aesccm/AESCCMXXF3.c
+        source/ti/drivers/aesctr/AESCTRXXF3.c
       )
     endif()
     if(CONFIG_WIFI_TI_CC35XX)
