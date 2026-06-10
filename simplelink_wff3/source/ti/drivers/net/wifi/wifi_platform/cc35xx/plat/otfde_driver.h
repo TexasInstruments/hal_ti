@@ -35,13 +35,13 @@
 #include <stdio.h>
 #include <stdint.h>
 
-__attribute__((section(".TI.ramfunc")))
+__attribute__((section(".TI.ramfunc"))) 
 uint8_t otfdeDriver_Config(const uint32_t region_number,
                            const uint8_t* security_id,
                            const uint32_t security_id_size);
 
 /******************************************************************************
-                                    DEFINE
+                                    DEFINE 
 ******************************************************************************/
 
 
@@ -51,3 +51,4 @@ uint8_t otfdeDriver_Config(const uint32_t region_number,
 
 
 #endif /* OTFDEDRIVER_H_ */
+

@@ -3,7 +3,7 @@
   FILENAME:       host_xip
 
   DESCRIPTION:    Defines module registers - address, fields masks and offsets
-                  NOTE: SET_FIELD/GET_FIELD macros (defined in register_macro.h)
+                  NOTE: SET_FIELD/GET_FIELD macros (defined in register_macro.h) 
                   must be used for accessing registers
 
   CREATED:        2025-03-11T10:37:34.093633
@@ -148,7 +148,7 @@
     Absolute address:    0x41912004
     Description:         WRR ARBITER HALT.
                          With sending halt request, Arbiter will finish current burst and then stop transmission of data.
-                         Write ENABLE = 0 to stop halting
+                         Write ENABLE = 0 to stop halting 
     Default Value:       0x00000000
 
         Field:          MEM_ARBITER_HALT_EN
@@ -430,7 +430,7 @@
     Register name:       OSPI_CONFIG
     Relative address:    0x40
     Absolute address:    0x41912040
-    Description:
+    Description:         
     Default Value:       0x00000003
 
         Field:          MEM_OSPI_CLK_GLITCH_FIX_EN
@@ -446,7 +446,7 @@
         Default Value:  0x1
         Access type:    read-write
         Description:    HOLD FIX ENABLE
-
+                        
                         Field to enable the *OSPI* hold fix
         Enumeration:     0x0 -  DIS Disable
                          0x1 -   EN Enable
@@ -607,7 +607,7 @@
         Access type:    read-only
         Description:    DMA SEC JOB ACTIVE:
                         Status bit to indicate that DMA is processing a secured job.
-                        When this bit is set, SW has written all the job parameters and also provided a start_pulse to HW,
+                        When this bit is set, SW has written all the job parameters and also provided a start_pulse to HW, 
                         and cannot change job parameters without clear_pulse.
                         Job will wait to be executed (indicated by job_in_progress)
 
@@ -721,9 +721,9 @@
         Access type:    read-write
         Description:    Secure channel peripheral block size(in 32bits/4bytes)
                         Multiplication of Word size
-
+                        
                         Upto 64 words based on the word size selected
-
+                        
                         Block = block_size * word_size
 
         Field:          MEM_SEC_EN_CLR_AT_START
@@ -764,7 +764,7 @@
                         0x9 ADC
                         0xA PDM
                         0xB HIF
-
+                        
 
   ----------------------------------------------------------------------------- */
 #define HOST_XIP__UDMA_SEC_PERIPHERAL_SEL__ADDR              (0x41913060)
@@ -954,7 +954,7 @@
         Access type:    read-only
         Description:    DMA NONSEC JOB ACTIVE:
                         Status bit to indicate that DMA is processing a non-secured job.
-                        When this bit is set, SW has written all the job parameters and also provided a start_pulse to HW,
+                        When this bit is set, SW has written all the job parameters and also provided a start_pulse to HW, 
                         and cannot change job parameters without clear_pulse.
                         Job will wait to be executed (indicated by job_in_progress)
 
@@ -1091,7 +1091,7 @@
         Access type:    read-write
         Description:    Non-secure channel peripheral job word size
                         8/16/32 (Word Size of 1/2/4 bytes)
-
+                        
                         Sel_0 - 32 bit
                         Sel_1 -  16 bit
                         Sel_2 - 8 bit
@@ -1102,9 +1102,9 @@
         Access type:    read-write
         Description:    Non-secure channel peripheral job block size(in 32bits/4bytes)
                         Multiplication of Word size.
-
+                        
                         Upto 64 words based on Word size
-
+                        
                         Block = block_size * word_size
 
         Field:          MEM_NON_SEC_EN_CLR_AT_START
@@ -1732,7 +1732,7 @@
         Default Value:  0x0
         Access type:    write-only
         Description:    OTFDE SW DISABLE REQ WRCL:
-                        Pulse signaled by SW to disable OTFDE and stop handling incoming task
+                        Pulse signaled by SW to disable OTFDE and stop handling incoming task 
                         and erase all task related data
 
   ----------------------------------------------------------------------------- */
@@ -1837,7 +1837,7 @@
         Default Value:  0x0
         Access type:    read-only
         Description:    OTFDE ACTIVE TASK VALID:
-                        0- No task is being handled,
+                        0- No task is being handled, 
                         1- A   task is being handled,
                         note: decide if OTFDE is active or suspended using OTFDE_ACTIVE and OTFDE_TASK_SUSPENDED
 
@@ -2075,7 +2075,7 @@
         Default Value:  0x1
         Access type:    read-write
         Description:    OTFDE RESET MASK:
-                        0- Masked
+                        0- Masked 
                         1- Enabled
                         Enable / Mask hard reset completion event
 
@@ -2084,7 +2084,7 @@
         Default Value:  0x1
         Access type:    read-write
         Description:    OTFDE SOFT RESET MASK:
-                        0- Masked
+                        0- Masked 
                         1- Enabled
                         Enable / Mask soft reset completion event
 
@@ -2261,7 +2261,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    BYPASS MODE CHANGE
-
+                        
                         Used in ECO for PG1.
                         Problem Statement
                         In DDR 80MHz mode RD cmd, Seen in QPI (Octal not yet checked) the xSPI IP stop driving the data to soon violating Ext Mem hold requirement (~0.5ns v. up to ~2-3ns requirement for most vendors)
@@ -2405,7 +2405,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV0_JOB4_GRANT_SEL
@@ -2413,7 +2413,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV0_JOB5_GRANT_SEL
@@ -2421,7 +2421,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV0_JOB6_GRANT_SEL
@@ -2429,7 +2429,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV0_JOB7_GRANT_SEL
@@ -2437,7 +2437,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV1_JOB0_GRANT_SEL
@@ -2445,7 +2445,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV1_JOB4_GRANT_SEL
@@ -2453,7 +2453,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV1_JOB5_GRANT_SEL
@@ -2461,7 +2461,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV1_JOB6_GRANT_SEL
@@ -2469,7 +2469,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
         Field:          MEM_OTFDE_DEV1_JOB7_GRANT_SEL
@@ -2477,7 +2477,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    Used when the access address does not match any region
-                        0- Reject not mapped address access
+                        0- Reject not mapped address access 
                         1- Bypass not mapped address access (address is forwarded as is to xspi)
 
   ----------------------------------------------------------------------------- */
@@ -2544,7 +2544,7 @@
         Access type:    read-write
         Description:    OTFDE DEVICE 0 WRITE BUFFER TIMER MODE:
                         00- mode0 is   16usec resolution
-                        01- mode1 is   32usec resolution
+                        01- mode1 is   32usec resolution 
                         10- mode2 is   64usec resolution
                         11- mode3 is 256usec resolution
 
@@ -2553,7 +2553,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    OTFDE DEVICE 0 WRITE BUFFER TIMER RANGE:
-                        range is 0 - 63 multiplied by Mode resolution
+                        range is 0 - 63 multiplied by Mode resolution 
                         mode0: timer res is   16usec, timer range is   16-1024usec
                         mode1: timer res is   32usec, timer range is   32-2048usec
                         mode2: timer res is   64usec, timer range is   64-4192usec
@@ -2564,7 +2564,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    OTFDE DEVICE 0 RWW EN:
-                        0- Read while Write is disabled
+                        0- Read while Write is disabled 
                         1- Read while Write is Enabled
 
         Field:          MEM_OTFDE_DEVICE_0_SIZE
@@ -2595,7 +2595,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    OTFDE DEVICE 0 SERVICE INTERRUPT CRITERIA:
-                        0- No service interruption criteria.
+                        0- No service interruption criteria. 
                         any other value is in 160MHz cycles between two transactions towards xSPI
 
   ----------------------------------------------------------------------------- */
@@ -2671,7 +2671,7 @@
                         0x7. 1024 Bytes
                         0x8. 2048 Bytes
                         0x9. 4096 Bytes
-
+                        
 
   ----------------------------------------------------------------------------- */
 #define HOST_XIP__OTFDE_DEVICE_0_WRAP__ADDR                  (0x41917078)
@@ -2729,7 +2729,7 @@
         Access type:    read-write
         Description:    OTFDE DEVICE 1 WRITE BUFFER TIMER MODE:
                         00- mode0 is   16usec resolution
-                        01- mode1 is   32usec resolution
+                        01- mode1 is   32usec resolution 
                         10- mode2 is   64usec resolution
                         11- mode3 is 256usec resolution
 
@@ -2738,7 +2738,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    OTFDE DEVICE 1 WRITE BUFFER TIMER RANGE:
-                        range is 0 - 63 multiplied by Mode resolution
+                        range is 0 - 63 multiplied by Mode resolution 
                         mode0: timer res is   16usec, timer range is   16-1024usec
                         mode1: timer res is   32usec, timer range is   32-2048usec
                         mode2: timer res is   64usec, timer range is   64-4192usec
@@ -2749,7 +2749,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    OTFDE DEVICE 1 SERVICE INTERRUPT CRITERIA:
-                        0- No service interruption criteria.
+                        0- No service interruption criteria. 
                         any other value is in 160MHz cycles between two transactions towards xSPI
 
   ----------------------------------------------------------------------------- */
@@ -2792,7 +2792,7 @@
                         0x7. 1024 Bytes
                         0x8. 2048 Bytes
                         0x9. 4096 Bytes
-
+                        
 
   ----------------------------------------------------------------------------- */
 #define HOST_XIP__OTFDE_DEVICE_1_WRAP__ADDR                  (0x41917084)
@@ -2813,7 +2813,7 @@
         From..to bits:  0..2
         Default Value:  0x5
         Access type:    read-write
-        Description:    Watchdog timer in ms
+        Description:    Watchdog timer in ms 
                         Timer pops watchdog IRQ in case a process within OTFDE crosses the required time
                         range 0-7
                         translated to up to 7ms
@@ -2837,7 +2837,7 @@
         Default Value:  0x1
         Access type:    read-write
         Description:    REGION 0 ENABLED:
-                        0- Disabled
+                        0- Disabled  
                         1- Enabled
                         Region enabled for incoming transactions
 
@@ -2966,7 +2966,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    REGION 1 DEVICE ID:
-                        0- Device_0
+                        0- Device_0 
                         1- Device_1
 
         Field:          MEM_REGION_1_SPI_WRITE_ENABLE
@@ -3077,7 +3077,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    REGION 2 ENABLED:
-                        0- Disabled
+                        0- Disabled 
                         1- Enabled
                         Region enabled for incoming transactions
 
@@ -3206,7 +3206,7 @@
         Default Value:  0x0
         Access type:    read-write
         Description:    REGION 3 DEVICE ID:
-                        0- Device_0
+                        0- Device_0 
                         1- Device_1
 
         Field:          MEM_REGION_3_SPI_WRITE_ENABLE

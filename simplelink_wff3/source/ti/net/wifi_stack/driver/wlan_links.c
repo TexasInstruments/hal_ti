@@ -848,7 +848,7 @@ void wlanLinks_SetLinkPn(uint32_t uHlid, uint8_t KeyID, uint16_t pn0_15, uint32_
         return;
     if (KeyID >= 4)
         return;
-
+    
     for (i = 0; i < NUM_TRAFFIC_CATEGORIES + 1; i++)
     {
         pWlanLinks->aLinks[uHlid].info.SecuritySeqNumLow[i] = pn0_15;
@@ -890,7 +890,7 @@ Bool_e wlanLinks_CheckLinkPn(uint32_t uHlid, dot11_rsn_header_t *pRsnHdr, uint8_
 
     pWlanLinks->aLinks[uHlid].info.SecuritySeqNumHigh[frameTId] = pn16_47;
     pWlanLinks->aLinks[uHlid].info.SecuritySeqNumLow[frameTId] = pn0_15;
-
+    
     return TRUE;
 }
 

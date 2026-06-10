@@ -223,7 +223,6 @@ int ipUtils_ConvertIpFromString2Number(
 }
 #endif
 
-#if !(defined(__ZEPHYR__))
 int inet_ntop4(const unsigned char *src, char *dst, size_t size)
 {
     const char *fmt = "%u.%u.%u.%u";
@@ -350,4 +349,3 @@ int inet_ntop(int af, const void *src, void *dst, size_t size)
             return 0;
     }
 }
-#endif /* !defined(__ZEPHYR__) */

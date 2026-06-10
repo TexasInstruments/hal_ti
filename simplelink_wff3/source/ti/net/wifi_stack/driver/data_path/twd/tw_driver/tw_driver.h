@@ -410,10 +410,8 @@ typedef enum
 /* Data body max length */
 #define MAX_DATA_BODY_LENGTH            4096
 
-#ifndef CTRL_BLK_ENTRIES_NUM
-#define CTRL_BLK_ENTRIES_NUM                             32
-#endif
-#define CTRL_BLK_ENTRIES_FOR_DATA_NUM                    (CTRL_BLK_ENTRIES_NUM-16)
+#define CTRL_BLK_ENTRIES_NUM                             120// was 120 but memory reduction for MX is required
+#define CTRL_BLK_ENTRIES_FOR_DATA_NUM                    (CTRL_BLK_ENTRIES_NUM-16) //means kept for mgmt
 
 
 /*the max table sized is : ( number of 221 * 8 bytes ) + ( non-221 * 2 bytes )

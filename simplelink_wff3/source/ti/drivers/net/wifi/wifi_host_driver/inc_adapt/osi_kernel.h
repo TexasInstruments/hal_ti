@@ -43,15 +43,6 @@
 extern "C" {
 #endif
 
-#if defined(__ZEPHYR__)
-#include <zephyr/kernel.h>
-#include <stdarg.h>
-#include <unistd.h>
-#if defined(CONFIG_POSIX_API)
-#include <zephyr/posix/unistd.h>
-#endif
-#endif /* defined(__ZEPHYR__) */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1358,11 +1349,9 @@ char *os_strtok_r(char *s, const char *delim, char **last);
 
 
 
-#if !defined(__ZEPHYR__)
 #ifndef inet_ntop
 extern int inet_ntop(int af, const void *src, void *dst, size_t size);
 #endif
-#endif /* !defined(__ZEPHYR__) */
 
 
 

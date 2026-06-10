@@ -82,6 +82,8 @@ OsiSyncObj_t p2p_find_stopped_syncObj = NULL;
 
 extern StartRoleApps_t gRoleAppsParams;
 extern TFwEvent *gFwEvent;
+extern volatile uint8_t gFwCrashOccurred;
+
 
 WlanNetworkDataRecvCB_t RecvCallBack[2] = {0};
 
@@ -656,6 +658,9 @@ int32_t set_cond_in_process_wlan_get(WlanGet_e wlanGetType)
         case WLAN_GET_FWVERSION:
         case WLAN_GET_SPVERSION:
         case WLAN_GET_RSSI:
+#ifdef NOISE_FLOOR //not defined on CC3xxx
+        case WLAN_GET_NOISE_FLOOR: 
+#endif
         case WLAN_GET_ROLE_CHANNEL_NUMBER:
         case WLAN_GET_HOST_VERSION:
         case WLAN_GET_EXTERNAL:
@@ -687,6 +692,9 @@ void set_finish_wlan_get(WlanGet_e wlanGetType)
         case WLAN_GET_FWVERSION:
         case WLAN_GET_SPVERSION:
         case WLAN_GET_RSSI:
+#ifdef NOISE_FLOOR //not defined on CC3xxx
+        case WLAN_GET_NOISE_FLOOR:
+#endif
         case WLAN_GET_ROLE_CHANNEL_NUMBER:
         case WLAN_GET_HOST_VERSION:
         case WLAN_GET_EXTERNAL:
@@ -1002,10 +1010,18 @@ int  Wlan_Stop(uint32_t flags)
 
     gWlanState = FALSE;
     set_finish_wlan_stop();
+
+    /* Clear FW crash flag on init */
+    gFwCrashOccurred = 0;
+
     return OSI_OK;
 
     fail:
         set_finish_wlan_stop();
+
+        /* Clear FW crash flag on init */
+        gFwCrashOccurred = 0;
+
     	return ret;
 }
 
@@ -1207,6 +1223,8 @@ int32_t wlan_connect_internal(const signed char *pName, const int NameLen, const
         cmeParamsEap->eapIdentityLen = eapConParam->eapIdentityLen;
         os_memcpy(cmeParamsEap->eapAnonymous ,eapConParam->eapAnonymous, eapConParam->eapAnonUserLen);
         cmeParamsEap->eapAnonUserLen = eapConParam->eapAnonUserLen;
+        cmeParamsEap->TLSKeyLength = eapConParam->KeyLength;
+
 
     #if CC35XX_SUPPORT_ENT_PROFILE
         if (WLAN_CONNECT_FLAG_PROFILE_CONNECT & flags)
@@ -1500,6 +1518,13 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params)
             ret = ctrlCmdFw_GetRssi((BeaconRssi_t*)params);
         }
         break;
+#ifdef NOISE_FLOOR //not defined on CC3xxx
+        case WLAN_GET_NOISE_FLOOR:
+        {
+            ret = ctrlCmdFw_GetNoiseFloor((NoiseFloor_t*)params);
+        }
+        break;
+#endif
         case WLAN_GET_FWVERSION:
         {
             ret = ctrlCmdFw_GetFwVersion((FWVersions_t*)params);
@@ -1954,6 +1979,30 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
 	        }
 	    }
 	    break;
+        
+        case WLAN_SET_CSI_SOLICITATION:
+        {
+            WlanCfgCsiSol_t *csiSolCfg = (WlanCfgCsiSol_t *)params;
+            if (csiSolCfg->csiSolEnable)
+            {
+                ret = ctrlCmdFw_CfgCsiSolicitation(TRUE, csiSolCfg->csiSolPeriod, csiSolCfg->csiSolExpiry);
+            }
+            else
+            {
+                ret = ctrlCmdFw_CfgCsiSolicitation(FALSE, 0, 0);
+            }
+        }
+        break;
+
+
+        case WLAN_SET_CSI_SOLICITATION_MAC:
+        {
+            WlanCfgCsiSolSetMac_t *csiSolSetMacCfg = (WlanCfgCsiSolSetMac_t *)params;
+
+            ret = ctrlCmdFw_CfgCsiSolSetMac(csiSolSetMacCfg->csiSolAddRemoveMac, csiSolSetMacCfg->csiSolMacAddress);
+        }
+        break;
+
         case WLAN_SET_WIRELESS_PROTOCOL:
         {
             l2_StoreWirelessProto(*(uint8_t *)params);
@@ -2066,6 +2115,11 @@ int Wlan_Set(WlanSet_e wlanSetType, void *params)
         case WLAN_SET_CUSTOM_DOMAIN_ENTRY:
         {
             ret = regulatoryDomain_SetCustomDomainEntry(params);
+        }
+        break;
+        case WLAN_SET_SCHED_SCAN_PLANS:
+        {
+            ret = CME_SetSchedScanPlans((char *)params);
         }
         break;
 

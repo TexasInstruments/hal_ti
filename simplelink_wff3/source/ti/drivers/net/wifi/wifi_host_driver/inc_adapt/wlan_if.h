@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2024, Texas Instruments Incorporated
+/* Copyright (c) 2024, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,9 +80,9 @@ extern "C" {
 #define WLAN_DOT11_MAX_SUPPORTED_RATES      (32)
 #define WLAN_DOT11_HT_CAPABILITIES_ELE_LEN  (26)
 #define WLAN_DOT11_ERP_ELE_LEN              (1)
-#define WLAN_MAX_BEACON_BODY_LENGTH         (700)
+#define WLAN_MAX_BEACON_BODY_LENGTH         (1600)
 #define WLAN_DOT11_MAX_RSNE_SIZE            (257)
-#define WLAN_DOT11_MAX_BEACON_BODY_LENGTH   (700)
+#define WLAN_DOT11_MAX_BEACON_BODY_LENGTH   (1600)
 #define WLAN_DOT11_MAX_WPSIE_SIZE           (350)
 
 #define WLAN_LEN_OF_IE_HEADER               (2)
@@ -165,6 +164,8 @@ extern "C" {
 #define WLAN_SEC_TYPE_WPA3                                                        (12) /* Support WPA3 only networks */
 #define WLAN_SEC_TYPE_WPA_PMK                                                     (15)
 #define WLAN_SEC_TYPE_WPA2_WPA3                                                   (16) /*transition mode WPA2 WPA2+PMF WPA3 */
+#define WLAN_SEC_TYPE_WPA2_AES_ONLY_PMF                                           (13) 
+#define WLAN_SEC_TYPE_WPA2_AES_ONLY_NO_PMF                                        (14) 
 
 
 /* AP access List Macros */
@@ -860,7 +861,7 @@ typedef union
 {
     /* STA Role */
     WlanEventConnect_t                    Connect; /* WLAN_EVENT_CONNECT */
-    uint16_t                              AuthStatusCode; /* WLAN_EVENT_AUTHENTICATION_REJECTED */
+    uint16_t                              AuthStatusCode; /* WLAN_EVENT_AUTHENTICATION_REJECTED */  
     WlanEventConnecting_t                 Connecting; /* WLAN_EVENT_CONNECTING */
     uint16_t                              AssocStatusCode; /* WLAN_EVENT_ASSOCIATION_REJECTED */
     WlanEventDisconnect_t                 Disconnect; /* WLAN_EVENT_DISCONNECT */
@@ -883,7 +884,7 @@ typedef union
     /* General*/
     WlanEventError_t       error;  /* WLAN_EVENT_ERROR */
     /* General */
-    WlanEventFwCrash_t           FwCrashLog; /* WLAN_EVENT_FW_CRASH */
+    WlanEventFwCrash_t           FwCrashLog; /* WLAN_EVENT_FW_CRASH */  
 } WlanEventData_u;
 
 typedef struct
@@ -1040,8 +1041,8 @@ typedef struct
 
 typedef struct
 {
-    char pin[WLAN_WPS_PIN_STR_LEN];
-    uint32_t timeout;
+    char pin[WLAN_WPS_PIN_STR_LEN]; 
+    uint32_t timeout; 
 } WlanSetWpsApPinParam_t;
 
 typedef enum
@@ -1106,7 +1107,10 @@ typedef enum
     WLAN_SET_CONNECTION_POLICY,
     WLAN_SET_SCAN_DWELL_TIME,
     WLAN_SET_LISTED_CHANNELS_FOR_SCAN,
-    WLAN_SET_WPS_AP_PIN
+    WLAN_SET_WPS_AP_PIN,
+    WLAN_SET_SCHED_SCAN_PLANS,
+    WLAN_SET_CSI_SOLICITATION,
+    WLAN_SET_CSI_SOLICITATION_MAC
 } WlanSet_e;
 
 
@@ -1119,6 +1123,9 @@ typedef enum
     WLAN_GET_CALIBRATOR_RX_STATS,
     WLAN_GET_CALIBRATOR_GET_IO_CFG,
     WLAN_GET_RSSI,
+#ifdef NOISE_FLOOR //not defined on CC3xxx
+    WLAN_GET_NOISE_FLOOR,
+#endif
     WLAN_GET_FWVERSION,
     WLAN_GET_SPVERSION,
     WLAN_GET_DEVICE_INFO,
@@ -1202,6 +1209,12 @@ typedef struct __PACKED__
     int8       rssi_beacon;
 } WlanBeaconRssi_t;
 
+typedef struct __PACKED__
+{
+    uint8      role_id;
+    uint8      pad[2];
+    int8_t     noiseFloorAvg;     /* noise floor indication measurement: average noise power */
+} WlanNoiseFloor_t;
 
 typedef enum
 {
@@ -1527,6 +1540,7 @@ typedef struct
     uint32_t  timestamp;
     uint16_t  packetLength;    // length of packet including Frame Check Sequence(FCS)
     uint16_t  csiInfoLength;
+    uint16_t  seqNum;
     uint8_t   tMacAddr[MAC_ADDRESS_LEN]; // transmitter mac address
     uint8_t   rMacAddr[MAC_ADDRESS_LEN]; // receiver mac address
     int8_t    rssi;
@@ -1548,6 +1562,19 @@ typedef struct
 
 typedef struct
 {
+    uint8_t   csiSolEnable;
+    uint8_t   csiSolPeriod;
+    uint8_t   csiSolExpiry;
+}WlanCfgCsiSol_t;
+
+typedef struct
+{
+    uint8_t   csiSolAddRemoveMac;
+    uint8_t   csiSolMacAddress[MAC_ADDRESS_LEN];
+}WlanCfgCsiSolSetMac_t;
+
+typedef struct
+{
     uint8_t  band;
     uint8_t  MaxTxPower;
     uint8_t  IsDfsChannel;
@@ -1555,8 +1582,10 @@ typedef struct
     uint16_t maxChannel;
     uint8_t  numOfChannels;
     uint32_t chanBitmap;
-    uint8_t  customIndex;
-    uint8_t  resetEntry;
+#ifdef CC35XX   
+    uint8_t  customIndex; // This param is used in CC35xx only
+    uint8_t  resetEntry;  // This param is used in CC35xx only
+#endif
 } WlanSetRegDomainCustomEntry_t;
 
 typedef struct
@@ -1606,8 +1635,12 @@ typedef struct
     uint32_t            eapIdentityLen; //identity len
     uint8_t             eapAnonymous[WLAN_MAX_ANON_LEN + 1];//anonymous string
     uint32_t            eapAnonUserLen;//anonymous string length
-
+    uint32_t             KeyLength;
 }WlanEapConnectParams_t;
+
+
+
+
 /*****************************************************************************/
 /* Data path CB function                                                     */
 /*****************************************************************************/
@@ -2069,12 +2102,12 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                 ### Wlan_Set Type 'WLAN_SET_LISTED_CHANNELS_FOR_SCAN'
                 Set a list of channels for next/upcoming Scan/Connect
                 This command sets a list of channels that will only be set when doing scan or connect, the list is used only
-                one time, meaning you need to set it again if you cant to list specific channels for scan/connect, after you
+                one time, meaning you need to set it again if you cant to list specific channels for scan/connect, after you 
                 scan or connect the listed channels will be resetted and the next scan/connect will be on all possible channels
 
                 the WLAN_SET_LISTED_CHANNEL_FOR_SCAN set command takes struct of WlanSelectedChannelsArray_t which includes
                 an allocated array of the list of channels we want to scan and the length that represents channels being set or not
-
+                
                 \param[in]  WlanSelectedChannelsArray_t
 
                 ## Example of how to set a channels 1,3 ,5
@@ -2093,7 +2126,7 @@ int Wlan_Get(WlanGet_e wlanGetType, void *params);
                 do the following
 
                 Wlan_Set(WLAN_SET_LISTED_CHANNELS_FOR_SCAN, NULL);
-
+                
 */
 int Wlan_Set(WlanSet_e wlanSetType, void *params);
 
@@ -2142,7 +2175,7 @@ int Wlan_EtherPacketRecvRegisterCallback(WlanRole_e role, WlanNetworkDataRecvCB_
     \brief Add profile
 
     When auto start is enabled, the device connects to a
-    station from the profiles table. Up to SL_WLAN_MAX_PROFILES profiles
+    station from the profiles table. Up to SL_WLAN_MAX_PROFILES profiles 
     are supported.
     If several profiles configured the device chose
     the highest priority profile, within each priority group,
@@ -2157,7 +2190,7 @@ int Wlan_EtherPacketRecvRegisterCallback(WlanRole_e role, WlanNetworkDataRecvCB_
                                 - CME_SEC_TYPE_OPEN
                                 - CME_SEC_TYPE_WEP
                                 - CME_SEC_TYPE_WPA_WPA2
-
+    
     \param[in]      pSecExtParams  Enterprise parameters - identity, identity length,
                                    Anonymous, Anonymous length, CertIndex (not supported,
                                    certificates need to be placed in a specific file ID),
@@ -2173,7 +2206,7 @@ int Wlan_EtherPacketRecvRegisterCallback(WlanRole_e role, WlanNetworkDataRecvCB_
                     Please Note that in case of adding an existing profile (compared by pName,pMACAddr and security type)
                     the old profile will be deleted and the same index will be returned.
 
-    \sa             Wlan_ProfileAdd
+    \sa             Wlan_ProfileAdd      
 
 */
 int Wlan_ProfileAdd(const signed char *pName, const int NameLen,
@@ -2190,7 +2223,7 @@ int Wlan_ProfileAdd(const signed char *pName, const int NameLen,
                                    (In case of p2p mode the name of the Remote Device)
     \param[out]     pNameLen       Name length
     \param[out]     pMacAddr       6 bytes for MAC address
-    \param[out]     pSecParams     Security parameters. Security types options:
+    \param[out]     pSecParams     Security parameters. Security types options: 
 									- WLAN_SEC_TYPE_OPEN
 									- WLAN_SEC_TYPE_WPA_WPA2
 									- WLAN_SEC_TYPE_WPA_ENT

@@ -52,6 +52,9 @@ extern ETxnStatus eventMbox_Handle();
 extern void FwEvent_StateMachine ();
 extern int wlanDispatcherSendEvent(uint16_t opcode, uint8_t * args, uint16_t argsLen);
 
+volatile uint8_t gFwCrashOccurred = 0;
+
+
 uint32_t wlan_FW_tsf;
 #define __ALIGN_MASK(x,mask)    (((x)+(mask))&~(mask))
 
@@ -249,12 +252,12 @@ int read_control_message(uint8_t *read_buffer, uint32_t buffer_size)
 
 int general_error_event_get_log(TFwEvent *pFwEvent)
 {
-	int ret = 0;
+	int ret = 0; 
 	const size_t buffer_size = 5000;
 	unsigned long end_time = osi_GetTimeMS() + CC33XX_GENERAL_ERROR_READ_TIMEOUT_MSEC;
 	uint8_t isGeneralError = 0;
 	uint32_t isTimeout = 0;
-
+	
     Report("\n\rAttempting to Get FW Crash Logs.");
 
 	while((isGeneralError != true) && (isTimeout != true))
@@ -275,7 +278,7 @@ int general_error_event_get_log(TFwEvent *pFwEvent)
         {
             Report("\n\rUNSUCCESSFULLY received NAB_GENERAL_ERROR_FW_LOGS_OPCODE");
         }
-		//should sleep here for 100ms if reading is zero
+		//should sleep here for 100ms if reading is zero 
 		if(isGeneralError != true)
 		{
 			os_sleep(0,100000);
@@ -296,7 +299,7 @@ int general_error_event_get_log(TFwEvent *pFwEvent)
 	goto out;
 
 out:
-	return ret;
+	return ret; 
 }
 
 extern OsiMsgQ_t eventMsgQueue;
@@ -464,6 +467,7 @@ ETxnStatus FwEvent_CallHandlers(TFwEvent *pFwEvent)
         // HINT_GENERAL_ERROR event is sent in case of FW assert
         if (core_status->host_interrupt_status & HINT_GENERAL_ERROR)
         {
+            gFwCrashOccurred = 1;
             FW_EVENT_HANDLE_PRINT_ERROR("\n\rFwEvent_CallHandlers: GENERAL ERROR event received! FW is stuck\n\r");
 
             WlanEventFwCrash_t *pArgs;

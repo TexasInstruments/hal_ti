@@ -119,6 +119,18 @@ int32_t HIFInit(uint32_t dmaChannel)
 
 //*****************************************************************************
 //
+// HIFDeinit
+// 1.  Unregister from power save module
+//
+//*****************************************************************************
+int32_t HIFDeinit(void)
+{
+    Power_unregisterNotify(&(HIFHandle.HIFpostNotify));
+    return HIF_STATUS_SUCCESS; // success
+}
+
+//*****************************************************************************
+//
 // HIF configure
 // 1.  INIT DMA Channel
 // 2.  INIT HIF
@@ -127,7 +139,7 @@ int32_t HIFInit(uint32_t dmaChannel)
 static int32_t HIFConfigure(uint32_t dmaChannel)
 {
     DMAInitChannel((uint32_t)dmaChannel, DMA_PERIPH_HIF);
-    DMAConfigureChannel(dmaChannel, HIF_DMA_BLOCK_SIZE_IN_WORDS, DMA_WORD_SIZE_4B, 0);
+    DMAConfigureChannel(dmaChannel, HIF_DMA_BLOCK_SIZE_IN_WORDS, DMA_WORD_SIZE_4B, 0);    
     // Configure HIF Threshold --> has to align with DMA_BLK_SIZE
     // Due to some concerns regarding the DMA_REQ indication from hif toward DMA we configure the HIF TH to 'DMA BLOCK SIZE + 1' to avoid the H race issue.
     uint32_t hifTh = HIF_DMA_BLOCK_SIZE_IN_WORDS ;
@@ -203,7 +215,7 @@ int32_t HIFRead(uint32_t dmaChannel,
     volatile uint16_t lengthAfterAlignment;
     uint32_t chStatus;
     recvRxData_t recvRxData;
-
+    
     // Wait untill fifo is empty
     while (!((HWREG(HIF_BASE + HIF_O_FIFOSTA) & HIF_FIFOSTA_EMP_M) >> HIF_FIFOSTA_EMP_S)) {};
 
@@ -321,7 +333,7 @@ int32_t HIFWriteDirect(uint8_t *srcStartAddr, uint16_t length)
     }
     //Wait untill fifo is empty
     while (!((HWREG(HIF_BASE + HIF_O_FIFOSTA) & HIF_FIFOSTA_EMP_M) >> HIF_FIFOSTA_EMP_S)) {};
-
+    
     HWREG(HIF_BASE + HIF_O_MOD) = HIF_MODE_DIRECT_ACCESS_WR;
     while (length > 0)
     {
@@ -360,7 +372,7 @@ int32_t HIFWrite(uint32_t dmaChannel, uint8_t *srcStartAddr, uint16_t length)
 
     // Wait until FIFO is not full
     //while (((HWREG(HIF_BASE + HIF_O_FIFOSTA) & HIF_FIFOSTA_FULL_M) >> HIF_FIFOSTA_FULL_S)) {};
-
+    
 
     DMAConfigureChannelFlags(dmaChannel, DMA_CONFIG_DST_PTR_FIFO);
 
@@ -373,7 +385,7 @@ int32_t HIFWrite(uint32_t dmaChannel, uint8_t *srcStartAddr, uint16_t length)
     // Wait for the DMA transaction to finish
     while ((chStatus = DMAGetChannelStatus(dmaChannel)) == STATUS_PROCESSING) {};
     if (chStatus & (STATUS_ABORT | STATUS_EXCEPTION)) // this is fatal error and should not happen
-    {
+    {        
         uint32_t  hifstat = HWREG(HIF_BASE + HIF_O_FIFOSTA);
         uint32_t  hifmod = HWREG(HIF_BASE + HIF_O_MOD);
         Report("chStatus error! status 0x%x, channel 0x%x, hifmod: 0x%x hif status: 0x%x",chStatus, dmaChannel,hifmod,hifstat);
@@ -385,7 +397,7 @@ int32_t HIFWrite(uint32_t dmaChannel, uint8_t *srcStartAddr, uint16_t length)
 
 //*****************************************************************************
 //
-// Wait for fifo to be empty before switching to mode 0 - idle
+// Wait for fifo to be empty before switching to mode 0 - idle 
 //
 //*****************************************************************************
 void HIFSetIdle(void)

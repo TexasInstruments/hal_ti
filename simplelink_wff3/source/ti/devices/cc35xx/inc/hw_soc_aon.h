@@ -1690,7 +1690,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-				0. not taken
+                         	0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -1765,7 +1765,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-				0. not taken
+                         	0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -1840,7 +1840,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-				0. not taken
+                         	0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -1915,7 +1915,7 @@ This section defines the register offsets of the SOC_AON component
                          M33  always looses to M3
 
                          Reading value:
-				0. not taken
+                         	0. not taken
                                  1. taken by M3
                                  2. taken by M33 (should wr IRQ afterwards)
                                  3. invalid.
@@ -17454,13 +17454,13 @@ This section defines the register offsets of the SOC_AON component
                         1. [11:8] Device Life Cycle SW Managed - as exist at [FUSELINE0.DEVLCSW]
                         2. [3:0] Device Life Cycle - based on Device Life Cycle HW Managed as exist at [FUSELINE0.DEVLCHW]
                             but with following decoding and validation logic:
-				if fuse data is valid- no crc/no efc ready /pattern error the Decoded value is:
-					0 - 1st Birthday
-					1 - AT TEST
-					2 - AT TEST Privilege
-					3 - Operational
-				otherwise, the value is
-					4 - fault mode -fault occurred on life cycle read
+                        	if fuse data is valid- no crc/no efc ready /pattern error the Decoded value is:
+                        		0 - 1st Birthday
+                        		1 - AT TEST
+                        		2 - AT TEST Privilege
+                        		3 - Operational
+                        	otherwise, the value is
+                        		4 - fault mode -fault occurred on life cycle read
     Default Value:       NA
 
         Field:           LIFECYCLE

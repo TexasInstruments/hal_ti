@@ -40,11 +40,6 @@
 #define INC_ADAPT_OSI_NETWORK_H_
 
 
-#if defined(__ZEPHYR__)
-#ifndef IN_ADDR
-#define IN_ADDR
-#endif
-#else
 #ifndef IN_ADDR
 #define IN_ADDR
 struct in_addr {
@@ -67,13 +62,11 @@ struct sockaddr_in {
 #define SIN_ZERO_LEN 8
   char            sin_zero[SIN_ZERO_LEN];
 };
-#endif /* defined(__ZEPHYR__) */
 
 #ifndef AF_INET
 #define AF_INET (2)
 #endif
 
-#if !defined(__ZEPHYR__)
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN  22
 #endif
@@ -81,7 +74,6 @@ struct sockaddr_in {
 #ifndef INET6_ADDRSTRLEN
 #define INET6_ADDRSTRLEN 65
 #endif
-#endif /* !defined(__ZEPHYR__) */
 
 #ifndef AF_INET6
 #define AF_INET6        23

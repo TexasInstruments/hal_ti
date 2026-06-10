@@ -2884,13 +2884,13 @@ This section defines the register offsets of the OSPI component
 
                          Design NOTE: Command gen FSM polling states are:
 
-				  CMD_GEN_FSM_STATE == POLL_STATUS_AFTER_WRITE   (0x7)
+                         	  CMD_GEN_FSM_STATE == POLL_STATUS_AFTER_WRITE   (0x7)
 
-				  CMD_GEN_FSM_STATE == POLL_STATUS_AFTER_WRITE2  (0x8)
+                         	  CMD_GEN_FSM_STATE == POLL_STATUS_AFTER_WRITE2  (0x8)
 
-				  CMD_GEN_FSM_STATE == POLL_STATUS_WAIT   (0xb)
+                         	  CMD_GEN_FSM_STATE == POLL_STATUS_WAIT   (0xb)
 
-				  CMD_GEN_FSM_STATE == LET_TXFIFO_EMPTY   (0xa)
+                         	  CMD_GEN_FSM_STATE == LET_TXFIFO_EMPTY   (0xa)
 
         ENUMs:
             IDLE:
