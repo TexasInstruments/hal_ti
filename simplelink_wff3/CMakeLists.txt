@@ -70,6 +70,14 @@ if(CONFIG_HAS_CC35XX_SDK)
       source/ti/drivers/utils/List.c
     )
     if(CONFIG_TI_CC35XX_HSM)
+      zephyr_include_directories(
+        third_party/mbedtls/include
+        third_party/mbedtls/ti/configs
+      )
+      zephyr_library_compile_definitions(
+        ENABLE_KEY_STORAGE=1
+        MBEDTLS_CONFIG_FILE="mbedtls_ti_config.h"
+      )
       zephyr_library_sources(
         third_party/hsmddk/include/Integration/HSMSAL/HSMSAL.c
         third_party/hsmddk/include/Integration/Adapter_DriverInit/Driver/src/adapter_init.c
@@ -79,17 +87,54 @@ if(CONFIG_HAS_CC35XX_SDK)
         third_party/hsmddk/include/Integration/Adapter_VEX/src/adapter_vex_physicaltoken.c
         third_party/hsmddk/include/Integration/Adapter_VEX/src/adapter_vex_identity.c
         third_party/hsmddk/include/Integration/Adapter_VEX/src/adapter_vex_mailbox.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_asset.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_asym_parse.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_asym_write.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_exchangetoken.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_init.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_internal.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_key_derivation.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_key_management.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_preprovisioned_keys.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/adapter_psa_system.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/src/psa_key_store.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/Adapter_mbedTLS/src/platform.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/Adapter_mbedTLS/src/psa_crypto_client.c
+        third_party/hsmddk/include/Integration/Adapter_PSA/Adapter_mbedTLS/src/psa_crypto_storage.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/Driver_Flash.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash_fs.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash_fs_dblock.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash_fs_mblock.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash_nor.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/its_utils.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/tfm_hal_its.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/tfm_internal_trusted_storage.c
+        third_party/hsmddk/include/Integration/Adapter_ITS/src/tfm_its_local_api.c
+        third_party/hsmddk/include/Integration/Asn1Der/src/asn1der_parse.c
+        third_party/hsmddk/include/Integration/Asn1Der/src/asn1der_write.c
         third_party/hsmddk/include/Integration/Adapter_Generic/src/adapter_interrupts.c
         third_party/hsmddk/include/Integration/DriverFramework/src/device_generic.c
         third_party/hsmddk/include/Integration/DriverFramework/src/hwpal_device_mb.c
+        third_party/hsmddk/include/Kit/EIP130/DomainHelper/src/eip130_domain_ecc_getcurve.c
         third_party/hsmddk/include/Kit/EIP130/MailboxControl/src/eip130.c
         third_party/hsmddk/include/Kit/EIP130/TokenHelper/src/eip130_token_common.c
         third_party/hsmddk/include/Kit/EIP201/src/eip201.c
         third_party/hsmddk/include/Kit/Log/src/log.c
+        kernel/zephyr/dpl/ti_psa_key_config.c
         source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
+        source/ti/drivers/cryptoutils/cryptokey/CryptoKeyKeyStore_PSA.c
+        source/ti/drivers/cryptoutils/cryptokey/CryptoKeyKeyStore_PSA_helpers.c
         source/ti/drivers/TRNG.c
         source/ti/drivers/trng/TRNGXXF3HSM.c
       )
+      if(NOT CONFIG_CRYPTO_TI_CC35XX)
+        zephyr_library_sources(
+          source/ti/drivers/aesecb/AESECBXXF3.c
+          source/ti/drivers/aesccm/AESCCMXXF3.c
+          source/ti/drivers/aesctr/AESCTRXXF3.c
+        )
+      endif()
     endif()
     if(CONFIG_CRYPTO_TI_CC35XX)
       zephyr_library_sources(
