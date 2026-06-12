@@ -1180,7 +1180,7 @@ int16_t CME_SetScanDwellTime(WlanScanDwellTime_t* dwellTimes)
 
     msg.msgId = CME_MESSAGE_ID_SET_SCAN_DWELL_TIME;
     os_memcpy(&(msg.un.dwellTimes), dwellTimes, sizeof(WlanScanDwellTime_t));
-    
+
     return pushMsg2Queue(&msg);
 }
 
@@ -1333,7 +1333,7 @@ int16_t CME_SetSchedScanPlans(char *sched_scan_plans)
     }
 
     os_memcpy(msg.un.sched_scan_plans, sched_scan_plans, len);
-    
+
     return pushMsg2Queue(&msg);
 }
 

@@ -1,5 +1,5 @@
 zephyr_library()
-zephyr_compile_definitions(MBEDTLS_CONFIG_FILE="ti/configs/config-hsm.h")
+zephyr_compile_definitions(MBEDTLS_CONFIG_FILE="mbedtls_ti_config.h")
 
 zephyr_library_sources(
 	library/aes.c

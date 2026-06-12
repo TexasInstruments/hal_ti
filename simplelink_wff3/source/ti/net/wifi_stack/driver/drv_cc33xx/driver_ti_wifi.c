@@ -3240,7 +3240,6 @@ int ti_send_mgmt_frame(void *apPriv,
             pPayload->u.action.category == WLAN_ACTION_PUBLIC))
     {
         SecureHdrLength = RSN_SEC_LEN;
-        CME_PRINT_REPORT_ERROR("\n\rti_send_mgmt_frame stype %d encrypted for link %d", stype, link);
     }
 
     extraHThdr += SecureHdrLength;

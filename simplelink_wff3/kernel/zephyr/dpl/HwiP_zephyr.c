@@ -65,6 +65,11 @@ static struct sl_isr_args s1_LRFD_IRQ0_cb = {NULL, 0};
 static struct sl_isr_args s1_LRFD_IRQ1_cb = {NULL, 0};
 static struct sl_isr_args sl_HSM_HOST_0_SEC_cb = {NULL, 0};
 
+static unsigned int sl_irq_priority(uint32_t priority)
+{
+    return (priority & INT_PRIORITY_MASK) >> 4;
+}
+
 /*
  *  ======== HwiP_construct ========
  */
@@ -113,8 +118,7 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
         priority = INT_PRI_LEVEL3;
     }
 
-    /* The priority for IRQ_CONNECT is encoded in the top 2 bits */
-    priority = (priority >> 6);
+    priority = sl_irq_priority(priority);
 
     switch (interruptNum)
     {
@@ -188,10 +192,20 @@ void HwiP_Params_init(HwiP_Params *params)
     params->priority = ~0;
 }
 
-/* Zephyr has no functions for clearing an interrupt, so use driverlib: */
 void HwiP_clearInterrupt(int interruptNum)
 {
-    IntClearPend((uint32_t)interruptNum);
+    if (interruptNum == INT_PENDSV)
+    {
+        SCB->ICSR |= SCB_ICSR_PENDSVCLR_Msk;
+    }
+    else if (interruptNum == INT_SYSTICK)
+    {
+        SCB->ICSR |= SCB_ICSR_PENDSTCLR_Msk;
+    }
+    else if (interruptNum >= 16)
+    {
+        NVIC_ClearPendingIRQ(interruptNum - 16);
+    }
 }
 
 void HwiP_enableInterrupt(int interruptNum)
@@ -222,7 +236,22 @@ void HwiP_restore(uintptr_t key)
 #ifdef CONFIG_HAS_CC35XX_SDK
 void HwiP_post(int interruptNum)
 {
-    IntSetPend((uint32_t)interruptNum);
+    if (interruptNum == INT_NMI_FAULT)
+    {
+        SCB->ICSR |= SCB_ICSR_NMIPENDSET_Msk;
+    }
+    else if (interruptNum == INT_PENDSV)
+    {
+        SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+    }
+    else if (interruptNum == INT_SYSTICK)
+    {
+        SCB->ICSR |= SCB_ICSR_PENDSTSET_Msk;
+    }
+    else if (interruptNum >= 16)
+    {
+        NVIC_SetPendingIRQ(interruptNum - 16);
+    }
 }
 
 void HwiP_setFunc(HwiP_Handle hwiP, HwiP_Fxn fxn, uintptr_t arg)
@@ -252,24 +281,13 @@ void HwiP_destruct(HwiP_Struct *hwiP)
 
 void HwiP_setPriority(int interruptNum, uint32_t priority)
 {
-    /*
-     * On CM0+, dynamically changing priorities is not allowed. In order to
-     * change priority of an interrupt, after it already has been enabled, the
-     * following must be done:
-     * - Disable the interrupt whose priority needs to be updated
-     * - Set the priority to be at the desired priority level
-     * - Re-enable the interrupt.
-     *
-     * These steps are all handled by IntSetPriority().
-     *
-     * HwiP_disable/enable here serves the purpose of deferring the handling of
-     * user interrupts until the priority of interruptNum has been changed. This
-     * prevents another interrupt from changing the global state potentially
-     * altering the outcome of this function.
-     */
-
     uintptr_t key = HwiP_disable();
-    IntSetPriority((uint32_t)interruptNum, (uint8_t)priority);
+
+    if (interruptNum >= 16)
+    {
+        z_arm_irq_priority_set(interruptNum - 16, sl_irq_priority(priority), 0);
+    }
+
     HwiP_restore(key);
 }
 
