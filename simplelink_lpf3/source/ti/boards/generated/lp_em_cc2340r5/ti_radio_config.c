@@ -7,7 +7,7 @@
  *
  *  Tool Name:           RadioConfig 8
  *  Tool Version:        9.11.00.02_ga
- *  RF Settings Version: 
+ *  RF Settings Version:
  */
 
 #include "ti_radio_config.h"
@@ -71,7 +71,7 @@ static const uint32_t LRF_commonRegConfigAdcNoise[] =
     0x0005002E,                     //     RFE_COMMON_RAM.DCOSETTLE      RFE_COMMON_RAM.CHRGSETTLE
     0x0000FE00,                     //     RFE_COMMON_RAM.IFAMPRFLDODEFAULT RFE_COMMON_RAM.IFAMPRFLDOTX
     0x68425003,                     //   RAM 16-bit region (start address = 0x6842, count = 4)
-    0x00220050,                     //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
+    0x00000050,                     //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
     0x00000045                      //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
 };
 
@@ -389,6 +389,3 @@ const LRF_Config LRF_config = {
     .rfeImage = (const LRF_TOPsmImage*) LRF_RFE_binary_ble5,
     .regConfigList = &LRF_regConfigList
 };
-
-
-

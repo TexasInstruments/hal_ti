@@ -71,7 +71,7 @@ static const uint32_t LRF_commonRegConfigAdcNoise[] =
     0x0005002E,                     //     RFE_COMMON_RAM.DCOSETTLE      RFE_COMMON_RAM.CHRGSETTLE
     0x0000FE00,                     //     RFE_COMMON_RAM.IFAMPRFLDODEFAULT RFE_COMMON_RAM.IFAMPRFLDOTX
     0x68446001,                     //   RAM 32-bit region (start address = 0x6844, count = 2)
-    0x00220051,                     //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
+    0x00000051,                     //     RFE_COMMON_RAM.SPARE0SHADOW   RFE_COMMON_RAM.PHYRSSIOFFSET
     0x00000045,                     //     RFE_COMMON_RAM.AGCINFO        RFE_COMMON_RAM.SPARE1SHADOW
     0x684E4001                      //   RAM zero region (start address = 0x1684E, count = 2)
 };
