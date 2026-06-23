@@ -46,6 +46,8 @@
 #ifndef ti_devices_DeviceFamily__include
 #define ti_devices_DeviceFamily__include
 
+#include <zephyr/zephyr_device_selection.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
