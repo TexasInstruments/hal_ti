@@ -52,4 +52,5 @@ zephyr_library_sources(
   stack_util/lib_opt/src/ctrl_opt_ext_vendor_specific_cmd.c
   stack_util/lib_opt/src/ctrl_opt_coex.c
   stack_util/lib_opt/src/ctrl_opt_legacy_cmd.c
+  stack_util/lib_opt/src/ctrl_opt_rssi_monitor.c
 )

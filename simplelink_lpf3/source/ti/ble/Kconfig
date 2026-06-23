@@ -18,6 +18,15 @@ config BT_CTLR_TI_EXT_VS_CMD
 	  TI BLE controller. Disable this option to reduce code size if
 	  extended vendor specific commands are not needed.
 
+config BT_CTRL_TI_VS_RSSI_MONITOR
+	bool "TI BLE Controller Vendor Specific RSSI Monitor"
+	default n
+	help
+	  Enable the TI vendor-specific RSSI Monitor feature. Tracks received
+	  signal strength per connection using a weighted average and invokes
+	  registered callbacks when RSSI crosses configurable high/low thresholds
+	  or returns to range.
+
 config BT_TI_SWAT_TEST_MODE
 	bool "TI BLE SWAT Test Mode (Internal TI Test Lab Only)"
 	depends on BT_HCI_RAW

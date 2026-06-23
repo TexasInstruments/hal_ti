@@ -143,6 +143,11 @@ if (CONFIG_BT_CTLR_TI_EXT_VS_CMD)
     -DEXT_VENDOR_SPECIFIC_CMD
   )
 endif()
+if (CONFIG_BT_CTRL_TI_VS_RSSI_MONITOR)
+  zephyr_compile_definitions(
+    -DRSSI_MONITOR
+  )
+endif()
 
 
 zephyr_compile_definitions(
