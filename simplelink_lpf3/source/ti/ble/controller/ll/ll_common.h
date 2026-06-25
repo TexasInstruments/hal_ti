@@ -2132,6 +2132,9 @@ bool llCompareAddresses( uint8_t *pAddr1, uint8_t addrType1,
 
 uint32_t llEstimateConnMinTimeLength(uint16_t connId);
 
+// Check if a received control packet opcode is a procedure with instant
+uint8_t llIsReceivedProcedureWithInstant( uint8_t opcode );
+
 #ifdef __cplusplus
 }
 #endif
