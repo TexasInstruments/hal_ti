@@ -53,6 +53,13 @@ zephyr_library_sources(
   fw_control_cmd/control_cmd_fw.c
 )
 
+# Workaround to improve the stability of SPI communication on SDK 10.
+set_property(
+    SOURCE cme/cme_connection_mng.c
+    APPEND
+    PROPERTY COMPILE_OPTIONS "-O0"
+)
+
 zephyr_include_directories(
   .
   cme

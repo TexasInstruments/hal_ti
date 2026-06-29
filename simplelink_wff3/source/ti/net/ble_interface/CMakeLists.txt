@@ -1,6 +1,5 @@
 zephyr_library()
 
-zephyr_compile_definitions(CONFIG_TI_BLE_TRANSPORT_SHARED)
 if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
   ti_mbedtls_configure_target(${ZEPHYR_CURRENT_LIBRARY})
 endif()
