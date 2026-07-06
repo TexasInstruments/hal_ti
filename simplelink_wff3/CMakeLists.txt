@@ -159,6 +159,22 @@ if(CONFIG_HAS_CC35XX_SDK)
         source/ti/drivers/aesctr/AESCTRXXF3.c
       )
     endif()
+    if(CONFIG_PSA_CRYPTO_DRIVER_CC35XX)
+      zephyr_library_sources(
+        source/ti/drivers/AESGCM.c
+        source/ti/drivers/ECDH.c
+        source/ti/drivers/ECDSA.c
+        source/ti/drivers/SHA2.c
+        source/ti/drivers/cryptoutils/hsm/HSMXXF3Utility.c
+        source/ti/drivers/aesccm/AESCCMXXF3.c
+        source/ti/drivers/aesctr/AESCTRXXF3.c
+        source/ti/drivers/aesecb/AESECBXXF3.c
+        source/ti/drivers/aesgcm/AESGCMXXF3HSM.c
+        source/ti/drivers/ecdh/ECDHXXF3HSM.c
+        source/ti/drivers/ecdsa/ECDSAXXF3HSM.c
+        source/ti/drivers/sha2/SHA2XXF3HSM.c
+      )
+    endif()
     if(CONFIG_WIFI_TI_CC35XX)
       zephyr_include_directories(
         kernel/zephyr/dpl
