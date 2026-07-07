@@ -17,3 +17,5 @@ zephyr_include_directories(
   inc_common
   plat
 )
+
+ti_mbedtls_configure_target(${ZEPHYR_CURRENT_LIBRARY})

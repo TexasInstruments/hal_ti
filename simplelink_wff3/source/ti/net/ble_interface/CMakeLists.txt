@@ -1,6 +1,7 @@
 zephyr_library()
 
 zephyr_compile_definitions(CONFIG_TI_BLE_TRANSPORT_SHARED)
+ti_mbedtls_configure_target(${ZEPHYR_CURRENT_LIBRARY})
 
 zephyr_library_sources(
   ble_transport_layer/ble_if.c
@@ -9,7 +10,7 @@ zephyr_library_sources(
   ble_transport_layer/hci_transport.c
 )
 
-zephyr_include_directories(
+zephyr_library_include_directories(
   .
   inc_adapt
   inc_common

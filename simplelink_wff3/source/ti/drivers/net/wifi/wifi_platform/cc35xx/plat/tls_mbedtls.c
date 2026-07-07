@@ -295,6 +295,7 @@ static void emsgrc(int level, const char * const msg, int rc)
 #define ilog(rc, msg) emsgrc(MSG_INFO,  (msg), (rc))
 
 
+#if !defined(__ZEPHYR__)
 mbedtls_ms_time_t mbedtls_ms_time(void)
 {
     struct os_time tv;
@@ -302,6 +303,7 @@ mbedtls_ms_time_t mbedtls_ms_time(void)
     os_get_time(&tv);
     return (unsigned long)(tv.sec * 1000UL + tv.usec / 1000UL);
 }
+#endif
 
 
 struct tls_conf * tls_conf_init(void *tls_ctx)

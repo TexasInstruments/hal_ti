@@ -70,4 +70,6 @@ zephyr_include_directories(
   inc_common
   inc_shared_w_fw
   inc_shared_w_fw/inc_common_fw
+  ../ble_interface/inc_adapt
+  ../ble_interface/inc_common
 )

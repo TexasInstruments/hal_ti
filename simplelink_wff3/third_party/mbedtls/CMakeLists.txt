@@ -1,5 +1,9 @@
 zephyr_library()
-zephyr_compile_definitions(MBEDTLS_CONFIG_FILE="mbedtls_ti_config.h")
+zephyr_library_compile_options(
+	-UMBEDTLS_CONFIG_FILE
+	-UTF_PSA_CRYPTO_CONFIG_FILE
+	-DMBEDTLS_CONFIG_FILE="mbedtls_ti_config.h"
+)
 
 zephyr_library_sources(
 	library/aes.c
@@ -113,7 +117,7 @@ zephyr_library_sources(
 	zephyr_entropy.c
 )
 
-zephyr_include_directories(
+zephyr_library_include_directories(
 	ti/configs
 	include
 	include/psa
