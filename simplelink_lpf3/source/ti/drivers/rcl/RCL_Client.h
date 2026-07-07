@@ -49,7 +49,6 @@ struct RCL_Client_s {
     SemaphoreP_Struct pendSem;
     RCL_Events        deferredRclEvents; /* Deferred from cmd -> cmd */
     const LRF_Config *lrfConfig;
-    bool              isOpen;
 };
 
 #endif /* ti_drivers_rcl_RCL_Client__include */
