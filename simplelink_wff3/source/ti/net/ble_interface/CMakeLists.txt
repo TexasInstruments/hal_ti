@@ -14,4 +14,6 @@ zephyr_library_include_directories(
   .
   inc_adapt
   inc_common
+  ${CMAKE_CURRENT_LIST_DIR}/../../../../third_party/mbedtls/ti/configs
+  ${CMAKE_CURRENT_LIST_DIR}/../../../../third_party/mbedtls/include
 )
