@@ -46,21 +46,6 @@ static MutexP_Status dpl_mutex_pool_free(struct k_mutex *mutex)
 	return MutexP_OK;
 }
 
-MutexP_Handle MutexP_construct(MutexP_Struct *handle, MutexP_Params *params)
-{
-	struct k_mutex *mutex = (struct k_mutex *)handle;
-
-	ARG_UNUSED(params);
-	k_mutex_init(mutex);
-
-	return mutex;
-}
-
-void MutexP_destruct(MutexP_Struct *mutex)
-{
-	ARG_UNUSED(mutex);
-}
-
 MutexP_Handle MutexP_create(MutexP_Params *params)
 {
     struct k_mutex *mutex;
@@ -75,6 +60,24 @@ MutexP_Handle MutexP_create(MutexP_Params *params)
         k_mutex_init(mutex);
     }
     return ((MutexP_Handle)mutex);
+}
+
+MutexP_Handle MutexP_construct(MutexP_Struct *handle, MutexP_Params *params)
+{
+    struct k_mutex *mutex = (struct k_mutex *)handle;
+
+    ARG_UNUSED(params);
+
+    __ASSERT(sizeof(*mutex) <= sizeof(*handle), "MutexP_Struct too small");
+
+    k_mutex_init(mutex);
+
+    return (MutexP_Handle)mutex;
+}
+
+void MutexP_destruct(MutexP_Struct *mutexP)
+{
+    k_mutex_init((struct k_mutex *)mutexP);
 }
 
 void MutexP_delete(MutexP_Handle handle)

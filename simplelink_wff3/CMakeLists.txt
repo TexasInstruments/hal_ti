@@ -49,6 +49,17 @@ if(CONFIG_HAS_CC35XX_SDK)
         source/ti/drivers/net/wifi/wifi_host_driver/trnspt_layer
       )
     endif()
+    if(CONFIG_CC35XXE_FWU)
+      zephyr_include_directories(
+        source/ti/utils/FWU
+        source/ti/utils/FWU/headers
+        source/ti/drivers/xmem
+        source/ti/drivers/net/wifi/wifi_host_driver/inc_common
+        source/ti/drivers/net/wifi/wifi_host_driver/inc_adapt
+        source/ti/drivers/net/wifi/wifi_platform/cc35xx/inc_common
+        source/ti/drivers/net/wifi/wifi_platform/cc35xx/plat
+      )
+    endif()
 
     zephyr_library()
     zephyr_library_compile_definitions(${COMPILER})
@@ -195,29 +206,52 @@ if(CONFIG_HAS_CC35XX_SDK)
         source/ti/drivers/sha2/SHA2XXF3HSM.c
       )
     endif()
-    if(CONFIG_TI_CC35XX_HSM_ITS OR CONFIG_WIFI_TI_CC35XX)
+    if(CONFIG_CC35XXE_FWU)
+      zephyr_library_sources(
+        source/ti/utils/FWU/psa_fwu.c
+      )
+      if(NOT CONFIG_WIFI_TI_CC35XX)
+        zephyr_library_sources(
+          source/ti/drivers/net/wifi/wifi_platform/cc35xx/plat/otfde_driver.c
+        )
+      endif()
+    endif()
+    if(CONFIG_TI_CC35XX_HSM_ITS OR CONFIG_WIFI_TI_CC35XX OR CONFIG_CC35XXE_FWU)
+      set(ti_flash_map_config_source kernel/zephyr/dpl/ti_flash_map_config.c)
+      set(ti_flash_map_config_target)
+
       if(CONFIG_CC35XXE_GENERATE_FLASH_MAP_CONFIG)
-        set(ti_flash_map_config_source "${ZEPHYR_BINARY_DIR}/ti_flash_map_config.c")
+        get_property(ti_flash_map_config_source GLOBAL PROPERTY
+                     CC35XXE_FLASH_MAP_CONFIG_SOURCE)
+        if(NOT ti_flash_map_config_source)
+          set(ti_flash_map_config_source "${ZEPHYR_BINARY_DIR}/ti_flash_map_config.c")
+        endif()
+        get_property(ti_flash_map_config_target GLOBAL PROPERTY
+                     CC35XXE_FLASH_MAP_CONFIG_TARGET)
+        set_source_files_properties(${ti_flash_map_config_source}
+                                    PROPERTIES GENERATED TRUE)
       endif()
 
       zephyr_include_directories(
         kernel/zephyr/dpl
       )
-      if(ti_flash_map_config_source)
-        zephyr_library_sources(${ti_flash_map_config_source})
-      else()
-        zephyr_library_sources(kernel/zephyr/dpl/ti_flash_map_config.c)
+      zephyr_library_sources(
+        ${ti_flash_map_config_source}
+      )
+      if(ti_flash_map_config_target)
+        add_dependencies(${ZEPHYR_CURRENT_LIBRARY} ${ti_flash_map_config_target})
       endif()
     endif()
-    if(CONFIG_WIFI_TI_CC35XX)
-      zephyr_include_directories(
-        kernel/zephyr/dpl
-      )
+    if(CONFIG_WIFI_TI_CC35XX OR CONFIG_CC35XXE_FWU)
       zephyr_library_sources(
         kernel/zephyr/dpl/osi_dpl.c
-        kernel/zephyr/dpl/osi_filesystem.c
-        kernel/zephyr/dpl/osi_term.c
       )
+      if(CONFIG_WIFI_TI_CC35XX)
+        zephyr_library_sources(
+          kernel/zephyr/dpl/osi_filesystem.c
+          kernel/zephyr/dpl/osi_term.c
+        )
+      endif()
     endif()
   endif()
 endif()
