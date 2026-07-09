@@ -37,7 +37,13 @@
 #include <mbedtls/platform_util.h> /* mbedtls_platform_zeroize() */
 #include <mbedtls/asn1.h>
 #include <mbedtls/asn1write.h>
+#if defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR_PSA) || \
+    defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR_MBEDTLS)
+#define TI_WIFI_CRYPTO_BACKEND_ZEPHYR
+#endif
+#if !defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR_PSA)
 #include <mbedtls/aes.h>
+#endif
 #include <mbedtls/md.h>
 #include <mbedtls/md5.h>
 #include <mbedtls/sha1.h>
@@ -46,6 +52,7 @@
 #include <mbedtls/ssl.h>
 #include <psa/crypto.h>       /* For PSA Crypto API */
 #include "mbedtls/md.h"
+#include "crypto_backend.h"
 
 
 
@@ -68,40 +75,22 @@ int sha384_prf_bits(const u8 *key, size_t key_len, const char *label,
             const u8 *data, size_t data_len, u8 *buf,
             size_t buf_len_bits);
 
-
 int crypto_psa_get_random(void *params, unsigned char *randBuff, size_t randLen)
 {
-
-    int status;
-    psa_crypto_init();
-    //Get new seed from HSM
-    status = psa_generate_random(randBuff, randLen);
-    if (status != PSA_SUCCESS) {
-        return -1;
-    }
-
-    return 0;
+    (void)params;
+    return crypto_backend_get_random(randBuff, randLen);
 }
 
 
 static mbedtls_ctr_drbg_context * ctr_drbg_init(void)
 {
-    psa_status_t status  = psa_crypto_init();
     return NULL;
 }
 
 #ifdef CRYPTO_MBEDTLS_CONFIG_FIPS
 int crypto_get_random(void *buf, size_t len)
 {
-        //Get new seed from HSM
-    status = psa_generate_random(buf, len);
-    if (status != PSA_SUCCESS)
-    {
-        return -1;
-    }
-
-    return 0;
-}
+    return crypto_backend_get_random(buf, len);
 }
 #endif
 
@@ -219,7 +208,7 @@ int crypto_get_random(void *buf, size_t len)
 #endif /* dh5_init_fixed() */
 #endif /* crypto_dh_*() */
 
-#if !defined(CONFIG_NO_WPA) /* CONFIG_NO_WPA= */
+#if !defined(CONFIG_NO_WPA) && !defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR) /* CONFIG_NO_WPA= */
 #define CRYPTO_MBEDTLS_CRYPTO_ECDH
 #endif /* crypto_ecdh_*() */
 
@@ -227,6 +216,10 @@ int crypto_get_random(void *buf, size_t len)
 #define CRYPTO_MBEDTLS_CRYPTO_BIGNUM
 #define CRYPTO_MBEDTLS_CRYPTO_EC
 #endif /* crypto_ec_*() crypto_ec_key_*() */
+
+#if defined(CRYPTO_MBEDTLS_CRYPTO_EC) && !defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR)
+#define CRYPTO_MBEDTLS_CRYPTO_EC_KEY
+#endif /* crypto_ec_key_*() */
 
 #if defined(CONFIG_DPP) /* CONFIG_DPP=y */
 #define CRYPTO_MBEDTLS_CRYPTO_EC_DPP /* extra for DPP */
@@ -503,18 +496,117 @@ static int hmac_vector(const u8 *key, size_t key_len, size_t num_elem,
     if (TEST_FAIL())
         return -1;
 
+#if defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR)
+    psa_key_attributes_t key_attrs = PSA_KEY_ATTRIBUTES_INIT;
+    psa_mac_operation_t operation = PSA_MAC_OPERATION_INIT;
+    psa_key_id_t key_id = 0;
+    psa_algorithm_t hash_alg;
+    psa_algorithm_t alg;
+    psa_status_t status;
+    size_t mac_len;
+    size_t mac_size;
+    int ret = -1;
+
+    switch (md_type) {
+    case MBEDTLS_MD_MD5:
+        hash_alg = PSA_ALG_MD5;
+        break;
+    case MBEDTLS_MD_SHA1:
+        hash_alg = PSA_ALG_SHA_1;
+        break;
+    case MBEDTLS_MD_SHA256:
+        hash_alg = PSA_ALG_SHA_256;
+        break;
+    case MBEDTLS_MD_SHA384:
+        hash_alg = PSA_ALG_SHA_384;
+        break;
+    case MBEDTLS_MD_SHA512:
+        hash_alg = PSA_ALG_SHA_512;
+        break;
+    default:
+        return -1;
+    }
+
+    alg = PSA_ALG_HMAC(hash_alg);
+    mac_size = PSA_MAC_LENGTH(PSA_KEY_TYPE_HMAC, key_len * 8, alg);
+
+    status = psa_crypto_init();
+    if (status != PSA_SUCCESS) {
+        return -1;
+    }
+
+    psa_set_key_type(&key_attrs, PSA_KEY_TYPE_HMAC);
+    psa_set_key_usage_flags(&key_attrs, PSA_KEY_USAGE_SIGN_MESSAGE);
+    psa_set_key_algorithm(&key_attrs, alg);
+
+    status = psa_import_key(&key_attrs, key, key_len, &key_id);
+    psa_reset_key_attributes(&key_attrs);
+    if (status != PSA_SUCCESS) {
+        return -1;
+    }
+
+    status = psa_mac_sign_setup(&operation, key_id, alg);
+    if (status != PSA_SUCCESS) {
+        goto out;
+    }
+
+    for (size_t i = 0; i < num_elem; ++i) {
+        if (len[i] == 0) {
+            continue;
+        }
+
+        status = psa_mac_update(&operation, addr[i], len[i]);
+        if (status != PSA_SUCCESS) {
+            goto out;
+        }
+    }
+
+    status = psa_mac_sign_finish(&operation, mac, mac_size, &mac_len);
+    if (status != PSA_SUCCESS || mac_len != mac_size) {
+        goto out;
+    }
+
+    ret = 0;
+
+out:
+    psa_mac_abort(&operation);
+    psa_destroy_key(key_id);
+    return ret;
+#else
     mbedtls_md_context_t ctx;
+    const mbedtls_md_info_t *md_info;
+    int ret;
+
     mbedtls_md_init(&ctx);
-    if (mbedtls_md_setup(&ctx, mbedtls_md_info_from_type(md_type), 1) != 0){
+    md_info = mbedtls_md_info_from_type(md_type);
+    if (!md_info) {
         mbedtls_md_free(&ctx);
         return -1;
     }
-    mbedtls_md_hmac_starts(&ctx, key, key_len);
+
+    ret = mbedtls_md_setup(&ctx, md_info, 1);
+    if (ret != 0) {
+        mbedtls_md_free(&ctx);
+        return -1;
+    }
+    ret = mbedtls_md_hmac_starts(&ctx, key, key_len);
+    if (ret != 0) {
+        mbedtls_md_free(&ctx);
+        return -1;
+    }
     for (size_t i = 0; i < num_elem; ++i)
-        mbedtls_md_hmac_update(&ctx, addr[i], len[i]);
-    mbedtls_md_hmac_finish(&ctx, mac);
+        if (mbedtls_md_hmac_update(&ctx, addr[i], len[i]) != 0) {
+            mbedtls_md_free(&ctx);
+            return -1;
+        }
+    ret = mbedtls_md_hmac_finish(&ctx, mac);
+    if (ret != 0) {
+        mbedtls_md_free(&ctx);
+        return -1;
+    }
     mbedtls_md_free(&ctx);
     return 0;
+#endif
 }
 
 #ifdef MBEDTLS_SHA512_C
@@ -997,7 +1089,9 @@ int hmac_md5(const u8 *key, size_t key_len, const u8 *data, size_t data_len,
  || defined(CRYPTO_MBEDTLS_HMAC_KDF_SHA384) \
  || defined(CRYPTO_MBEDTLS_HMAC_KDF_SHA512)
 
+#ifdef MBEDTLS_HKDF_C
 #include <mbedtls/hkdf.h>
+#endif
 
 /* sha256-kdf.c sha384-kdf.c sha512-kdf.c */
 
@@ -1024,23 +1118,14 @@ static int hmac_kdf_expand(const u8 *prk, size_t prk_len,
     if (okm_len > ((mac_len << 8) - mac_len))
         return -1;
 
-    mbedtls_md_context_t ctx;
-    mbedtls_md_init(&ctx);
-    if (mbedtls_md_setup(&ctx, md_info, 1) != 0) {
-        mbedtls_md_free(&ctx);
-        return -1;
-    }
-    mbedtls_md_hmac_starts(&ctx, prk, prk_len);
-
     u8 iter = 1;
     const u8 *addr[4] = { okm, (const u8 *)label, info, &iter };
     size_t len[4] = { 0, label ? os_strlen(label)+1 : 0, info_len, 1 };
 
     for (; okm_len >= mac_len; okm_len -= mac_len, ++iter) {
-        for (size_t i = 0; i < ARRAY_SIZE(addr); ++i)
-            mbedtls_md_hmac_update(&ctx, addr[i], len[i]);
-        mbedtls_md_hmac_finish(&ctx, okm);
-        mbedtls_md_hmac_reset(&ctx);
+        if (hmac_vector(prk, prk_len, ARRAY_SIZE(addr), addr, len, okm,
+                        md_type) < 0)
+            return -1;
         addr[0] = okm;
         okm += mac_len;
         len[0] = mac_len; /*(include digest in subsequent rounds)*/
@@ -1048,14 +1133,13 @@ static int hmac_kdf_expand(const u8 *prk, size_t prk_len,
 
     if (okm_len) {
         u8 hash[MBEDTLS_MD_MAX_SIZE];
-        for (size_t i = 0; i < ARRAY_SIZE(addr); ++i)
-            mbedtls_md_hmac_update(&ctx, addr[i], len[i]);
-        mbedtls_md_hmac_finish(&ctx, hash);
+        if (hmac_vector(prk, prk_len, ARRAY_SIZE(addr), addr, len, hash,
+                        md_type) < 0)
+            return -1;
         os_memcpy(okm, hash, okm_len);
         forced_memzero(hash, mac_len);
     }
 
-    mbedtls_md_free(&ctx);
     return 0;
 }
 
@@ -1098,42 +1182,29 @@ static int hmac_prf_bits(const u8 *key, size_t key_len, const char *label,
     if (TEST_FAIL())
         return -1;
 
-    mbedtls_md_context_t ctx;
-    mbedtls_md_init(&ctx);
     const mbedtls_md_info_t *md_info = mbedtls_md_info_from_type(md_type);
-    if (mbedtls_md_setup(&ctx, md_info, 1) != 0) {
-        mbedtls_md_free(&ctx);
+    if (!md_info)
         return -1;
-    }
-    mbedtls_md_hmac_starts(&ctx, key, key_len);
 
-    u16 ctr, n_le = host_to_le16(buf_len_bits);
-    const u8 * const addr[] = { (u8 *)&ctr,(u8 *)label,data,(u8 *)&n_le };
+    u16 ctr, ctr_le, n_le = host_to_le16(buf_len_bits);
+    const u8 *addr[] = { (u8 *)&ctr_le, (u8 *)label, data, (u8 *)&n_le };
     const size_t len[] =      { 2, os_strlen(label), data_len, 2 };
     const size_t mac_len = mbedtls_md_get_size(md_info);
     size_t buf_len = (buf_len_bits + 7) / 8;
     for (ctr = 1; buf_len >= mac_len; buf_len -= mac_len, ++ctr) {
-      #if __BYTE_ORDER == __BIG_ENDIAN
-        ctr = host_to_le16(ctr);
-      #endif
-        for (size_t i = 0; i < ARRAY_SIZE(addr); ++i)
-            mbedtls_md_hmac_update(&ctx, addr[i], len[i]);
-        mbedtls_md_hmac_finish(&ctx, buf);
-        mbedtls_md_hmac_reset(&ctx);
+        ctr_le = host_to_le16(ctr);
+        if (hmac_vector(key, key_len, ARRAY_SIZE(addr), addr, len, buf,
+                        md_type) < 0)
+            return -1;
         buf += mac_len;
-      #if __BYTE_ORDER == __BIG_ENDIAN
-        ctr = le_to_host16(ctr);
-      #endif
     }
 
     if (buf_len) {
         u8 hash[MBEDTLS_MD_MAX_SIZE];
-      #if __BYTE_ORDER == __BIG_ENDIAN
-        ctr = host_to_le16(ctr);
-      #endif
-        for (size_t i = 0; i < ARRAY_SIZE(addr); ++i)
-            mbedtls_md_hmac_update(&ctx, addr[i], len[i]);
-        mbedtls_md_hmac_finish(&ctx, hash);
+        ctr_le = host_to_le16(ctr);
+        if (hmac_vector(key, key_len, ARRAY_SIZE(addr), addr, len, hash,
+                        md_type) < 0)
+            return -1;
         os_memcpy(buf, hash, buf_len);
         buf += buf_len;
         forced_memzero(hash, mac_len);
@@ -1143,7 +1214,6 @@ static int hmac_prf_bits(const u8 *key, size_t key_len, const char *label,
     if ((buf_len_bits &= 0x7))
         buf[-1] &= (u8)(0xff << (8 - buf_len_bits));
 
-    mbedtls_md_free(&ctx);
     return 0;
 }
 
@@ -1193,353 +1263,43 @@ int sha256_prf_bits(const u8 *key, size_t key_len, const char *label,
 
 
 #ifdef CRYPTO_MBEDTLS_PBKDF2_SHA1
-/* sha1-pbkdf2.c */
-#include <mbedtls/pkcs5.h>
 int pbkdf2_sha1(const char *passphrase, const u8 *ssid, size_t ssid_len,
                 int iterations, u8 *buf, size_t buflen)
 {
-  #if MBEDTLS_VERSION_NUMBER >= 0x03030000 /* mbedtls 3.3.0 */
-    return mbedtls_pkcs5_pbkdf2_hmac_ext(MBEDTLS_MD_SHA1,
-            (const u8 *)passphrase, os_strlen(passphrase),
-            ssid, ssid_len, iterations, 32, buf) ? -1 : 0;
-  #else
-    const mbedtls_md_info_t *md_info;
-    md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
-    if (md_info == NULL)
-        return -1;
-    mbedtls_md_context_t ctx;
-    mbedtls_md_init(&ctx);
-    int ret = mbedtls_md_setup(&ctx, md_info, 1)
-           || mbedtls_pkcs5_pbkdf2_hmac(&ctx,
-            (const u8 *)passphrase, os_strlen(passphrase),
-            ssid, ssid_len, iterations, 32, buf) ? -1 : 0;
-    mbedtls_md_free(&ctx);
-    return ret;
-  #endif
+    return crypto_backend_pbkdf2_sha1(passphrase, ssid, ssid_len,
+                                      iterations, buf, buflen);
 }
 #endif
 
-#define PSA_AES_ENABLED
-/*#include "aes.h"*/ /* prototypes also included in "crypto.h" */
-#ifdef PSA_AES_ENABLED
-
-#include <psa/crypto.h>
-#include <string.h>
-#include <stdlib.h>
-#include "crypto.h"
-
-/* Context structure to hold PSA key and cipher operation */
-typedef struct {
-    uint8_t *rawKey;
-    size_t len;
-    psa_key_id_t key_id;
-    psa_cipher_operation_t operation;
-    uint8_t iv[16]; /* Zero IV for ECB mode */
-} aes_context;
-
-/**
- * aes_encrypt_init - Initialize AES for encryption
- * @key: Encryption key
- * @len: Key length in bytes (usually 16, i.e., 128 bits)
- * Returns: Pointer to context data or %NULL on failure
- */
-void *aes_encrypt_init(const u8 *key, size_t len) {
-    psa_status_t status;
-    aes_context *ctx = os_calloc(1, sizeof(aes_context));
-
-    psa_key_id_t keyID;
-    psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_HSM_ASSET_STORE,
-                                                       PSA_KEY_LOCATION_HSM_ASSET_STORE);
-
-    if (!ctx) {
-        return NULL;
-    }
-
-    /* Initialize PSA Crypto */
-    status = psa_crypto_init();
-    if (status != PSA_SUCCESS) {
-        os_free(ctx);
-        return NULL;
-    }
-
-    /* Import the key */
-    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_ENCRYPT);
-    psa_set_key_algorithm(&key_attributes, PSA_ALG_ECB_NO_PADDING);
-    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&key_attributes, len * 8);
-
-    /* Set key location to volatile storage */
-    psa_set_key_lifetime(&key_attributes, lifetime);
-
-    keyID = PSA_KEY_ID_USER_MIN;
-    psa_set_key_id(&key_attributes, keyID);
-
-    /* Attempt to delete the key. To ensure psa_import_key() works everytime. */
-    status = psa_destroy_key(keyID);
-
-    status = psa_import_key(&key_attributes, key, len, &ctx->key_id);
-    if (status != PSA_SUCCESS) {
-        os_free(ctx);
-        return NULL;
-    }
-
-    /* Setup cipher operation */
-    ctx->operation = psa_cipher_operation_init();
-    status = psa_cipher_encrypt_setup(&ctx->operation, ctx->key_id, PSA_ALG_ECB_NO_PADDING);
-    if (status != PSA_SUCCESS) {
-        psa_destroy_key(ctx->key_id);
-        os_free(ctx);
-        return NULL;
-    }
-
-    /* ECB mode doesn't need an IV, but we set it to zero for completeness */
-    memset(ctx->iv, 0, sizeof(ctx->iv));
-    ctx->rawKey = os_malloc(len);
-    os_memcpy(ctx->rawKey, key,len);
-    ctx->len = len;
-    return ctx;
-}
-
-/**
- * aes_encrypt_deinit - Deinitialize AES encryption
- * @ctx: Context pointer from aes_encrypt_init()
- */
-void aes_encrypt_deinit(void *ctx) {
-    aes_context *aes_ctx = (aes_context *)ctx;
-
-    if (aes_ctx) {
-        /* Abort the operation */
-        psa_cipher_abort(&aes_ctx->operation);
-
-        /* Destroy the key */
-        psa_destroy_key(aes_ctx->key_id);
-
-        os_free(aes_ctx->rawKey);
-
-        /* Free the context */
-        os_free(aes_ctx);
-
-    }
-}
-
-/**
- * aes_encrypt - Encrypt one AES block
- * @ctx: Context pointer from aes_encrypt_init()
- * @plain: Plaintext data to be encrypted (16 bytes)
- * @crypt: Buffer for the encrypted data (16 bytes)
- * Returns: 0 on success, -1 on failure
- */
-
-static __attribute__((aligned(4))) uint8_t plainA[16];
-static __attribute__((aligned(4))) uint8_t cryptA[16];
-
-int aes_encrypt(void *ctx, const u8 *plain, u8 *crypt) {
-    aes_context *aes_ctx = (aes_context *)ctx;
-    psa_status_t status;
-    size_t output_length;
-    uint8_t *rawKey;
-    size_t len;
-
-    if (!ctx) {
-        return -1;
-    }
-
-
-    os_memset(plainA,0,16);
-    os_memset(cryptA,0,16);
-
-    os_memcpy(plainA,plain,16);
-
-
-    /* Skip the set IV step since we're using ECB mode */
-
-
-    /* Process a single block */
-    status = psa_cipher_update(&aes_ctx->operation, plainA, 16, cryptA, 16, &output_length);
-    if (status != PSA_SUCCESS || output_length != 16) {
-        Report("FAIL!!!! - \n\r");
-        return -1;
-    }
-
-    os_memcpy(crypt,cryptA,16);
-
-
-    return 0;
-}
-
-
-
-/**
- * aes_decrypt_init - Initialize AES for decryption
- * @key: Decryption key
- * @len: Key length in bytes (usually 16, i.e., 128 bits)
- * Returns: Pointer to context data or %NULL on failure
- */
-void *aes_decrypt_init(const u8 *key, size_t len) {
-    psa_status_t status;
-    aes_context *ctx = os_calloc(1, sizeof(aes_context));
-    psa_key_id_t keyID;
-    psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_HSM_ASSET_STORE,
-                                                       PSA_KEY_LOCATION_HSM_ASSET_STORE);
-
-    if (!ctx) {
-        return NULL;
-    }
-
-    /* Initialize PSA Crypto */
-    status = psa_crypto_init();
-    if (status != PSA_SUCCESS) {
-        os_free(ctx);
-        return NULL;
-    }
-
-    /* Import the key */
-    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_DECRYPT);
-    psa_set_key_algorithm(&key_attributes, PSA_ALG_ECB_NO_PADDING);
-    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&key_attributes, len * 8);
-
-    /* Set key location to volatile storage */
-    psa_set_key_lifetime(&key_attributes, lifetime);
-
-    keyID = PSA_KEY_ID_USER_MIN + 1;
-    psa_set_key_id(&key_attributes, keyID);
-
-    /* Attempt to delete the key. To ensure psa_import_key() works everytime. */
-    status = psa_destroy_key(keyID);
-
-    status = psa_import_key(&key_attributes, key, len, &ctx->key_id);
-    if (status != PSA_SUCCESS) {
-        os_free(ctx);
-        return NULL;
-    }
-
-    /* Setup cipher operation */
-    ctx->operation = psa_cipher_operation_init();
-    status = psa_cipher_decrypt_setup(&ctx->operation, ctx->key_id, PSA_ALG_ECB_NO_PADDING);
-    if (status != PSA_SUCCESS) {
-        psa_destroy_key(ctx->key_id);
-        os_free(ctx);
-        return NULL;
-    }
-
-    /* ECB mode doesn't need an IV, but we set it to zero for completeness */
-    memset(ctx->iv, 0, sizeof(ctx->iv));
-
-    return ctx;
-}
-
-/**
- * aes_decrypt - Decrypt one AES block
- * @ctx: Context pointer from aes_decrypt_init()
- * @crypt: Encrypted data (16 bytes)
- * @plain: Buffer for the decrypted data (16 bytes)
- * Returns: 0 on success, -1 on failure
- */
-int aes_decrypt(void *ctx, const u8 *crypt, u8 *plain) {
-    aes_context *aes_ctx = (aes_context *)ctx;
-    psa_status_t status;
-    size_t output_length;
-
-    if (!ctx) {
-        return -1;
-    }
-
-    /* Skip the set IV step since we're using ECB mode */
-
-    os_memset(plainA,0,16);
-    os_memset(cryptA,0,16);
-
-    os_memcpy(cryptA,crypt,16);
-
-
-    /* Process a single block */
-    status = psa_cipher_update(&aes_ctx->operation, cryptA, 16, plainA, 16, &output_length);
-    if (status != PSA_SUCCESS || output_length != 16) {
-        return -1;
-    }
-
-    os_memcpy(plain,plainA,16);
-
-    return 0;
-}
-
-/**
- * aes_decrypt_deinit - Deinitialize AES decryption
- * @ctx: Context pointer from aes_decrypt_init()
- */
-void aes_decrypt_deinit(void *ctx) {
-    aes_context *aes_ctx = (aes_context *)ctx;
-
-    if (aes_ctx) {
-        /* Abort the operation */
-        psa_cipher_abort(&aes_ctx->operation);
-
-        /* Destroy the key */
-        psa_destroy_key(aes_ctx->key_id);
-
-        /* Free the context */
-        os_free(aes_ctx);
-    }
-}
-
-
-#else
-
-static void *aes_crypt_init_mode(const u8 *key, size_t len, int mode)
-{
-    if (TEST_FAIL())
-        return NULL;
-
-    mbedtls_aes_context *aes = os_malloc(sizeof(*aes));
-    if (!aes)
-        return NULL;
-
-    mbedtls_aes_init(aes);
-    if ((mode == MBEDTLS_AES_ENCRYPT
-        ? mbedtls_aes_setkey_enc(aes, key, len * 8)
-        : mbedtls_aes_setkey_dec(aes, key, len * 8)) == 0)
-        return aes;
-
-    mbedtls_aes_free(aes);
-    os_free(aes);
-    return NULL;
-}
-
 void *aes_encrypt_init(const u8 *key, size_t len)
 {
-    return aes_crypt_init_mode(key, len, MBEDTLS_AES_ENCRYPT);
+    return crypto_backend_aes_encrypt_init(key, len);
 }
 
 int aes_encrypt(void *ctx, const u8 *plain, u8 *crypt)
 {
-    return mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, plain, crypt);
+    return crypto_backend_aes_encrypt(ctx, plain, crypt);
 }
 
 void aes_encrypt_deinit(void *ctx)
 {
-    mbedtls_aes_free(ctx);
-    os_free(ctx);
+    crypto_backend_aes_encrypt_deinit(ctx);
 }
 
 void *aes_decrypt_init(const u8 *key, size_t len)
 {
-    return aes_crypt_init_mode(key, len, MBEDTLS_AES_DECRYPT);
+    return crypto_backend_aes_decrypt_init(key, len);
 }
 
 int aes_decrypt(void *ctx, const u8 *crypt, u8 *plain)
 {
-    return mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_DECRYPT, crypt, plain);
+    return crypto_backend_aes_decrypt(ctx, crypt, plain);
 }
 
 void aes_decrypt_deinit(void *ctx)
 {
-    mbedtls_aes_free(ctx);
-    os_free(ctx);
+    crypto_backend_aes_decrypt_deinit(ctx);
 }
-#endif //PSA_AES_ENABLED
 
 #include "aes_wrap.h"
 
@@ -1658,7 +1418,9 @@ int omac1_aes_256(const u8 *key, const u8 *data, size_t data_len, u8 *mac)
 #endif
 
 #endif /* MBEDTLS_CMAC_C */
+#if !defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR_PSA)
 #include "mbedtls/aes.h"
+#endif
 
 
 /* These interfaces can be inefficient when used in loops, as the overhead of
@@ -1668,16 +1430,19 @@ int omac1_aes_256(const u8 *key, const u8 *data, size_t data_len, u8 *mac)
 /* aes-encblock.c */
 int aes_128_encrypt_block(const u8 *key, const u8 *in, u8 *out)
 {
+    void *ctx;
+    int ret;
+
     if (TEST_FAIL())
         return -1;
 
-    mbedtls_aes_context aes;
-    mbedtls_aes_init(&aes);
-    int ret = mbedtls_aes_setkey_enc(&aes, key, 128)
-           || mbedtls_aes_crypt_ecb(&aes, MBEDTLS_AES_ENCRYPT, in, out)
-      ? -1
-      : 0;
-    mbedtls_aes_free(&aes);
+    ctx = crypto_backend_aes_encrypt_init(key, 16);
+    if (ctx == NULL)
+        return -1;
+
+    ret = crypto_backend_aes_encrypt(ctx, in, out);
+    crypto_backend_aes_encrypt_deinit(ctx);
+
     return ret;
 }
 
@@ -1689,20 +1454,7 @@ int aes_ctr_encrypt(const u8 *key, size_t key_len, const u8 *nonce,
     if (TEST_FAIL())
         return -1;
 
-    unsigned char counter[MBEDTLS_AES_BLOCK_SIZE];
-    unsigned char stream_block[MBEDTLS_AES_BLOCK_SIZE];
-    os_memcpy(counter, nonce, MBEDTLS_AES_BLOCK_SIZE);/*(must be writable)*/
-
-    mbedtls_aes_context ctx;
-    mbedtls_aes_init(&ctx);
-    size_t nc_off = 0;
-    int ret = mbedtls_aes_setkey_enc(&ctx, key, key_len*8)
-           || mbedtls_aes_crypt_ctr(&ctx, data_len, &nc_off,
-                                    counter, stream_block,
-                                    data, data) ? -1 : 0;
-    forced_memzero(stream_block, sizeof(stream_block));
-    mbedtls_aes_free(&ctx);
-    return ret;
+    return crypto_backend_aes_ctr_encrypt(key, key_len, nonce, data, data_len);
 }
 
 int aes_128_ctr_encrypt(const u8 *key, const u8 *nonce,
@@ -1712,169 +1464,11 @@ int aes_128_ctr_encrypt(const u8 *key, const u8 *nonce,
 }
 
 
-#ifdef PSA_AES_ENABLED
-
-#include "psa/crypto.h"
-
-/**
- * aes_128_cbc_oper - Perform AES-128-CBC encryption or decryption using PSA
- * @key: 16-byte key for the operation
- * @iv: 16-byte initialization vector
- * @data: Data buffer for in-place encryption/decryption
- * @data_len: Length of data buffer
- * @mode: 0 = decrypt, 1 = encrypt
- * Returns: 0 on success, -1 on failure
- */
-static int aes_128_cbc_oper(const u8 *key, const u8 *iv, u8 *data,
-                           size_t data_len, int mode)
-{
-    psa_status_t status;
-    psa_key_id_t key_id;
-    psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    size_t output_len;
-    psa_cipher_operation_t operation = PSA_CIPHER_OPERATION_INIT;
-    psa_key_lifetime_t lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_HSM_ASSET_STORE,
-                                                       PSA_KEY_LOCATION_HSM_ASSET_STORE);
-    uint8_t *orig_data = data;
-    uint8_t *tmp_buf = NULL;
-    uint8_t *aligned_tmp_buf = NULL;
-
-    /* Initialize PSA Crypto */
-    status = psa_crypto_init();
-    if (status != PSA_SUCCESS) {
-        return -1;
-    }
-
-    /* Set up key attributes */
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
-    psa_set_key_algorithm(&key_attributes, PSA_ALG_CBC_NO_PADDING);
-    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&key_attributes, 128);
-
-    /* Set key location to volatile storage */
-    psa_set_key_lifetime(&key_attributes, lifetime);
-
-    if (mode == 1) {
-        key_id = PSA_KEY_ID_USER_MIN + 2;
-    } else {
-        key_id = PSA_KEY_ID_USER_MIN + 3;
-    }
-
-    psa_set_key_id(&key_attributes, key_id);
-
-    /* Attempt to delete the key. To ensure psa_import_key() works everytime. */
-    status = psa_destroy_key(key_id);
-
-    /* Import the key */
-    status = psa_import_key(&key_attributes, key, 16, &key_id);
-    if (status != PSA_SUCCESS) {
-        goto exit;
-    }
-
-    /* Check if data is 4-byte aligned */
-    if (((uintptr_t)data & 0x3) != 0) {
-        /* Allocate a temp buffer with extra space for alignment */
-        tmp_buf = os_malloc(data_len + 3);
-        if (!tmp_buf) {
-            status = PSA_ERROR_INSUFFICIENT_MEMORY;
-            goto exit;
-        }
-
-        /* Align to 4 bytes */
-        aligned_tmp_buf = (uint8_t *)(((uintptr_t)tmp_buf + 3) & ~(uintptr_t)3);
-
-        os_memcpy(aligned_tmp_buf, data, data_len);
-        data = aligned_tmp_buf;
-    }
-
-    /* Perform encryption or decryption using multi-part operations */
-    if (mode == 1) {  /* Encrypt */
-        /* Setup encryption operation */
-        status = psa_cipher_encrypt_setup(&operation, key_id, PSA_ALG_CBC_NO_PADDING);
-        if (status != PSA_SUCCESS) {
-            goto exit;
-        }
-
-        /* Set the IV */
-        status = psa_cipher_set_iv(&operation, iv, 16);
-        if (status != PSA_SUCCESS) {
-            psa_cipher_abort(&operation);
-            goto exit;
-        }
-
-        /* Encrypt the data */
-        status = psa_cipher_update(&operation, data, data_len, data, data_len, &output_len);
-        if (status != PSA_SUCCESS) {
-            psa_cipher_abort(&operation);
-            goto exit;
-        }
-
-        /* Finalize the encryption */
-        size_t final_output_len;
-        status = psa_cipher_finish(&operation, data + output_len, data_len - output_len, &final_output_len);
-        output_len += final_output_len;
-    } else {  /* Decrypt */
-        /* Setup decryption operation */
-        status = psa_cipher_decrypt_setup(&operation, key_id, PSA_ALG_CBC_NO_PADDING);
-        if (status != PSA_SUCCESS) {
-            goto exit;
-        }
-
-        /* Set the IV */
-        status = psa_cipher_set_iv(&operation, iv, 16);
-        if (status != PSA_SUCCESS) {
-            psa_cipher_abort(&operation);
-            goto exit;
-        }
-
-        /* Decrypt the data */
-        status = psa_cipher_update(&operation, data, data_len, data, data_len, &output_len);
-        if (status != PSA_SUCCESS) {
-            psa_cipher_abort(&operation);
-            goto exit;
-        }
-
-        /* Finalize the decryption */
-        size_t final_output_len;
-        status = psa_cipher_finish(&operation, data + output_len, data_len - output_len, &final_output_len);
-        output_len += final_output_len;
-    }
-
-exit:
-    /* Clean up */
-    psa_destroy_key(key_id);
-
-    if (tmp_buf) {
-        /* Copy processed data back to the original buffer only on success */
-        if (status == PSA_SUCCESS) {
-            os_memcpy(orig_data, aligned_tmp_buf, data_len);
-        }
-        os_free(tmp_buf);
-    }
-
-    return (status == PSA_SUCCESS) ? 0 : -1;
-}
-
-#else
-
-/* aes-cbc.c */
 static int aes_128_cbc_oper(const u8 *key, const u8 *iv,
                             u8 *data, size_t data_len, int mode)
 {
-    unsigned char ivec[MBEDTLS_AES_BLOCK_SIZE];
-    os_memcpy(ivec, iv, MBEDTLS_AES_BLOCK_SIZE); /*(must be writable)*/
-
-    mbedtls_aes_context ctx;
-    mbedtls_aes_init(&ctx);
-    int ret = (mode == MBEDTLS_AES_ENCRYPT
-               ? mbedtls_aes_setkey_enc(&ctx, key, 128)
-               : mbedtls_aes_setkey_dec(&ctx, key, 128))
-           || mbedtls_aes_crypt_cbc(&ctx, mode, data_len, ivec, data, data);
-    mbedtls_aes_free(&ctx);
-    return ret ? -1 : 0;
+    return crypto_backend_aes_128_cbc_oper(key, iv, data, data_len, mode);
 }
-
-#endif
 
 int aes_128_cbc_encrypt(const u8 *key, const u8 *iv, u8 *data, size_t data_len)
 {
@@ -3032,6 +2626,9 @@ size_t crypto_ecdh_prime_len(struct crypto_ecdh *ecdh)
 
 #include <mbedtls/ecp.h>
 
+int mbedtls_ecp_muladd(mbedtls_ecp_group *grp, mbedtls_ecp_point *R,
+                       const mbedtls_mpi *m, const mbedtls_ecp_point *P,
+                       const mbedtls_mpi *n, const mbedtls_ecp_point *Q);
 
 #if 0
 /**
@@ -4149,6 +3746,8 @@ void crypto_ec_point_debug_print(const struct crypto_ec *e,
 #endif
 
 
+#ifdef CRYPTO_MBEDTLS_CRYPTO_EC_KEY
+
 struct crypto_ec_key * crypto_ec_key_parse_priv(const u8 *der, size_t der_len)
 {
     mbedtls_pk_context *ctx = os_malloc(sizeof(*ctx));
@@ -4829,6 +4428,8 @@ void crypto_ec_key_debug_print(const struct crypto_ec_key *key,
 
 #endif /* CRYPTO_MBEDTLS_CRYPTO_EC_DPP */
 
+#endif /* CRYPTO_MBEDTLS_CRYPTO_EC_KEY */
+
 #endif /* CRYPTO_MBEDTLS_CRYPTO_EC */
 
 
@@ -5403,9 +5004,3 @@ struct wpabuf * hpke_base_open(enum hpke_kem_id kem_id,
 }
 
 #endif
-
-
-
-
-
-

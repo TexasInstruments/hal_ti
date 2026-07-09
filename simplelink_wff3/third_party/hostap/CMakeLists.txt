@@ -4,6 +4,15 @@ zephyr_compile_options(
   --include=ti_config/build_configs.h
 )
 
+if(CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA OR CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
+  zephyr_compile_options(
+    --include=ti_config/zephyr_no_eap_tls.h
+  )
+  zephyr_library_sources(
+    src/crypto/tls_none.c
+  )
+endif()
+
 zephyr_library_sources(
   hostapd/eap_register.c
   src/ap/ap_config.c
@@ -61,31 +70,19 @@ zephyr_library_sources(
   src/drivers/drivers.c
   src/eap_common/chap.c
   src/eap_common/eap_common.c
-  src/eap_common/eap_fast_common.c
-  src/eap_common/eap_peap_common.c
-  src/eap_common/eap_teap_common.c
   src/eap_common/eap_wsc_common.c
   src/eap_peer/eap.c
-  src/eap_peer/eap_fast.c
-  src/eap_peer/eap_fast_pac.c
   src/eap_peer/eap_gtc.c
   src/eap_peer/eap_leap.c
   src/eap_peer/eap_md5.c
   src/eap_peer/eap_methods.c
   src/eap_peer/eap_mschapv2.c
   src/eap_peer/eap_otp.c
-  src/eap_peer/eap_peap.c
-  src/eap_peer/eap_teap.c
-  src/eap_peer/eap_teap_pac.c
-  src/eap_peer/eap_tls.c
-  src/eap_peer/eap_tls_common.c
-  src/eap_peer/eap_ttls.c
   src/eap_peer/eap_wsc.c
   src/eap_peer/mschapv2.c
   src/eap_server/eap_server.c
   src/eap_server/eap_server_identity.c
   src/eap_server/eap_server_methods.c
-  src/eap_server/eap_server_teap.c
   src/eap_server/eap_server_wsc.c
   src/eapol_auth/eapol_auth_sm.c
   src/eapol_supp/eapol_supp_sm.c
@@ -148,6 +145,24 @@ zephyr_library_sources(
   wpa_supplicant/wpas_glue.c
   wpa_supplicant/wps_supplicant.c
 )
+
+if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA AND
+   NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
+  zephyr_library_sources(
+    src/eap_common/eap_fast_common.c
+    src/eap_common/eap_peap_common.c
+    src/eap_common/eap_teap_common.c
+    src/eap_peer/eap_fast.c
+    src/eap_peer/eap_fast_pac.c
+    src/eap_peer/eap_peap.c
+    src/eap_peer/eap_teap.c
+    src/eap_peer/eap_teap_pac.c
+    src/eap_peer/eap_tls.c
+    src/eap_peer/eap_tls_common.c
+    src/eap_peer/eap_ttls.c
+    src/eap_server/eap_server_teap.c
+  )
+endif()
 
 zephyr_include_directories(
   .

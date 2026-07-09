@@ -17,7 +17,10 @@ if(CONFIG_WIFI_TI_CC35XX)
   add_subdirectory(source/ti/drivers/net/wifi/wifi_host_driver)
   add_subdirectory(source/ti/drivers/net/wifi/wifi_platform/cc35xx)
   add_subdirectory(third_party/hostap)
-  add_subdirectory(third_party/mbedtls)
+  if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA AND
+     NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
+    add_subdirectory(third_party/mbedtls)
+  endif()
   add_subdirectory(source/ti/net/wifi_stack)
   add_subdirectory(source/ti/net/ble_interface)
 endif()
@@ -90,10 +93,14 @@ if(CONFIG_HAS_CC35XX_SDK)
         third_party/mbedtls/include
         third_party/mbedtls/ti/configs
       )
-      zephyr_library_compile_definitions(
-        ENABLE_KEY_STORAGE=1
-        MBEDTLS_CONFIG_FILE="mbedtls_ti_config.h"
-      )
+      zephyr_library_compile_definitions(ENABLE_KEY_STORAGE=1)
+      if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA AND
+         NOT CONFIG_PSA_CRYPTO_DRIVER_CC35XX AND
+         NOT CONFIG_MBEDTLS_PSA_CRYPTO_C)
+        zephyr_library_compile_definitions(
+          MBEDTLS_CONFIG_FILE="mbedtls_ti_config.h"
+        )
+      endif()
       zephyr_library_sources(
         third_party/hsmddk/include/Integration/HSMSAL/HSMSAL.c
         third_party/hsmddk/include/Integration/Adapter_DriverInit/Driver/src/adapter_init.c
