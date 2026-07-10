@@ -68,7 +68,29 @@ extern const uint_least8_t              CONFIG_ECDH_0_CONST;
 
 #define RNG_POOL_BYTE_SIZE 
 
+/*
+ *  ======== RCL ========
+ */
+#include <stdint.h>
 
+#ifndef RCL_REGULATORY_DOMAIN_ETSI
+#define RCL_REGULATORY_DOMAIN_ETSI     0x01
+#endif
+#ifndef RCL_REGULATORY_DOMAIN_FCC
+#define RCL_REGULATORY_DOMAIN_FCC      0x02
+#endif
+#ifndef RCL_REGULATORY_DOMAIN_MIIT
+#define RCL_REGULATORY_DOMAIN_MIIT     0x04
+#endif
+
+#if defined(CONFIG_RCL_REGULATORY_DOMAIN_RUNTIME_MODIFIABLE)
+extern uint8_t rclRegulatoryMask;
+#endif
+
+#if defined(CONFIG_RCL_COEX_RUNTIME_MODIFIABLE)
+#include <ti/drivers/rcl/LRF.h>
+extern LRF_CoexConfiguration lrfCoexConfiguration;
+#endif
 
 /*
  *  ======== Board_init ========

@@ -19,7 +19,7 @@ config RCL_DRIVER
 
 config RCL_DRIVER_INTERNAL
 	bool "Internal RCL driver source path (dev/test only)"
-	depends on HAS_CC23X0_SDK || HAS_CC27XXX20_SDK || HAS_CC27XXX20_SDK
+	depends on HAS_CC23X0_SDK || HAS_CC27XXX10_SDK || HAS_CC27XXX20_SDK
 	depends on !RCL_DRIVER
 	default n
 	help
