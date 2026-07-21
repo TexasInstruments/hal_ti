@@ -142,9 +142,9 @@ bool OPT_LL_PAwRS_IsACADPAwR(uint8_t* pACAD)
     return LL_PAwRS_IsACADPAwR(pACAD);
 }
 
-void OPT_LL_PAwRS_Activate(uint8_t* pPAwRParams)
+void OPT_LL_PAwRS_Activate(uint8_t* pPAwRParams, uint32_t padvRxRfDelay)
 {
-    LL_PAwRS_Activate(pPAwRParams);
+    LL_PAwRS_Activate(pPAwRParams, padvRxRfDelay);
 }
 
 void OPT_LL_PAwRS_PostProcess(const llPAwRSPostProcessIn_t* in, llPAwRSPostProcessOut_t* out, uint8_t* pPAwRParams)

@@ -252,6 +252,7 @@ typedef struct
   syncParams_t                        syncParams;            // Struct that holds subevent list and the sync params.
   uint32_t                            lastStartTime;         // Start Time of the last subevent
   uint16_t                            lastEvent;             // Number of last Event that was proccessed
+  uint32_t                            rfRxDelay;             // RCL start time delay from periodic scanner command
   rspNode_t                           *pRspDataHead;         // Linked list of response data info
 } llPAwRParamsSet_t;
 
@@ -350,8 +351,9 @@ uint8_t LL_PAwRS_InitSet(uint8_t **pPAwRParams, uint8_t* pPAwRSyncInfoData, uint
  *              default list (Sync to subevent 0).
  *
  * @param       pPAwRParams - Pointer to PAwR params set.
+ * @param       rfRxDelay   - RF receive delay.
  */
-void LL_PAwRS_Activate(uint8_t* pPAwRParams);
+void LL_PAwRS_Activate(uint8_t* pPAwRParams, uint32_t rfRxDelay);
 
 /*******************************************************************************
  * @fn          LL_PAwRS_GetSubeventNum
