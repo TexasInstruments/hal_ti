@@ -42,3 +42,12 @@ config BT_TI_SWAT_TEST_MODE
 	  customer applications.
 
 	  Default: n (disabled)
+
+config BT_CTLR_TI_LL_QUAL
+	bool "TI BLE Controller Link Layer Qualification Test Mode"
+	default n
+	help
+	  Enable the TI BLE controller build configuration used for Bluetooth
+	  SIG Link Layer qualification testing.
+
+	  Default: n (disabled)
