@@ -43,10 +43,17 @@
 #include <cc33xx_fw_blobs.h>
 #endif /* CONFIG_WIFI_TI_CC33XX */
 
-#define FW_SLOT1_DEV    FIXED_PARTITION_DEVICE(wifi_fw_slot1_partition)
-#define FW_SLOT1_OFFSET FIXED_PARTITION_OFFSET(wifi_fw_slot1_partition)
-#define FW_SLOT2_DEV    FIXED_PARTITION_DEVICE(wifi_fw_slot2_partition)
-#define FW_SLOT2_OFFSET FIXED_PARTITION_OFFSET(wifi_fw_slot2_partition)
+/* Zephyr 3.7 exposes only the legacy FIXED_PARTITION_* helpers. */
+#if !defined(PARTITION_DEVICE)
+#define PARTITION_DEVICE(label) FIXED_PARTITION_DEVICE(label)
+#define PARTITION_OFFSET(label) FIXED_PARTITION_OFFSET(label)
+#define PARTITION_SIZE(label)   FIXED_PARTITION_SIZE(label)
+#endif
+
+#define FW_SLOT1_DEV    PARTITION_DEVICE(wifi_fw_slot1_partition)
+#define FW_SLOT1_OFFSET PARTITION_OFFSET(wifi_fw_slot1_partition)
+#define FW_SLOT2_DEV    PARTITION_DEVICE(wifi_fw_slot2_partition)
+#define FW_SLOT2_OFFSET PARTITION_OFFSET(wifi_fw_slot2_partition)
 
 LOG_MODULE_REGISTER(osi_filesystem, CONFIG_LOG_DEFAULT_LEVEL);
 
@@ -248,7 +255,7 @@ static void osi_conf_flash_init(void)
 	gpeTlvManifestHeader_t tlv_mhdr;
 	uint32_t manifest_offset, conf_tlv_offset;
 
-	dev = FIXED_PARTITION_DEVICE(vendor_image_partition);
+	dev = PARTITION_DEVICE(vendor_image_partition);
 	if (!device_is_ready(dev)) {
 		LOG_ERR("vendor_image flash not ready");
 		return;
@@ -289,13 +296,13 @@ static int osi_nvs_init(void)
 	osi_conf_flash_init();
 #endif /* CONFIG_HAS_CC35XX_SDK */
 
-	wifi_nvs.flash_device = FIXED_PARTITION_DEVICE(wifi_nvs_partition);
+	wifi_nvs.flash_device = PARTITION_DEVICE(wifi_nvs_partition);
 	if (!device_is_ready(wifi_nvs.flash_device)) {
 		LOG_ERR("NVS flash device not ready");
 		return -ENODEV;
 	}
 
-	wifi_nvs.offset = FIXED_PARTITION_OFFSET(wifi_nvs_partition);
+	wifi_nvs.offset = PARTITION_OFFSET(wifi_nvs_partition);
 
 	rc = flash_get_page_info_by_offs(wifi_nvs.flash_device, wifi_nvs.offset,
 					 &info);
@@ -305,7 +312,7 @@ static int osi_nvs_init(void)
 	}
 
 	wifi_nvs.sector_size = info.size;
-	wifi_nvs.sector_count = FIXED_PARTITION_SIZE(wifi_nvs_partition) / info.size;
+	wifi_nvs.sector_count = PARTITION_SIZE(wifi_nvs_partition) / info.size;
 
 	rc = nvs_mount(&wifi_nvs);
 	if (rc) {
@@ -474,7 +481,7 @@ size_t ATTRIBUTE osi_fread(void *_ptr, size_t len, size_t offset, FILE *_fp)
 			return 0;
 		}
 		ret = flash_read(
-			FIXED_PARTITION_DEVICE(vendor_image_partition),
+			PARTITION_DEVICE(vendor_image_partition),
 			conf_flash_offset + offset, _ptr, len);
 		if (ret < 0) {
 			LOG_ERR("Conf flash read failed: %d", ret);
