@@ -84,7 +84,9 @@ if(CONFIG_HAS_CC35XX_SDK)
       source/ti/drivers/utils/List.c
     )
     if(CONFIG_TI_CC35XX_HSM)
-      zephyr_include_directories(
+      # TI HSM sources are provided by the SDK and are not warning-clean with -Werror.
+      zephyr_library_compile_options(-Wno-error)
+      zephyr_library_include_directories(
         third_party/mbedtls/include
         third_party/mbedtls/ti/configs
       )
