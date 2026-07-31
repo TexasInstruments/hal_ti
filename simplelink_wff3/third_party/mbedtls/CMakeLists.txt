@@ -122,4 +122,5 @@ zephyr_library_include_directories(
 	include
 	include/psa
 	include/mbedtls
+	../hsmddk/include/Integration/Adapter_PSA/incl
 )
