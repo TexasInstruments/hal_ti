@@ -37,6 +37,7 @@
 #include <mbedtls/platform_util.h> /* mbedtls_platform_zeroize() */
 #include <mbedtls/asn1.h>
 #include <mbedtls/asn1write.h>
+#include <zephyr/random/random.h>
 #if defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR_PSA) || \
     defined(TI_WIFI_CRYPTO_BACKEND_ZEPHYR_MBEDTLS)
 #define TI_WIFI_CRYPTO_BACKEND_ZEPHYR
@@ -52,7 +53,6 @@
 #include <mbedtls/ssl.h>
 #include <psa/crypto.h>       /* For PSA Crypto API */
 #include "mbedtls/md.h"
-#include "crypto_backend.h"
 
 
 
@@ -71,6 +71,183 @@
 #include "sha384.h"
 #include "sha512.h"
 
+#ifndef MBEDTLS_AES_BLOCK_SIZE
+#define MBEDTLS_AES_BLOCK_SIZE 16
+#endif
+
+static int crypto_zephyr_get_random(unsigned char *rand_buf, size_t rand_len)
+{
+    return sys_csrand_get(rand_buf, rand_len) ? -1 : 0;
+}
+
+static void *aes_crypt_init_mode(const uint8_t *key, size_t len, int mode)
+{
+    mbedtls_aes_context *aes = os_malloc(sizeof(*aes));
+
+    if (!aes)
+        return NULL;
+
+    mbedtls_aes_init(aes);
+    if ((mode == MBEDTLS_AES_ENCRYPT ?
+         mbedtls_aes_setkey_enc(aes, key, len * 8) :
+         mbedtls_aes_setkey_dec(aes, key, len * 8)) == 0)
+        return aes;
+
+    mbedtls_aes_free(aes);
+    os_free(aes);
+    return NULL;
+}
+
+static void *crypto_zephyr_aes_encrypt_init(const uint8_t *key, size_t len)
+{
+    return aes_crypt_init_mode(key, len, MBEDTLS_AES_ENCRYPT);
+}
+
+static int crypto_zephyr_aes_encrypt(void *ctx, const uint8_t *plain,
+                                      uint8_t *crypt)
+{
+    return mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, plain, crypt);
+}
+
+static void crypto_zephyr_aes_encrypt_deinit(void *ctx)
+{
+    if (!ctx)
+        return;
+
+    mbedtls_aes_free(ctx);
+    os_free(ctx);
+}
+
+static void *crypto_zephyr_aes_decrypt_init(const uint8_t *key, size_t len)
+{
+    return aes_crypt_init_mode(key, len, MBEDTLS_AES_DECRYPT);
+}
+
+static int crypto_zephyr_aes_decrypt(void *ctx, const uint8_t *crypt,
+                                      uint8_t *plain)
+{
+    return mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_DECRYPT, crypt, plain);
+}
+
+static void crypto_zephyr_aes_decrypt_deinit(void *ctx)
+{
+    if (!ctx)
+        return;
+
+    mbedtls_aes_free(ctx);
+    os_free(ctx);
+}
+
+static int crypto_zephyr_aes_128_cbc_oper(const uint8_t *key,
+                                           const uint8_t *iv, uint8_t *data,
+                                           size_t data_len, int mode)
+{
+    unsigned char ivec[MBEDTLS_AES_BLOCK_SIZE];
+    mbedtls_aes_context ctx;
+    int ret;
+
+    os_memcpy(ivec, iv, MBEDTLS_AES_BLOCK_SIZE);
+
+    mbedtls_aes_init(&ctx);
+    ret = (mode == MBEDTLS_AES_ENCRYPT ?
+           mbedtls_aes_setkey_enc(&ctx, key, 128) :
+           mbedtls_aes_setkey_dec(&ctx, key, 128)) ||
+          mbedtls_aes_crypt_cbc(&ctx, mode, data_len, ivec, data, data);
+    mbedtls_aes_free(&ctx);
+
+    return ret ? -1 : 0;
+}
+
+static int crypto_zephyr_aes_ctr_encrypt(const uint8_t *key, size_t key_len,
+                                          const uint8_t *nonce, uint8_t *data,
+                                          size_t data_len)
+{
+    unsigned char counter[MBEDTLS_AES_BLOCK_SIZE];
+    unsigned char stream_block[MBEDTLS_AES_BLOCK_SIZE];
+    mbedtls_aes_context ctx;
+    size_t nc_off = 0;
+    int ret;
+
+    os_memcpy(counter, nonce, sizeof(counter));
+
+    mbedtls_aes_init(&ctx);
+    ret = mbedtls_aes_setkey_enc(&ctx, key, key_len * 8) ||
+          mbedtls_aes_crypt_ctr(&ctx, data_len, &nc_off, counter,
+                                stream_block, data, data);
+    os_memset(stream_block, 0, sizeof(stream_block));
+    mbedtls_aes_free(&ctx);
+
+    return ret ? -1 : 0;
+}
+
+static int crypto_zephyr_pbkdf2_sha1_f(const char *passphrase,
+                                        const uint8_t *ssid, size_t ssid_len,
+                                        int iterations, unsigned int count,
+                                        uint8_t *digest)
+{
+    uint8_t tmp[SHA1_MAC_LEN];
+    uint8_t tmp2[SHA1_MAC_LEN];
+    uint8_t count_buf[4];
+    const uint8_t *addr[2];
+    size_t len[2];
+    size_t passphrase_len = os_strlen(passphrase);
+    int i;
+    int j;
+
+    addr[0] = ssid;
+    len[0] = ssid_len;
+    addr[1] = count_buf;
+    len[1] = sizeof(count_buf);
+
+    count_buf[0] = (count >> 24) & 0xff;
+    count_buf[1] = (count >> 16) & 0xff;
+    count_buf[2] = (count >> 8) & 0xff;
+    count_buf[3] = count & 0xff;
+    if (hmac_sha1_vector((uint8_t *)passphrase, passphrase_len, 2, addr,
+                         len, tmp))
+        return -1;
+
+    os_memcpy(digest, tmp, SHA1_MAC_LEN);
+
+    for (i = 1; i < iterations; i++) {
+        if (hmac_sha1((uint8_t *)passphrase, passphrase_len, tmp,
+                      SHA1_MAC_LEN, tmp2))
+            return -1;
+
+        os_memcpy(tmp, tmp2, SHA1_MAC_LEN);
+        for (j = 0; j < SHA1_MAC_LEN; j++)
+            digest[j] ^= tmp2[j];
+    }
+
+    return 0;
+}
+
+static int crypto_zephyr_pbkdf2_sha1(const char *passphrase,
+                                      const uint8_t *ssid, size_t ssid_len,
+                                      int iterations, uint8_t *buf,
+                                      size_t buflen)
+{
+    unsigned int count = 0;
+    uint8_t digest[SHA1_MAC_LEN];
+    uint8_t *pos = buf;
+    size_t left = buflen;
+    size_t plen;
+
+    while (left > 0) {
+        count++;
+        if (crypto_zephyr_pbkdf2_sha1_f(passphrase, ssid, ssid_len,
+                                         iterations, count, digest))
+            return -1;
+
+        plen = left > SHA1_MAC_LEN ? SHA1_MAC_LEN : left;
+        os_memcpy(pos, digest, plen);
+        pos += plen;
+        left -= plen;
+    }
+
+    return 0;
+}
+
 int sha384_prf_bits(const u8 *key, size_t key_len, const char *label,
             const u8 *data, size_t data_len, u8 *buf,
             size_t buf_len_bits);
@@ -78,7 +255,7 @@ int sha384_prf_bits(const u8 *key, size_t key_len, const char *label,
 int crypto_psa_get_random(void *params, unsigned char *randBuff, size_t randLen)
 {
     (void)params;
-    return crypto_backend_get_random(randBuff, randLen);
+    return crypto_zephyr_get_random(randBuff, randLen);
 }
 
 
@@ -90,7 +267,7 @@ static mbedtls_ctr_drbg_context * ctr_drbg_init(void)
 #ifdef CRYPTO_MBEDTLS_CONFIG_FIPS
 int crypto_get_random(void *buf, size_t len)
 {
-    return crypto_backend_get_random(buf, len);
+    return crypto_zephyr_get_random(buf, len);
 }
 #endif
 
@@ -1225,13 +1402,6 @@ int sha512_prf(const u8 *key, size_t key_len, const char *label,
     return hmac_prf_bits(key, key_len, label, data, data_len, buf,
                          buf_len * 8, MBEDTLS_MD_SHA512);
 }
-
-//int sha384_prf(const u8 *key, size_t key_len, const char *label,
-//               const u8 *data, size_t data_len, u8 *buf, size_t buf_len)
-//{
-//    return hmac_prf_bits(key, key_len, label, data, data_len, buf,
-//                         buf_len * 8, MBEDTLS_MD_SHA384);
-//}
 #endif
 
 #ifdef MBEDTLS_SHA256_C
@@ -1266,39 +1436,39 @@ int sha256_prf_bits(const u8 *key, size_t key_len, const char *label,
 int pbkdf2_sha1(const char *passphrase, const u8 *ssid, size_t ssid_len,
                 int iterations, u8 *buf, size_t buflen)
 {
-    return crypto_backend_pbkdf2_sha1(passphrase, ssid, ssid_len,
+    return crypto_zephyr_pbkdf2_sha1(passphrase, ssid, ssid_len,
                                       iterations, buf, buflen);
 }
 #endif
 
 void *aes_encrypt_init(const u8 *key, size_t len)
 {
-    return crypto_backend_aes_encrypt_init(key, len);
+    return crypto_zephyr_aes_encrypt_init(key, len);
 }
 
 int aes_encrypt(void *ctx, const u8 *plain, u8 *crypt)
 {
-    return crypto_backend_aes_encrypt(ctx, plain, crypt);
+    return crypto_zephyr_aes_encrypt(ctx, plain, crypt);
 }
 
 void aes_encrypt_deinit(void *ctx)
 {
-    crypto_backend_aes_encrypt_deinit(ctx);
+    crypto_zephyr_aes_encrypt_deinit(ctx);
 }
 
 void *aes_decrypt_init(const u8 *key, size_t len)
 {
-    return crypto_backend_aes_decrypt_init(key, len);
+    return crypto_zephyr_aes_decrypt_init(key, len);
 }
 
 int aes_decrypt(void *ctx, const u8 *crypt, u8 *plain)
 {
-    return crypto_backend_aes_decrypt(ctx, crypt, plain);
+    return crypto_zephyr_aes_decrypt(ctx, crypt, plain);
 }
 
 void aes_decrypt_deinit(void *ctx)
 {
-    crypto_backend_aes_decrypt_deinit(ctx);
+    crypto_zephyr_aes_decrypt_deinit(ctx);
 }
 
 #include "aes_wrap.h"
@@ -1436,12 +1606,12 @@ int aes_128_encrypt_block(const u8 *key, const u8 *in, u8 *out)
     if (TEST_FAIL())
         return -1;
 
-    ctx = crypto_backend_aes_encrypt_init(key, 16);
+    ctx = crypto_zephyr_aes_encrypt_init(key, 16);
     if (ctx == NULL)
         return -1;
 
-    ret = crypto_backend_aes_encrypt(ctx, in, out);
-    crypto_backend_aes_encrypt_deinit(ctx);
+    ret = crypto_zephyr_aes_encrypt(ctx, in, out);
+    crypto_zephyr_aes_encrypt_deinit(ctx);
 
     return ret;
 }
@@ -1454,7 +1624,7 @@ int aes_ctr_encrypt(const u8 *key, size_t key_len, const u8 *nonce,
     if (TEST_FAIL())
         return -1;
 
-    return crypto_backend_aes_ctr_encrypt(key, key_len, nonce, data, data_len);
+    return crypto_zephyr_aes_ctr_encrypt(key, key_len, nonce, data, data_len);
 }
 
 int aes_128_ctr_encrypt(const u8 *key, const u8 *nonce,
@@ -1467,7 +1637,7 @@ int aes_128_ctr_encrypt(const u8 *key, const u8 *nonce,
 static int aes_128_cbc_oper(const u8 *key, const u8 *iv,
                             u8 *data, size_t data_len, int mode)
 {
-    return crypto_backend_aes_128_cbc_oper(key, iv, data, data_len, mode);
+    return crypto_zephyr_aes_128_cbc_oper(key, iv, data, data_len, mode);
 }
 
 int aes_128_cbc_encrypt(const u8 *key, const u8 *iv, u8 *data, size_t data_len)
@@ -1960,7 +2130,7 @@ int crypto_bignum_legendre(const struct crypto_bignum *a,
 #endif /* CRYPTO_MBEDTLS_CRYPTO_BIGNUM */
 
 
-#ifdef CRYPTO_MBEDTLS_CRYPTO_DH
+#if defined(CRYPTO_MBEDTLS_CRYPTO_DH) && MBEDTLS_VERSION_NUMBER < 0x04000000
 
 /* crypto_internal-modexp.c */
 
@@ -2283,7 +2453,129 @@ void dh5_free(void *ctx)
 }
 #endif // 0
 
-#endif /* CRYPTO_MBEDTLS_CRYPTO_DH */
+#endif /* CRYPTO_MBEDTLS_CRYPTO_DH && mbedTLS < 4 */
+
+#if defined(CRYPTO_MBEDTLS_CRYPTO_DH) && MBEDTLS_VERSION_NUMBER >= 0x04000000
+
+#include <mbedtls/bignum.h>
+
+static int crypto_mbedtls_mod_exp(const u8 *base, size_t base_len,
+				  const u8 *power, size_t power_len,
+				  const u8 *modulus, size_t modulus_len,
+				  u8 *result, size_t *result_len)
+{
+	mbedtls_mpi bn_base;
+	mbedtls_mpi bn_exp;
+	mbedtls_mpi bn_modulus;
+	mbedtls_mpi bn_result;
+	size_t len;
+	int ret = -1;
+
+	mbedtls_mpi_init(&bn_base);
+	mbedtls_mpi_init(&bn_exp);
+	mbedtls_mpi_init(&bn_modulus);
+	mbedtls_mpi_init(&bn_result);
+
+	if (mbedtls_mpi_read_binary(&bn_base, base, base_len) ||
+	    mbedtls_mpi_read_binary(&bn_exp, power, power_len) ||
+	    mbedtls_mpi_read_binary(&bn_modulus, modulus, modulus_len) ||
+	    mbedtls_mpi_exp_mod(&bn_result, &bn_base, &bn_exp, &bn_modulus, NULL)) {
+		goto out;
+	}
+
+	len = mbedtls_mpi_size(&bn_result);
+	if (len > *result_len || mbedtls_mpi_write_binary(&bn_result, result, len)) {
+		goto out;
+	}
+
+	*result_len = len;
+	ret = 0;
+
+out:
+	mbedtls_mpi_free(&bn_base);
+	mbedtls_mpi_free(&bn_exp);
+	mbedtls_mpi_free(&bn_modulus);
+	mbedtls_mpi_free(&bn_result);
+	return ret;
+}
+
+int crypto_dh_init(u8 generator, const u8 *prime, size_t prime_len, u8 *privkey,
+		   u8 *pubkey)
+{
+	size_t pubkey_len = prime_len;
+	size_t pad;
+
+	if (TEST_FAIL() || os_get_random(privkey, prime_len) < 0) {
+		return -1;
+	}
+
+	if (os_memcmp(privkey, prime, prime_len) > 0) {
+		privkey[0] = 0;
+	}
+
+	if (crypto_mbedtls_mod_exp(&generator, 1, privkey, prime_len, prime,
+				   prime_len, pubkey, &pubkey_len) < 0) {
+		return -1;
+	}
+
+	if (pubkey_len < prime_len) {
+		pad = prime_len - pubkey_len;
+		os_memmove(pubkey + pad, pubkey, pubkey_len);
+		os_memset(pubkey, 0, pad);
+	}
+
+	return 0;
+}
+
+int crypto_dh_derive_secret(u8 generator, const u8 *prime, size_t prime_len,
+			    const u8 *order, size_t order_len,
+			    const u8 *privkey, size_t privkey_len,
+			    const u8 *pubkey, size_t pubkey_len,
+			    u8 *secret, size_t *len)
+{
+	mbedtls_mpi peer;
+	mbedtls_mpi group_order;
+	mbedtls_mpi modulus;
+	mbedtls_mpi result;
+	int ret = -1;
+
+	(void)generator;
+
+	if (TEST_FAIL() || pubkey_len > prime_len ||
+	    (pubkey_len == prime_len && os_memcmp(pubkey, prime, prime_len) >= 0)) {
+		return -1;
+	}
+
+	mbedtls_mpi_init(&peer);
+	mbedtls_mpi_init(&group_order);
+	mbedtls_mpi_init(&modulus);
+	mbedtls_mpi_init(&result);
+
+	if (mbedtls_mpi_read_binary(&peer, pubkey, pubkey_len) ||
+	    mbedtls_mpi_cmp_int(&peer, 1) <= 0) {
+		goto out;
+	}
+
+	if (order != NULL &&
+	    (mbedtls_mpi_read_binary(&modulus, prime, prime_len) ||
+	     mbedtls_mpi_read_binary(&group_order, order, order_len) ||
+	     mbedtls_mpi_exp_mod(&result, &peer, &group_order, &modulus, NULL) ||
+	     mbedtls_mpi_cmp_int(&result, 1) != 0)) {
+		goto out;
+	}
+
+	ret = crypto_mbedtls_mod_exp(pubkey, pubkey_len, privkey, privkey_len,
+				     prime, prime_len, secret, len);
+
+out:
+	mbedtls_mpi_free(&peer);
+	mbedtls_mpi_free(&group_order);
+	mbedtls_mpi_free(&modulus);
+	mbedtls_mpi_free(&result);
+	return ret;
+}
+
+#endif /* CRYPTO_MBEDTLS_CRYPTO_DH && mbedTLS >= 4 */
 
 
 #if defined(CRYPTO_MBEDTLS_CRYPTO_ECDH) || defined(CRYPTO_MBEDTLS_CRYPTO_EC)

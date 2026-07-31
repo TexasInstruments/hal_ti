@@ -14,11 +14,15 @@ endfunction()
 
 add_subdirectory(source/ti/devices)
 if(CONFIG_WIFI_TI_CC35XX)
+  if(CONFIG_WIFI_TI_CC35XX_USE_TI_MBEDTLS AND CONFIG_MBEDTLS)
+    message(FATAL_ERROR
+      "TI SDK mbedTLS cannot be linked with Zephyr mbedTLS; select the Zephyr Wi-Fi platform instead")
+  endif()
+
   add_subdirectory(source/ti/drivers/net/wifi/wifi_host_driver)
   add_subdirectory(source/ti/drivers/net/wifi/wifi_platform/cc35xx)
   add_subdirectory(third_party/hostap)
-  if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA AND
-     NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
+  if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
     add_subdirectory(third_party/mbedtls)
   endif()
   add_subdirectory(source/ti/net/wifi_stack)
@@ -74,10 +78,6 @@ if(CONFIG_HAS_CC35XX_SDK)
       source/ti/drivers/dma/DMAWFF3.c
       source/ti/devices/cc35xx/driverlib/dma.c
       source/ti/drivers/power/PowerWFF3.c
-      source/ti/drivers/cryptoutils/hsm/HSMXXF3.c
-      source/ti/drivers/cryptoutils/sharedresources/HSMResourceXXF3.c
-      source/ti/drivers/cryptoutils/sharedresources/CommonResourceXXF3.c
-
       source/ti/drivers/xmem/flash/FlashWFF3.c
       source/ti/drivers/xmem/XMEMWFF3.c
       source/ti/devices/cc35xx/driverlib/xip.c
@@ -94,14 +94,16 @@ if(CONFIG_HAS_CC35XX_SDK)
         third_party/mbedtls/ti/configs
       )
       zephyr_library_compile_definitions(ENABLE_KEY_STORAGE=1)
-      if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA AND
-         NOT CONFIG_PSA_CRYPTO_DRIVER_CC35XX AND
+      if(NOT CONFIG_PSA_CRYPTO_DRIVER_CC35XX AND
          NOT CONFIG_MBEDTLS_PSA_CRYPTO_C)
         zephyr_library_compile_definitions(
           MBEDTLS_CONFIG_FILE="mbedtls_ti_config.h"
         )
       endif()
       zephyr_library_sources(
+        source/ti/drivers/cryptoutils/hsm/HSMXXF3.c
+        source/ti/drivers/cryptoutils/sharedresources/HSMResourceXXF3.c
+        source/ti/drivers/cryptoutils/sharedresources/CommonResourceXXF3.c
         third_party/hsmddk/include/Integration/HSMSAL/HSMSAL.c
         third_party/hsmddk/include/Integration/Adapter_DriverInit/Driver/src/adapter_init.c
         third_party/hsmddk/include/Integration/Adapter_DriverInit/Driver/src/adapter_driver_init.c

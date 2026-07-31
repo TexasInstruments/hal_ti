@@ -4,7 +4,7 @@ zephyr_compile_options(
   --include=ti_config/build_configs.h
 )
 
-if(CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA OR CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
+if(CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
   zephyr_compile_options(
     --include=ti_config/zephyr_no_eap_tls.h
   )
@@ -146,8 +146,7 @@ zephyr_library_sources(
   wpa_supplicant/wps_supplicant.c
 )
 
-if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_PSA AND
-   NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
+if(NOT CONFIG_WIFI_TI_CC35XX_USE_ZEPHYR_MBEDTLS)
   zephyr_library_sources(
     src/eap_common/eap_fast_common.c
     src/eap_common/eap_peap_common.c
