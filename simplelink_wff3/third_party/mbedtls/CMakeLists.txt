@@ -2,7 +2,7 @@ zephyr_library()
 zephyr_library_compile_options(
 	-UMBEDTLS_CONFIG_FILE
 	-UTF_PSA_CRYPTO_CONFIG_FILE
-	-DMBEDTLS_CONFIG_FILE="mbedtls_ti_config.h"
+	-DMBEDTLS_CONFIG_FILE="mbedtls_ti_hsm_zephyr_config.h"
 )
 
 zephyr_library_sources(
@@ -78,8 +78,6 @@ zephyr_library_sources(
 	library/psa_crypto_rsa.c
 	library/psa_crypto_se.c
 	library/psa_crypto_slot_management.c
-	library/psa_crypto_storage.c
-	library/psa_its_file.c
 	library/psa_util.c
 	library/ripemd160.c
 	library/rsa.c
@@ -116,6 +114,13 @@ zephyr_library_sources(
 	library/x509write_csr.c
 	zephyr_entropy.c
 )
+
+if(NOT CONFIG_TI_CC35XX_HSM_PSA_ADAPTER)
+	zephyr_library_sources(
+		library/psa_crypto_storage.c
+		library/psa_its_file.c
+	)
+endif()
 
 zephyr_library_include_directories(
 	ti/configs

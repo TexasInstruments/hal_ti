@@ -179,7 +179,10 @@ HwiP_Handle HwiP_construct(HwiP_Struct *handle, int interruptNum, HwiP_Fxn hwiFx
         default:
             return (handle);
     }
-    irq_enable(interruptNum - 16);
+    if (params == NULL || params->enableInt)
+    {
+        irq_enable(interruptNum - 16);
+    }
 
     obj->intNum = interruptNum;
 
@@ -190,6 +193,7 @@ void HwiP_Params_init(HwiP_Params *params)
 {
     params->arg      = 0;
     params->priority = ~0;
+    params->enableInt = true;
 }
 
 void HwiP_clearInterrupt(int interruptNum)

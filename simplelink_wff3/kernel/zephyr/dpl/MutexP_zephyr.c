@@ -42,8 +42,23 @@ static struct k_mutex *dpl_mutex_pool_alloc()
 
 static MutexP_Status dpl_mutex_pool_free(struct k_mutex *mutex)
 {
-    k_mem_slab_free(&mutex_slab, (void **)&mutex);
-    return MutexP_OK;
+	k_mem_slab_free(&mutex_slab, (void **)&mutex);
+	return MutexP_OK;
+}
+
+MutexP_Handle MutexP_construct(MutexP_Struct *handle, MutexP_Params *params)
+{
+	struct k_mutex *mutex = (struct k_mutex *)handle;
+
+	ARG_UNUSED(params);
+	k_mutex_init(mutex);
+
+	return mutex;
+}
+
+void MutexP_destruct(MutexP_Struct *mutex)
+{
+	ARG_UNUSED(mutex);
 }
 
 MutexP_Handle MutexP_create(MutexP_Params *params)

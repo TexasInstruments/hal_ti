@@ -311,9 +311,7 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t cnt)
 {
-    uint32_t fapi_status;
     uint32_t status;
-    uintptr_t key;
 
     /* Conversion between data items and bytes */
     cnt *= data_width_byte[DriverCapabilities.data_width];
@@ -325,8 +323,10 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
      * is not necessary to check that the flash area is erased prior to
      * programming.
      */
-    key = HwiP_disable();
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    uint32_t fapi_status;
+    uintptr_t key = HwiP_disable();
+
     fapi_status = FlashProgram((uint8_t *)data, addr, cnt);
 
     HwiP_restore(key);
@@ -339,8 +339,6 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
      * prototype.
      */
     status = XMEMWFF3_write(handle, (addr - FLASH0_DEV->memory_base), (void *)data, cnt, 0);
-
-    HwiP_restore(key);
 #endif
 
     if (status != ARM_DRIVER_OK) {
@@ -356,15 +354,15 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
 static int32_t ARM_Flash_EraseSector(uint32_t addr)
 {
     int32_t status;
-    uintptr_t key;
 
     /*
      * CMSIS -> FAPI -> HAPI (Secure ROM)
      * CC27xx FlashEraseSector handles VIMS cache and line buffer disable/restore
      * automatically.
      */
-    key = HwiP_disable();
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    uintptr_t key = HwiP_disable();
+
     status = translateFAPIStatus(FlashEraseSector(addr));
 
     HwiP_restore(key);
@@ -372,8 +370,6 @@ static int32_t ARM_Flash_EraseSector(uint32_t addr)
     return status;
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
     status = XMEMWFF3_erase(handle, (addr - FLASH0_DEV->memory_base), FLASH0_SECTOR_SIZE);
-
-    HwiP_restore(key);
 
     return status;
 #endif

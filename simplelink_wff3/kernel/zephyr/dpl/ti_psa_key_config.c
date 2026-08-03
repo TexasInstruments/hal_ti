@@ -12,7 +12,8 @@
 const size_t MBEDTLS_KEY_VOLATILE_COUNT = 4;
 const size_t MBEDTLS_KEY_ASSET_STORE_COUNT = 4;
 const size_t MBEDTLS_KEY_PERSISTENT_COUNT = 0;
-const size_t FLASH_KEY_PERSISTENT_COUNT = 0;
+/* The IS25WJ032F key-storage partition holds eight 1600-byte ITS objects. */
+const size_t FLASH_KEY_PERSISTENT_COUNT = 8;
 
 psa_key_context_t gl_PSA_Key[8];
 
