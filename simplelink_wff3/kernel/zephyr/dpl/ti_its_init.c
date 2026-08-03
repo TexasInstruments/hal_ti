@@ -9,8 +9,6 @@
 #include <zephyr/init.h>
 #include <zephyr/kernel.h>
 
-#include <psa/error.h>
-
 #include <third_party/hsmddk/include/Integration/Adapter_ITS/incl/tfm_internal_trusted_storage.h>
 
 #include "ti_its_init.h"

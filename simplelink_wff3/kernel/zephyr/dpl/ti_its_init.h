@@ -7,7 +7,7 @@
 #ifndef TI_ITS_INIT_H_
 #define TI_ITS_INIT_H_
 
-#include <psa/error.h>
+#include <third_party/hsmddk/include/Integration/Adapter_PSA/incl/psa/error.h>
 
 psa_status_t ti_cc35xx_its_status(void);
 psa_status_t ti_cc35xx_its_lock(void);

@@ -14,11 +14,6 @@ endfunction()
 
 add_subdirectory(source/ti/devices)
 if(CONFIG_WIFI_TI_CC35XX)
-  if(CONFIG_WIFI_TI_CC35XX_USE_TI_MBEDTLS AND CONFIG_MBEDTLS)
-    message(FATAL_ERROR
-      "TI SDK mbedTLS cannot be linked with Zephyr mbedTLS; select the Zephyr Wi-Fi platform instead")
-  endif()
-
   add_subdirectory(source/ti/drivers/net/wifi/wifi_host_driver)
   add_subdirectory(source/ti/drivers/net/wifi/wifi_platform/cc35xx)
   add_subdirectory(third_party/hostap)
@@ -127,6 +122,7 @@ if(CONFIG_HAS_CC35XX_SDK)
       if(CONFIG_TI_CC35XX_HSM_ITS)
         zephyr_library_sources(
           kernel/zephyr/dpl/ti_its_init.c
+          kernel/zephyr/dpl/ti_psa_key_config.c
           third_party/hsmddk/include/Integration/Adapter_ITS/src/Driver_Flash.c
           third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash.c
           third_party/hsmddk/include/Integration/Adapter_ITS/src/its_flash_fs.c
@@ -169,7 +165,6 @@ if(CONFIG_HAS_CC35XX_SDK)
           third_party/hsmddk/include/Integration/Adapter_PSA/Adapter_mbedTLS/src/psa_crypto_storage.c
           third_party/hsmddk/include/Integration/Asn1Der/src/asn1der_parse.c
           third_party/hsmddk/include/Integration/Asn1Der/src/asn1der_write.c
-          kernel/zephyr/dpl/ti_psa_key_config.c
           source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
           source/ti/drivers/cryptoutils/cryptokey/CryptoKeyKeyStore_PSA.c
           source/ti/drivers/cryptoutils/cryptokey/CryptoKeyKeyStore_PSA_helpers.c
@@ -189,6 +184,7 @@ if(CONFIG_HAS_CC35XX_SDK)
         source/ti/drivers/ECDH.c
         source/ti/drivers/ECDSA.c
         source/ti/drivers/SHA2.c
+        source/ti/drivers/cryptoutils/cryptokey/CryptoKeyPlaintext.c
         source/ti/drivers/cryptoutils/hsm/HSMXXF3Utility.c
         source/ti/drivers/aesccm/AESCCMXXF3.c
         source/ti/drivers/aesctr/AESCTRXXF3.c

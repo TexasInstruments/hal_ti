@@ -1215,6 +1215,7 @@ static int_fast16_t AESCTRXXF3HSM_oneStepOperation(AESCTR_Handle handle,
  */
 static int_fast16_t AESCTRXXF3HSM_freeAllAssets(AESCTR_Handle handle)
 {
+#if (ENABLE_KEY_STORAGE == 1)
     AESCTRXXF3_Object *object = (AESCTRXXF3_Object *)handle->object;
     int_fast16_t status       = AESCTR_STATUS_SUCCESS;
     KeyStore_PSA_KeyFileId keyID;
@@ -1241,6 +1242,11 @@ static int_fast16_t AESCTRXXF3HSM_freeAllAssets(AESCTR_Handle handle)
     }
 
     return status;
+#else
+    (void)handle;
+
+    return AESCTR_STATUS_SUCCESS;
+#endif
 }
 
 /*
