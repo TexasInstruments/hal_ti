@@ -90,22 +90,6 @@ static mbedtls_ctr_drbg_context * ctr_drbg_init(void)
     return NULL;
 }
 
-#ifdef CRYPTO_MBEDTLS_CONFIG_FIPS
-int crypto_get_random(void *buf, size_t len)
-{
-        //Get new seed from HSM
-    status = psa_generate_random(buf, len);
-    if (status != PSA_SUCCESS)
-    {
-        return -1;
-    }
-
-    return 0;
-}
-}
-#endif
-
-
 
 /*
  * selective code inclusion based on preprocessor defines

@@ -77,6 +77,7 @@ MutexP_Handle MutexP_construct(MutexP_Struct *handle, MutexP_Params *params)
 
 void MutexP_destruct(MutexP_Struct *mutexP)
 {
+    /* Zephyr k_mutex has no destructor; leave the static handle reinitialized. */
     k_mutex_init((struct k_mutex *)mutexP);
 }
 
