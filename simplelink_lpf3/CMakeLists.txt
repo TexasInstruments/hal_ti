@@ -36,9 +36,7 @@ add_subdirectory(source/ti/log)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeSources.cmake)
 
-if(NOT CONFIG_BT_HCI_TI_CC3XXX)
-  add_subdirectory_ifdef(CONFIG_BT source/ti/ble)
-endif()
+add_subdirectory_ifdef(CONFIG_BT source/ti/ble)
 
 if(CONFIG_HAS_CC23X0_SDK)
 
