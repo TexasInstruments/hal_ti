@@ -71,9 +71,14 @@ if(CONFIG_HAS_CC23X0_SDK)
     ${SOURCES_KERNEL}
     ${SOURCES_OVERLOADS}
     )
-  zephyr_link_libraries(
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m0p/ecc.a
-    )
+  # TEMP: the prebuilt ecc.a is built with GCC 12 LTO bytecode and cannot be
+  # linked by the Zephyr SDK 1.0.1 toolchain (GCC 14) - "LTO version 12.0
+  # instead of the expected 14.0". blinky does not use ECC, so it is dropped
+  # here to validate the build. Real fix: regenerate hal_ti's prebuilt libs
+  # against the SDK 1.0.1 toolchain (and gate this link behind actual ECC use).
+  # zephyr_link_libraries(
+  #   ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m0p/ecc.a
+  #   )
   zephyr_linker_sources(RAM_SECTIONS
     ${CMAKE_CURRENT_SOURCE_DIR}/source/ti/drivers/dma/dma.ld
   )
@@ -131,9 +136,14 @@ if(CONFIG_HAS_CC27XXX10_SDK OR CONFIG_HAS_CC27XXX20_SDK)
     ${SOURCES_KERNEL}
     ${SOURCES_OVERLOADS}
     )
-  zephyr_link_libraries(
-    ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m33f/ecc.a
-    )
+  # TEMP: the prebuilt ecc.a is built with GCC 12 LTO bytecode and cannot be
+  # linked by the Zephyr SDK 1.0.1 toolchain (GCC 14) - "LTO version 12.0
+  # instead of the expected 14.0". blinky does not use ECC, so it is dropped
+  # here to validate the build. Real fix: regenerate hal_ti's prebuilt libs
+  # against the SDK 1.0.1 toolchain (and gate this link behind actual ECC use).
+  # zephyr_link_libraries(
+  #   ${CMAKE_CURRENT_SOURCE_DIR}/source/third_party/ecc/lib/gcc/m33f/ecc.a
+  #   )
   zephyr_linker_sources(RAM_SECTIONS
     ${CMAKE_CURRENT_SOURCE_DIR}/source/ti/drivers/dma/dma.ld
   )
