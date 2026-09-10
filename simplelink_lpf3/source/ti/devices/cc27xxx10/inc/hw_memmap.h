@@ -226,14 +226,8 @@
 #define FPB_BASE                0xE0002000U // FPB
 #define ICB_BASE                0xE000E000U // ICB
 #define SYSTICK_BASE            0xE000E010U // SYSTICK
-#define NVIC_BASE               0xE000E100U // NVIC
-#define SCB_BASE                0xE000ECFCU // SCB
-#define MPU_BASE                0xE000ED90U // MPU
 #define SAU_BASE                0xE000EDD0U // SAU
-#define DCB_BASE                0xE000EDE0U // DCB
 #define FPE_BASE                0xE000EF30U // FPE
-#define DIB_BASE                0xE000EFB0U // DIB
-#define TPIU_BASE               0xE0040000U // TPIU
 #define CPU_ROM_TABLE_BASE      0xE00FF000U // CPU_ROM_TABLE
 
 #ifdef DRIVERLIB_NS

@@ -236,24 +236,18 @@
 #define SYSTICK_BASE            0xE000E010U // SYSTICK
 #define SYSTICK_S_BASE          0xE000E010U // SYSTICK_S
 #define SYSTICK_NS_BASE         0xF000E010U // SYSTICK_NS
-#define NVIC_BASE               0xE000E100U // NVIC
 #define NVIC_S_BASE             0xE000E100U // NVIC_S
 #define NVIC_NS_BASE            0xF000E100U // NVIC_NS
-#define SCB_BASE                0xE000ECFCU // SCB
 #define SCB_S_BASE              0xE000ECFCU // SCB_S
 #define SCB_NS_BASE             0xF000ECFCU // SCB_NS
-#define MPU_BASE                0xE000ED90U // MPU
 #define MPU_S_BASE              0xE000ED90U // MPU_S
 #define MPU_NS_BASE             0xF000ED90U // MPU_NS
 #define SAU_BASE                0xE000EDD0U // SAU
-#define DCB_BASE                0xE000EDE0U // DCB
 #define DCB_S_BASE              0xE000EDE0U // DCB_S
 #define DCB_NS_BASE             0xF000EDE0U // DCB_NS
 #define FPE_BASE                0xE000EF30U // FPE
-#define DIB_BASE                0xE000EFB0U // DIB
 #define DIB_S_BASE              0xE000EFB0U // DIB_S
 #define DIB_NS_BASE             0xF000EFB0U // DIB_NS
-#define TPIU_BASE               0xE0040000U // TPIU
 #define CPU_ROM_TABLE_BASE      0xE00FF000U // CPU_ROM_TABLE
 
 #ifdef DRIVERLIB_NS
