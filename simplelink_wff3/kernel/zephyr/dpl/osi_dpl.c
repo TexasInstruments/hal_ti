@@ -62,6 +62,8 @@ uint32_t heapDbg_alloc_fail = 0;
 int64_t heapDbg_total_alloc = 0;
 #endif
 
+static struct k_spinlock os_heap_lock;
+
 /*******************************************************************************
 
     MISCELLANEOUS
@@ -462,12 +464,19 @@ BOOLEAN osi_MsgQIsEmpty(OsiMsgQ_t* pMsgQ)
 
 void *os_malloc(size_t size)
 {
-	return shared_multi_heap_alloc(SMH_REG_ATTR_NON_CACHEABLE, size);
+	k_spinlock_key_t key = k_spin_lock(&os_heap_lock);
+	void *p = shared_multi_heap_alloc(SMH_REG_ATTR_NON_CACHEABLE, size);
+
+	k_spin_unlock(&os_heap_lock, key);
+	return p;
 }
 
 void os_free(void *ptr)
 {
+	k_spinlock_key_t key = k_spin_lock(&os_heap_lock);
+
 	shared_multi_heap_free(ptr);
+	k_spin_unlock(&os_heap_lock, key);
 }
 
 void *os_realloc(void *ptr, size_t newsize)
