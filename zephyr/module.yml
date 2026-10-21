@@ -7,17 +7,17 @@ build:
 blobs:
   # TIFS (TI Foundational Security) firmware for AM62Lx SoC
   - path: ti-sysfw/ti-fs-firmware-am62lx-hs-enc.bin
-    sha256: a0f950de0258ee2dd1b6f4b48a6cc6a92df53bb19cea9f89cdde4266e89a060b
+    sha256: 1a420bd60eb158f4e6d8f345bde5131811ca6f88d6476afbce90929e032109ff
     type: img
-    version: '12.00.00.07'
+    version: '12.01.00.06'
     license-path: zephyr/blobs/LICENSE.ti
-    url: https://github.com/TexasInstruments/ti-linux-firmware/raw/12.00.00.07/ti-sysfw/ti-fs-firmware-am62lx-hs-enc.bin
+    url: https://github.com/TexasInstruments/ti-linux-firmware/raw/12.01.00.06/ti-sysfw/ti-fs-firmware-am62lx-hs-enc.bin
     description: "TIFS (TI Foundational Security) firmware for AM62Lx SoC"
 
   - path: ti-sysfw/ti-fs-firmware-am62lx-hs-cert.bin
-    sha256: 114389460bb1c087c52e8d0709080b7b99d5c7da7e81d33d623de49f35c7375b
+    sha256: d0931a3e7295f91195c0a947185811817929a4549ff69a112b7e32c5271dc7dd
     type: img
-    version: '12.00.00.07'
+    version: '12.01.00.06'
     license-path: zephyr/blobs/LICENSE.ti
-    url: https://github.com/TexasInstruments/ti-linux-firmware/raw/12.00.00.07/ti-sysfw/ti-fs-firmware-am62lx-hs-cert.bin
+    url: https://github.com/TexasInstruments/ti-linux-firmware/raw/12.01.00.06/ti-sysfw/ti-fs-firmware-am62lx-hs-cert.bin
     description: "TIFS inner certificate for AM62Lx SoC"
