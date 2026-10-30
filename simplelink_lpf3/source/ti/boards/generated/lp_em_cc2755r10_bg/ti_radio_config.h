@@ -214,14 +214,14 @@ extern const LRF_Config LRF_configAdcNoise;
 
 
 // LRF data structures
-extern const LRF_TxShape LRF_shapeBaseGfsk067Ble;
-extern const LRF_TxShape LRF_shapeBaseGfsk05Ble;
-extern const LRF_SwConfig LRF_swConfig1MbpsBle;
-extern const LRF_SwConfig LRF_swConfig2MbpsBle;
-extern const LRF_TxPowerTable LRF_txPowerTableBle;
-extern const LRF_TxPowerLimitTable LRF_txPowerLimitTable1MbpsBle;
-extern const LRF_TxPowerLimitTable LRF_txPowerLimitTable2MbpsBle;
-extern const LRF_Config LRF_configBle;
+extern const LRF_TxShape LRF_shapeBaseGfsk067;
+extern const LRF_TxShape LRF_shapeBaseGfsk05;
+extern const LRF_SwConfig LRF_swConfig1Mbps;
+extern const LRF_SwConfig LRF_swConfig2Mbps;
+extern const LRF_TxPowerTable LRF_txPowerTable;
+extern const LRF_TxPowerLimitTable LRF_txPowerLimitTable1Mbps;
+extern const LRF_TxPowerLimitTable LRF_txPowerLimitTable2Mbps;
+extern const LRF_Config LRF_config;
 
 
 // Address    Module            Register             Bit(s)     Field              Value (1_mbps)    Value (2_mbps)    Value (coded)

@@ -118,7 +118,7 @@ static const uint32_t LRF_commonRegConfig[] =
 {
     0x0000003F,                     // Segment length = 63
     0x0008A001,                     //   Data structure 32-bit region (start byte position = 8, count = 2)
-    (uint32_t) &LRF_txPowerTableBle,//     LRF_swParam : txPowerTable
+    (uint32_t) &LRF_txPowerTable,//     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
     0x14502001,                     //   HW 32-bit region (start address = 0x1450, count = 2)
     0x22000000,                     //     LRFDPBE.POLY0H                LRFDPBE.POLY0L
@@ -214,8 +214,8 @@ static const uint32_t LRF_subPhy1MbpsCodedRegConfig[] =
 {
     0x00014009,                     // Segment length = 9
     0x0000A001,                     //   Data structure 32-bit region (start byte position = 0, count = 2)
-    (uint32_t) &LRF_swConfig1MbpsBle,//     LRF_swParam : swConfig
-    (uint32_t) &LRF_txPowerLimitTable1MbpsBle,//     LRF_swParam : txPowerLimitTable
+    (uint32_t) &LRF_swConfig1Mbps,//     LRF_swParam : swConfig
+    (uint32_t) &LRF_txPowerLimitTable1Mbps,//     LRF_swParam : txPowerLimitTable
     0x00003002,                     //   HW sparse region (address/value pairs, count = 3)
     0x20D44000,                     //     LRFDMDM.BAUD
     0x20E00387,                     //     LRFDMDM.DEMMISC0
@@ -257,8 +257,8 @@ static const uint32_t LRF_subPhy2MbpsRegConfig[] =
 {
     0x00010013,                     // Segment length = 19
     0x0000A001,                     //   Data structure 32-bit region (start byte position = 0, count = 2)
-    (uint32_t) &LRF_swConfig2MbpsBle,//     LRF_swParam : swConfig
-    (uint32_t) &LRF_txPowerLimitTable2MbpsBle,//     LRF_swParam : txPowerLimitTable
+    (uint32_t) &LRF_swConfig2Mbps,//     LRF_swParam : swConfig
+    (uint32_t) &LRF_txPowerLimitTable2Mbps,//     LRF_swParam : txPowerLimitTable
     0x00003007,                     //   HW sparse region (address/value pairs, count = 8)
     0x1090800F,                     //     LRFDPBE.MDMCMDPAR0
     0x20C40017,                     //     LRFDMDM.MODPRECTRL
@@ -338,7 +338,7 @@ static const uint32_t LRF_codedTxRateS2RegConfig[] =
 
 
 // LRF register configuration list
-static const LRF_RegConfigList LRF_regConfigListBle = {
+static const LRF_RegConfigList LRF_regConfigList = {
     .numEntries = 9,
     .entries = {
         (LRF_ConfigWord*)LRF_commonRegConfig,
@@ -354,43 +354,43 @@ static const LRF_RegConfigList LRF_regConfigListBle = {
 };
 
 // LRF_TxShape data structure
-const LRF_TxShape LRF_shapeBaseGfsk067Ble = {
+const LRF_TxShape LRF_shapeBaseGfsk067 = {
     .scale = 0x0FDE2,
     .numCoeff = 0x0011,
     .coeff = { 0x01, 0x02, 0x05, 0x0A, 0x14, 0x22, 0x37, 0x52, 0x71, 0x91, 0xB0, 0xCB, 0xE0, 0xEE, 0xF8, 0xFD, 0xFF}
 };
 
 // LRF_TxShape data structure
-const LRF_TxShape LRF_shapeBaseGfsk05Ble = {
+const LRF_TxShape LRF_shapeBaseGfsk05 = {
     .scale = 0x0F183,
     .numCoeff = 0x0014,
     .coeff = { 0x01, 0x02, 0x03, 0x06, 0x0A, 0x11, 0x1A, 0x27, 0x37, 0x4B, 0x62, 0x7B, 0x94, 0xAD, 0xC4, 0xD8, 0xE7, 0xF3, 0xFB, 0xFF}
 };
 
 // LRF_SwConfig data structure
-const LRF_SwConfig LRF_swConfig1MbpsBle = {
+const LRF_SwConfig LRF_swConfig1Mbps = {
     .rxIntFrequency = 1000000,
     .rxFrequencyOffset = 0,
     .txFrequencyOffset = 1000000,
     .modFrequencyDeviation = 0x0003D090,
-    .txShape = &LRF_shapeBaseGfsk067Ble,
+    .txShape = &LRF_shapeBaseGfsk067,
     .bwIndex = 0x00,
     .bwIndexDither = 0x01
 };
 
 // LRF_SwConfig data structure
-const LRF_SwConfig LRF_swConfig2MbpsBle = {
+const LRF_SwConfig LRF_swConfig2Mbps = {
     .rxIntFrequency = 850000,
     .rxFrequencyOffset = 0,
     .txFrequencyOffset = 850000,
     .modFrequencyDeviation = 0x0007A120,
-    .txShape = &LRF_shapeBaseGfsk05Ble,
+    .txShape = &LRF_shapeBaseGfsk05,
     .bwIndex = 0x01,
     .bwIndexDither = 0x01
 };
 
 // LRF_TxPowerTable data structure
-const LRF_TxPowerTable LRF_txPowerTableBle = {
+const LRF_TxPowerTable LRF_txPowerTable = {
     .numEntries = 0x00000018,
     .powerTable = {
         { .power = { .fraction = 0, .dBm = -20 }, .tempCoeff = 0, .value = { .ibBoost = 0, .ib = 18, .gain = 0, .mode = 0, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
@@ -421,7 +421,7 @@ const LRF_TxPowerTable LRF_txPowerTableBle = {
 };
 
 // LRF_TxPowerLimitTable data structure
-const LRF_TxPowerLimitTable LRF_txPowerLimitTable1MbpsBle = {
+const LRF_TxPowerLimitTable LRF_txPowerLimitTable1Mbps = {
     .numEntries = 0x00000005,
     .freqDiv = 0x000F4240,
     .limitTable = {
@@ -434,7 +434,7 @@ const LRF_TxPowerLimitTable LRF_txPowerLimitTable1MbpsBle = {
 };
 
 // LRF_TxPowerLimitTable data structure
-const LRF_TxPowerLimitTable LRF_txPowerLimitTable2MbpsBle = {
+const LRF_TxPowerLimitTable LRF_txPowerLimitTable2Mbps = {
     .numEntries = 0x00000003,
     .freqDiv = 0x000F4240,
     .limitTable = {
@@ -445,9 +445,9 @@ const LRF_TxPowerLimitTable LRF_txPowerLimitTable2MbpsBle = {
 };
 
 // LRF_Config data structure
-const LRF_Config LRF_configBle = {
+const LRF_Config LRF_config = {
     .pbeImage = (const LRF_TOPsmImage*) LRF_PBE_binary_ble5,
     .mceImage = (const LRF_TOPsmImage*) LRF_MCE_binary_ble5_phac,
     .rfeImage = (const LRF_TOPsmImage*) LRF_RFE_binary_ble5,
-    .regConfigList = &LRF_regConfigListBle
+    .regConfigList = &LRF_regConfigList
 };
