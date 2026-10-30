@@ -76,9 +76,9 @@ Bool_e g_wait_p2p_scan_complete = FALSE;
 OsiSyncObj_t p2p_find_stopped_syncObj = NULL;
 #endif // CC35XX
 
-#ifdef CONFIG_WIFI_TI_CC35XX
+#ifndef CC33XX
 #define WLAN_PROTECTION
-#endif /* CONFIG_WIFI_TI_CC35XX */
+#endif // CC33XX
 
 extern StartRoleApps_t gRoleAppsParams;
 extern TFwEvent *gFwEvent;
@@ -501,7 +501,7 @@ void set_finish_wlan_periodic_scan()
 
 int32_t is_wlan_periodic_scan_in_progress()
 {
-    int32_t ret;
+    int32_t ret = 0;
 #ifdef WLAN_PROTECTION
     wlan_if_lock();
     ret = g_oper_bitmap & WLAN_IF_PERIODIC_SCAN_IN_PROGRESS;
@@ -533,7 +533,7 @@ void set_finish_wlan_supplicant_operation()
 
 int32_t is_wlan_supplicant_operation_in_progress()
 {
-    int32_t ret;
+    int32_t ret = 0;
 #ifdef WLAN_PROTECTION
     wlan_if_lock();
     ret = g_oper_bitmap & WLAN_IF_SUPPLICANT_OPERATION_IN_PROGRESS;
