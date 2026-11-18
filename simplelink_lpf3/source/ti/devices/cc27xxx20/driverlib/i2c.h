@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __I2C_H__
-#define __I2C_H__
+#ifndef ti_devices_i2c__include
+#define ti_devices_i2c__include
 
 //*****************************************************************************
 //
@@ -841,4 +841,4 @@ __STATIC_INLINE uint32_t I2CTargetIntStatus(uint32_t base, bool masked)
 //
 //*****************************************************************************
 
-#endif // __I2C_H__
+#endif // ti_devices_i2c__include

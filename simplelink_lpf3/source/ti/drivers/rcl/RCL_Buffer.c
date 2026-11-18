@@ -72,26 +72,35 @@ uint8_t *RCL_TxBuffer_init(RCL_Buffer_TxBuffer *buffer, uint32_t numPad, uint32_
     {
         return NULL;
     }
-    else
+
+    buffer->state   = RCL_BufferStatePending;
+    buffer->length  = (uint16_t) (sizeof(buffer->numPad) + numPad + hdrLen + dataLen);
+    buffer->numPad  = (uint8_t) numPad;
+
+    /*
+     * The writable region starts with 'pad0'. Since data[] is guaranteed to start immediately
+     * after 'pad0', it's safe to treat the whole contiguous region as a single byte array.
+     * Use offsetof() to make it clear to the compiler that the pointer points to the beginning
+     * of data[], and not to a stand-alone 'uint8_t' object.
+     */
+    uint8_t *writePtr = (uint8_t *)((uintptr_t)buffer + offsetof(RCL_Buffer_TxBuffer, pad0));
+
+    if (numPad > 0U)
     {
-        buffer->state = RCL_BufferStatePending;
-        buffer->length = (uint16_t) (sizeof(buffer->numPad) + numPad + hdrLen + dataLen);
-        buffer->numPad = (uint8_t) numPad;
-        /* Start writing at pad0, then continue into data field */
-        uint8_t *data = &buffer->pad0;
-        if (numPad > 0U)
-        {
-            --numPad;
-            *data = (uint8_t) numPad;
-            data = buffer->data;
-        }
-        while (numPad > 0U)
-        {
-            --numPad;
-            *data++ = (uint8_t) numPad;
-        }
-        return data;
+        /* The first pad byte holds (numPad ‑ 1) and the next byte is the start of the real data */
+        *writePtr = (uint8_t) (numPad - 1);
+        /* Continue into the data[] field */
+        writePtr = buffer->data;
+        numPad--;
     }
+
+    while (numPad > 0U)
+    {
+        *writePtr++ = (uint8_t) (numPad - 1);
+        numPad--;
+    }
+
+    return writePtr;
 }
 
 /*

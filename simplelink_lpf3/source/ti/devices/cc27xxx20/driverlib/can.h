@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __CAN_H__
-#define __CAN_H__
+#ifndef ti_devices_can__include
+#define ti_devices_can__include
 
 //*****************************************************************************
 //
@@ -574,4 +574,4 @@ __STATIC_INLINE uint32_t CANSSGetClkStopCtrlStatus(void)
 //
 //*****************************************************************************
 
-#endif // __CAN_H__
+#endif // ti_devices_can__include

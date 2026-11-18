@@ -47,17 +47,13 @@
 #endif
 
 #if (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC23X0) || \
+    (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC23X1) || \
     (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC27XX)
     #include DeviceFamily_constructPath(inc/hw_types.h)
     #include DeviceFamily_constructPath(inc/hw_lrfdpbe.h)
     #include <ti/drivers/rcl/lrf/LRFLPF3.h>
-    #include <ti/drivers/rcl/lrf/LRFLPF3_Interface.h>
-    #include <ti/drivers/rcl/lrf/LRFLPF3_Interface_Generic.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC283X)
     #include <ti/drivers/rcl/lrf/LRFLPF4.h>
-    #include <ti/drivers/rcl/lrf/LRFLPF4_Access.h>
-    #include <ti/drivers/rcl/lrf/LRFLPF4_Interface.h>
-    #include <ti/drivers/rcl/lrf/LRFLPF4_Interface_Generic.h>
 #endif
 
 #ifdef DeviceFamily_CC1308

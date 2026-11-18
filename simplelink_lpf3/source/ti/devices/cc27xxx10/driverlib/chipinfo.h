@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __CHIP_INFO_H__
-#define __CHIP_INFO_H__
+#ifndef ti_devices_chipinfo__include
+#define ti_devices_chipinfo__include
 
 //*****************************************************************************
 //
@@ -85,6 +85,7 @@ typedef enum
     CC2745R10E1WRHARQ1  = 0xE8AF23U, //!< Part ID is CC2745R10E1WRHARQ1
     CC2745P10E0WRHARQ1  = 0xDEAF23U, //!< Part ID is CC2745P10E0WRHARQ1
     CC2745R74E0WRHARQ1  = 0x87AF23U, //!< Part ID is CC2745R74E0WRHARQ1
+    CC2755R74E0YCJR     = 0x2F6301U, //!< Part ID is CC2755R74E0YCJR
     CC2755R105E0WRHAR   = 0x9D6301U, //!< Part ID is CC2755R105E0WRHAR
     CC2755P105E0WRHAR   = 0xE66301U, //!< Part ID is CC2755P105E0WRHAR
     CC2755R105E0YCJR    = 0x316301U, //!< Part ID is CC2755R105E0YCJR
@@ -202,4 +203,4 @@ extern void ChipInfoGetBleAddr_veneer(uint8_t *pBleAddr);
 //
 //*****************************************************************************
 
-#endif // __CHIP_INFO_H__
+#endif // ti_devices_chipinfo__include

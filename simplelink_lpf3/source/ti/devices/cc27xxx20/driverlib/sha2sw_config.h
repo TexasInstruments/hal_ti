@@ -28,8 +28,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-#ifndef SHA2SW_CONFIG_H_
-#define SHA2SW_CONFIG_H_
+#ifndef ti_devices_sha2sw_config__include
+#define ti_devices_sha2sw_config__include
 
 /** ============================================================================
  *  @file       sha2sw_config.h
@@ -124,4 +124,4 @@
 /*! @}*/
 /*! @}*/
 
-#endif /* SHA2SW_CONFIG_H_ */
+#endif /* ti_devices_sha2sw_config__include */

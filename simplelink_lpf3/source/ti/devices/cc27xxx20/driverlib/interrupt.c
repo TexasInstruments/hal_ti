@@ -39,7 +39,7 @@
 
 #include "../inc/hw_ints.h"
 #include "../inc/hw_types.h"
-#include "../cmsis/core/core_cm33.h"
+#include "../cmsis/device.h"
 
 //*****************************************************************************
 //

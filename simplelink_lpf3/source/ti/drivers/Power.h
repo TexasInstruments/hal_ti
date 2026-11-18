@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2025, Texas Instruments Incorporated
+ * Copyright (c) 2015-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -949,7 +949,7 @@ void Power_unregisterNotify(Power_NotifyObj *pNotifyObj);
     #include <ti/drivers/power/PowerCC27XX.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC283X)
     #include <ti/drivers/power/PowerCC283X.h>
-#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX || DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX)
     #include <ti/drivers/power/PowerWFF3.h>
 #else
     #error The Power driver does not support the selected device family

@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __CLKCTL_H__
-#define __CLKCTL_H__
+#ifndef ti_devices_clkctl__include
+#define ti_devices_clkctl__include
 
 //*****************************************************************************
 //
@@ -247,4 +247,4 @@ __STATIC_INLINE void CLKCTLDisableFlashLdoOffInIdle(void)
 //
 //*****************************************************************************
 
-#endif // __CLKCTL_H__
+#endif // ti_devices_clkctl__include

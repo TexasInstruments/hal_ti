@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2026, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,9 +39,8 @@
 #include <ti/drivers/dpl/HwiP.h>
 #include <ti/drivers/dpl/ClockP.h>
 #include <ti/drivers/dpl/DebugP.h>
-
 #ifndef __ZEPHYR__
-#include <ti/drivers/ITM.h>
+    #include <ti/drivers/ITM.h>
 #endif
 #include <ti/drivers/Power.h>
 #include <ti/drivers/power/PowerCC27XX.h>
@@ -79,7 +78,7 @@
 #include DeviceFamily_constructPath(driverlib/systimer.h)
 #include DeviceFamily_constructPath(driverlib/ull.h)
 #include DeviceFamily_constructPath(driverlib/clkctl.h)
-#include DeviceFamily_constructPath(cmsis/core/cmsis_compiler.h)
+#include DeviceFamily_constructPath(cmsis/device.h)
 
 /* Type definitions */
 
@@ -151,6 +150,7 @@ extern const uint_least8_t GPIO_pinLowerBound;
 extern const uint_least8_t GPIO_pinUpperBound;
 extern const uint_least8_t PowerLPF3_extlfPin;
 extern const uint_least8_t PowerLPF3_extlfPinMux;
+extern const uint32_t PowerLPF3_extlfPeriodUsQ16;
 
 /* Macro for weak definition of the Power Log module */
 Log_MODULE_DEFINE_WEAK(LogModule_Power, Log_MODULE_INIT_SINK_DUMMY);
@@ -228,6 +228,21 @@ static PowerLPF3_LfclkQualFxn PowerLPF3_lfclkQualFxn = NULL;
  * after an update or not, in case compensation has been asynchronously disabled
  */
 static bool PowerCC27XX_hfxtCompEnabled = false;
+
+/* Configuration for polling-based HFXT temperature compensation */
+static PowerCC27XX_hfxtConfig PowerCC27XX_hfxtCompConfig;
+
+/* Tracks whether PowerLPF3_initHFXTCompensation() has been called, to
+ * guard against PowerLPF3_updateHFXTCompensation() running with
+ * uninitialized compensation coefficients.
+ */
+static bool PowerCC27XX_hfxtCompInitialized = false;
+
+/* Tracks whether PowerLPF3_configureHFXTCompensation() has been called, to
+ * guard against PowerLPF3_updateHFXTCompensation() running with
+ * unconfigured threshold/delta parameters
+ */
+static bool PowerCC27XX_hfxtCompConfigured = false;
 
 /* Array to maintain constraint reference counts.
  * Declare volatile variable to ensure the toolchain does not use
@@ -310,9 +325,10 @@ static ClockP_Struct hfxtAmpCompClock;
 /* Non-static Globals */
 
 #ifndef __ZEPHYR__
-    /* Interrupt for ClockP and Power policy */
-    HwiP_Struct clockHwi;
-#endif /* ZEPHYR */
+/* Interrupt for ClockP and Power policy */
+HwiP_Struct clockHwi;
+#endif /* __ZEPHYR__ */
+
 /* ****************** Power APIs ******************** */
 
 /*
@@ -379,17 +395,21 @@ int_fast16_t Power_init(void)
      * mux one of the configurable lines to the CKM.
      * CPUIRQ16 is dedicated to this purpose.
      *
-     * In Zephyr, ClockP takes this IRQ before this function is called
+     * In Zephyr, the timer driver takes this IRQ before this function is called
      * which mean that this muxing will prevent the timer interrupt, causing
      * the kernel not to tick.
      */
     HwiP_construct(&clockHwi, INT_CPUIRQ16, PowerCC27XX_rtcISR, NULL);
-#endif
 
     /* Use RTC channel 0 in compare mode. Channel 1 could be used for other
-     * purposes.
+     * purposes. This is excluded from the Zephyr SDK as the power driver in
+     * the Zephyr SDK is designed to allow sharing of the RTC with different
+     * components and so RTC interrupts will not be enabled but only when
+     * the power driver requires an interrupt to be generated for the SoC
+     * to wake-up from sleep.
      */
     HWREG(RTC_BASE + RTC_O_IMSET) = RTC_IMSET_EV0_SET;
+#endif
 
     /* Configure RTC to halt when CPU stopped during debug */
     HWREG(RTC_BASE + RTC_O_EMU) = RTC_EMU_HALT_STOP;
@@ -924,6 +944,13 @@ int_fast16_t Power_sleep(uint_fast16_t sleepState)
 
     /* Adjust HFXT amplitude if needed */
     int_fast8_t adjustment = PowerLPF3_getHfxtAmpAdjustment();
+
+    /* Stop continuous measurements of HFXT amplitude before entering standby,
+     * since the same hardware is needed to start the HFXT when waking up from
+     * standby.
+     */
+    PowerCC27XX_stopContHfxtAmpMeasurements();
+
     if (adjustment != 0)
     {
         PowerLPF3_adjustHfxtAmp(adjustment);
@@ -935,12 +962,6 @@ int_fast16_t Power_sleep(uint_fast16_t sleepState)
          */
         HWREG(CKMD_BASE + CKMD_O_HFXTCTL) &= ~CKMD_HFXTCTL_EN_M;
     }
-
-    /* Stop continuous measurements of HFXT amplitude before entering standby,
-     * since the same hardware is needed to start the HFXT when waking up from
-     * standby.
-     */
-    PowerCC27XX_stopContHfxtAmpMeasurements();
 
     /* Due to a bug in the ROM code, the SCB.AIRCR registers are not restored
      * correctly so we need to store and restore the state here instead.
@@ -1105,8 +1126,14 @@ void PowerLPF3_releaseLatches(void)
  */
 static void PowerCC27XX_enterStandby(void)
 {
+    /* Declare static volatile variable to ensure the toolchain does not use
+     * stack for the variable and does not optimize this memory allocation
+     * away.
+     */
+    static volatile uint32_t controlPreStandby;
+
     /* Read current stack pointer from CONTROL */
-    uint32_t controlPreStandby = __get_CONTROL();
+    controlPreStandby = __get_CONTROL();
 
     if ((controlPreStandby & 0x02U) == 0x02U)
     {
@@ -1125,7 +1152,7 @@ static void PowerCC27XX_enterStandby(void)
          */
         HapiEnterStandby(NULL);
 
-        /* Switch back to PSP stack, where controlPreStandby is stored */
+        /* Switch back to PSP stack */
         __set_CONTROL(0x02U);
 
         /* Restore control register */
@@ -1251,14 +1278,12 @@ void PowerLPF3_selectEXTLF(void)
 
     Log_printf(LogModule_Power, Log_INFO, "PowerLPF3_selectEXTLF: EXTLF pin muxing configured");
 
-    /* Set LFINC override to 31.25 kHz.
+    /* Set LFINC override based on configured EXTLF frequency.
      *
-     * The value is calculated as period in microseconds with 16 fractional
-     * bits.
-     * The EXTLF runs at 31.25 kHz -> 1 / 31250 Hz = 32 us.
-     * 32 * 2^16 = 2097152 = 0x00200000
+     * PowerLPF3_extlfPeriodUsQ16 stores the period in us with 16 fractional
+     * bits, matching the LFINCOVR register format.
      */
-    HWREG(CKMD_BASE + CKMD_O_LFINCOVR) = 0x00200000U | CKMD_LFINCOVR_OVERRIDE;
+    HWREG(CKMD_BASE + CKMD_O_LFINCOVR) = (PowerLPF3_extlfPeriodUsQ16 << CKMD_LFINCOVR_LFINC_S) | CKMD_LFINCOVR_OVERRIDE;
 
     /* Directly switch to EXTLF, LFTICK will be generated by HFOSC until EXTLF
      * is running.
@@ -1766,6 +1791,7 @@ static void PowerCC27XX_rtcISR(uintptr_t arg)
     HWREG(RTC_BASE + RTC_O_ICLR) = HWREG(RTC_BASE + RTC_O_MIS);
 }
 #endif
+
 /*
  *  ======== PowerCC27XX_startHFXT ========
  * It should be ensured that the system does not vector to the CKMD interrupt
@@ -2213,6 +2239,8 @@ void PowerLPF3_initHFXTCompensation(int32_t P0,
     PowerCC27XX_hfxtCompCoefficients.P3    = P3;
     PowerCC27XX_hfxtCompCoefficients.shift = shift;
 
+    PowerCC27XX_hfxtCompInitialized = true;
+
     /* If device offers FCFG insertion data it will be factored in here.
      * Currently no device supports this.
      */
@@ -2284,6 +2312,79 @@ void PowerLPF3_disableHFXTCompensation(void)
     Log_printf(LogModule_Power,
                Log_INFO,
                "PowerLPF3_disableHFXTCompensation: Compensation disabled");
+}
+
+/*
+ *  ======== PowerLPF3_configureHFXTCompensation ========
+ */
+void PowerLPF3_configureHFXTCompensation(int16_t tempThreshold, int16_t tempDelta)
+{
+    Temperature_init();
+
+    PowerCC27XX_hfxtCompConfig.temperature.threshold = tempThreshold;
+    PowerCC27XX_hfxtCompConfig.temperature.delta     = tempDelta;
+
+    PowerCC27XX_hfxtCompConfigured = true;
+}
+
+/*
+ *  ======== PowerLPF3_updateHFXTCompensation ========
+ */
+void PowerLPF3_updateHFXTCompensation(void)
+{
+    static int16_t lastTemperature;
+    uint32_t ratio;
+    int16_t currentTemperature;
+    /* Tracks whether HFXT is currently being temperature-compensated.
+     * Used to force a compensation update when temperature crosses
+     * back above the threshold, and avoid redundant register writes
+     * when temperature stays below the threshold across multiple calls.
+     */
+    static bool compensationActive = false;
+
+    /* Guard against running compensation without the required setup
+     * functions first
+     */
+    if (PowerCC27XX_hfxtCompConfigured == false || PowerCC27XX_hfxtCompInitialized == false)
+    {
+        return;
+    }
+
+    currentTemperature = Temperature_getTemperature();
+
+    /* Sanitize current temperature to fall within valid range. This ensures
+     * that 32-bit overflow does not occur in the ppm calculation below.
+     */
+    if (currentTemperature > HFXT_COMP_MAX_TEMP)
+    {
+        currentTemperature = HFXT_COMP_MAX_TEMP;
+    }
+
+    if (currentTemperature < HFXT_COMP_MIN_TEMP)
+    {
+        currentTemperature = HFXT_COMP_MIN_TEMP;
+    }
+
+    if (currentTemperature > PowerCC27XX_hfxtCompConfig.temperature.threshold)
+    {
+        if (!compensationActive ||
+            Math_ABS(currentTemperature - lastTemperature) >= PowerCC27XX_hfxtCompConfig.temperature.delta)
+        {
+            ratio = PowerCC27XX_temperatureToRatio(currentTemperature);
+            PowerCC27XX_updateHFXTRatio(ratio);
+            lastTemperature    = currentTemperature;
+            compensationActive = true;
+        }
+    }
+    else
+    {
+        if (compensationActive)
+        {
+            PowerCC27XX_updateHFXTRatio(CKMD_HFTRACKCTL_RATIO_REF48M);
+            compensationActive = false;
+        }
+        lastTemperature = currentTemperature;
+    }
 }
 
 /*
@@ -2546,7 +2647,24 @@ static void PowerCC27XX_startContHfxtAmpMeasurements(void)
  */
 static void PowerCC27XX_stopContHfxtAmpMeasurements(void)
 {
-    /* Clear SW override of Amplitude ADC */
+    /* Stop SAR conversions before releasing SWOVR. SWOVR must not be cleared
+     * while the ADC is in SETUP state: during SETUP, MUX_SEL_HW points to
+     * BIAS, so releasing SWOVR then causes BIAS=0 to be read. With BIAS=0,
+     * amplitude (peakRaw - DC_bias) is overestimated, Ramp 0 exits too early,
+     * and the HFXT fails qualification.
+     */
+    HWREG(CKMD_BASE + CKMD_O_AMPADCCTL) &= ~CKMD_AMPADCCTL_SARSTRT;
+
+    /* Wait for any in-progress SETUP state to complete before clearing SWOVR.
+     * This takes 1 clock cycle in the worst case. With FSM update rate set to 2
+     * MHz (CKMD:AMPCFG0:FSMRATE), that's 0.5 us minimum. 1us is used because
+     * HapiWaitUs is used for the delay, which has a 1 us resolution.
+     */
+    HapiWaitUs(1);
+
+    /* Transfer ADC control back to HW to prepare for next HFXT wakeup DC bias
+     * measurement.
+     */
     HWREG(CKMD_BASE + CKMD_O_AMPADCCTL) &= ~CKMD_AMPADCCTL_SWOVR;
 }
 
@@ -2580,9 +2698,20 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
 {
     uint32_t sysTimerIMASK;
     uint32_t sysTimerARMSET;
+#ifdef __ZEPHYR__
+
+    /**
+     * The current RTC compare register value, the armed state and the
+     * interrupt mask register which is configured by the RTC driver have
+     * to be saved before the power driver can write into the RTC registers.
+     * Once, the SoC wakes up from standby, we write the values in these
+     * variables back into the respective registers.
+     */
+
     uint32_t rtcCH0CC8U;
     uint32_t rtcARMSET;
     uint32_t rtcIMASK;
+#endif
     uint32_t sysTimerTimeouts[SYSTIMER_CHANNEL_COUNT];
     int_fast16_t result = Power_SOK;
 
@@ -2598,6 +2727,7 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
     /* Store SysTimer timeouts */
     memcpy(sysTimerTimeouts, (void *)(SYSTIM_BASE + SYSTIM_O_CH0CCSR), sizeof(sysTimerTimeouts));
 
+#ifdef __ZEPHYR__
     /* Read back current RTC compare value. */
     rtcCH0CC8U = HWREG(RTC_BASE + RTC_O_CH0CC8U);
 
@@ -2609,6 +2739,7 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
 
     /* Interrupt must be unmasked as CPU requires RTC compare event to wakeup. */
     HWREG(RTC_BASE + RTC_O_IMSET) = RTC_IMSET_EV0_SET;
+#endif
 
     /* Switch CPUIRQ16 in event fabric to RTC.
      * Since the CC27XX only has limited interrupt lines, we need to switch the
@@ -2631,6 +2762,11 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
     /* RTC channel 0 compare is automatically armed upon writing the
      * compare value. It will automatically be disarmed when it
      * triggers.
+     * When using this function in the Zephyr SDK, care should taken not
+     * to taken not to write to the CH0CC1U register from any other part of the
+     * code except this function. Only CH0CC8U register can be used to configure
+     * RTC compare events and not CH0CC8U. Writing to CH0CC1U to configure RTC
+     * compare events will result in undefined behavior.
      */
     HWREG(RTC_BASE + RTC_O_CH0CC1U) = nextEventTimeUs;
 
@@ -2661,13 +2797,14 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
     /* Switch CPUIRQ16 in event fabric back to SysTimer */
     EVTSVTConfigureEvent(EVTSVT_SUB_CPUIRQ16, EVTSVT_PUB_SYSTIM0);
 
+#ifdef __ZEPHYR__
     /* Restore RTC compare value. Writing into compare register
      * automatically arms the RTC for compare events.
      */
     HWREG(RTC_BASE + RTC_O_CH0CC8U) = rtcCH0CC8U;
 
     /* If RTC was not armed before sleep. */
-    if( (rtcARMSET & RTC_ARMSET_CH0_M) == RTC_ARMSET_CH0_NOEFF )
+    if ((rtcARMSET & RTC_ARMSET_CH0_M) == RTC_ARMSET_CH0_NOEFF)
     {
         /* Disarm the RTC */
         HWREG(RTC_BASE + RTC_O_ARMCLR) = RTC_ARMCLR_CH0_CLR;
@@ -2676,7 +2813,7 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
         HWREG(RTC_BASE + RTC_O_ICLR) = RTC_ICLR_EV0_CLR;
     }
 
-    if( ( rtcIMASK & RTC_IMASK_EV0_M ) == RTC_IMASK_EV0_EN )
+    if ((rtcIMASK & RTC_IMASK_EV0_M) == RTC_IMASK_EV0_EN)
     {
         /* If interrupt was masked, enable the interrupt mask. */
         HWREG(RTC_BASE + RTC_O_IMSET) = RTC_IMSET_EV0_SET;
@@ -2686,6 +2823,7 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
         /* If interrupt was unmasked, clear the interrupt mask. */
         HWREG(RTC_BASE + RTC_O_IMCLR) = RTC_IMCLR_EV0_CLR;
     }
+#endif
 
     /* When waking up from standby, the SysTimer may not have
      * synchronised with the RTC by now. Wait for SysTimer
@@ -2695,7 +2833,9 @@ int_fast16_t PowerLPF3_sleep(uint32_t nextEventTimeUs)
      * We need to wait both for RUN to be set and SYNCUP to go low. Any
      * other register state will cause undefined behaviour.
      */
-    while (HWREG(SYSTIM_BASE + SYSTIM_O_STATUS) != SYSTIM_STATUS_VAL_RUN) {}
+    while ((HWREG(SYSTIM_BASE + SYSTIM_O_STATUS) & (SYSTIM_STATUS_VAL_M | SYSTIM_STATUS_SYNCUP_M)) !=
+            SYSTIM_STATUS_VAL_RUN)
+    {}
 
     /* Restore SysTimer timeouts */
     memcpy((void *)(SYSTIM_BASE + SYSTIM_O_CH0CCSR), sysTimerTimeouts, sizeof(sysTimerTimeouts));

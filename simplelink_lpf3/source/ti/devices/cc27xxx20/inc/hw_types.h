@@ -3,7 +3,7 @@
 *
 *  Description:    Common types and macros.
 *
-*  Copyright (c) 2025-2026 Texas Instruments Incorporated
+*  Copyright (c) 2025 Texas Instruments Incorporated
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -91,74 +91,28 @@ typedef unsigned int  __UINT32;
 #define HWREGB(x)                                                             \
         (*((volatile unsigned char *)(x)))
 
-// Word (32 bit) read to address x in the LRF module. On some device revisions,
-// back-to-back memory reads to LRF does not read the correct value, this is
-// worked around by always inserting 4 NOP.Ws before loading from address x.
-// The NOP.W instruction is 32-bit and will never be optimized out by the CPU.
-#define HWREG_READ_LRF(x) ({ \
-    uint32_t tmpHwregReadLrfVal; \
-    __asm volatile("nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "ldr %[val], [%[adr]]" \
-                   : [val] "=r" (tmpHwregReadLrfVal) \
-                   : [adr] "r" (x) \
-                   : "memory"); \
-    tmpHwregReadLrfVal; })
+// Word (32 bit) read to address x in the LRF module
+// This define is present for cross-device compatibility. Do not use!
+#define HWREG_READ_LRF(x) HWREG(x)
 
-// Half word (16 bit) access to address x in the LRF module. On some device revisions,
-// back-to-back memory reads to LRF does not read the correct value, this is
-// worked around by always inserting 4 NOP.Ws before loading from address x.
-// The NOP.W instruction is 32-bit and will never be optimized out by the CPU.
-#define HWREGH_READ_LRF(x) ({ \
-    uint16_t tmpHwregReadLrfVal; \
-    __asm volatile("nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "ldrh %[val], [%[adr]]" \
-                   : [val] "=r" (tmpHwregReadLrfVal) \
-                   : [adr] "r" (x) \
-                   : "memory"); \
-    tmpHwregReadLrfVal; })
+// Half word (16 bit) read to address x in the LRF module
+// This define is present for cross-device compatibility. Do not use!
+#define HWREGH_READ_LRF(x) HWREGH(x)
 
-// Byte (8 bit) access to address x in the LRF module. On some device revisions,
-// back-to-back memory reads to LRF does not read the correct value, this is
-// worked around by always inserting 4 NOP.Ws before loading from address x.
-// The NOP.W instruction is 32-bit and will never be optimized out by the CPU.
-#define HWREGB_READ_LRF(x) ({ \
-    uint8_t tmpHwregReadLrfVal; \
-    __asm volatile("nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "ldrb %[val], [%[adr]]" \
-                   : [val] "=r" (tmpHwregReadLrfVal) \
-                   : [adr] "r" (x) \
-                   : "memory"); \
-    tmpHwregReadLrfVal; })
+// Byte (8 bit) read to address x in the LRF module
+// This define is present for cross-device compatibility. Do not use!
+#define HWREGB_READ_LRF(x) HWREGB(x)
 
-// Utility macro used by HWREGx_WRITE_LRF macros
-#define ASM_4_NOPS() \
-    __asm volatile("nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t" \
-                   "nop.w\n\t")
+// Word (32 bit) write to address x in the LRF module.
+// This define is present for cross-device compatibility. Do not use!
+#define HWREG_WRITE_LRF(x) HWREG(x)
 
-// Word (32 bit) write to address x in the LRF module. On some device revisions,
-// back-to-back memory writes may not go through, this is worked around by always
-// inserting 4 NOPs before writing to address x.
-#define HWREG_WRITE_LRF(x) ASM_4_NOPS(); HWREG(x)
+// Half word (16 bit) write to address x in the LRF module.
+// This define is present for cross-device compatibility. Do not use!
+#define HWREGH_WRITE_LRF(x) HWREGH(x)
 
-// Half word (16 bit) write to address x in the LRF module. On some device revisions,
-// back-to-back memory writes may not go through, this is worked around by always
-// inserting 4 NOPs before writing to address x.
-#define HWREGH_WRITE_LRF(x) ASM_4_NOPS(); HWREGH(x)
-
-// Byte (8 bit) write to address x in the LRF module. On some device revisions,
-// back-to-back memory writes may not go through, this is worked around by always
-// inserting 4 NOPs before writing to address x.
-#define HWREGB_WRITE_LRF(x) ASM_4_NOPS(); HWREGB(x)
+// Byte (8 bit) write to address x in the LRF module.
+// This define is present for cross-device compatibility. Do not use!
+#define HWREGB_WRITE_LRF(x) HWREGB(x)
 
 #endif // __HW_TYPES_H__

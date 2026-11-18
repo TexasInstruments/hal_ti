@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __SPI_H__
-#define __SPI_H__
+#ifndef ti_devices_spi__include
+#define ti_devices_spi__include
 
 //*****************************************************************************
 //
@@ -675,4 +675,4 @@ __STATIC_INLINE void SPIDisableDMA(uint32_t base, uint32_t dmaFlags)
 //
 //*****************************************************************************
 
-#endif // __SPI_H__
+#endif // ti_devices_spi__include

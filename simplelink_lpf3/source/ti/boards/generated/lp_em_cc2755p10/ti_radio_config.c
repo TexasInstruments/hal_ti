@@ -6,8 +6,8 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        9.11.00.02_ga
- *  RF Settings Version:
+ *  Tool Version:        01.10.00.06_eng
+ *  RF Settings Version: 01.10.00.42_eng
  */
 
 #include "ti_radio_config.h"
@@ -116,7 +116,7 @@ const LRF_Config LRF_configAdcNoise = {
 // Configuration: Common
 static const uint32_t LRF_commonRegConfig[] =
 {
-    0x0000003D,                     // Segment length = 61
+    0x0000003F,                     // Segment length = 63
     0x0008A001,                     //   Data structure 32-bit region (start byte position = 8, count = 2)
     (uint32_t) &LRF_txPowerTable,   //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
@@ -131,13 +131,15 @@ static const uint32_t LRF_commonRegConfig[] =
     0x00020004,                     //     LRFDPBE.TXFWBTHRS             LRFDPBE.RXFRBTHRS
     0x10DC1001,                     //   HW 16-bit region (start address = 0x10DC, count = 2)
     0x0B0B0202,                     //     LRFDPBE.TIMPRE                LRFDPBE.TIMCTL
-    0x0000300A,                     //   HW sparse region (address/value pairs, count = 11)
+    0x0000300C,                     //   HW sparse region (address/value pairs, count = 13)
     0x20C00003,                     //     LRFDMDM.ADCDIGCONF
     0x20C8001F,                     //     LRFDMDM.MODSYMMAP0
     0x20F00000,                     //     LRFDMDM.DEMIQMC0
     0x20F80080,                     //     LRFDMDM.DEMDSBU2
     0x21000000,                     //     LRFDMDM.DEMFIDC0
     0x21480000,                     //     LRFDMDM.MODCTRL
+    0x21840000,                     //     LRFDMDM.DEMDEBUG
+    0x22480000,                     //     LRFDMDM.GPOCTRL0
     0x30840000,                     //     LRFDRFE.MAGNTHRCFG
     0x308C0000,                     //     LRFDRFE.RSSIOFFSET
     0x30AC0000,                     //     LRFDRFE.SPARE4

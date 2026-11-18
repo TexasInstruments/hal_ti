@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2026, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,11 +131,25 @@ extern "C" {
 /*! The latency to reserve for resume from STANDBY (usec). */
 #define PowerCC27XX_RESUMETIMESTANDBY (400U)
 
-/*! The total latency to reserve for entry to and exit from STANDBY (usec). */
-#define PowerCC27XX_TOTALTIMESTANDBY (500U)
+#ifdef TFM_BUILD
+    /*! Additional BATMON stabilization overhead in TFM builds (usec).
+     * In TFM builds, HapiWaitUs busy-waits for BATMON to stabilize on
+     * AWAKE_STANDBY since ClockP is unavailable.
+     */
+    #define PowerCC27XX_WAKEDELAYSTANDBY_TFM_OVERHEAD (70U)
 
-/*! The initial delay when waking from STANDBY (usec). */
-#define PowerCC27XX_WAKEDELAYSTANDBY (150U)
+    /*! The total latency to reserve for entry to and exit from STANDBY (usec). */
+    #define PowerCC27XX_TOTALTIMESTANDBY (500U + PowerCC27XX_WAKEDELAYSTANDBY_TFM_OVERHEAD)
+
+    /*! The initial delay when waking from STANDBY (usec). */
+    #define PowerCC27XX_WAKEDELAYSTANDBY (150U + PowerCC27XX_WAKEDELAYSTANDBY_TFM_OVERHEAD)
+#else
+    /*! The total latency to reserve for entry to and exit from STANDBY (usec). */
+    #define PowerCC27XX_TOTALTIMESTANDBY (500U)
+
+    /*! The initial delay when waking from STANDBY (usec). */
+    #define PowerCC27XX_WAKEDELAYSTANDBY (150U)
+#endif
 
 /* Default lower threshold for when HFXT compensation is enabled */
 #define PowerCC27XX_HFXT_THRESHOLD_TEMP_DEFAULT (-40)
@@ -206,11 +220,34 @@ typedef uint16_t PowerLPF3_Resource; /* Power resource identifier */
 /*! Resource ID: Hardware Security Module */
 #define PowerLPF3_PERIPH_HSM (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_HSM_S)
 
-/*! Resource ID: Algorithm Processing Unit */
-#define PowerLPF3_PERIPH_APU (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_APU_S)
+#if (DeviceFamily_ID != DeviceFamily_ID_CC274X_CC276X)
+    /*! Resource ID: MCAN 0 */
+    #define PowerLPF3_PERIPH_MCAN0 (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_MCAN_S)
 
-/*! Resource ID: MCAN */
-#define PowerLPF3_PERIPH_MCAN (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_MCAN_S)
+    /*! Resource ID: Algorithm Processing Unit */
+    #define PowerLPF3_PERIPH_APU (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_APU_S)
+
+    /*! @deprecated Retained for backwards compatibility */
+    #define PowerLPF3_PERIPH_MCAN (PowerLPF3_PERIPH_MCAN0)
+#else
+    /*! Resource ID: MCAN 0 */
+    #define PowerLPF3_PERIPH_MCAN0 (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_MCAN0_S)
+
+    /*! Resource ID: Algorithm Processing Unit */
+    #define PowerLPF3_PERIPH_APU   (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_VCE_S)
+
+    /*! Resource ID: SPI 1 */
+    #define PowerLPF3_PERIPH_SPI2  (PowerCC27XX_PERIPH_GROUP_CLKCTL0 | CLKCTL_DESCEX0_SPI2_S)
+
+    /*! Resource ID: MCAN 1 */
+    #define PowerLPF3_PERIPH_MCAN1 (PowerCC27XX_PERIPH_GROUP_CLKCTL1 | CLKCTL_DESCEX1_MCAN1_S)
+
+    /*! Resource ID: I2C 1 */
+    #define PowerLPF3_PERIPH_I2C1  (PowerCC27XX_PERIPH_GROUP_CLKCTL0 | CLKCTL_DESCEX0_I2C1_S)
+
+    /*! Resource ID: I2C 2 */
+    #define PowerLPF3_PERIPH_I2C2  (PowerCC27XX_PERIPH_GROUP_CLKCTL0 | CLKCTL_DESCEX0_I2C2_S)
+#endif
 
 /*! @brief Resource ID: LRFD
  *
@@ -279,8 +316,12 @@ typedef uint16_t PowerLPF3_Resource; /* Power resource identifier */
  * sparse table.
  */
 #define PowerCC27XX_NUMRESOURCES_CLKCTL0 (31U)
-#define PowerCC27XX_NUMRESOURCES_CLKCTL1 (7U)
-#define PowerCC27XX_NUMRESOURCES_LRFD    (15U)
+#if (DeviceFamily_ID != DeviceFamily_ID_CC274X_CC276X)
+    #define PowerCC27XX_NUMRESOURCES_CLKCTL1 (7U)
+#else
+    #define PowerCC27XX_NUMRESOURCES_CLKCTL1 (8U)
+#endif
+#define PowerCC27XX_NUMRESOURCES_LRFD (15U)
 
 /* \endcond */
 
@@ -476,7 +517,13 @@ typedef struct
 {
     /*! @brief The expected interval in us between system wakeups.
      *
-     * This would for example be 1000000 (1s) for a 1s BLE connection interval.
+     * This would for example be 1000000 (1s) for a 1s BLE connection
+     * interval. This is the minimum interval for which PPM guarantees
+     * apply.
+     *
+     * Note: Asynchronous wakeups (GPIO, events) that occur after this
+     * interval but before the scheduled wakeup may not meet PPM spec when
+     * dynamic wakeup intervals optimization is enabled.
      */
     uint32_t systemWakeupIntervalUsec;
 
@@ -490,6 +537,16 @@ typedef struct
      *  gradient in mC/s.
      */
     uint16_t temperatureGradientMilliCelsiusPerSec;
+
+    /*! @brief Enable dynamic wakeup intervals optimization.
+     *
+     * When enabled, the calibration interval is optimized at each standby
+     * entry based on the actual wakeup time if it exceeds
+     * systemWakeupIntervalUsec. The systemWakeupIntervalUsec remains the
+     * minimum interval for PPM guarantees. If actual wakeup is sooner or
+     * equal to systemWakeupIntervalUsec, no optimization is applied.
+     */
+    bool enableDynamicWakeupIntervals;
 
 } PowerLPF3_LfoscCompensationProfile;
 
@@ -598,13 +655,17 @@ void PowerLPF3_selectLFXT(void);
 /*!
  * @brief Select EXTLF as LFCLK source
  *
- * Choose an external 31.25 kHz square wave as the LFCLK source as input.
+ * Choose an external square wave as the LFCLK source as input.
  * Once LFCLK has switched, the #PowerLPF3_LFCLK_SWITCHED notification
  * will be issued and all subscribers to this event will be notified.
  *
  * This function requires the following symbols to be defined.
  *  - \c PowerLPF3_extlfPin (uint8_t): The DIO number of the pin to be used as the EXTLF pin.
  *  - \c PowerLPf3_extlfPinMux (uint8_t): Mux value used to mux the EXTLF signal to \c PowerLPF3_extlfPin.
+ *  - \c PowerLPF3_extlfPeriodUsQ16 (uint32_t): The EXTLF clock period in us as a
+ *    fixed-point value with 6 integer bits and 16 fractional bits, computed as: round(1e6 * 2^16 / frequencyHz).
+ * Allowed range: from 0x1E8480 to 0x200000 (maximum frequency 32768 Hz, minimum frequency 31250 Hz).
+ *
  * If using SysConfig, the symbols will be defined in ti_drivers_config.c.
  *
  * @warning Dynamic switching between LF clocks is not supported. Once one of
@@ -642,6 +703,12 @@ void PowerLPF3_initHFXTCompensation(int32_t P0, int32_t P1, int32_t P2, int32_t 
 /*!
  * @brief Enable HFXT temperature compensation
  *
+ * @deprecated This function relies on interrupt-based temperature
+ * notifications, which can produce invalid readings during standby due to
+ * BATMON_02 errata. Use PowerLPF3_configureHFXTCompensation() together
+ * with PowerLPF3_updateHFXTCompensation() instead, which only reads
+ * temperature when explicitly polled.
+ *
  * Enable automatic compensation for temperature-based frequency-drift of HFXT
  *
  * This function should only be called once, but can be invoked again if
@@ -666,6 +733,11 @@ void PowerLPF3_enableHFXTCompensation(int16_t tempThreshold, int16_t tempDelta);
 /*!
  * @brief Disable HFXT temperature compensation
  *
+ * @deprecated Only needed to disable the interrupt-based compensation
+ * enabled by the deprecated PowerLPF3_enableHFXTCompensation(). When using
+ * the polling-based API (PowerLPF3_updateHFXTCompensation()), the caller
+ * controls when compensation runs and no disable call is needed.
+ *
  * Disable automatic compensation for temperature-based frequency-drift of HFXT
  *
  * @note Calling this function will also undo any previous temperature compensation that has been
@@ -676,12 +748,50 @@ void PowerLPF3_enableHFXTCompensation(int16_t tempThreshold, int16_t tempDelta);
 void PowerLPF3_disableHFXTCompensation(void);
 
 /*!
+ * @brief Configure HFXT temperature compensation
+ *
+ * Configures the threshold and delta used by PowerLPF3_updateHFXTCompensation().
+ * Must be called before PowerLPF3_updateHFXTCompensation().
+ *
+ * @param[in] tempThreshold Threshold above which temperature compensation will
+ * be performed. If the threshold is set to for example 80 degrees, then
+ * the first compensation will occur once the temperature reaches 81 degrees.
+ * Units in degrees Celsius.
+ * @param[in] tempDelta Delta describing how much the temperature can drift
+ * before compensation is applied. If compensation is performed at 81 degrees,
+ * and the delta is set to 5, then a re-compensation is performed at either
+ * 76 degrees or 86 degrees, depending on which temperature state occurs first.
+ * Units in degrees Celsius.
+ *
+ * @pre PowerLPF3_initHFXTCompensation()
+ */
+void PowerLPF3_configureHFXTCompensation(int16_t tempThreshold, int16_t tempDelta);
+
+/*!
+ * @brief Update HFXT temperature compensation
+ *
+ * Compensation for temperature-based frequency-drift of HFXT
+ *
+ * Reads the current temperature and updates the HFXT ratio if the temperature has
+ * changed by more than the configured delta and is above the configured temperature threshold.
+ * Resets compensation if the temperature is below the configured threshold.
+ *
+ * @pre PowerLPF3_configureHFXTCompensation()
+ */
+void PowerLPF3_updateHFXTCompensation(void);
+
+/*!
  * @brief Force HFXT temperature compensation update
+ *
+ * @deprecated Only needed when using the interrupt-based compensation enabled
+ * by the deprecated PowerLPF3_enableHFXTCompensation(). Use
+ * PowerLPF3_updateHFXTCompensation() instead, which provides the same
+ * functionality.
  *
  * Should be called after releasing the #PowerLPF3_DISALLOW_SWTCXO constraint
  * to ensure the correct HFXT frequency.
  *
- * @pre PowerLPF3_enableHFXTCompensation()
+ * @pre PowerLPF3_configureHFXTCompensation() or PowerLPF3_enableHFXTCompensation()
  */
 void PowerLPF3_forceHFXTCompensationUpdate(void);
 
@@ -873,7 +983,13 @@ void PowerLPF3_disableLfoscCompensation(void);
  *  should not be called directly by the application, or by any drivers.
  *  This function does not check declared constraints; the policy function
  *  must check constraints before calling this function to initiate sleep.
-
+ *
+ *  @warning For the Simplelink SDK, the power driver owns the RTC channel 0 and
+ *  no other component must use it. However, for the the Zephyr SDK, the power
+ *  driver has been designed to allow other components to use the RTC compare
+ *  channels but there is a limitation. The other components using the RTC
+ *  compare events must configure it using only CH0CC8U register and not CH0CC1U
+ *  or CH0CC250N register.
  *
  *  @param[in]  nextEventTimeUs    the SysTimer time of the next event, this
  *                                 must be far enough in the future.

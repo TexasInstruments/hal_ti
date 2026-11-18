@@ -3,7 +3,7 @@
  *
  *  Description:    Defines and prototypes for the APU peripheral.
  *
- *  Copyright (c) 2024-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2024-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __APU_H__
-#define __APU_H__
+#ifndef ti_devices_apu__include
+#define ti_devices_apu__include
 
 //*****************************************************************************
 //
@@ -65,32 +65,32 @@ extern "C" {
 //*****************************************************************************
 enum APUApi
 {
-    APU_API_NOP               = 0x0000,
-    APU_API_CONFIG            = 0x0001,
-    APU_API_DOTPROD           = 0x0002,
-    APU_API_VECTMULT          = 0x0003,
-    APU_API_VECTSUM           = 0x0004,
-    APU_API_MATMATMULT        = 0x0005,
-    APU_API_UNITCIRC          = 0x0006,
-    APU_API_SYMMATRIXVECTPROD = 0x0007,
-    APU_API_MATRIXMULT        = 0x0008,
-    APU_API_HERMATRIXMULT     = 0x0009,
-    APU_API_SYMMATRIXMULT     = 0x000A,
-    APU_API_MATRIXSUM         = 0x000B,
-    APU_API_SCALARMULT        = 0x000C,
-    APU_API_MATRIXSCALARSUM   = 0x000D,
-    APU_API_POLAR             = 0x000E,
-    APU_API_CARTESIAN         = 0x000F,
-    APU_API_COVMATRIX         = 0x0010,
-    APU_API_EIGEN             = 0x0011,
-    APU_API_R2C               = 0x0012,
-    APU_API_MATRIXNORM        = 0x0013,
-    APU_API_FFT               = 0x0014,
-    APU_API_DCT               = 0x0015,
-    APU_API_SORT              = 0x0016,
-    APU_API_GAUSS             = 0x0017,
-    APU_API_HERMLO            = 0x0018,
-    APU_API_MAXMIN            = 0x0019,
+    APU_API_NOP             = 0x0000,
+    APU_API_CONFIG          = 0x0001,
+    APU_API_DOTPROD         = 0x0002,
+    APU_API_VECTMULT        = 0x0003,
+    APU_API_VECTSUM         = 0x0004,
+    APU_API_MATMATMULT      = 0x0005,
+    APU_API_UNITCIRC        = 0x0006,
+    APU_API_CONV1D          = 0x0007,
+    APU_API_MATRIXMULT      = 0x0008,
+    APU_API_HERMATRIXMULT   = 0x0009,
+    APU_API_SYMMATRIXMULT   = 0x000A,
+    APU_API_MATRIXSUM       = 0x000B,
+    APU_API_AUTOCORR        = 0x000C,
+    APU_API_MATRIXSCALARSUM = 0x000D,
+    APU_API_POLAR           = 0x000E,
+    APU_API_CARTESIAN       = 0x000F,
+    APU_API_COVMATRIX       = 0x0010,
+    APU_API_EIGEN           = 0x0011,
+    APU_API_R2C             = 0x0012,
+    APU_API_MATRIXNORM      = 0x0013,
+    APU_API_FFT             = 0x0014,
+    APU_API_DCT             = 0x0015,
+    APU_API_SORT            = 0x0016,
+    APU_API_GAUSS           = 0x0017,
+    APU_API_HERMLO          = 0x0018,
+    APU_API_MAXMIN          = 0x0019,
 };
 
 //****************************************************************************
@@ -976,6 +976,51 @@ void APUHermLo(uint16_t N, void *pInput, void *pResult);
 
 //*****************************************************************************
 //
+//! \brief APU accelerator for computing autocorrelation of input vector
+//!
+//! APU accelerator for one-sided autocorrelation of input vector (non-negative lags)
+//!
+//! Defined as:
+//! \code
+//!    C[k] = dot_product(A[k:N-1], conj(A[0:N-1-k])), k=0:N-1
+//! \endcode
+//! in which A, C are two complex vectors
+//!
+//! \param N length of the vector A/C
+//! \param pInputA a pointer to the base of the input vector A, in APU memory
+//! \param pResult autocorrelation of input vector
+//!
+//! \return None
+//
+//*****************************************************************************
+void APUVectorAutoCorrelation(uint16_t N, void *pInputA, void *pResult);
+
+//*****************************************************************************
+//
+//! \brief APU accelerator for computing 1D Convolution between 2 vectors
+//!
+//! APU accelerator for computing 1D Convolution between vector X (sample vector)
+//! and kernel H (filter), assume that length of H is less or equal length of X
+//!
+//! Defined as:
+//! \code
+//!  Y = conv1d(X, H, 'full')
+//! \endcode
+//! in which, X, H and Y are complex vectors.
+//!
+//! \param length_H length of kernel H
+//! \param length_X length of vector X
+//! \param pH a pointer to the base of vector H, in APU memory
+//! \param pX a pointer to the base of vector X, in APU memory
+//! \param pResult a pointer to the output vector Y, in APU memory
+//!
+//! \return None
+//
+//*****************************************************************************
+void APUVectorConv1d(uint16_t length_H, uint16_t length_X, void *pH, void *pX, void *pResult);
+
+//*****************************************************************************
+//
 //! Close the Doxygen group.
 //! @}
 //
@@ -998,4 +1043,4 @@ void APUHermLo(uint16_t N, void *pInput, void *pResult);
 //
 //*****************************************************************************
 
-#endif //  __APU_H__
+#endif // ti_devices_apu__include

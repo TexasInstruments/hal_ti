@@ -40,7 +40,7 @@
 #include <stdint.h>
 
 /* Length of binary image. */
-#define LRF_PBE_BINARY_GENERIC_LENGTH 745 
+#define LRF_PBE_BINARY_GENERIC_LENGTH 746
 
 /* Declaration of raw binary. */
 extern const uint32_t LRF_PBE_binary_generic[LRF_PBE_BINARY_GENERIC_LENGTH];

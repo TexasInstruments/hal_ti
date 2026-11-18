@@ -1,7 +1,7 @@
 /******************************************************************************
  *  Filename:       systick_doc.h
  *
- *  Copyright (c) 2025-2026 Texas Instruments Incorporated
+ *  Copyright (c) 2025 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:

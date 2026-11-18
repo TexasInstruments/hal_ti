@@ -44,32 +44,32 @@
 //*****************************************************************************
 enum APUApi
 {
-    APU_API_NOP               = 0x0000,
-    APU_API_CONFIG            = 0x0001,
-    APU_API_DOTPROD           = 0x0002,
-    APU_API_VECTMULT          = 0x0003,
-    APU_API_VECTSUM           = 0x0004,
-    APU_API_MATMATMULT        = 0x0005,
-    APU_API_UNITCIRC          = 0x0006,
-    APU_API_SYMMATRIXVECTPROD = 0x0007,
-    APU_API_MATRIXMULT        = 0x0008,
-    APU_API_HERMATRIXMULT     = 0x0009,
-    APU_API_SYMMATRIXMULT     = 0x000A,
-    APU_API_MATRIXSUM         = 0x000B,
-    APU_API_SCALARMULT        = 0x000C,
-    APU_API_MATRIXSCALARSUM   = 0x000D,
-    APU_API_POLAR             = 0x000E,
-    APU_API_CARTESIAN         = 0x000F,
-    APU_API_COVMATRIX         = 0x0010,
-    APU_API_EIGEN             = 0x0011,
-    APU_API_R2C               = 0x0012,
-    APU_API_MATRIXNORM        = 0x0013,
-    APU_API_FFT               = 0x0014,
-    APU_API_DCT               = 0x0015,
-    APU_API_SORT              = 0x0016,
-    APU_API_GAUSS             = 0x0017,
-    APU_API_HERMLO            = 0x0018,
-    APU_API_MAXMIN            = 0x0019,
+    APU_API_NOP             = 0x0000,
+    APU_API_CONFIG          = 0x0001,
+    APU_API_DOTPROD         = 0x0002,
+    APU_API_VECTMULT        = 0x0003,
+    APU_API_VECTSUM         = 0x0004,
+    APU_API_MATMATMULT      = 0x0005,
+    APU_API_UNITCIRC        = 0x0006,
+    APU_API_CONV1D          = 0x0007,
+    APU_API_MATRIXMULT      = 0x0008,
+    APU_API_HERMATRIXMULT   = 0x0009,
+    APU_API_SYMMATRIXMULT   = 0x000A,
+    APU_API_MATRIXSUM       = 0x000B,
+    APU_API_AUTOCORR        = 0x000C,
+    APU_API_MATRIXSCALARSUM = 0x000D,
+    APU_API_POLAR           = 0x000E,
+    APU_API_CARTESIAN       = 0x000F,
+    APU_API_COVMATRIX       = 0x0010,
+    APU_API_EIGEN           = 0x0011,
+    APU_API_R2C             = 0x0012,
+    APU_API_MATRIXNORM      = 0x0013,
+    APU_API_FFT             = 0x0014,
+    APU_API_DCT             = 0x0015,
+    APU_API_SORT            = 0x0016,
+    APU_API_GAUSS           = 0x0017,
+    APU_API_HERMLO          = 0x0018,
+    APU_API_MAXMIN          = 0x0019,
 };
 
 //****************************************************************************
@@ -77,6 +77,15 @@ enum APUApi
 //****************************************************************************
 #define APU_MSGBOX_CMDOK 0x0001 //!< Indicate operation has completed
 #define APU_HEAP_ADDR    0x03CE //!< 50 positions for Heap, from 974->1023
+#define APU_WAIT_8_NOPS()      \
+    __asm volatile("nop.w\n\t" \
+                   "nop.w\n\t" \
+                   "nop.w\n\t" \
+                   "nop.w\n\t" \
+                   "nop.w\n\t" \
+                   "nop.w\n\t" \
+                   "nop.w\n\t" \
+                   "nop.w\n\t")
 
 //*****************************************************************************
 //
@@ -125,11 +134,7 @@ void APUSetConfig(uint32_t memConfig)
     HWREG(APU_BASE + APU_O_ENABLE) = APU_ENABLE_TOPSM_ONE;
     HWREG(APU_BASE + APU_O_INIT)   = APU_INIT_TOPSM_ONE;
     // Ensure APU is in wait before calling API
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
-
+    APU_WAIT_8_NOPS();
     // Set memory mode: interleaving or mirrored
     if (memConfig == APU_MEMORY_INTERLEAVED)
     {
@@ -534,24 +539,17 @@ void APUJacobiEVD(uint16_t N, void *pInput, void *pResultV, uint16_t maxIter, fl
     // Always save min_sum at: heap_base + 7
     volatile float *mem_ptr         = (float *)(APU_GET_DATA_MEM_ABS(APU_HEAP_ADDR + 7));
     *mem_ptr                        = minSum; // real part
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
     // Imaginary part
-    *(mem_ptr + 1) = 0;
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
-    volatile float *mem_ptr_eps = (float *)(APU_GET_DATA_MEM_ABS(APU_HEAP_ADDR + 30));
+    *(mem_ptr + 1)                  = 0;
+    volatile float *mem_ptr_eps     = (float *)(APU_GET_DATA_MEM_ABS(APU_HEAP_ADDR + 30));
     // Real part
-    *mem_ptr_eps                = epsTol;
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
+    *mem_ptr_eps                    = epsTol;
     // Imaginary part
-    *(mem_ptr_eps + 1) = 0;
+    *(mem_ptr_eps + 1)              = 0;
 
     // Start APU
     HWREG(APU_BASE + APU_O_API) = APU_API_EIGEN;
 }
-
 //*****************************************************************************
 //
 // Configure the APU to perform Gauss-Jordan Elimination on a matrix
@@ -567,10 +565,8 @@ void APUGaussJordanElim(uint16_t M, uint16_t N, void *pInput, float epsTol)
     HWREG(APU_BASE + APU_O_CMDPAR2) = APU_GET_DATA_MEM_OFFSET(pInput);
     // Threshold epsilon at heap addres + 1
     volatile float *mem_ptr;
-    mem_ptr  = (float *)(APU_GET_DATA_MEM_ABS((APU_HEAP_ADDR + 1)));
-    *mem_ptr = epsTol; // real part
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
+    mem_ptr        = (float *)(APU_GET_DATA_MEM_ABS((APU_HEAP_ADDR + 1)));
+    *mem_ptr       = epsTol; // real part
     // Imaginary part
     *(mem_ptr + 1) = 0;
 
@@ -686,11 +682,9 @@ void APUVectorMaxMin(uint16_t N, void *pInput, float thresh, uint16_t op, void *
     HWREG(APU_BASE + APU_O_CMDPAR1) = APU_GET_DATA_MEM_OFFSET(pInput);
 
     // Threshold epsilon at heap addres + 1
-    volatile float *mem_ptr = (float *)(APU_GET_DATA_MEM_ABS((APU_HEAP_ADDR + 1)));
-    *mem_ptr                = thresh; // real part
-    // Prevent back-to-back-writes
-    ASM_4_NOPS();
-    *(mem_ptr + 1)                  = 0; // imaginary part
+    volatile float *mem_ptr         = (float *)(APU_GET_DATA_MEM_ABS((APU_HEAP_ADDR + 1)));
+    *mem_ptr                        = thresh; // real part
+    *(mem_ptr + 1)                  = 0;      // imaginary part
     HWREG(APU_BASE + APU_O_CMDPAR2) = APU_GET_DATA_MEM_OFFSET(mem_ptr);
 
     // op for max (APU_MAXMIN_OP_MAX) or min (APU_MAXMIN_OP_MIN)
@@ -740,4 +734,42 @@ void APUHermLo(uint16_t N, void *pInput, void *pResult)
 
     // Start APU
     HWREG(APU_BASE + APU_O_API) = APU_API_HERMLO;
+}
+
+//*****************************************************************************
+//
+// Configure the APU to calculate the one-sided autocorrelation
+//
+//*****************************************************************************
+void APUVectorAutoCorrelation(uint16_t N, void *pInputA, void *pResult)
+{
+    // Length of vectors
+    HWREG(APU_BASE + APU_O_CMDPAR0) = N;
+    // Input vector A offset in memory
+    HWREG(APU_BASE + APU_O_CMDPAR2) = APU_GET_DATA_MEM_OFFSET(pInputA);
+    // Result offset in memory
+    HWREG(APU_BASE + APU_O_CMDPAR4) = APU_GET_DATA_MEM_OFFSET(pResult);
+
+    HWREG(APU_BASE + APU_O_API) = APU_API_AUTOCORR;
+}
+
+//*****************************************************************************
+//
+// Configure the APU to calculate the convolution between H and X for filters
+//
+//*****************************************************************************
+void APUVectorConv1d(uint16_t length_H, uint16_t length_X, void *pH, void *pX, void *pResult)
+{
+    // Length of kernel H
+    HWREG(APU_BASE + APU_O_CMDPAR0) = length_H;
+    // Lengh of input vector X
+    HWREG(APU_BASE + APU_O_CMDPAR1) = length_X;
+    // Offset of kernel H in APU memory
+    HWREG(APU_BASE + APU_O_CMDPAR2) = APU_GET_DATA_MEM_OFFSET(pH);
+    // Offset of input X in APU memory
+    HWREG(APU_BASE + APU_O_CMDPAR3) = APU_GET_DATA_MEM_OFFSET(pX);
+    // Result offset in memory
+    HWREG(APU_BASE + APU_O_CMDPAR4) = APU_GET_DATA_MEM_OFFSET(pResult);
+
+    HWREG(APU_BASE + APU_O_API) = APU_API_CONV1D;
 }

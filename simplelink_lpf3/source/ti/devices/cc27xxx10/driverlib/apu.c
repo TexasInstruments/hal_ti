@@ -3,7 +3,7 @@
  *
  *  Description:    Driver for the APU peripheral.
  *
- *  Copyright (c) 2024-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2024-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -733,5 +733,45 @@ void APUHermLo(uint16_t N, void *pInput, void *pResult)
 
     // Start APU
     HWREG(APU_BASE + APU_O_API)    = APU_API_HERMLO;
+    HWREG(APU_BASE + APU_O_MSGBOX) = APU_MSGBOX_VAL_ALLONES;
+}
+
+//*****************************************************************************
+//
+// Configure the APU to calculate the one-sided autocorrelation
+//
+//*****************************************************************************
+void APUVectorAutoCorrelation(uint16_t N, void *pInputA, void *pResult)
+{
+    // Length of vectors
+    HWREG(APU_BASE + APU_O_CMDPAR0) = N;
+    // Input vector A offset in memory
+    HWREG(APU_BASE + APU_O_CMDPAR2) = APU_GET_DATA_MEM_OFFSET(pInputA);
+    // Result offset in memory
+    HWREG(APU_BASE + APU_O_CMDPAR4) = APU_GET_DATA_MEM_OFFSET(pResult);
+
+    HWREG(APU_BASE + APU_O_API)    = APU_API_AUTOCORR;
+    HWREG(APU_BASE + APU_O_MSGBOX) = APU_MSGBOX_VAL_ALLONES;
+}
+
+//*****************************************************************************
+//
+// Configure the APU to calculate the convolution between H and X for filters
+//
+//*****************************************************************************
+void APUVectorConv1d(uint16_t length_H, uint16_t length_X, void *pH, void *pX, void *pResult)
+{
+    // Length of kernel H
+    HWREG(APU_BASE + APU_O_CMDPAR0) = length_H;
+    // Lengh of input vector X
+    HWREG(APU_BASE + APU_O_CMDPAR1) = length_X;
+    // Offset of kernel H in APU memory
+    HWREG(APU_BASE + APU_O_CMDPAR2) = APU_GET_DATA_MEM_OFFSET(pH);
+    // Offset of input X in APU memory
+    HWREG(APU_BASE + APU_O_CMDPAR3) = APU_GET_DATA_MEM_OFFSET(pX);
+    // Result offset in memory
+    HWREG(APU_BASE + APU_O_CMDPAR4) = APU_GET_DATA_MEM_OFFSET(pResult);
+
+    HWREG(APU_BASE + APU_O_API)    = APU_API_CONV1D;
     HWREG(APU_BASE + APU_O_MSGBOX) = APU_MSGBOX_VAL_ALLONES;
 }

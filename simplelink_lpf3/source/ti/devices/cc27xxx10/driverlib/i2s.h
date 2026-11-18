@@ -3,7 +3,7 @@
  *
  *  Description:    Prototypes and defines for the I2S API.
  *
- *  Copyright (c) 2023-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2023-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __I2S_H__
-#define __I2S_H__
+#ifndef ti_devices_i2s__include
+#define ti_devices_i2s__include
 
 //****************************************************************************
 //
@@ -900,4 +900,4 @@ __STATIC_INLINE void I2SResetWclkCounter(uint32_t base)
 //
 //****************************************************************************
 
-#endif //  __I2S_H__
+#endif // ti_devices_i2s__include

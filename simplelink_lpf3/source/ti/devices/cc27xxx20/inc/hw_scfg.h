@@ -26,7 +26,7 @@
 * specific language governing permissions and limitations
 * under the License.
 *
-* Copyright (c) 2025-2026 Texas Instruments Incorporated
+* Copyright (c) 2025 Texas Instruments Incorporated
 *
 * SPDX-License-Identifier: BSD-3-Clause
 ******************************************************************************/

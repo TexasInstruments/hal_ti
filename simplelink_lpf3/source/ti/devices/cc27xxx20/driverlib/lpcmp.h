@@ -34,8 +34,8 @@
  *
  ******************************************************************************/
 
-#ifndef __LPCMP_H__
-#define __LPCMP_H__
+#ifndef ti_devices_lpcmp__include
+#define ti_devices_lpcmp__include
 
 //*****************************************************************************
 //
@@ -406,7 +406,7 @@ __STATIC_INLINE void LPCMPEnableOutputAtPin(void)
 //*****************************************************************************
 __STATIC_INLINE bool LPCMPEventFlagIsSet(void)
 {
-    return ( (bool)(HWREG(SYS0_BASE + SYS0_O_LPCMPCFG) & SYS0_LPCMPCFG_EVTIFG_M) );
+    return ((bool)(HWREG(SYS0_BASE + SYS0_O_LPCMPCFG) & SYS0_LPCMPCFG_EVTIFG_M));
 }
 
 #else
@@ -477,4 +477,4 @@ extern void LPCMPSetDividerPath_veneer(uint32_t path);
 //
 //*****************************************************************************
 
-#endif // __LPCMP_H__
+#endif // ti_devices_lpcmp__include

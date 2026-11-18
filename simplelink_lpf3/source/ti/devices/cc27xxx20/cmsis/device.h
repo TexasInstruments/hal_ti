@@ -38,18 +38,13 @@
 // Device-specific configuration file
 #include "cc27xxx20.h"
 
-// Core-specific cmsis header file
-#include "core/core_cm33.h"
-
-// Toolchain-specific cmsis header files
-#if defined(__IAR_SYSTEMS_ICC__)
-#include "core/cmsis_iccarm.h"
-#elif defined(__clang__)
-#include "core/cmsis_tiarmclang.h"
-#elif defined(__GNUC__)
-#include "core/cmsis_gcc.h"
+// Core-specific CMSIS header file. The core header includes the
+// toolchain-specific CMSIS header files through cmsis_compiler.h.
+#if defined(__ZEPHYR__)
+// Zephyr provides CMSIS-Core through the cmsis_6 module.
+#include <core_cm33.h>
 #else
-    #error "Unexpected toolchain used when importing cmsis headers"
+#include "core/core_cm33.h"
 #endif
 
 #endif // #ifndef __DEVICE_H__

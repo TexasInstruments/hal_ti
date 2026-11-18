@@ -1,7 +1,7 @@
 /******************************************************************************
 *  Filename:       hw_memmap.h
 ******************************************************************************
-*  Copyright (c) 2025-2026 Texas Instruments Incorporated. All rights reserved.
+*  Copyright (c) 2025 Texas Instruments Incorporated. All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
 *  modification, are permitted provided that the following conditions are met:
@@ -236,18 +236,36 @@
 #define SYSTICK_BASE            0xE000E010U // SYSTICK
 #define SYSTICK_S_BASE          0xE000E010U // SYSTICK_S
 #define SYSTICK_NS_BASE         0xF000E010U // SYSTICK_NS
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define NVIC_BASE               0xE000E100U // NVIC
+#endif // __ZEPHYR__
 #define NVIC_S_BASE             0xE000E100U // NVIC_S
 #define NVIC_NS_BASE            0xF000E100U // NVIC_NS
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define SCB_BASE                0xE000ECFCU // SCB
+#endif // __ZEPHYR__
 #define SCB_S_BASE              0xE000ECFCU // SCB_S
 #define SCB_NS_BASE             0xF000ECFCU // SCB_NS
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define MPU_BASE                0xE000ED90U // MPU
+#endif // __ZEPHYR__
 #define MPU_S_BASE              0xE000ED90U // MPU_S
 #define MPU_NS_BASE             0xF000ED90U // MPU_NS
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
 #define SAU_BASE                0xE000EDD0U // SAU
+#define DCB_BASE                0xE000EDE0U // DCB
+#endif // __ZEPHYR__
 #define DCB_S_BASE              0xE000EDE0U // DCB_S
 #define DCB_NS_BASE             0xF000EDE0U // DCB_NS
 #define FPE_BASE                0xE000EF30U // FPE
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define DIB_BASE                0xE000EFB0U // DIB
+#endif // __ZEPHYR__
 #define DIB_S_BASE              0xE000EFB0U // DIB_S
 #define DIB_NS_BASE             0xF000EFB0U // DIB_NS
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define TPIU_BASE               0xE0040000U // TPIU
+#endif // __ZEPHYR__
 #define CPU_ROM_TABLE_BASE      0xE00FF000U // CPU_ROM_TABLE
 
 #ifdef DRIVERLIB_NS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025, Texas Instruments Incorporated
+ * Copyright (c) 2017-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,8 @@
 #include <ti/drivers/cryptoutils/cryptokey/CryptoKey.h>
 #include <ti/devices/DeviceFamily.h>
 
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX)
     #include <ti/drivers/cryptoutils/ecc/ECCParamsXXF3HSM.h>
 #endif
 
@@ -266,7 +267,8 @@ extern const ECCParams_CurveParams ECCParams_Ed25519;
 #define ECC_LENGTH_PREFIX_BYTES 4
 
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || \
-    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX)
 
     /*!
      *  @defgroup nistp256_params NIST P256 curve params to be used with ECC SW library
@@ -439,7 +441,8 @@ typedef union
 } ECC_Param;
 
 #endif /* (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) \
-          || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) */
+          || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) || (DeviceFamily_PARENT ==                          \
+          DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX) */
 
 /*!
  *  @brief Length of Curve25519 curve parameters in bytes

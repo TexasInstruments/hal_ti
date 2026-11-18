@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -510,13 +510,17 @@ void PowerLPF3_selectLFXT(void);
 /*!
  * @brief Select EXTLF as LFCLK source
  *
- * Choose an external 31.25 kHz square wave as the LFCLK source as input.
+ * Choose an external square wave as the LFCLK source as input.
  * Once LFCLK has switched, the #PowerLPF3_LFCLK_SWITCHED notification
  * will be issued and all subscribers to this event will be notified.
  *
  * This function requires the following symbols to be defined.
  *  - \c PowerLPF3_extlfPin (uint8_t): The DIO number of the pin to be used as the EXTLF pin.
  *  - \c PowerLPf3_extlfPinMux (uint8_t): Mux value used to mux the EXTLF signal to \c PowerLPF3_extlfPin.
+ *  - \c PowerLPF3_extlfPeriodUsQ16 (uint32_t): The EXTLF clock period in us as a
+ *    fixed-point value with 6 integer bits and 16 fractional bits, computed as: round(1e6 * 2^16 / frequencyHz).
+ * Allowed range: from 0x1E8480 to 0x200000 (maximum frequency 32768 Hz, minimum frequency 31250 Hz).
+ *
  * If using SysConfig, the symbols will be defined in ti_drivers_config.c.
  *
  * @warning Dynamic switching between LF clocks is not supported. Once one of
@@ -555,6 +559,12 @@ void PowerLPF3_initHFXTCompensation(int32_t P0, int32_t P1, int32_t P2, int32_t 
 /*!
  * @brief Enable HFXT temperature compensation
  *
+ * @deprecated This function relies on interrupt-based temperature
+ * notifications, which can produce invalid readings during standby due to
+ * BATMON_02 errata. Use PowerLPF3_configureHFXTCompensation() together
+ * with PowerLPF3_updateHFXTCompensation() instead, which only reads
+ * temperature when explicitly polled.
+ *
  * Enable automatic compensation for temperature-based frequency-drift of HFXT
  *
  * This function should only be called once, but can be invoked again if
@@ -579,6 +589,11 @@ void PowerLPF3_enableHFXTCompensation(int16_t tempThreshold, int16_t tempDelta);
 /*!
  * @brief Disable HFXT temperature compensation
  *
+ * @deprecated Only needed to disable the interrupt-based compensation
+ * enabled by the deprecated PowerLPF3_enableHFXTCompensation(). When using
+ * the polling-based API (PowerLPF3_updateHFXTCompensation()), the caller
+ * controls when compensation runs and no disable call is needed.
+ *
  * Disable automatic compensation for temperature-based frequency-drift of HFXT
  *
  * @note Calling this function will also undo any previous temperature compensation that has been
@@ -591,12 +606,50 @@ void PowerLPF3_disableHFXTCompensation(void);
 /*!
  * @brief Force HFXT temperature compensation update
  *
+ * @deprecated Only needed when using the interrupt-based compensation enabled
+ * by the deprecated PowerLPF3_enableHFXTCompensation(). Use
+ * PowerLPF3_updateHFXTCompensation() instead, which provides the same
+ * functionality.
+ *
  * Should be called after releasing the #PowerLPF3_DISALLOW_SWTCXO constraint
  * to ensure the correct HFXT frequency.
  *
- * @pre PowerLPF3_enableHFXTCompensation()
+ * @pre PowerLPF3_configureHFXTCompensation() or PowerLPF3_enableHFXTCompensation()
  */
 void PowerLPF3_forceHFXTCompensationUpdate(void);
+
+/*!
+ * @brief Configure HFXT temperature compensation
+ *
+ * Configures the threshold and delta used by PowerLPF3_updateHFXTCompensation().
+ * Must be called before PowerLPF3_updateHFXTCompensation().
+ *
+ * @param[in] tempThreshold Threshold above which temperature compensation will
+ * be performed. If the threshold is set to for example 80 degrees, then
+ * the first compensation will occur once the temperature reaches 81 degrees.
+ * Units in degrees Celsius.
+ * @param[in] tempDelta Delta describing how much the temperature can drift
+ * before compensation is applied. If compensation is performed at 81 degrees,
+ * and the delta is set to 5, then a re-compensation is performed at either
+ * 76 degrees or 86 degrees, depending on which temperature state occurs first.
+ * Units in degrees Celsius.
+ *
+ * @pre PowerLPF3_initHFXTCompensation()
+ */
+void PowerLPF3_configureHFXTCompensation(int16_t tempThreshold, int16_t tempDelta);
+
+/*!
+ * @brief Update HFXT temperature compensation
+ *
+ * Compensation for temperature-based frequency-drift of HFXT
+ *
+ * Reads the current temperature and updates the HFXT ratio if the temperature has
+ * changed by more than the configured delta and is above the configured temperature threshold.
+ * Resets compensation if the temperature is below the configured threshold.
+ *
+ * @pre PowerLPF3_configureHFXTCompensation()
+ */
+void PowerLPF3_updateHFXTCompensation(void);
 
 /*!
  * @brief Get the current HFXT compensation ratio.

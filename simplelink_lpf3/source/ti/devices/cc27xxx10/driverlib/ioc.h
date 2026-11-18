@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __IOC_H__
-#define __IOC_H__
+#ifndef ti_devices_ioc__include
+#define ti_devices_ioc__include
 
 //*****************************************************************************
 //
@@ -508,4 +508,4 @@ __STATIC_INLINE void IOCSetEdgeDetectConfig(uint32_t dioNumber, uint32_t edgeDet
 //
 //*****************************************************************************
 
-#endif // __IOC_H__
+#endif // ti_devices_ioc__include

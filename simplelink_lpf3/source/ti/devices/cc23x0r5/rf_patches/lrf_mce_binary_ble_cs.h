@@ -40,7 +40,7 @@
 #include <stdint.h>
 
 /* Length of binary image. */
-#define LRF_MCE_BINARY_BLE_CS_LENGTH 651 
+#define LRF_MCE_BINARY_BLE_CS_LENGTH 659
 
 /* Declaration of raw binary. */
 extern const uint32_t LRF_MCE_binary_ble_cs[LRF_MCE_BINARY_BLE_CS_LENGTH];

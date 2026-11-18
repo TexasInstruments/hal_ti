@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -259,14 +259,13 @@ extern "C" {
  */
 #define BatteryMonitor_STATUS_ERROR (-1)
 
-/* @cond NODOC
+/*!
+ * @brief Forward declaration of the BatteryMonitor notification object.
  *
- * Type declaration for the notification object made separately from the
- * struct definition because of the circular dependency between
- * #BatteryMonitor_NotifyFxn() and #BatteryMonitor_NotifyObj.
+ * Declared separately from the struct definition due to the circular
+ * dependency between #BatteryMonitor_NotifyFxn() and #BatteryMonitor_NotifyObj.
  */
 typedef struct BatteryMonitor_NotifyObj_ BatteryMonitor_NotifyObj;
-/* @endcond */
 
 /*!
  *  @brief Function prototype for a notification callback.

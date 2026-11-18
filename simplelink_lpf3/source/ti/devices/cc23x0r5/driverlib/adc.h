@@ -3,7 +3,7 @@
  *
  *  Description:    Prototypes and defines for the ADC API.
  *
- *  Copyright (c) 2022-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __ADC_H__
-#define __ADC_H__
+#ifndef ti_devices_adc__include
+#define ti_devices_adc__include
 
 //*****************************************************************************
 //
@@ -872,4 +872,4 @@ extern uint32_t ADCAdjustValueForGain(uint32_t adcValue, uint32_t bitResolution,
 //
 //*****************************************************************************
 
-#endif //  __ADC_H__
+#endif // ti_devices_adc__include

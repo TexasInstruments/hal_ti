@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __CHIP_INFO_H__
-#define __CHIP_INFO_H__
+#ifndef ti_devices_chipinfo__include
+#define ti_devices_chipinfo__include
 
 //*****************************************************************************
 //
@@ -161,4 +161,4 @@ extern void ChipInfoGetBleAddr(uint8_t *pBleAddr);
 //
 //*****************************************************************************
 
-#endif // __CHIP_INFO_H__
+#endif // ti_devices_chipinfo__include

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Texas Instruments Incorporated - http://www.ti.com
+ * Copyright (c) 2024-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,11 @@
 #ifndef ti_log_LogSinkTraceLPF3__include
 #define ti_log_LogSinkTraceLPF3__include
 
+#include <stdint.h>
+#include <ti/log/Log.h>
+#include <ti/devices/DeviceFamily.h>
+#include DeviceFamily_constructPath(inc/hw_lrfdtrc.h)
+
 /*
  * Helpers to set the configuration for the tracer
  */
@@ -116,11 +121,6 @@
 #define LogSinkTraceLPF3_CONFIG_PRESCALER_DIV2 LRFDTRC_CFG_PRESCAL_DIV2
 #define LogSinkTraceLPF3_CONFIG_PRESCALER_DIV3 LRFDTRC_CFG_PRESCAL_DIV3
 #define LogSinkTraceLPF3_CONFIG_PRESCALER_DIV4 LRFDTRC_CFG_PRESCAL_DIV4
-
-#include <stdint.h>
-#include <ti/log/Log.h>
-#include <ti/devices/DeviceFamily.h>
-#include DeviceFamily_constructPath(inc/hw_lrfdtrc.h)
 
 #if defined(__cplusplus)
 extern "C" {

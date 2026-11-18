@@ -6,8 +6,8 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        9.11.00.02_ga
- *  RF Settings Version:
+ *  Tool Version:        01.10.00.06_eng
+ *  RF Settings Version: 01.10.00.42_eng
  */
 
 #include "ti_radio_config.h"

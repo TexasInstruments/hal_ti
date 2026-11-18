@@ -45,19 +45,19 @@
 // Configure FIFO what statuses to append
 #define PBE_IEEE_RAM_O_FIFOCFG                                       0x00000022U
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTRABYTES                                    0x00000024U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PRETXIFS                                      0x00000026U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PRERXIFS                                      0x00000028U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PRETXIFSV2                                    0x0000002AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_PILOTLEN                                      0x0000002CU
 
 // How long to search for sync before giving up
@@ -66,55 +66,55 @@
 // Combined tx/rx/fs configuration
 #define PBE_IEEE_RAM_O_OPCFG                                         0x00000030U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PATTERN                                       0x00000032U
 
 // Initialization for the whitener, if 0 the whitener is not used
 #define PBE_IEEE_RAM_O_WHITEINIT                                     0x00000034U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PIB                                           0x00000036U
 
-// 
+//
 #define PBE_IEEE_RAM_O_FFTYPE                                        0x00000038U
 
-// 
+//
 #define PBE_IEEE_RAM_O_NRXNOK                                        0x0000003AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_NRXIGNORED                                    0x0000003CU
 
-// 
+//
 #define PBE_IEEE_RAM_O_NTXENHACK                                     0x0000003EU
 
-// 
+//
 #define PBE_IEEE_RAM_O_NRXFIFOFULL                                   0x00000040U
 
-// 
+//
 #define PBE_IEEE_RAM_O_NRXOK                                         0x00000042U
 
-// 
+//
 #define PBE_IEEE_RAM_O_NTX                                           0x00000044U
 
-// 
+//
 #define PBE_IEEE_RAM_O_NTXACK                                        0x00000046U
 
-// 
+//
 #define PBE_IEEE_RAM_O_NRXTIMEOUT                                    0x00000048U
 
-// 
+//
 #define PBE_IEEE_RAM_O_LASTRSSI                                      0x0000004AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_LASTFREQOFF                                   0x0000004CU
 
-// 
+//
 #define PBE_IEEE_RAM_O_LASTLQI                                       0x0000004EU
 
-// 
+//
 #define PBE_IEEE_RAM_O_LASTTIMESTAMPL                                0x00000050U
 
-// 
+//
 #define PBE_IEEE_RAM_O_LASTTIMESTAMPH                                0x00000052U
 
 // Status of receiver and transmitter
@@ -138,148 +138,151 @@
 // Source matching index
 #define PBE_IEEE_RAM_O_SRCMATCHIDX                                   0x00000060U
 
-// 
+// Extended operation status flags (RCL-1372: freed G_FLAGS bit 3 from bRxtimeoutUsed)
+#define PBE_IEEE_RAM_O_FLAGS2                                        0x00000062U
+
+//
 #define PBE_IEEE_RAM_O_PANID0                                        0x00000064U
 
-// 
+//
 #define PBE_IEEE_RAM_O_SHORTADDR0                                    0x00000066U
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR00                                     0x00000068U
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR01                                     0x0000006AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR02                                     0x0000006CU
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR03                                     0x0000006EU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FFOPT0                                        0x00000070U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PANID1                                        0x00000074U
 
-// 
+//
 #define PBE_IEEE_RAM_O_SHORTADDR1                                    0x00000076U
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR10                                     0x00000078U
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR11                                     0x0000007AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR12                                     0x0000007CU
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTADDR13                                     0x0000007EU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FFOPT1                                        0x00000080U
 
-// 
+//
 #define PBE_IEEE_RAM_O_TMPRSSI                                       0x00000082U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE00                                 0x00000084U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE01                                 0x00000086U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE02                                 0x00000088U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE03                                 0x0000008AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING00                                0x0000008CU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING01                                0x0000008EU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING02                                0x00000090U
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING03                                0x00000092U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE10                                 0x00000094U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE11                                 0x00000096U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE12                                 0x00000098U
 
-// 
+//
 #define PBE_IEEE_RAM_O_ENTRYENABLE13                                 0x0000009AU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING10                                0x0000009CU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING11                                0x0000009EU
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING12                                0x000000A0U
 
-// 
+//
 #define PBE_IEEE_RAM_O_FRAMEPENDING13                                0x000000A2U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PANCFGED                                      0x000000A4U
 
-// 
+//
 #define PBE_IEEE_RAM_O_TMPFCF                                        0x000000A6U
 
-// 
+//
 #define PBE_IEEE_RAM_O_CFGAUTOACK                                    0x000000A8U
 
-// 
+//
 #define PBE_IEEE_RAM_O_MACCMDID                                      0x000000AAU
 
-// 
+//
 #define PBE_IEEE_RAM_O_ACKSTATUS                                     0x000000ACU
 
-// 
+//
 #define PBE_IEEE_RAM_O_CORRCNT                                       0x000000AEU
 
-// 
+//
 #define PBE_IEEE_RAM_O_COEXCORRMASK                                  0x000000B0U
 
-// 
+//
 #define PBE_IEEE_RAM_O_TSYNC                                         0x000000B2U
 
-// 
+//
 #define PBE_IEEE_RAM_O_COEXT1                                        0x000000B4U
 
-// 
+//
 #define PBE_IEEE_RAM_O_COEXT2                                        0x000000B6U
 
-// 
+//
 #define PBE_IEEE_RAM_O_COEXCFG                                       0x000000B8U
 
-// 
+//
 #define PBE_IEEE_RAM_O_EXTSRCADDRTBL                                 0x000000BAU
 
-// 
+//
 #define PBE_IEEE_RAM_O_MATCHIDXFILT                                  0x000000BCU
 
-// 
+//
 #define PBE_IEEE_RAM_O_PAN0_SRC_MATCH_SHORT_START                    0x00000104U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PAN0_SRC_MATCH_EXT_START                      0x00000184U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PAN1_SRC_MATCH_SHORT_START                    0x00000204U
 
-// 
+//
 #define PBE_IEEE_RAM_O_PAN1_SRC_MATCH_EXT_START                      0x00000284U
 
 //******************************************************************************
@@ -891,6 +894,16 @@
 #define PBE_IEEE_RAM_SRCMATCHIDX_TBLIDX_S                                     0U
 
 //******************************************************************************
+// Register: FLAGS2
+//******************************************************************************
+// Field: [3:3] rxtimeoutused
+//
+// RX timeout occurred during current operation
+#define PBE_IEEE_RAM_FLAGS2_RXTIMEOUTUSED                                0x0008U
+#define PBE_IEEE_RAM_FLAGS2_RXTIMEOUTUSED_M                              0x0008U
+#define PBE_IEEE_RAM_FLAGS2_RXTIMEOUTUSED_S                                   3U
+
+//******************************************************************************
 // Register: PANID0
 //******************************************************************************
 // Field: [15:0] val
@@ -962,7 +975,7 @@
 
 // Field: [7:7] pancoord
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT0_PANCOORD                                     0x0080U
 #define PBE_IEEE_RAM_FFOPT0_PANCOORD_M                                   0x0080U
 #define PBE_IEEE_RAM_FFOPT0_PANCOORD_S                                        7U
@@ -971,7 +984,7 @@
 
 // Field: [6:6] preqonly
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT0_PREQONLY                                     0x0040U
 #define PBE_IEEE_RAM_FFOPT0_PREQONLY_M                                   0x0040U
 #define PBE_IEEE_RAM_FFOPT0_PREQONLY_S                                        6U
@@ -987,7 +1000,7 @@
 
 // Field: [4:4] autopend
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT0_AUTOPEND                                     0x0010U
 #define PBE_IEEE_RAM_FFOPT0_AUTOPEND_M                                   0x0010U
 #define PBE_IEEE_RAM_FFOPT0_AUTOPEND_S                                        4U
@@ -996,7 +1009,7 @@
 
 // Field: [2:2] autoack
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT0_AUTOACK                                      0x0004U
 #define PBE_IEEE_RAM_FFOPT0_AUTOACK_M                                    0x0004U
 #define PBE_IEEE_RAM_FFOPT0_AUTOACK_S                                         2U
@@ -1093,7 +1106,7 @@
 
 // Field: [7:7] pancoord
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT1_PANCOORD                                     0x0080U
 #define PBE_IEEE_RAM_FFOPT1_PANCOORD_M                                   0x0080U
 #define PBE_IEEE_RAM_FFOPT1_PANCOORD_S                                        7U
@@ -1102,7 +1115,7 @@
 
 // Field: [6:6] preqonly
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT1_PREQONLY                                     0x0040U
 #define PBE_IEEE_RAM_FFOPT1_PREQONLY_M                                   0x0040U
 #define PBE_IEEE_RAM_FFOPT1_PREQONLY_S                                        6U
@@ -1118,7 +1131,7 @@
 
 // Field: [4:4] autopend
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT1_AUTOPEND                                     0x0010U
 #define PBE_IEEE_RAM_FFOPT1_AUTOPEND_M                                   0x0010U
 #define PBE_IEEE_RAM_FFOPT1_AUTOPEND_S                                        4U
@@ -1127,7 +1140,7 @@
 
 // Field: [2:2] autoack
 //
-// 
+//
 #define PBE_IEEE_RAM_FFOPT1_AUTOACK                                      0x0004U
 #define PBE_IEEE_RAM_FFOPT1_AUTOACK_M                                    0x0004U
 #define PBE_IEEE_RAM_FFOPT1_AUTOACK_S                                         2U

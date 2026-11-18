@@ -36,6 +36,7 @@ set(SOURCES_DRIVERLIB
   ckmd.c
   cpu.c
   evtsvt.c
+  flash.c
   gpio.c
   interrupt.c
   lrfd.c

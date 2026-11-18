@@ -6,8 +6,8 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        9.11.00.02_ga
- *  RF Settings Version:
+ *  Tool Version:        01.10.00.06_eng
+ *  RF Settings Version: 01.10.00.42_eng
  */
 
 #include "ti_radio_config.h"
@@ -116,7 +116,7 @@ const LRF_Config LRF_configAdcNoise = {
 // Configuration: Common
 static const uint32_t LRF_commonRegConfig[] =
 {
-    0x0000003D,                     // Segment length = 61
+    0x0000003F,                     // Segment length = 63
     0x0008A001,                     //   Data structure 32-bit region (start byte position = 8, count = 2)
     (uint32_t) &LRF_txPowerTable,   //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
@@ -131,13 +131,15 @@ static const uint32_t LRF_commonRegConfig[] =
     0x00020004,                     //     LRFDPBE.TXFWBTHRS             LRFDPBE.RXFRBTHRS
     0x10DC1001,                     //   HW 16-bit region (start address = 0x10DC, count = 2)
     0x0B0B0202,                     //     LRFDPBE.TIMPRE                LRFDPBE.TIMCTL
-    0x0000300A,                     //   HW sparse region (address/value pairs, count = 11)
+    0x0000300C,                     //   HW sparse region (address/value pairs, count = 13)
     0x20C00003,                     //     LRFDMDM.ADCDIGCONF
     0x20C8001F,                     //     LRFDMDM.MODSYMMAP0
     0x20F00000,                     //     LRFDMDM.DEMIQMC0
     0x20F80080,                     //     LRFDMDM.DEMDSBU2
     0x21000000,                     //     LRFDMDM.DEMFIDC0
     0x21480000,                     //     LRFDMDM.MODCTRL
+    0x21840000,                     //     LRFDMDM.DEMDEBUG
+    0x22480000,                     //     LRFDMDM.GPOCTRL0
     0x30840000,                     //     LRFDRFE.MAGNTHRCFG
     0x308C0000,                     //     LRFDRFE.RSSIOFFSET
     0x30AC0000,                     //     LRFDRFE.SPARE4
@@ -401,20 +403,20 @@ const LRF_TxPowerTable LRF_txPowerTable = {
         { .power = { .fraction = 0, .dBm = 2 }, .tempCoeff = 35, .value = { .ibBoost = 0, .ib = 35, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 3 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 43, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 4 }, .tempCoeff = 50, .value = { .ibBoost = 0, .ib = 33, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 5 }, .tempCoeff = 10, .value = { .ibBoost = 0, .ib = 54, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 6 }, .tempCoeff = 6, .value = { .ibBoost = 1, .ib = 29, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 7 }, .tempCoeff = 5, .value = { .ibBoost = 1, .ib = 34, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 8 }, .tempCoeff = 8, .value = { .ibBoost = 1, .ib = 41, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 9 }, .tempCoeff = 20, .value = { .ibBoost = 1, .ib = 34, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 10 }, .tempCoeff = 30, .value = { .ibBoost = 1, .ib = 45, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 11 }, .tempCoeff = 65, .value = { .ibBoost = 1, .ib = 47, .gain = 5, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 12 }, .tempCoeff = 15, .value = { .ibBoost = 1, .ib = 44, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 13 }, .tempCoeff = 18, .value = { .ibBoost = 1, .ib = 49, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 14 }, .tempCoeff = 25, .value = { .ibBoost = 1, .ib = 40, .gain = 4, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 15 }, .tempCoeff = 20, .value = { .ibBoost = 2, .ib = 48, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 16 }, .tempCoeff = 40, .value = { .ibBoost = 1, .ib = 40, .gain = 5, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 17 }, .tempCoeff = 36, .value = { .ibBoost = 3, .ib = 39, .gain = 4, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 18 }, .tempCoeff = 40, .value = { .ibBoost = 3, .ib = 40, .gain = 5, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 5 }, .tempCoeff = 85, .value = { .ibBoost = 0, .ib = 30, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 6 }, .tempCoeff = 18, .value = { .ibBoost = 0, .ib = 36, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 7 }, .tempCoeff = 19, .value = { .ibBoost = 0, .ib = 42, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 8 }, .tempCoeff = 20, .value = { .ibBoost = 0, .ib = 31, .gain = 5, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 9 }, .tempCoeff = 25, .value = { .ibBoost = 0, .ib = 19, .gain = 6, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 10 }, .tempCoeff = 20, .value = { .ibBoost = 1, .ib = 27, .gain = 5, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 11 }, .tempCoeff = 35, .value = { .ibBoost = 1, .ib = 21, .gain = 6, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 12 }, .tempCoeff = 15, .value = { .ibBoost = 1, .ib = 37, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 13 }, .tempCoeff = 15, .value = { .ibBoost = 1, .ib = 44, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 14 }, .tempCoeff = 18, .value = { .ibBoost = 1, .ib = 49, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 15 }, .tempCoeff = 25, .value = { .ibBoost = 1, .ib = 40, .gain = 4, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 16 }, .tempCoeff = 20, .value = { .ibBoost = 2, .ib = 48, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 17 }, .tempCoeff = 35, .value = { .ibBoost = 3, .ib = 48, .gain = 3, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 18 }, .tempCoeff = 36, .value = { .ibBoost = 3, .ib = 39, .gain = 4, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 19 }, .tempCoeff = 80, .value = { .ibBoost = 2, .ib = 49, .gain = 6, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 20 }, .tempCoeff = 140, .value = { .ibBoost = 3, .ib = 47, .gain = 7, .mode = 3, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } }
     }
@@ -422,17 +424,25 @@ const LRF_TxPowerTable LRF_txPowerTable = {
 
 // LRF_TxPowerLimitTable data structure
 const LRF_TxPowerLimitTable LRF_txPowerLimitTable1Mbps = {
-    .numEntries = 0x00000000,
-    .freqDiv = 0x00000001,
+    .numEntries = 0x00000005,
+    .freqDiv = 0x000F4240,
     .limitTable = {
+        { .minFreq = 2401, .maxFreq = 2403, .regulatoryMask = 0x01, .maxTxPower = { .fraction = 0, .dBm = 15 } },
+        { .minFreq = 2401, .maxFreq = 2403, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 16 } },
+        { .minFreq = 2475, .maxFreq = 2477, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 15 } },
+        { .minFreq = 2477, .maxFreq = 2479, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 14 } },
+        { .minFreq = 2479, .maxFreq = 2481, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 10 } }
     }
 };
 
 // LRF_TxPowerLimitTable data structure
 const LRF_TxPowerLimitTable LRF_txPowerLimitTable2Mbps = {
-    .numEntries = 0x00000000,
-    .freqDiv = 0x00000001,
+    .numEntries = 0x00000003,
+    .freqDiv = 0x000F4240,
     .limitTable = {
+        { .minFreq = 2473, .maxFreq = 2475, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 17 } },
+        { .minFreq = 2475, .maxFreq = 2477, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 16 } },
+        { .minFreq = 2477, .maxFreq = 2479, .regulatoryMask = 0x04, .maxTxPower = { .fraction = 0, .dBm = 13 } }
     }
 };
 

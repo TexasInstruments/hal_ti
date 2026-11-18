@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 
 #include <ti/log/Log.h>
 
@@ -45,10 +44,12 @@
 #include <ti/drivers/rcl/RCL_Profiling.h>
 #include <ti/drivers/rcl/RCL_Feature.h>
 
-#include <ti/drivers/rcl/LRF.h>
 #include <ti/drivers/rcl/hal/RCL_Hal.h>
 #include <ti/drivers/rcl/commands/generic.h>
 
+#include <ti/drivers/rcl/LRF.h>
+#include <ti/drivers/rcl/lrf/LRF_Interface.h>
+#include <ti/drivers/rcl/lrf/LRF_Interface_Generic.h>
 
 struct
 {
@@ -92,7 +93,7 @@ struct
 static uint32_t RCL_Handler_Generic_prepareSynth(void);
 static void RCL_Handler_Generic_setSynthPowerState(bool fsOff);
 static void RCL_Handler_Generic_updateRxCurBufferAndFifo(List_List *rxBuffers);
-static RCL_CommandStatus RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(void);
+static RCL_CommandStatus RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(uint16_t lrfCmdEndCause);
 static uint32_t RCL_Handler_Generic_updateTxBuffers(List_List *txBuffers, uint32_t maxBuffers);
 static void RCL_Handler_Generic_updateRxStats(RCL_StatsGeneric *stats, uint32_t startTime);
 static void RCL_Handler_Generic_updateLongStats(void);
@@ -174,7 +175,8 @@ RCL_Events RCL_Handler_Generic_Fs(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
             RCL_CommandStatus endStatus = genericHandlerState.common.endStatus;
             if (endStatus == RCL_CommandStatus_Finished)
             {
-                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
             else
             {
@@ -241,7 +243,8 @@ RCL_Events RCL_Handler_Generic_FsOff(RCL_Command *cmd, LRF_Events lrfEvents, RCL
         }
         else if (lrfEvents.opError != 0U)
         {
-            cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+            uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+            cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             rclEvents.lastCmdDone = 1U;
         }
         else
@@ -270,7 +273,6 @@ RCL_Events RCL_Handler_Generic_Tx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
 
         /* Start by enabling refsys */
         earliestStartTime = RCL_Handler_Generic_prepareSynth();
-
         if ((txCmd->rfFrequency == 0U) && (LRF_Interface_Generic_isFreqSynthLocked() == false))
         {
             /* Synth not to be programmed, but not already locked */
@@ -282,7 +284,7 @@ RCL_Events RCL_Handler_Generic_Tx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
             /* Program the sync word provided in the RCL_CmdGenericTx radio command to the LRF */
             LRF_Interface_Generic_programSyncWordA(txCmd->syncWord);
 
-            /* Configure LRF for running operation generix tx */
+            /* Configure LRF for running operation generic tx */
             LRF_Interface_Generic_configOpTx(txCmd->config.fsOff, txCmd->rfFrequency);
 
             /* Mark as active */
@@ -361,13 +363,18 @@ RCL_Events RCL_Handler_Generic_Tx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
             RCL_CommandStatus endStatus = genericHandlerState.common.endStatus;
             if (endStatus == RCL_CommandStatus_Finished)
             {
-                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
             else
             {
                 cmd->status = endStatus;
             }
             rclEvents.lastCmdDone = 1U;
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -475,11 +482,6 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
 
                         runTx = true; /* Go on */
                         genericHandlerState.tx.gracefulStopObserved = false;
-                        if (rclSchedulerState.gracefulStopInfo.cmdStopEnabled || rclSchedulerState.gracefulStopInfo.schedStopEnabled)
-                        {
-                            /* Enable interrupt to service graceful stop */
-                            RCL_Hal_enableGracefulStopTimeIrq();
-                        }
                     }
                 }
             }
@@ -492,8 +494,9 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
         {
             rclEvents.cmdStarted = 1U;
         }
-        if (lrfEvents.systim1 != 0U)
+        if (rclEventsIn.gracefulStop != 0U)
         {
+            LRF_sendGracefulStop();
             genericHandlerState.tx.gracefulStopObserved = true;
         }
         if (lrfEvents.opDone != 0U)
@@ -507,6 +510,7 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
                 /* Retry TX FIFO */
                 LRF_retryTxFifo();
 
+                uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
                 if (txCmd->numPackets == 0U || genericHandlerState.tx.txCount < txCmd->numPackets)
                 {
                     /* Configure LRF for next tx operation if there are more packets to transmit */
@@ -518,7 +522,7 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
                         genericHandlerState.common.endStatus = RCL_Scheduler_findStopStatus(RCL_StopType_Hard);
                         runTx = false;
                     }
-                    else if (LRF_Interface_isCmdEndCauseEopStop() == true ||
+                    else if (lrfCmdEndCause == LRF_INTERFACE_ENDCAUSE_STAT_EOPSTOP ||
                              genericHandlerState.tx.gracefulStopObserved ||
                              rclEventsIn.gracefulStop != 0U)
                     {
@@ -545,7 +549,7 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
                 }
                 else
                 {
-                    if (LRF_Interface_isCmdEndCauseEopStop() == true)
+                    if (lrfCmdEndCause == LRF_INTERFACE_ENDCAUSE_STAT_EOPSTOP)
                     {
                         genericHandlerState.common.endStatus = RCL_Scheduler_findStopStatus(RCL_StopType_Graceful);
                     }
@@ -571,7 +575,8 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
         {
             if (genericHandlerState.common.endStatus == RCL_CommandStatus_Finished)
             {
-                genericHandlerState.common.endStatus = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+                genericHandlerState.common.endStatus = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
 
             if (!genericHandlerState.tx.stopFs && txCmd->config.fsRecal == 0U && txCmd->config.fsOff != 0U &&
@@ -587,6 +592,10 @@ RCL_Events RCL_Handler_Generic_TxRepeat(RCL_Command *cmd, LRF_Events lrfEvents, 
                 cmd->status = genericHandlerState.common.endStatus;
                 rclEvents.lastCmdDone = 1U;
             }
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -731,13 +740,18 @@ RCL_Events RCL_Handler_Generic_TxTest(RCL_Command *cmd, LRF_Events lrfEvents, RC
             RCL_CommandStatus endStatus = genericHandlerState.common.endStatus;
             if (endStatus == RCL_CommandStatus_Finished)
             {
-                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
             else
             {
                 cmd->status = endStatus;
             }
             rclEvents.lastCmdDone = 1U;
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -780,21 +794,11 @@ RCL_Events RCL_Handler_Generic_Rx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
         }
         else
         {
-            /* Program sync words provided by the radio command to the LRF */
-            LRF_Interface_Generic_programSyncWordA(rxCmd->syncWordA);
-            LRF_Interface_Generic_programSyncWordB(rxCmd->syncWordB);
-
             /* Configure LRF for running operation generic rx */
             LRF_Interface_Generic_configOpRx(rxCmd->config.fsOff, rxCmd->rfFrequency, rxCmd->config.repeated, rxCmd->maxPktLen);
 
-            /* Disable sync search for syncwordA and syncwordB if requested by the radio configuration */
-            bool disableSyncA = (rxCmd->config.disableSyncA != 0U);
-            bool disableSyncB = (rxCmd->config.disableSyncB != 0U);
-            /* To avoid the overhead of calling functions by checking the parameters first */
-            if (disableSyncA == true || disableSyncB == true)
-            {
-                LRF_Interface_Generic_disableSyncSearch(disableSyncA, disableSyncB, &(genericHandlerState.rx.syncSearchCtrl));
-            }
+            /* Configure sync words for the RX operation. */
+            LRF_Interface_Generic_configDualSyncWords(rxCmd->syncWordA, rxCmd->syncWordB, rxCmd->config.disableSyncA, rxCmd->config.disableSyncB, &genericHandlerState.rx.syncSearchCtrl);
 
             /* Mark as active */
             cmd->status = RCL_CommandStatus_Active;
@@ -916,11 +920,12 @@ RCL_Events RCL_Handler_Generic_Rx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
         {
             RCL_CommandStatus endStatus = genericHandlerState.common.endStatus;
             rclEvents.lastCmdDone = 1U;
+            uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
             if (lrfEvents.opError != 0U && endStatus == RCL_CommandStatus_Finished)
             {
-                endStatus = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                endStatus = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
-            else if (LRF_Interface_isCmdEndCauseEopStop() == true)
+            else if (lrfCmdEndCause == LRF_INTERFACE_ENDCAUSE_STAT_EOPSTOP)
             {
                 endStatus = RCL_Scheduler_findStopStatus(RCL_StopType_Graceful);
             }
@@ -930,6 +935,10 @@ RCL_Events RCL_Handler_Generic_Rx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Ev
             }
             cmd->status = endStatus;
             RCL_Profiling_eventHook(RCL_ProfilingEvent_PostprocStart);
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -999,8 +1008,13 @@ RCL_Events RCL_Handler_Generic_LrfOperation(RCL_Command *cmd, LRF_Events lrfEven
         }
         else if (lrfEvents.opError != 0U)
         {
-            cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+            uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+            cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             rclEvents.lastCmdDone = 1U;
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -1177,7 +1191,7 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
             LRF_retryTxFifo();
 
             uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
-            if (LRF_Interface_isCmdEndCauseEndOk(lrfCmdEndCause) == true)
+            if (lrfCmdEndCause == LRF_INTERFACE_ENDCAUSE_STAT_ENDOK)
             {
                 /* Increment the sequence number for next packet */
                 txCmd->seqNo = (txCmd->seqNo + 1U) % 4U;
@@ -1196,7 +1210,7 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
                 RCL_Profiling_eventHook(RCL_ProfilingEvent_PostprocStart);
             }
             /* Handle missed ACKs or ACKs with the wrong address */
-            else if (LRF_Interface_isCmdEndCauseEndedWithoutSync(lrfCmdEndCause) == true)
+            else if (lrfCmdEndCause == LRF_INTERFACE_ENDCAUSE_STAT_NOSYNC)
             {
                 /* Configure LRF for next tx operation to retransmit the packet */
                 LRF_Interface_Generic_configNextOpTx();
@@ -1234,7 +1248,8 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
 
             if (endStatus == RCL_CommandStatus_Finished)
             {
-                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
+                cmd->status = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
             else
             {
@@ -1242,6 +1257,10 @@ RCL_Events RCL_Handler_Nesb_Ptx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Even
             }
             rclEvents.lastCmdDone = 1U;
             runTx = false;
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -1315,10 +1334,6 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
         }
         else
         {
-            /* Program sync words provided by the radio command to the LRF */
-            LRF_Interface_Generic_programSyncWordA(rxCmd->syncWordA);
-            LRF_Interface_Generic_programSyncWordB(rxCmd->syncWordB);
-
             uint16_t lrfOpCfg = LRF_Interface_Generic_getOpCfgNesbPrx(rxCmd->config.fsOff,
                                                                       rxCmd->rfFrequency,
                                                                       rxCmd->config.repeatNok,
@@ -1326,14 +1341,8 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             /* NOTE: rxCmd->syncWord is an array containing two sync word configurations, i.e. RCL_ConfigAddress */
             LRF_Interface_Generic_configOpNesbPrx(lrfOpCfg, rxCmd->addrLen, rxCmd->syncWord);
 
-            /* Disable sync search for syncwordA and syncwordB if requested by the radio configuration */
-            bool disableSyncA = (rxCmd->config.disableSyncA != 0U);
-            bool disableSyncB = (rxCmd->config.disableSyncB != 0U);
-            /* To avoid the overhead of calling functions by checking the parameters first */
-            if (disableSyncA == true || disableSyncB == true)
-            {
-                LRF_Interface_Generic_disableSyncSearch(disableSyncA, disableSyncB, &(genericHandlerState.nesb.syncSearchCtrl));
-            }
+            /* Configure sync words for the RX operation. */
+            LRF_Interface_Generic_configDualSyncWords(rxCmd->syncWordA, rxCmd->syncWordB, rxCmd->config.disableSyncA, rxCmd->config.disableSyncB, &genericHandlerState.nesb.syncSearchCtrl);
 
             /* Mark as active */
             cmd->status = RCL_CommandStatus_Active;
@@ -1480,11 +1489,12 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             RCL_CommandStatus endStatus = genericHandlerState.common.endStatus;
 
             rclEvents.lastCmdDone = 1U;
+            uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
             if (lrfEvents.opError != 0U && endStatus == RCL_CommandStatus_Finished)
             {
-                endStatus = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus();
+                endStatus = RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(lrfCmdEndCause);
             }
-            else if (LRF_Interface_isCmdEndCauseEopStop() == true)
+            else if (lrfCmdEndCause == LRF_INTERFACE_ENDCAUSE_STAT_EOPSTOP)
             {
                 endStatus = RCL_Scheduler_findStopStatus(RCL_StopType_Graceful);
             }
@@ -1494,6 +1504,10 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
             }
             cmd->status = endStatus;
             RCL_Profiling_eventHook(RCL_ProfilingEvent_PostprocStart);
+        }
+        else if (rclEventsIn.gracefulStop != 0U)
+        {
+            LRF_sendGracefulStop();
         }
         else
         {
@@ -1524,10 +1538,11 @@ RCL_Events RCL_Handler_Nesb_Prx(RCL_Command *cmd, LRF_Events lrfEvents,  RCL_Eve
  */
 static uint32_t RCL_Handler_Generic_prepareSynth(void)
 {
-    /* Power up synth refsys and set a constraint on swtcxo to ensure it is not changed while radio is running */
+    /* Power up synth refsys after updating HFXT, if needed, and set a constraint on swtcxo to ensure it is not changed while radio is running */
     if (!genericHandlerState.common.powerSwtcxoConstraintSet)
     {
         genericHandlerState.common.powerSwtcxoConstraintSet = true;
+        RCL_Hal_powerSwTcxoUpdate();
         RCL_Hal_powerSetSwTcxoUpdateConstraint();
     }
     return LRF_enableSynthRefsys();
@@ -1589,11 +1604,8 @@ static void RCL_Handler_Generic_updateRxCurBufferAndFifo(List_List *rxBuffers)
 /*
  *  ======== RCL_Handler_Generic_mapLrfErrorStatusToRclStatus ========
  */
-static RCL_CommandStatus RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(void)
+static RCL_CommandStatus RCL_Handler_Generic_mapLrfErrorStatusToRclStatus(uint16_t lrfCmdEndCause)
 {
-    /* Get LRF command end cause */
-    uint16_t lrfCmdEndCause = LRF_Interface_getCmdEndCause();
-
     /* Map LRF command end cause to corresponding RCL command status */
     RCL_CommandStatus status;
     switch (lrfCmdEndCause)

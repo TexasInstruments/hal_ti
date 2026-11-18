@@ -1,5 +1,6 @@
 /******************************************************************************
- *  Copyright (c) 2025-2026 Texas Instruments Incorporated. All rights reserved.
+ *  Copyright (c) 2025-2026 Texas Instruments Incorporated
+ *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -31,8 +32,8 @@
  *
  *  \brief      ROM Hard API header file for applications
  ******************************************************************************/
-#ifndef __HAPI_H__
-#define __HAPI_H__
+#ifndef ti_devices_hapi__include
+#define ti_devices_hapi__include
 #include <stdint.h>
 #include <stdbool.h>
 #include "sha256sw.h"
@@ -601,4 +602,4 @@ extern void HapiWaitUs_veneer(uint32_t nUs);
 
 #endif
 
-#endif //__HAPI_H__
+#endif // ti_devices_hapi__include

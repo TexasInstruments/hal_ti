@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2025, Texas Instruments Incorporated
+ * Copyright (c) 2020-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,7 +134,8 @@
  *
  *  It is strongly recommended to read the device-specific Temperature driver
  *  documentation for details of the temperature sensor characteristics and
- *  how they might affect choices of threshold values.
+ *  how they might affect choices of threshold values. Some APIs also have
+ *  device-specific restrictions.
  *
  *  @anchor ti_drivers_Temperature_Synopsis
  *  # Synopsis #
@@ -277,14 +278,13 @@ extern "C" {
  */
 #define Temperature_STATUS_ERROR (-1)
 
-/* @cond
+/*!
+ * @brief Forward declaration of the Temperature notification object.
  *
- * Type declaration for the notification object made separately from the
- * struct definition because of the circular dependency between
- * #Temperature_NotifyFxn() and #Temperature_NotifyObj.
+ * Declared separately from the struct definition due to the circular
+ * dependency between #Temperature_NotifyFxn() and #Temperature_NotifyObj.
  */
 typedef struct Temperature_NotifyObj_ Temperature_NotifyObj;
-/* @endcond */
 
 /*!
  *  @brief Function prototype for a notification callback.

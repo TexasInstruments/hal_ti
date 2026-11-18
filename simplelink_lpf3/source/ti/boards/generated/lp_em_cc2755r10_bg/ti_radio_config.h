@@ -6,8 +6,8 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        9.11.00.02_ga
- *  RF Settings Version:
+ *  Tool Version:        01.10.00.06_eng
+ *  RF Settings Version: 01.10.00.42_eng
  */
 #ifndef _TI_RADIO_CONFIG_H_
 #define _TI_RADIO_CONFIG_H_
@@ -17,7 +17,7 @@
 #include DeviceFamily_constructPath(inc/hw_fcfg.h)
 
 // RF settings version
-#define RF_SETTINGS_VERSION "undefined"
+#define RF_SETTINGS_VERSION "01.10.00.42_eng"
 
 
 // ****************************************************************
@@ -200,11 +200,11 @@ extern const LRF_Config LRF_configAdcNoise;
 // ****************************************************************
 
 // PHY features
-#define RCL_PHY_FEATURE_SUB_PHY_1_MBPS_BLE            0x0000
-#define RCL_PHY_FEATURE_SUB_PHY_2_MBPS_BLE            0x0001
-#define RCL_PHY_FEATURE_SUB_PHY_CODED_BLE             0x0002
-#define RCL_PHY_FEATURE_CODED_TX_RATE_S8_BLE          0x0000
-#define RCL_PHY_FEATURE_CODED_TX_RATE_S2_BLE          0x0004
+#define RCL_PHY_FEATURE_SUB_PHY_1_MBPS                0x0000
+#define RCL_PHY_FEATURE_SUB_PHY_2_MBPS                0x0001
+#define RCL_PHY_FEATURE_SUB_PHY_CODED                 0x0002
+#define RCL_PHY_FEATURE_CODED_TX_RATE_S8              0x0000
+#define RCL_PHY_FEATURE_CODED_TX_RATE_S2              0x0004
 
 
 // Regulatory domains (for channel specific TX output power limitation)

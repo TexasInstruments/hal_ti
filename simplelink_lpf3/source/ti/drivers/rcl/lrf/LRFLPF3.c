@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,11 @@
 /* Nominal temperature (degrees C) for offset definitions */
 #define LRF_TEMPERATURE_NOM 25
 
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+#define LRF_DCDC_IPEAK_RF_ACTIVITY  1U
+#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
 #define LRF_DCDC_IPEAK_RF_ACTIVITY  3U
+#endif
 
 /* Only the lower 8-bits of the LRFDPBE_O_GPOCTRL are supported */
 #define LRF_PBE_GPOCTRL_MASK 0xFFU
@@ -164,7 +168,7 @@ static struct {
 /* Required time from enabling refsys to synth programming */
 #define LRF_REFSYS_ENABLE_TIME RCL_SCHEDULER_SYSTIM_US(30)
 
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+#if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX))
 /* Stores the previous DCDC IPEAK setting to be set after RF activity */
 static uint8_t dcdcIpeakRestoreSetting;
 #endif
@@ -186,7 +190,7 @@ const LRF_CoexConfiguration lrfCoexConfiguration __attribute__((weak)) =
 
 /* Regulatory mask to use if no other configuration is provided through SysConfig or other file.
  * This default configuration disables the use of power limitation tables. */
-const uint8_t rclRegulatoryMask __attribute__((weak)) = 0x00;
+uint8_t rclRegulatoryMask __attribute__((weak)) = 0x00;
 
 /* Bit mask indicating which bits in LRFDPBE_GPOCTRL register are written
  * This is the configuration supposed to not change during runtime and allowed
@@ -834,7 +838,7 @@ void LRF_enable(void)
 {
     /* Set MSGBOX register to 0 */
     HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_MSGBOX) = 0;
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+#if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX))
     dcdcIpeakRestoreSetting = RCL_Hal_setDcdcIpeakSetting(LRF_DCDC_IPEAK_RF_ACTIVITY);
 #endif
 
@@ -857,7 +861,7 @@ void LRF_enable(void)
 
 void LRF_disable(void)
 {
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+#if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX))
     (void) RCL_Hal_setDcdcIpeakSetting(dcdcIpeakRestoreSetting);
 #endif
 
@@ -1049,8 +1053,8 @@ static void LRF_programShape(const LRF_TxShape *txShape, uint32_t deviation, uin
                 ((deviationFactor2 * txShape->coeff[i]) + (1U << (18U + (uint32_t) shapeGain))) >> (19U + (uint32_t) shapeGain));
         }
 
-        /* [RCL-515 WORKAROUND]: Protect the first memory write on BLE High PG1.x due to the hardware bugs */
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+        /* Protect the first memory write on CC27xxx10, ref. RCL-515. */
+#if (DeviceFamily_CC27XXX10)
         ASM_4_NOPS();
 #endif
         for (uint32_t i = 0; i <  NUM_TX_FILTER_TAPS / 4U; i++)
@@ -1754,8 +1758,9 @@ void LRF_updateTemperatureCompensation(uint32_t rfFrequency, bool tx)
     if (rclFeatureControl.enableTemperatureMonitoring)
     {
         LRF_SwParam *swParam = (LRF_SwParam *) swParamList;
-        /* Allow SWTCXO updates and adjust HFXT with missed updates */
+        /* Adjust HFXT after releasing constraints */
         RCL_Hal_powerReleaseSwTcxoUpdateConstraint();
+        RCL_Hal_powerSwTcxoUpdate();
         /* Set RF frequency word based on updated HFXT value */
         LRF_programFrequency(rfFrequency, tx);
         /* Re-calculate temperature dependent trims */
@@ -1764,7 +1769,7 @@ void LRF_updateTemperatureCompensation(uint32_t rfFrequency, bool tx)
         LRF_programTemperatureCompensatedTxPower();
         /* Set new limit for temperature monitoring */
         LRF_enableTemperatureMonitoring();
-        /* Stop SWTCXO updates again */
+         /* Stop SWTCXO updates again */
         RCL_Hal_powerSetSwTcxoUpdateConstraint();
     }
 }
@@ -1794,6 +1799,21 @@ static void LRF_applyAntennaSelection(void)
     pbeGpoVal &= ~((uint32_t)rclPbeGpoMask);
     pbeGpoVal |= (uint32_t)(rclPbeGpoVal & rclPbeGpoMask);
     HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_GPOCTRL) = pbeGpoVal;
+}
+
+/*
+ * ======== LRF_clearHardStopTimerEventInRadio ========
+ */
+void LRF_clearHardStopTimerEventInRadio(void)
+{
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    /* Clearing the event in the TOPsm is needed only because the
+    event out of the timer stays high until it is read.*/
+    RCL_Hal_clearHardStopTimerEvent();
+    HWREG_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_EVTCLR0) = LRFDPBE_EVTCLR0_SYSTCMP1_M;
+#else
+    /* SYSTIM IP for other devices behave different and event should be cleaned already*/
+#endif
 }
 
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)

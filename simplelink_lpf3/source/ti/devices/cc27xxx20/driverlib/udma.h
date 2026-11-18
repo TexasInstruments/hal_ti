@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __UDMA_H__
-#define __UDMA_H__
+#ifndef ti_devices_udma__include
+#define ti_devices_udma__include
 
 //*****************************************************************************
 //
@@ -957,4 +957,4 @@ __STATIC_INLINE void uDMAClearChannelPriority(uint32_t channelBitMask)
 //
 //*****************************************************************************
 
-#endif //  __UDMA_H__
+#endif // ti_devices_udma__include

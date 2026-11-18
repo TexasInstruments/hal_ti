@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025, Texas Instruments Incorporated
+ * Copyright (c) 2023-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -99,6 +99,8 @@ RCL_Events RCL_Handler_ADC_Noise_getNoise(RCL_Command *cmd, LRF_Events lrfEvents
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Adjust HFXT before starting the command */
+        RCL_Hal_powerSwTcxoUpdate();
         /* Make sure SWTCXO does not adjust clock while radio is running */
         RCL_Hal_powerSetSwTcxoUpdateConstraint();
 
