@@ -393,6 +393,40 @@ void RCL_GPIO_coexDisable(void)
 #endif /* RCL_COEX */
 
 /*
+ * ======== BLE Coex Per-Use-Case Priority ========
+ * Provides the strong definition that overrides the weak default in ll_coex.c.
+ * Values are read from optional DT properties; absent properties fall back to
+ * the same defaults as the weak global (scanner/periodicScanner=Low, rest=High).
+ * Only compiled when both Bluetooth and a PRIORITY-capable coex mode are active.
+ */
+#if defined(CONFIG_BT) && COEX_HAS_PRIORITY
+
+#include <ti/ble/controller/ll/ll_coex.h>
+
+#define _COEX_BLE_PRIO(prop, fallback) \
+    (DT_NODE_HAS_PROP(COEX_NODE, prop) ? \
+        (DT_ENUM_IDX(COEX_NODE, prop) == 0 ? RCL_CoexPriority_High : RCL_CoexPriority_Low) : \
+        (fallback))
+
+const llCoexBleUseCasePriority_t llCoexBleUseCasePriority = {
+    .advertiser         = _COEX_BLE_PRIO(ble_advertiser_priority,          RCL_CoexPriority_High),
+    .auxAdvertiser      = _COEX_BLE_PRIO(ble_aux_advertiser_priority,      RCL_CoexPriority_High),
+    .periodicAdvertiser = _COEX_BLE_PRIO(ble_periodic_advertiser_priority, RCL_CoexPriority_High),
+    .initiator          = _COEX_BLE_PRIO(ble_initiator_priority,           RCL_CoexPriority_High),
+    .scanner            = _COEX_BLE_PRIO(ble_scanner_priority,             RCL_CoexPriority_Low),
+    .periodicScanner    = _COEX_BLE_PRIO(ble_periodic_scanner_priority,    RCL_CoexPriority_Low),
+    .connection         = _COEX_BLE_PRIO(ble_connection_priority,          RCL_CoexPriority_High),
+    .genericRx          = _COEX_BLE_PRIO(ble_generic_rx_priority,          RCL_CoexPriority_High),
+    .genericTx          = _COEX_BLE_PRIO(ble_generic_tx_priority,          RCL_CoexPriority_High),
+    .ctxGenericTx       = _COEX_BLE_PRIO(ble_ctx_generic_tx_priority,      RCL_CoexPriority_High),
+    .chAssessment       = _COEX_BLE_PRIO(ble_ch_assessment_priority,       RCL_CoexPriority_High),
+};
+
+#undef _COEX_BLE_PRIO
+
+#endif /* CONFIG_BT && COEX_HAS_PRIORITY */
+
+/*
  * ======== RCL GPIO Configuration ========
  */
 
