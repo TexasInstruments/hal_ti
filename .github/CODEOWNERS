@@ -1,0 +1,14 @@
+# Default reviewers for hal_ti, by area.
+# The last matching pattern wins, so the BLE and Wi-Fi entries below
+# repeat the baseport owners to keep them on every PR.
+
+# Drivers and baseport
+/simplelink/        @vmyklebust @LarsMorstadTI @PatrickJosephTI @JoseThomasTI @AdityaShankarTI
+/simplelink_lpf3/   @vmyklebust @LarsMorstadTI @PatrickJosephTI @JoseThomasTI @AdityaShankarTI
+/simplelink_wff3/   @vmyklebust @LarsMorstadTI @PatrickJosephTI @JoseThomasTI @AdityaShankarTI
+
+# BLE
+/simplelink_lpf3/source/ti/ble/   @vmyklebust @LarsMorstadTI @PatrickJosephTI @JoseThomasTI @AdityaShankarTI @ti-il-danils @RoniTI-develop
+
+# Wi-Fi
+/simplelink_wff3/   @vmyklebust @LarsMorstadTI @PatrickJosephTI @JoseThomasTI @AdityaShankarTI @uikart @jacekozimektech @IsriTI
