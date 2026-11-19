@@ -15,7 +15,7 @@
 
 #if DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX
     #define INT_PRI_LEVEL_LOWEST INT_PRI_LEVEL15
-#elif DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0
+#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
     #define INT_PRI_LEVEL_LOWEST INT_PRI_LEVEL3
 #endif
 
