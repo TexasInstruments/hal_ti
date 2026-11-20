@@ -226,8 +226,18 @@
 #define FPB_BASE                0xE0002000U // FPB
 #define ICB_BASE                0xE000E000U // ICB
 #define SYSTICK_BASE            0xE000E010U // SYSTICK
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define NVIC_BASE               0xE000E100U // NVIC
+#define SCB_BASE                0xE000ECFCU // SCB
+#define MPU_BASE                0xE000ED90U // MPU
 #define SAU_BASE                0xE000EDD0U // SAU
+#define DCB_BASE                0xE000EDE0U // DCB
+#endif // __ZEPHYR__
 #define FPE_BASE                0xE000EF30U // FPE
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define DIB_BASE                0xE000EFB0U // DIB
+#define TPIU_BASE               0xE0040000U // TPIU
+#endif // __ZEPHYR__
 #define CPU_ROM_TABLE_BASE      0xE00FF000U // CPU_ROM_TABLE
 
 #ifdef DRIVERLIB_NS

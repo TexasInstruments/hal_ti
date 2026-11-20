@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2025, Texas Instruments Incorporated
+ * Copyright (c) 2015-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -271,7 +271,7 @@
     #include <ti/drivers/gpio/GPIOLPF3.h>
 #elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC283X)
     #include <ti/drivers/gpio/GPIOLPF4.h>
-#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX)
+#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX || DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX)
     #include <ti/drivers/gpio/GPIOWFF3.h>
 #else
     #error The GPIO driver does not support the selected device family
@@ -390,7 +390,13 @@ typedef uint32_t GPIO_PinConfig;
  *  @{
  */
 /*! @hideinitializer Input and output are both disabled. Primarily useful for disabling muxed pins.  */
-#define GPIO_CFG_NO_DIR GPIO_CFG_NO_DIR_INTERNAL | GPIO_CFG_PULL_NONE_INTERNAL
+#define GPIO_CFG_NO_DIR        GPIO_CFG_NO_DIR_INTERNAL | GPIO_CFG_PULL_NONE_INTERNAL
+/*! @hideinitializer Input and output are both disabled. Same as GPIO_CFG_NO_DIR. */
+#define GPIO_CFG_NO_DIR_NOPULL GPIO_CFG_NO_DIR_INTERNAL | GPIO_CFG_PULL_NONE_INTERNAL
+/*! @hideinitializer Input and output are both disabled, with internal PU */
+#define GPIO_CFG_NO_DIR_PU     GPIO_CFG_NO_DIR_INTERNAL | GPIO_CFG_PULL_UP_INTERNAL
+/*! @hideinitializer Input and output are both disabled, with internal PD */
+#define GPIO_CFG_NO_DIR_PD     GPIO_CFG_NO_DIR_INTERNAL | GPIO_CFG_PULL_DOWN_INTERNAL
 /** @} */
 
 /** @name GPIO_PinConfig pin inversion configuration macros

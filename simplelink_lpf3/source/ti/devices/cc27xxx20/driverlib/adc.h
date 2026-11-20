@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __ADC_H__
-#define __ADC_H__
+#ifndef ti_devices_adc__include
+#define ti_devices_adc__include
 
 //*****************************************************************************
 //
@@ -899,4 +899,4 @@ extern void ADCSetAdjustmentOffset_veneer(uint32_t reference);
 //
 //*****************************************************************************
 
-#endif //  __ADC_H__
+#endif // ti_devices_adc__include

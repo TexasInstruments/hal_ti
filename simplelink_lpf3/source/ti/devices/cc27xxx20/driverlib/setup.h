@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __SETUP_H__
-#define __SETUP_H__
+#ifndef ti_devices_setup__include
+#define ti_devices_setup__include
 
 //*****************************************************************************
 //
@@ -101,4 +101,4 @@ extern void SetupTrimDevice(void);
 //
 //*****************************************************************************
 
-#endif //  __SETUP_H__
+#endif // ti_devices_setup__include

@@ -214,8 +214,8 @@ void LRF_readRxFifoWords(uint32_t *data32, uint32_t wordLength)
     uint32_t readPointer = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_RXFRP) & ~0x0003U;
     volatile uint32_t *fifoReadPtr = (volatile uint32_t *) (RXF_UNWRAPPED_BASE_ADDR + fifoStart + readPointer);
 
-    /* [RCL-515 WORKAROUND]: Protect the first memory write on BLE High PG1.x due to the hardware bugs */
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    /* Protect the first memory write on CC27xxx10, ref. RCL-515. */
+#if (DeviceFamily_CC27XXX10)
     ASM_4_NOPS();
 #endif
     for (uint32_t i = 0U; i < wordLength; i++)
@@ -245,8 +245,8 @@ void LRF_writeTxFifoWords(const uint32_t *data32, uint32_t wordLength)
     uint32_t writePointer = HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_TXFWP) & ~0x0003U;
     volatile uint32_t *fifoWritePtr = (volatile uint32_t *) (TXF_UNWRAPPED_BASE_ADDR + fifoStart + writePointer);
 
-    /* [RCL-515 WORKAROUND]: Protect the first memory write on BLE High PG1.x due to the hardware bugs */
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    /* Protect the first memory write on CC27xxx10, ref. RCL-515. */
+#if (DeviceFamily_CC27XXX10)
     ASM_4_NOPS();
 #endif
     for (uint32_t i = 0U; i < wordLength; i++)
@@ -314,7 +314,9 @@ void LRF_peekRxFifoWords(uint32_t *data32, uint32_t wordLength, uint32_t startRp
 {
     uint32_t fifoStart = (uint32_t) (((HWREG_READ_LRF(LRFDPBE_BASE + LRFDPBE_O_FCFG3) & LRFDPBE_FCFG3_RXSTRT_M) >> LRFDPBE_FCFG3_RXSTRT_S) << 2);
     uint32_t *dataEntry = (uint32_t *) (RXF_UNWRAPPED_BASE_ADDR + fifoStart + startRp);
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+
+    /* Protect the first memory write on CC27xxx10, ref. RCL-515. */
+#if (DeviceFamily_CC27XXX10)
     ASM_4_NOPS();
 #endif
     for (uint32_t i = 0U; i < wordLength; i++)

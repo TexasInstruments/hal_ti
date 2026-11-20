@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,16 +39,23 @@
  *  the temperature of the chip and will issue interrupts if the configured
  *  upper limit or lower limit is crossed.
  *
- *  # Standby Power Mode Behavior #
- *  The temperature measurement is active while in standby power mode as well.
- *  The interrupt used by the temperature module is capable of bringing the
- *  device out of standby and into active mode to handle it. That means that an
- *  application will not miss a change in temperature just because the device
- *  has transitioned to standby power mode. While in standby, the temperature
- *  will only be sampled during a VDDR recharge pulse. This means that the
- *  sampling frequency in standby will be determined by the temperature as
- *  leakage increases with temperature and requires more frequent recharging of
- *  VDDR.
+ *  # Standby Temperature Reading Behavior #
+ *  Due to errata BATMON_02, temperature readings taken in standby,
+ *  or within the first 70 us after waking from standby, may be invalid.
+ *  To prevent spurious threshold interrupts caused by these invalid readings,
+ *  temperature interrupts are disabled while the device is in standby.
+ *  Upon wakeup, interrupts remain disabled for a 70 us stabilization delay
+ *  to allow the BATMON reading to settle before being re-enabled.
+ *
+ *  @note This means that notifications registered through the following APIs
+ *  will not trigger while in standby:
+ *   - #Temperature_registerNotifyHigh()
+ *   - #Temperature_registerNotifyLow()
+ *   - #Temperature_registerNotifyRange()
+ *
+ *  As a result, #Temperature_getTemperature() should not be called within the
+ *  first 70 us after waking from standby (for instance in a wakeup notification
+ *  callback) as the returned value may be incorrect.
  */
 
 #ifndef ti_drivers_temperature_TemperatureLPF3__include

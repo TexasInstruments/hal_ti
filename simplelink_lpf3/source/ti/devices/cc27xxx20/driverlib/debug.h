@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __DEBUG_H__
-#define __DEBUG_H__
+#ifndef ti_devices_debug__include
+#define ti_devices_debug__include
 
 //*****************************************************************************
 //
@@ -98,4 +98,4 @@ extern void __error__(char *pFilename, uint32_t line);
 //
 //*****************************************************************************
 
-#endif // __DEBUG_H__
+#endif // ti_devices_debug__include

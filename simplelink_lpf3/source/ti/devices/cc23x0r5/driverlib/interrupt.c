@@ -3,7 +3,7 @@
  *
  *  Description:    Utility functions to interact with interrupts and the NVIC
  *
- *  Copyright (c) 2022-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -39,7 +39,7 @@
 
 #include "../inc/hw_ints.h"
 #include "../inc/hw_types.h"
-#include <core_cm0plus.h>
+#include "../cmsis/device.h"
 
 //*****************************************************************************
 //

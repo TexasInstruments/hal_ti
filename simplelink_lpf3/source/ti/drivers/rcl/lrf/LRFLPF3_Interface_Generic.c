@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026, Texas Instruments Incorporated
+ * Copyright (c) 2025-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,42 @@
 #include DeviceFamily_constructPath(inc/hw_lrfdmdm.h)
 #include DeviceFamily_constructPath(inc/hw_lrfdpbe32.h)
 #include DeviceFamily_constructPath(inc/pbe_generic_ram_regs.h)
+
+/* ============================================================================
+ * Helpers
+ * ============================================================================
+ */
+static void LRF_Interface_Generic_disableSyncSearch(bool disableSyncWordA, bool disableSyncWordB, LRF_SyncSearchCtrl* syncSearchCtrl)
+{
+    uint16_t demc1be1 = HWREGH_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1);
+    uint16_t demc1be2 = HWREGH_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2);
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    uint16_t demc1be12 = HWREGH_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE12);
+#endif
+    syncSearchCtrl->restoreThresh = 1U;
+    syncSearchCtrl->demc1be1 = demc1be1;
+    syncSearchCtrl->demc1be2 = demc1be2;
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    syncSearchCtrl->demc1be12 = demc1be12;
+#endif
+    if (disableSyncWordA == true)
+    {
+        demc1be1 = (uint16_t) ((demc1be1 & ~LRFDMDM_DEMC1BE1_THRESHOLDA_M) | (0x7FU << LRFDMDM_DEMC1BE1_THRESHOLDA_S));
+        demc1be2 = (uint16_t) ((demc1be2 & ~LRFDMDM_DEMC1BE2_THRESHOLDC_M) | (0x7FU << LRFDMDM_DEMC1BE2_THRESHOLDC_S));
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+        demc1be12 = (uint16_t) ((demc1be12 & ~LRFDMDM_DEMC1BE12_THRESHOLDG_M) | (0x7FU << LRFDMDM_DEMC1BE12_THRESHOLDG_S));
+#endif
+    }
+    if (disableSyncWordB == true)
+    {
+        demc1be1 = (uint16_t) ((demc1be1 & ~LRFDMDM_DEMC1BE1_THRESHOLDB_M) | (0x7FU << LRFDMDM_DEMC1BE1_THRESHOLDB_S));
+    }
+    HWREGH_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1) = demc1be1;
+    HWREGH_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2) = demc1be2;
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+    HWREGH_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE12) = demc1be12;
+#endif
+}
 
 /* ============================================================================
  * Implementations
@@ -142,36 +178,18 @@ void LRF_Interface_Generic_setModulationMode(uint32_t sendCw, uint32_t whitenMod
 }
 
 /*
- * ======== LRF_Interface_Generic_disableSyncSearch ========
+ * ======== LRF_Interface_Generic_configDualSyncWords ========
  */
-void LRF_Interface_Generic_disableSyncSearch(bool disableSyncWordA, bool disableSyncWordB, LRF_SyncSearchCtrl* syncSearchCtrl)
+void LRF_Interface_Generic_configDualSyncWords(uint32_t syncWordA, uint32_t syncWordB, bool disableSyncWordA, bool disableSyncWordB, LRF_SyncSearchCtrl * syncSearchCtrl)
 {
-    uint16_t demc1be1 = HWREGH_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1);
-    uint16_t demc1be2 = HWREGH_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2);
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
-    uint16_t demc1be12 = HWREGH_READ_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE12);
-#endif
-    syncSearchCtrl->restoreThresh = 1U;
-    syncSearchCtrl->demc1be1 = demc1be1;
-    syncSearchCtrl->demc1be2 = demc1be2;
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
-    syncSearchCtrl->demc1be12 = demc1be12;
-#endif
-    if (disableSyncWordA == true)
+    /* Program sync words provided by the radio command to the LRF */
+    LRF_Interface_Generic_programSyncWordA(syncWordA);
+    LRF_Interface_Generic_programSyncWordB(syncWordB);
+
+    /* Disable sync search for syncwordA and syncwordB if requested by the radio configuration */
+    /* To avoid the overhead of calling functions by checking the parameters first */
+    if (disableSyncWordA == true || disableSyncWordB == true)
     {
-        demc1be1 = (uint16_t) ((demc1be1 & ~LRFDMDM_DEMC1BE1_THRESHOLDA_M) | (0x7FU << LRFDMDM_DEMC1BE1_THRESHOLDA_S));
-        demc1be2 = (uint16_t) ((demc1be2 & ~LRFDMDM_DEMC1BE2_THRESHOLDC_M) | (0x7FU << LRFDMDM_DEMC1BE2_THRESHOLDC_S));
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
-        demc1be12 = (uint16_t) ((demc1be12 & ~LRFDMDM_DEMC1BE12_THRESHOLDG_M) | (0x7FU << LRFDMDM_DEMC1BE12_THRESHOLDG_S));
-#endif
+        LRF_Interface_Generic_disableSyncSearch(disableSyncWordA, disableSyncWordB, syncSearchCtrl);
     }
-    if (disableSyncWordB == true)
-    {
-        demc1be1 = (uint16_t) ((demc1be1 & ~LRFDMDM_DEMC1BE1_THRESHOLDB_M) | (0x7FU << LRFDMDM_DEMC1BE1_THRESHOLDB_S));
-    }
-    HWREGH_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE1) = demc1be1;
-    HWREGH_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE2) = demc1be2;
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
-    HWREGH_WRITE_LRF(LRFDMDM_BASE + LRFDMDM_O_DEMC1BE12) = demc1be12;
-#endif
 }

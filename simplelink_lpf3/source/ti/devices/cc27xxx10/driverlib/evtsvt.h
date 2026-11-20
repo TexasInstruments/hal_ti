@@ -3,7 +3,7 @@
  *
  *  Description:    Prototypes and defines for the EVTSVT API.
  *
- *  Copyright (c) 2025 Texas Instruments Incorporated
+ *  Copyright (c) 2025-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __EVTSVT_H__
-#define __EVTSVT_H__
+#ifndef ti_devices_evtsvt__include
+#define ti_devices_evtsvt__include
 
 //*****************************************************************************
 //
@@ -133,8 +133,12 @@ extern "C" {
 #define EVTSVT_DMA_TRIG_ADC0TRG    EVTSVT_DMACH3SEL_IPID_ADC0TRG    //!< DMA trigger for ADC0
 #define EVTSVT_DMA_TRIG_LAESTRGA   EVTSVT_DMACH4SEL_IPID_LAESTRGA   //!< DMA trigger for LAES A
 #define EVTSVT_DMA_TRIG_LAESTRGB   EVTSVT_DMACH5SEL_IPID_LAESTRGB   //!< DMA trigger for LAES B
-#define EVTSVT_DMA_TRIG_CANTRGA    EVTSVT_DMACH6SEL_IPID_CANTRGA    //!< DMA trigger for CAN A
-#define EVTSVT_DMA_TRIG_CANTRGB    EVTSVT_DMACH7SEL_IPID_CANTRGB    //!< DMA trigger for CAN B
+#define EVTSVT_DMA_TRIG_CAN0TRGA   EVTSVT_DMACH6SEL_IPID_CANTRGA    //!< DMA trigger for CAN A
+#define EVTSVT_DMA_TRIG_CAN0TRGB   EVTSVT_DMACH7SEL_IPID_CANTRGB    //!< DMA trigger for CAN B
+#define EVTSVT_DMA_TRIG_CANTRGA \
+    EVTSVT_DMACH6SEL_IPID_CANTRGA //!< DMA trigger for CAN A \deprecated. Use EVTSVT_DMA_TRIG_CAN0TRGA instead.
+#define EVTSVT_DMA_TRIG_CANTRGB \
+    EVTSVT_DMACH7SEL_IPID_CANTRGB //!< DMA trigger for CAN B \deprecated. Use EVTSVT_DMA_TRIG_CAN0TRGB instead.
 
 //*****************************************************************************
 //
@@ -143,12 +147,16 @@ extern "C" {
 //
 //*****************************************************************************
 
-#define EVTSVT_PUB_SYSTIM5       EVTSVT_CPUIRQ0SEL_PUBID_SYSTIM5       //!< Publisher ID for System Timer 5
-#define EVTSVT_PUB_GPIO_EVT1     EVTSVT_CPUIRQ0SEL_PUBID_GPIO_EVT1     //!< Publisher ID for GPIO Event 1
-#define EVTSVT_PUB_APU_IRQ       EVTSVT_CPUIRQ0SEL_PUBID_APU_IRQ       //!< Publisher ID for APU IRQ
-#define EVTSVT_PUB_SPI1_COMB     EVTSVT_CPUIRQ0SEL_PUBID_SPI1_COMB     //!< Publisher ID for SPI1 Combined event
-#define EVTSVT_PUB_CAN_EVT       EVTSVT_CPUIRQ0SEL_PUBID_CAN_EVT       //!< Publisher ID for CAN Event
-#define EVTSVT_PUB_CAN_IRQ       EVTSVT_CPUIRQ0SEL_PUBID_CAN_IRQ       //!< Publisher ID for CAN IRQ event
+#define EVTSVT_PUB_SYSTIM5   EVTSVT_CPUIRQ0SEL_PUBID_SYSTIM5   //!< Publisher ID for System Timer 5
+#define EVTSVT_PUB_GPIO_EVT1 EVTSVT_CPUIRQ0SEL_PUBID_GPIO_EVT1 //!< Publisher ID for GPIO Event 1
+#define EVTSVT_PUB_APU_IRQ   EVTSVT_CPUIRQ0SEL_PUBID_APU_IRQ   //!< Publisher ID for APU IRQ
+#define EVTSVT_PUB_SPI1_COMB EVTSVT_CPUIRQ0SEL_PUBID_SPI1_COMB //!< Publisher ID for SPI1 Combined event
+#define EVTSVT_PUB_CAN0_EVT  EVTSVT_CPUIRQ0SEL_PUBID_CAN_EVT   //!< Publisher ID for CAN Event
+#define EVTSVT_PUB_CAN0_IRQ  EVTSVT_CPUIRQ0SEL_PUBID_CAN_IRQ   //!< Publisher ID for CAN IRQ event
+#define EVTSVT_PUB_CAN_EVT \
+    EVTSVT_CPUIRQ0SEL_PUBID_CAN_EVT //!< Publisher ID for CAN Event \deprecated. Use EVTSVT_PUB_CAN0_EVT instead
+#define EVTSVT_PUB_CAN_IRQ \
+    EVTSVT_CPUIRQ0SEL_PUBID_CAN_IRQ //!< Publisher ID for CAN IRQ event \deprecated. Use EVTSVT_PUB_CAN0_IRQ instead.
 #define EVTSVT_PUB_I2S_IRQ       EVTSVT_CPUIRQ0SEL_PUBID_I2S_IRQ       //!< Publisher ID for I2S IRQ event
 #define EVTSVT_PUB_LGPT3_ADC     EVTSVT_CPUIRQ0SEL_PUBID_LGPT3_ADC     //!< Publisher ID for LGPT3 ADC event
 #define EVTSVT_PUB_LGPT3_DMA     EVTSVT_CPUIRQ0SEL_PUBID_LGPT3_DMA     //!< Publisher ID for LGPT3 DMA event
@@ -197,10 +205,12 @@ extern "C" {
 #define EVTSVT_PUB_LRFD_IRQ1     EVTSVT_CPUIRQ0SEL_PUBID_LRFD_IRQ1     //!< Publisher ID for LRFD IRQ1
 #define EVTSVT_PUB_LRFD_IRQ0     EVTSVT_CPUIRQ0SEL_PUBID_LRFD_IRQ0     //!< Publisher ID for LRFD IRQ0
 #define EVTSVT_PUB_FLASH_IRQ     EVTSVT_CPUIRQ0SEL_PUBID_FLASH_IRQ     //!< Publisher ID for Flash IRQ
-#define EVTSVT_PUB_GPIO_EVT      EVTSVT_CPUIRQ0SEL_PUBID_GPIO_EVT      //!< Publisher ID for GPIO Event
-#define EVTSVT_PUB_GPIO_COMB     EVTSVT_CPUIRQ0SEL_PUBID_GPIO_COMB     //!< Publisher ID for GPIO Combined event
-#define EVTSVT_PUB_SYSTIM_COMB   EVTSVT_CPUIRQ0SEL_PUBID_SYSTIM_COMB   //!< Publisher ID for System Timer Combined event
-#define EVTSVT_PUB_AON_IOC_COMB  EVTSVT_CPUIRQ0SEL_PUBID_AON_IOC_COMB  //!< Publisher ID for AON IOC Combined event
+#define EVTSVT_PUB_GPIO_EVT0     EVTSVT_CPUIRQ0SEL_PUBID_GPIO_EVT      //!< Publisher ID for GPIO Event
+#define EVTSVT_PUB_GPIO_EVT \
+    EVTSVT_PUB_GPIO_EVT0 //!< Publisher ID for GPIO Event \deprecated. Use \ref EVTSVT_PUB_GPIO_EVT0 instead.
+#define EVTSVT_PUB_GPIO_COMB    EVTSVT_CPUIRQ0SEL_PUBID_GPIO_COMB    //!< Publisher ID for GPIO Combined event
+#define EVTSVT_PUB_SYSTIM_COMB  EVTSVT_CPUIRQ0SEL_PUBID_SYSTIM_COMB  //!< Publisher ID for System Timer Combined event
+#define EVTSVT_PUB_AON_IOC_COMB EVTSVT_CPUIRQ0SEL_PUBID_AON_IOC_COMB //!< Publisher ID for AON IOC Combined event
 #define EVTSVT_PUB_AON_LPMCMP_IRQ \
     EVTSVT_CPUIRQ0SEL_PUBID_AON_LPMCMP_IRQ                           //!< Publisher ID for AON Low Power Comparator IRQ
 #define EVTSVT_PUB_AON_DBG_COMB EVTSVT_CPUIRQ0SEL_PUBID_AON_DBG_COMB //!< Publisher ID for AON Debug Combined event
@@ -294,16 +304,16 @@ extern "C" {
 //! - \ref EVTSVT_DMA_TRIG_ADC0TRG
 //! - \ref EVTSVT_DMA_TRIG_LAESTRGA
 //! - \ref EVTSVT_DMA_TRIG_LAESTRGB
-//! - \ref EVTSVT_DMA_TRIG_CANTRGA
-//! - \ref EVTSVT_DMA_TRIG_CANTRGB
+//! - \ref EVTSVT_DMA_TRIG_CAN0TRGA
+//! - \ref EVTSVT_DMA_TRIG_CAN0TRGB
 //!
 //! For DMA channels 8-11, \c id must be ONE of the following values:
 //! - \ref EVTSVT_PUB_SYSTIM5
 //! - \ref EVTSVT_PUB_GPIO_EVT1
 //! - \ref EVTSVT_PUB_APU_IRQ
 //! - \ref EVTSVT_PUB_SPI1_COMB
-//! - \ref EVTSVT_PUB_CAN_EVT
-//! - \ref EVTSVT_PUB_CAN_IRQ
+//! - \ref EVTSVT_PUB_CAN0_EVT
+//! - \ref EVTSVT_PUB_CAN0_IRQ
 //! - \ref EVTSVT_PUB_I2S_IRQ
 //! - \ref EVTSVT_PUB_LGPT3_ADC
 //! - \ref EVTSVT_PUB_LGPT3_DMA
@@ -352,7 +362,7 @@ extern "C" {
 //! - \ref EVTSVT_PUB_LRFD_IRQ1
 //! - \ref EVTSVT_PUB_LRFD_IRQ0
 //! - \ref EVTSVT_PUB_FLASH_IRQ
-//! - \ref EVTSVT_PUB_GPIO_EVT
+//! - \ref EVTSVT_PUB_GPIO_EVT0
 //! - \ref EVTSVT_PUB_GPIO_COMB
 //! - \ref EVTSVT_PUB_SYSTIM_COMB
 //! - \ref EVTSVT_PUB_AON_IOC_COMB
@@ -413,8 +423,8 @@ extern void EVTSVTConfigureDma(uint32_t channel, uint32_t id);
 //! - \ref EVTSVT_PUB_GPIO_EVT1
 //! - \ref EVTSVT_PUB_APU_IRQ
 //! - \ref EVTSVT_PUB_SPI1_COMB
-//! - \ref EVTSVT_PUB_CAN_EVT
-//! - \ref EVTSVT_PUB_CAN_IRQ
+//! - \ref EVTSVT_PUB_CAN0_EVT
+//! - \ref EVTSVT_PUB_CAN0_IRQ
 //! - \ref EVTSVT_PUB_I2S_IRQ
 //! - \ref EVTSVT_PUB_LGPT3_ADC
 //! - \ref EVTSVT_PUB_LGPT3_DMA
@@ -463,7 +473,7 @@ extern void EVTSVTConfigureDma(uint32_t channel, uint32_t id);
 //! - \ref EVTSVT_PUB_LRFD_IRQ1
 //! - \ref EVTSVT_PUB_LRFD_IRQ0
 //! - \ref EVTSVT_PUB_FLASH_IRQ
-//! - \ref EVTSVT_PUB_GPIO_EVT
+//! - \ref EVTSVT_PUB_GPIO_EVT0
 //! - \ref EVTSVT_PUB_GPIO_COMB
 //! - \ref EVTSVT_PUB_SYSTIM_COMB
 //! - \ref EVTSVT_PUB_AON_IOC_COMB
@@ -511,4 +521,4 @@ extern void EVTSVTConfigureEvent_veneer(uint32_t subscriber, uint32_t pubId);
 //
 //*****************************************************************************
 
-#endif //  __EVTSVT_H__
+#endif // ti_devices_evtsvt__include

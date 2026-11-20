@@ -35,6 +35,7 @@
 
 #include "chipinfo.h"
 
+#include <stdint.h>
 #include <string.h>
 
 #ifndef DRIVERLIB_NS // FCFG is not accessible in non-secure mode.

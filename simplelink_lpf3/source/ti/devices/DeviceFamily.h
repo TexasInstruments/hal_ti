@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025, Texas Instruments Incorporated
+ * Copyright (c) 2017-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +84,8 @@ extern "C" {
 #define DeviceFamily_ID_CC27XXX20         25
 #define DeviceFamily_ID_CC283X            26
 #define DeviceFamily_ID_CC23X1R10         27
+#define DeviceFamily_ID_CC37XX            28
+#define DeviceFamily_ID_CC274X_CC276X     29
 
 /*
  * DeviceFamily_PARENT_XYZ values.
@@ -102,6 +104,7 @@ extern "C" {
 #define DeviceFamily_PARENT_CC35XX               8
 #define DeviceFamily_PARENT_CC283X               9
 #define DeviceFamily_PARENT_CC23X1               10
+#define DeviceFamily_PARENT_CC37XX               11
 
 /*
  * Lookup table that sets DeviceFamily_ID, DeviceFamily_DIRECTORY, and
@@ -200,6 +203,11 @@ extern "C" {
     #define DeviceFamily_DIRECTORY      cc27xxx20
     #define DeviceFamily_PARENT         DeviceFamily_PARENT_CC27XX
 
+#elif defined(DeviceFamily_CC274X_CC276X)
+    #define DeviceFamily_ID             DeviceFamily_ID_CC274X_CC276X
+    #define DeviceFamily_DIRECTORY      cc274x_cc276x
+    #define DeviceFamily_PARENT         DeviceFamily_PARENT_CC27XX
+
 #elif defined(DeviceFamily_CC283X)
     #define DeviceFamily_ID             DeviceFamily_ID_CC283X
     #define DeviceFamily_DIRECTORY      cc283x
@@ -245,6 +253,11 @@ extern "C" {
     #define DeviceFamily_DIRECTORY cc33xx
     #define DeviceFamily_PARENT    DeviceFamily_PARENT_CC35XX
 
+#elif defined(DeviceFamily_CC37XX)
+    #define DeviceFamily_ID        DeviceFamily_ID_CC37XX
+    #define DeviceFamily_DIRECTORY cc37xx
+    #define DeviceFamily_PARENT    DeviceFamily_PARENT_CC37XX
+
 #elif defined(DeviceFamily_CC23X0R22)
     #define DeviceFamily_ID        DeviceFamily_ID_CC23X0R22
     #define DeviceFamily_DIRECTORY cc23x0r5
@@ -255,15 +268,15 @@ extern "C" {
 #endif
 
 /* Ensure that only one DeviceFamily was specified */
-#if (defined(DeviceFamily_CC13X0) + defined(DeviceFamily_CC13X1) + defined(DeviceFamily_CC13X2) +     \
-     defined(DeviceFamily_CC13X2X7) + defined(DeviceFamily_CC26X0) + defined(DeviceFamily_CC26X0R2) + \
-     defined(DeviceFamily_CC26X1) + defined(DeviceFamily_CC26X2) + defined(DeviceFamily_CC26X2X7) +   \
-     defined(DeviceFamily_CC26X3) + defined(DeviceFamily_CC26X4) + defined(DeviceFamily_CC13X4) +     \
-     defined(DeviceFamily_CC23X0R5) + defined(DeviceFamily_CC23X0R2) +                                \
-     defined(DeviceFamily_CC27XXX10) + defined(DeviceFamily_CC27XXX20) +                              \
-     defined(DeviceFamily_CC283X) + defined(DeviceFamily_CC3200) + defined(DeviceFamily_CC3220) +     \
-     defined(DeviceFamily_CC35XX) + defined(DeviceFamily_CC33XX) + defined(DeviceFamily_CC23X0R22) +  \
-     defined(DeviceFamily_CC23X1R10)                                                                  \
+#if (defined(DeviceFamily_CC13X0) + defined(DeviceFamily_CC13X1) + defined(DeviceFamily_CC13X2) +          \
+     defined(DeviceFamily_CC13X2X7) + defined(DeviceFamily_CC26X0) + defined(DeviceFamily_CC26X0R2) +      \
+     defined(DeviceFamily_CC26X1) + defined(DeviceFamily_CC26X2) + defined(DeviceFamily_CC26X2X7) +        \
+     defined(DeviceFamily_CC26X3) + defined(DeviceFamily_CC26X4) + defined(DeviceFamily_CC13X4) +          \
+     defined(DeviceFamily_CC23X0R5) + defined(DeviceFamily_CC23X0R2) +                                     \
+     defined(DeviceFamily_CC27XXX10) + defined(DeviceFamily_CC27XXX20) + defined(DeviceFamily_CC274X_CC276X) + \
+     defined(DeviceFamily_CC283X) + defined(DeviceFamily_CC3200) + defined(DeviceFamily_CC3220) +          \
+     defined(DeviceFamily_CC35XX) + defined(DeviceFamily_CC33XX) + defined(DeviceFamily_CC23X0R22) +       \
+     defined(DeviceFamily_CC23X1R10) + defined(DeviceFamily_CC37XX)                                        \
      ) > 1
     #error More than one DeviceFamily has been defined!
 #endif

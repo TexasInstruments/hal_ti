@@ -39,19 +39,19 @@
 //******************************************************************************
 // REGISTER OFFSETS
 //******************************************************************************
-// 
+//
 #define PBE_COMMON_RAM_O_CMDPAR0                                     0x00000000U
 
-// 
+//
 #define PBE_COMMON_RAM_O_CMDPAR1                                     0x00000002U
 
-// 
+//
 #define PBE_COMMON_RAM_O_MSGBOX                                      0x00000004U
 
 // Reason why PBE ended operation.
 #define PBE_COMMON_RAM_O_ENDCAUSE                                    0x00000006U
 
-// 
+//
 #define PBE_COMMON_RAM_O_FIFOCMDADD                                  0x00000008U
 
 //******************************************************************************
@@ -59,7 +59,7 @@
 //******************************************************************************
 // Field: [15:0] val
 //
-// 
+//
 #define PBE_COMMON_RAM_CMDPAR0_VAL_W                                         16U
 #define PBE_COMMON_RAM_CMDPAR0_VAL_M                                     0xFFFFU
 #define PBE_COMMON_RAM_CMDPAR0_VAL_S                                          0U
@@ -69,7 +69,7 @@
 //******************************************************************************
 // Field: [15:0] val
 //
-// 
+//
 #define PBE_COMMON_RAM_CMDPAR1_VAL_W                                         16U
 #define PBE_COMMON_RAM_CMDPAR1_VAL_M                                     0xFFFFU
 #define PBE_COMMON_RAM_CMDPAR1_VAL_S                                          0U
@@ -79,7 +79,7 @@
 //******************************************************************************
 // Field: [15:0] val
 //
-// 
+//
 #define PBE_COMMON_RAM_MSGBOX_VAL_W                                          16U
 #define PBE_COMMON_RAM_MSGBOX_VAL_M                                      0xFFFFU
 #define PBE_COMMON_RAM_MSGBOX_VAL_S                                           0U
@@ -89,7 +89,7 @@
 //******************************************************************************
 // Field: [7:0] stat
 //
-// 
+//
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_W                                        8U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_M                                   0x00FFU
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_S                                        0U
@@ -98,8 +98,8 @@
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_NOSYNC                              0x0002U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_RXERR                               0x0003U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_CONNECT                             0x0004U
-#define PBE_COMMON_RAM_ENDCAUSE_STAT_SCANRSP                             0x0006U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_MAXNAK                              0x0006U
+#define PBE_COMMON_RAM_ENDCAUSE_STAT_SCANRSP                             0x0006U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_EOPSTOP                             0x0007U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_ERR_RXF                             0x00F9U
 #define PBE_COMMON_RAM_ENDCAUSE_STAT_ERR_TXF                             0x00FAU
@@ -114,7 +114,7 @@
 //******************************************************************************
 // Field: [15:0] val
 //
-// 
+//
 #define PBE_COMMON_RAM_FIFOCMDADD_VAL_W                                      16U
 #define PBE_COMMON_RAM_FIFOCMDADD_VAL_M                                  0xFFFFU
 #define PBE_COMMON_RAM_FIFOCMDADD_VAL_S                                       0U

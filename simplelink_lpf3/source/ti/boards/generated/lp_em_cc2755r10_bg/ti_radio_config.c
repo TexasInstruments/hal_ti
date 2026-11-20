@@ -6,8 +6,8 @@
  *  by the SysConfig tool.
  *
  *  Tool Name:           RadioConfig 8
- *  Tool Version:        9.11.00.02_ga
- *  RF Settings Version:
+ *  Tool Version:        01.10.00.06_eng
+ *  RF Settings Version: 01.10.00.42_eng
  */
 
 #include "ti_radio_config.h"
@@ -118,7 +118,7 @@ static const uint32_t LRF_commonRegConfig[] =
 {
     0x0000003F,                     // Segment length = 63
     0x0008A001,                     //   Data structure 32-bit region (start byte position = 8, count = 2)
-    (uint32_t) &LRF_txPowerTable,//     LRF_swParam : txPowerTable
+    (uint32_t) &LRF_txPowerTable,   //     LRF_swParam : txPowerTable
     (uint32_t) &(fcfg->appTrims),   //     LRF_swParam : trimDef
     0x14502001,                     //   HW 32-bit region (start address = 0x1450, count = 2)
     0x22000000,                     //     LRFDPBE.POLY0H                LRFDPBE.POLY0L
@@ -214,7 +214,7 @@ static const uint32_t LRF_subPhy1MbpsCodedRegConfig[] =
 {
     0x00014009,                     // Segment length = 9
     0x0000A001,                     //   Data structure 32-bit region (start byte position = 0, count = 2)
-    (uint32_t) &LRF_swConfig1Mbps,//     LRF_swParam : swConfig
+    (uint32_t) &LRF_swConfig1Mbps,  //     LRF_swParam : swConfig
     (uint32_t) &LRF_txPowerLimitTable1Mbps,//     LRF_swParam : txPowerLimitTable
     0x00003002,                     //   HW sparse region (address/value pairs, count = 3)
     0x20D44000,                     //     LRFDMDM.BAUD
@@ -257,7 +257,7 @@ static const uint32_t LRF_subPhy2MbpsRegConfig[] =
 {
     0x00010013,                     // Segment length = 19
     0x0000A001,                     //   Data structure 32-bit region (start byte position = 0, count = 2)
-    (uint32_t) &LRF_swConfig2Mbps,//     LRF_swParam : swConfig
+    (uint32_t) &LRF_swConfig2Mbps,  //     LRF_swParam : swConfig
     (uint32_t) &LRF_txPowerLimitTable2Mbps,//     LRF_swParam : txPowerLimitTable
     0x00003007,                     //   HW sparse region (address/value pairs, count = 8)
     0x1090800F,                     //     LRFDPBE.MDMCMDPAR0
@@ -405,11 +405,11 @@ const LRF_TxPowerTable LRF_txPowerTable = {
         { .power = { .fraction = 0, .dBm = 2 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 42, .gain = 5, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 1, .dBm = 2 }, .tempCoeff = 40, .value = { .ibBoost = 0, .ib = 28, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 3 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 33, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 3 }, .tempCoeff = 45, .value = { .ibBoost = 0, .ib = 33, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 4 }, .tempCoeff = 60, .value = { .ibBoost = 0, .ib = 39, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 4 }, .tempCoeff = 80, .value = { .ibBoost = 0, .ib = 49, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 0, .dBm = 5 }, .tempCoeff = 95, .value = { .ibBoost = 0, .ib = 34, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
-        { .power = { .fraction = 1, .dBm = 5 }, .tempCoeff = 150, .value = { .ibBoost = 0, .ib = 63, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 3 }, .tempCoeff = 60, .value = { .ibBoost = 0, .ib = 39, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 4 }, .tempCoeff = 80, .value = { .ibBoost = 0, .ib = 49, .gain = 6, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 4 }, .tempCoeff = 95, .value = { .ibBoost = 0, .ib = 34, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 0, .dBm = 5 }, .tempCoeff = 150, .value = { .ibBoost = 0, .ib = 63, .gain = 7, .mode = 1, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
+        { .power = { .fraction = 1, .dBm = 5 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 46, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 6 }, .tempCoeff = 5, .value = { .ibBoost = 0, .ib = 49, .gain = 3, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 1, .dBm = 6 }, .tempCoeff = 12, .value = { .ibBoost = 0, .ib = 34, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },
         { .power = { .fraction = 0, .dBm = 7 }, .tempCoeff = 15, .value = { .ibBoost = 0, .ib = 37, .gain = 4, .mode = 2, .rtrimTxCompCtl = 0, .pa20dBmEsdCtl = 0, .noIfampRfLdoBypass = 0 } },

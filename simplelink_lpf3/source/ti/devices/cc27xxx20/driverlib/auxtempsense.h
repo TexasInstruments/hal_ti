@@ -4,7 +4,7 @@
  *  Description:    Defines and prototypes for reading the high accuracy
  *                  temperature sensor
  *
- *  Copyright (c) 2025-2026, Texas Instruments Incorporated
+ *  Copyright (c) 2025-2026 Texas Instruments Incorporated
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  *
  ******************************************************************************/
 
-#ifndef __auxtempsense_H__
-#define __auxtempsense_H__
+#ifndef ti_devices_auxtempsense__include
+#define ti_devices_auxtempsense__include
 
 //*****************************************************************************
 //
@@ -119,4 +119,4 @@ extern int32_t AuxTempSenseGetTemperature_veneer(void);
 //
 //*****************************************************************************
 
-#endif // __auxtempsense_H__
+#endif // ti_devices_auxtempsense__include

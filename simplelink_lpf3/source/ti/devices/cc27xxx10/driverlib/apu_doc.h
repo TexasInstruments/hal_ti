@@ -1,7 +1,7 @@
 /******************************************************************************
  *  Filename:       apu_doc.h
  *
- *  Copyright (c) 2024-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2024-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -79,7 +79,7 @@
 //! This table illustrates the differences in the two views.
 //! ~~~
 //! |--------------------------------------------------------------------------------------------------------------|
-//! | System Address Scheme                                                          | APU Address Scheme          |
+//! | System Address Scheme                                                          | APU Address Scheme          |
 //! |--------------------------------------|----|----|----|---------|----|---|-------|-----------------------------|
 //! | imag(x)                                             | real(x)                  | x                           |
 //! |--------------------------------------|----|----|----|---------|----|---|-------|-----------------------------|
@@ -176,5 +176,7 @@
 //! - \ref APUVectorMaxMin()
 //! - \ref APUVectorR2C()
 //! - \ref APUHermLo()
+//! - \ref APUVectorAutoCorrelation()
+//! - \ref APUVectorConv1d()
 //!
 //! @}

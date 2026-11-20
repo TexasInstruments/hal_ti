@@ -58,7 +58,7 @@
 #define RCL_SCHEDULER_MARGIN_LOAD        RCL_SCHEDULER_SYSTIM_US(460U) /*!< Time to load TOPsm images */
 #define RCL_SCHEDULER_SLEEP_CUTOFF       RCL_SCHEDULER_SYSTIM_MS(5U)  /*!< Time margin when not to arm LRF immediately */
 #define RCL_SCHEDULER_TRIG_NOW_DELAY     RCL_SCHEDULER_SYSTIM_US(50U)  /*!< Delay to add to current time to allow start to be in the future */
-#if (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC23X0)
+#if (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC23X1)
 #define RCL_SCHEDULER_WAKEUP_MARGIN      RCL_SCHEDULER_SYSTIM_US(390U) /*!< Wakeup margin to allow for varying command and setup time */
 #elif (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC27XX)
 #define RCL_SCHEDULER_WAKEUP_MARGIN      RCL_SCHEDULER_SYSTIM_US(150U) /*!< Wakeup margin to allow for varying command and setup time */

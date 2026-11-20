@@ -983,7 +983,7 @@ RCL_CommandStatus RCL_Command_submit(RCL_Handle h, RCL_Command_Handle c)
 RCL_CommandStatus RCL_Command_pend(RCL_Command_Handle c)
 {
     RCL_Command *cmd = (RCL_Command *)c;
-    RCL_Handle h = NULL;
+    RCL_Client *h = NULL;
 
     if (cmd == NULL)
     {
@@ -998,21 +998,32 @@ RCL_CommandStatus RCL_Command_pend(RCL_Command_Handle c)
         return RCL_CommandStatus_Error;
     }
 
+    /* RCL-1493: Use volatile accesses to h->pendCmd and cmd->status to ensure operations are done
+       in the order written, thus avoiding race conditions if the command ends during this sequence
+     */
+    volatile RCL_Command **pendCmd = (volatile RCL_Command **) &h->pendCmd;
+    volatile RCL_CommandStatus *cmdStatus = (volatile RCL_CommandStatus *) &cmd->status;
+    RCL_CommandStatus status;
+
     /* Indicate interest */
-    h->pendCmd = cmd;
+    *pendCmd = cmd;
 
     /* Check if already completed. */
-    if (cmd->status > RCL_CommandStatus_Active)
+    status = *cmdStatus;
+    if (status > RCL_CommandStatus_Active)
     {
-        h->pendCmd = NULL;
-        return cmd->status;
+        *pendCmd = NULL;
+        return status;
     }
 
     /* Wait */
     /* Discard the enum type returned by SemaphoreP_pend to comply with MISRA C rules */
     SemaphoreP_Status semStatus = SemaphoreP_pend(&h->pendSem, SemaphoreP_WAIT_FOREVER);
     (void) semStatus;
-    return cmd->status;
+
+    /* Return the updated command status */
+    status = *cmdStatus;
+    return status;
 }
 
 /*

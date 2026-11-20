@@ -95,7 +95,13 @@
 #define CCFG_BASE               0x4E020000U // CCFG
    #define CCFG_SIZE                       0x800U
 #define BPU_BASE                0xE0002000U // BPU
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define NVIC_BASE               0xE000E000U // NVIC
+#endif // __ZEPHYR__
 #define SYSTICK_BASE            0xE000E010U // SYSTICK
+#ifndef __ZEPHYR__ // Defined by CMSIS-Core in Zephyr builds
+#define SCB_BASE                0xE000ED00U // SCB
+#endif // __ZEPHYR__
 #define DCB_BASE                0xE000ED30U // DCB
 #define SCSCS_BASE              0xE000EFC0U // SCSCS
 #define CPU_ROM_TABLE_BASE      0xE00FF000U // CPU_ROM_TABLE

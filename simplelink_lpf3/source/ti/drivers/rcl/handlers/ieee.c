@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -338,6 +338,8 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Adjust HFXT before starting the command */
+        RCL_Hal_powerSwTcxoUpdate();
         /* Make sure SWTCXO does not adjust clock while radio is running */
         RCL_Hal_powerSetSwTcxoUpdateConstraint();
 
@@ -754,16 +756,18 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
             }
         }
 
-        if ((rclEventsIn.hardStop && ieeeHandlerState.common.eventTimeType == customEvent) ||
+        if ((rclEventsIn.gracefulStop && ieeeHandlerState.common.eventTimeType == customEvent) ||
             (lrfEvents.rfesoft0 && LRF_readRssi() != LRF_RSSI_INVALID))
         {
             if (ieeeHandlerState.rxTx.txState == txStateWaitForCca)
             {
-                /* The hard stop event means "do CCA" and will not cause PBE to stop */
+                /* The graceful stop event means "do CCA" and should not cause PBE to stop */
                 doCca = true;
                 Log_printf(LogModule_RCL, Log_VERBOSE, "RCL_Handler_Ieee_RxTx: Perform CCA");
                 /* Set back stop event */
                 (void) RCL_Handler_Ieee_restoreStopTime();
+                /* Mark graceful stop event as handled */
+                rclEventsIn.gracefulStop = 0U;
             }
         }
 
@@ -997,6 +1001,12 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
         if (lrfEvents.opDone != 0U || lrfEvents.opError != 0U)
         {
             uint16_t endCause = HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_ENDCAUSE);
+
+            if (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_ERR_STOP)
+            {
+                LRF_clearHardStopTimerEventInRadio();
+            }
+
             ieeeHandlerState.rxTx.rxState = rxStateNoRx;
             if (ieeeHandlerState.rxTx.txState == txStateSetTxTime)
             {
@@ -1135,6 +1145,10 @@ RCL_Events RCL_Handler_Ieee_RxTx(RCL_Command *cmd, LRF_Events lrfEvents, RCL_Eve
             /* Clear no grant flag and interrupt in all cases */
             ieeeHandlerState.rxTx.coexNoGrant = false;
             LRF_clearHwInterrupt(LRF_EventRfesoft1.value);
+        }
+        else if (rclEventsIn.gracefulStop != 0U && ieeeHandlerState.common.eventTimeType != customEvent)
+        {
+            LRF_sendGracefulStop();
         }
         if (rclEventsIn.txBufferUpdate != 0U)
         {
@@ -1652,6 +1666,8 @@ RCL_Events RCL_Handler_Ieee_TxTest(RCL_Command *cmd, LRF_Events lrfEvents, RCL_E
 
         /* Start by enabling refsys */
         earliestStartTime = LRF_enableSynthRefsys();
+        /* Adjust HFXT before starting the command */
+        RCL_Hal_powerSwTcxoUpdate();
         /* Make sure SWTCXO does not adjust clock while radio is running */
         RCL_Hal_powerSetSwTcxoUpdateConstraint();
         ieeeHandlerState.txTest.restoreOpt = RCL_HANDLER_IEEE_RESTORE_NONE;
@@ -2554,6 +2570,7 @@ static RCL_CommandStatus RCL_Handler_Ieee_findPbeErrorEndStatus(uint16_t pbeEndS
         {
             status = RCL_Scheduler_findStopStatus(RCL_StopType_Hard);
         }
+
         break;
     case PBE_COMMON_RAM_ENDCAUSE_STAT_ERR_BADOP:
         status = RCL_CommandStatus_Error_UnknownOp;
@@ -2700,17 +2717,26 @@ static bool RCL_Handler_Ieee_initStats(RCL_StatsIeee *stats, uint32_t startTime)
 static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t timeMargin, bool hardStop)
 {
     bool setCustomEventTime = true;
-    if (rclSchedulerState.hardStopInfo.stopReason != RCL_SchedulerStopReason_None)
+    RCL_SchedulerStopInfo *stopInfo;
+    if (hardStop)
     {
-        if (rclSchedulerState.hardStopInfo.stopReason == RCL_SchedulerStopReason_Timeout)
+        stopInfo = &rclSchedulerState.hardStopInfo;
+    }
+    else
+    {
+        stopInfo = &rclSchedulerState.gracefulStopInfo;
+    }
+    if (stopInfo->stopReason != RCL_SchedulerStopReason_None)
+    {
+        if (stopInfo->stopReason == RCL_SchedulerStopReason_Timeout)
         {
-            /* Only set custom time if the next hard stop (timeout) is expected after the margin */
-            setCustomEventTime = RCL_Scheduler_isLater(eventTime + timeMargin, rclSchedulerState.hardStopInfo.cmdStopTime);
+            /* Only set custom time if the next stop (timeout) is expected after the margin */
+            setCustomEventTime = RCL_Scheduler_isLater(eventTime + timeMargin, stopInfo->cmdStopTime);
         }
-        else if (rclSchedulerState.hardStopInfo.stopReason == RCL_SchedulerStopReason_Scheduling)
+        else if (stopInfo->stopReason == RCL_SchedulerStopReason_Scheduling)
         {
-            /* Only set custom time if the next hard stop (scheduler) is expected after the margin */
-            setCustomEventTime = RCL_Scheduler_isLater(eventTime + timeMargin, rclSchedulerState.hardStopInfo.schedStopTime);
+            /* Only set custom time if the next stop (scheduler) is expected after the margin */
+            setCustomEventTime = RCL_Scheduler_isLater(eventTime + timeMargin, stopInfo->schedStopTime);
         }
         else
         {
@@ -2723,7 +2749,7 @@ static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t tim
         if (hardStop)
         {
             /* Configure PBE to keep REQUEST asserted if coex is enabled, REQUEST was already asserted,
-               and priority is not set to be changed. */
+            and priority is not set to be changed. */
             RCL_Handler_Ieee_setCoexEndMode();
             /* Program hard stop time */
             RCL_Hal_setupHardStopTime(eventTime);
@@ -2733,11 +2759,8 @@ static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t tim
         }
         else
         {
-            /* Change the stop time and set it to a soft timing */
-            HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_IEEE_RAM_O_OPCFG) =
-                HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_IEEE_RAM_O_OPCFG) | PBE_IEEE_RAM_OPCFG_SYSTIM0BEH_M;
-            RCL_Hal_setupHardStopTime(eventTime);
-            RCL_Hal_enableHardStopTimeIrq();
+            /* Change the graceful stop time  */
+            RCL_Hal_setupGracefulStopTime(eventTime);
             ieeeHandlerState.common.nextEventTime = eventTime;
             ieeeHandlerState.common.eventTimeType = customEvent;
         }
@@ -2758,18 +2781,11 @@ static bool RCL_Handler_Ieee_setCustomEventTime(uint32_t eventTime, uint32_t tim
  */
 static bool RCL_Handler_Ieee_restoreStopTime(void)
 {
-    if (ieeeHandlerState.common.eventTimeType != noEvent)
+    if (ieeeHandlerState.common.eventTimeType == customHardStop)
     {
         RCL_Hal_cancelHardStopTime();
         /* Set back stop event */
         RCL_StopType stopType = RCL_Scheduler_setStopTimes();
-
-        /* Clear systimer event in TOPsm to avoid an old event stopping the RX */
-        HWREGH_WRITE_LRF(LRFDPBE_BASE + LRFDPBE_O_EVTCLR0) = LRFDPBE_EVTCLR0_SYSTCMP0_M;
-
-        /* Set stop time back to hard stop */
-        HWREGH_WRITE_LRF(LRFD_BUFRAM_BASE + PBE_IEEE_RAM_O_OPCFG) =
-            (uint16_t) (HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_IEEE_RAM_O_OPCFG) & ~PBE_IEEE_RAM_OPCFG_SYSTIM0BEH_M);
 
         ieeeHandlerState.common.eventTimeType = noEvent;
         /* If hard stop already occurred, it needs to be executed (unless already planned) */
@@ -2783,6 +2799,26 @@ static bool RCL_Handler_Ieee_restoreStopTime(void)
             }
             return true;
         }
+    }
+    else if (ieeeHandlerState.common.eventTimeType == customEvent)
+    {
+        RCL_Hal_cancelGracefulStopTime();
+        /* Set back stop event */
+        RCL_StopType stopType = RCL_Scheduler_setStopTimes();
+
+        ieeeHandlerState.common.eventTimeType = noEvent;
+        /* If graceful stop already occurred, it needs to be executed (unless already planned) */
+        /* Other stop types returned should not need special handling */
+        if (stopType == RCL_StopType_Graceful)
+        {
+            if (rclSchedulerState.gracefulStopInfo.apiStopEnabled == 0U)
+            {
+                LRF_sendGracefulStop();
+                rclSchedulerState.gracefulStopInfo.apiStopEnabled = 1;
+            }
+            return true;
+        }
+
     }
     return false;
 }

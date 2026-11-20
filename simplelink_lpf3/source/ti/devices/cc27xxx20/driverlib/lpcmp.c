@@ -3,7 +3,7 @@
  *
  *  Description:    Driver for the LPCMP peripheral.
  *
- *  Copyright (c) 2025-2026 Texas Instruments Incorporated
+ *  Copyright (c) 2025 Texas Instruments Incorporated
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without

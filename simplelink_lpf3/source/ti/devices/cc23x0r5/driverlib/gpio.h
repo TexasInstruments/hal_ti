@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __GPIO_H__
-#define __GPIO_H__
+#ifndef ti_devices_gpio__include
+#define ti_devices_gpio__include
 
 //*****************************************************************************
 //
@@ -781,4 +781,4 @@ __STATIC_INLINE void GPIOSetEventEnableMultiDio(uint64_t dioMask, uint64_t bitVe
 //
 //*****************************************************************************
 
-#endif // __GPIO_H__
+#endif // ti_devices_gpio__include

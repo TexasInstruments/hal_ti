@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026, Texas Instruments Incorporated
+ * Copyright (c) 2025-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,9 @@
 #include DeviceFamily_constructPath(inc/pbe_common_ram_regs.h)
 #include DeviceFamily_constructPath(inc/pbe_generic_regdef_regs.h)
 
-#if (DeviceFamily_PARENT != DeviceFamily_PARENT_CC23X0) && (DeviceFamily_PARENT != DeviceFamily_PARENT_CC27XX)
+#if (DeviceFamily_PARENT != DeviceFamily_PARENT_CC23X0) && \
+    (DeviceFamily_PARENT != DeviceFamily_PARENT_CC23X1) && \
+    (DeviceFamily_PARENT != DeviceFamily_PARENT_CC27XX)
     #error "This LRFLPF3_Interface.h header file is only for CC23X0 and CC27XX devices!"
 #endif
 
@@ -90,21 +92,6 @@ static inline void LRF_Interface_programSyncWordB(uint32_t syncWord)
 static inline uint16_t LRF_Interface_getCmdEndCause(void)
 {
     return HWREGH_READ_LRF(LRFD_BUFRAM_BASE + PBE_COMMON_RAM_O_ENDCAUSE);
-}
-
-static inline bool LRF_Interface_isCmdEndCauseEopStop(void)
-{
-    return (LRF_Interface_getCmdEndCause() == PBE_COMMON_RAM_ENDCAUSE_STAT_EOPSTOP);
-}
-
-static inline bool LRF_Interface_isCmdEndCauseEndOk(uint16_t endCause)
-{
-    return (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_ENDOK);
-}
-
-static inline bool LRF_Interface_isCmdEndCauseEndedWithoutSync(uint16_t endCause)
-{
-    return (endCause == PBE_COMMON_RAM_ENDCAUSE_STAT_NOSYNC);
 }
 
 #endif /* ti_drivers_rcl_lrf_LRFLPF3_Interface__include */

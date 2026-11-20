@@ -271,6 +271,7 @@ void LRF_clearClockEnable(uint16_t mask, uint8_t entryNumber);
 int8_t LRF_readRssi(void);
 void LRF_setRawTxPower(uint32_t value, uint32_t temperatureCoefficient);
 LRF_TxPowerTable_Entry LRF_getRawTxPower(void);
+void LRF_clearHardStopTimerEventInRadio(void);
 bool LRF_imagesNeedUpdate(const LRF_Config *lrfConfig);
 
   /**

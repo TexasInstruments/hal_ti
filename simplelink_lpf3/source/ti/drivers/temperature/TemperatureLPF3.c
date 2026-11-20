@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,12 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <ti/drivers/dpl/HwiP.h>
-
+#include <ti/drivers/Power.h>
 #include <ti/drivers/Temperature.h>
 #include <ti/drivers/temperature/TemperatureLPF3.h>
 #include <ti/drivers/batterymonitor/BatMonSupportLPF3.h>
+
+#include <ti/drivers/dpl/HwiP.h>
 
 #include <ti/drivers/utils/Math.h>
 
@@ -50,6 +51,12 @@
 #include DeviceFamily_constructPath(inc/hw_pmctl.h)
 #include DeviceFamily_constructPath(inc/hw_types.h)
 #include DeviceFamily_constructPath(driverlib/interrupt.h)
+
+#ifndef TFM_BUILD
+    #include <ti/drivers/dpl/ClockP.h>
+#else
+    #include DeviceFamily_constructPath(driverlib/hapi.h)
+#endif
 
 /* Macros */
 /* Offset to apply to all thresholds before programming the hardware.
@@ -84,6 +91,11 @@
  */
 #define DISTRIBUTION_OFFSET (2)
 
+/* Time required for BATMON to stabilize after a standby-to-awake transition,
+ * in microseconds.
+ */
+#define TEMPERATURE_BATMON_STABILIZE_DELAY_US (70)
+
 /* Forward declarations */
 static void TemperatureLPF3_walkNotifyList(void);
 static void TemperatureLPF3_setNextThresholds(void);
@@ -103,6 +115,10 @@ static void TemperatureLPF3_thermalShutdownCallback(int16_t currentTemperature,
                                                     Temperature_NotifyObj *notifyObject);
 static int16_t TemperatureLPF3_scaleToRealTemperature(int32_t temperature);
 static int16_t TemperatureLPF3_scaleFromRealTemperature(int32_t temperature);
+static int_fast16_t TemperatureLPF3_powerNotifyFxn(uint_fast16_t eventType, uintptr_t eventArg, uintptr_t clientArg);
+#ifndef TFM_BUILD
+static void TemperatureLPF3_batmonClockFxn(uintptr_t arg);
+#endif
 
 /* Globals */
 
@@ -116,10 +132,22 @@ volatile static List_List TemperatureLPF3_notificationList;
 static volatile int16_t TemperatureLPF3_currentThresholdHigh = INVALID_TEMPERATURE_MAX;
 static volatile int16_t TemperatureLPF3_currentThresholdLow  = INVALID_TEMPERATURE_MIN;
 
+/* Power notification object used to disable temperature events during standby */
+static Power_NotifyObj TemperatureLPF3_powerNotifyObj;
+
 /*
  *  This object is used to monitor the temperature and trigger thermal shutdown once the threshold is reached.
  */
 static Temperature_NotifyObj thermalShutdown;
+
+/* Clock used to delay re-enabling of temperature threshold interrupts
+ * until BATMON has stabilized after waking up from standby.
+ * ClockP is not available in TFM.
+ */
+#ifndef TFM_BUILD
+static ClockP_Struct TemperatureLPF3_batmonClockStruct;
+static ClockP_Handle TemperatureLPF3_batmonClockHandle;
+#endif
 
 /*
  *  ======== TemperatureLPF3_degreesToCode ========
@@ -278,6 +306,78 @@ static void TemperatureLPF3_thermalShutdownCallback(int16_t currentTemperature,
 }
 
 /*
+ *  ======== TemperatureLPF3_batmonClockFxn ========
+ * Not used in TFM builds since ClockP is not available.
+ */
+#ifndef TFM_BUILD
+static void TemperatureLPF3_batmonClockFxn(uintptr_t arg)
+{
+    (void)arg;
+
+    /* Clear events set by measurements taken during standby */
+    TemperatureLPF3_clearEventFlags();
+
+    TemperatureLPF3_setNextThresholds();
+}
+#endif /* TFM_BUILD */
+
+/*
+ *  ======== TemperatureLPF3_powerNotifyFxn ========
+ *  Called by Power module when entering or waking up from standby.
+ */
+static int_fast16_t TemperatureLPF3_powerNotifyFxn(uint_fast16_t eventType, uintptr_t eventArg, uintptr_t clientArg)
+{
+    (void)clientArg;
+    (void)eventArg;
+
+    /* Disable temperature events before entering standby, since temperature
+     * measurements taken during standby are unreliable (See errata BATMON_02).
+     */
+    if (eventType == PowerLPF3_ENTERING_STANDBY)
+    {
+#ifndef TFM_BUILD
+        /* Cancel any pending stabilization clock from a prior wakeup to prevent
+         * it from re-enabling interrupts after standby entry.
+         */
+        ClockP_stop(TemperatureLPF3_batmonClockHandle);
+#endif
+
+        /* Set the thresholds to invalid values to make sure the events are
+         * re-enabled after standby. TemperatureLPF3_setNextThresholds() only
+         * re-enables an event if the new threshold is stricter than the current
+         * one.
+         */
+        TemperatureLPF3_setTempUpperLimit(INVALID_TEMPERATURE_MAX);
+        TemperatureLPF3_disableTempUpperLimit();
+
+        TemperatureLPF3_setTempLowerLimit(INVALID_TEMPERATURE_MIN);
+        TemperatureLPF3_disableTempLowerLimit();
+
+        TemperatureLPF3_clearEventFlags();
+    }
+
+    /* Re-enable temperature events if returning from standby */
+    if (eventType == PowerLPF3_AWAKE_STANDBY)
+    {
+#ifndef TFM_BUILD
+        /* Schedule BATMON re-enable in the future, giving BATMON
+         * time to stabilize before thresholds/interrupts are re-enabled.
+         */
+        ClockP_start(TemperatureLPF3_batmonClockHandle);
+#else
+        /* In TFM ClockP is unavailable. Use HapiWaitUs to busy-wait
+         * for BATMON to stabilize before re-enabling thresholds.
+         */
+        HapiWaitUs(TEMPERATURE_BATMON_STABILIZE_DELAY_US);
+        TemperatureLPF3_clearEventFlags();
+        TemperatureLPF3_setNextThresholds();
+#endif
+    }
+
+    return Power_NOTIFYDONE;
+}
+
+/*
  *  ======== Temperature_init ========
  */
 void Temperature_init(void)
@@ -294,6 +394,19 @@ void Temperature_init(void)
         BatMonSupportLPF3_init();
         BatMonSupportLPF3_registerTemperatureCb(PMUD_EVENT_TEMP_BELOW_LL | PMUD_EVENT_TEMP_OVER_UL,
                                                 TemperatureLPF3_temperatureEventCb);
+
+#ifndef TFM_BUILD
+        TemperatureLPF3_batmonClockHandle = ClockP_construct(&TemperatureLPF3_batmonClockStruct,
+                                                             TemperatureLPF3_batmonClockFxn,
+                                                             TEMPERATURE_BATMON_STABILIZE_DELAY_US /
+                                                                 ClockP_getSystemTickPeriod(),
+                                                             NULL);
+#endif
+
+        Power_registerNotify(&TemperatureLPF3_powerNotifyObj,
+                             PowerLPF3_ENTERING_STANDBY | PowerLPF3_AWAKE_STANDBY,
+                             TemperatureLPF3_powerNotifyFxn,
+                             (uintptr_t)NULL);
 
         /* Wait first measurement is ready to prevent Temperature_getTemperature
          * returning an invalid value

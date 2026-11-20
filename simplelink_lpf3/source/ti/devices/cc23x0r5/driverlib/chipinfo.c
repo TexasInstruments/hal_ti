@@ -35,6 +35,7 @@
 
 #include "chipinfo.h"
 
+#include <stdint.h>
 #include <string.h>
 
 void ChipInfoGetBleAddr(uint8_t *pBleAddr)

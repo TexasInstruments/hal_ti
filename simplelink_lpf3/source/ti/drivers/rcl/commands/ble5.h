@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2026, Texas Instruments Incorporated
+ * Copyright (c) 2020-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -754,6 +754,7 @@ struct RCL_CTX_GENERIC_RX_t {
     List_List rxBuffers;       /*!< Linked list of buffers for storing received packets */
     uint32_t  accessAddress;   /*!< Access address */
     uint32_t  crcInit;         /*!< CRC initialization value (24 bits) */
+    uint16_t  rxTimeoutTime;   /*!< Repeated RX only: Inter-packet RX timeout applied for each packet after the first. Expires if syncword for next packet is not received within T_IFS (150 us) + rxTimeoutTime. 0: No inter-packet timeout. */
     uint8_t   maxPktLen;       /*!< Maximum payload length of received packets */
     uint8_t   maxPkts;         /*!< Maximum number of packets to be received before closing the Rx window. 0: Do not stop command based on received packets */
     struct {
@@ -769,6 +770,7 @@ struct RCL_CTX_GENERIC_RX_t {
     .rxBuffers = { 0 },             \
     .accessAddress = 0x71764129U,   \
     .crcInit = 0x555555,            \
+    .rxTimeoutTime = 0,             \
     .maxPktLen = 255,               \
     .maxPkts = 0,                   \
     .config = {                     \

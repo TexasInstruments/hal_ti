@@ -4,7 +4,7 @@
  *  Description:    Instruction wrappers for special CPU instructions needed by
  *                  the drivers.
  *
- *  Copyright (c) 2022-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -58,7 +58,7 @@ void CPUDelay(uint32_t count)
 }
     #pragma diag_default  = Pe940
 #elif (defined(__clang__) || defined(__GNUC__))
-void __attribute__((naked, no_profile_instrument_function)) CPUDelay(uint32_t count)
+void __attribute__((naked, aligned(8), no_profile_instrument_function)) CPUDelay(uint32_t count)
 {
     // The naked attribute tells the compiler that the function is effectively
     // hand-coded assembly implemented using inlined assembly without operands.
@@ -66,6 +66,9 @@ void __attribute__((naked, no_profile_instrument_function)) CPUDelay(uint32_t co
     // For ARM calling convention, the first parameter (count) is in r0.
     // no_profile_instrument_function disables code coverage instrumentation.
     // which could break the above assumption that count is in r0.
+    // The aligned attribute keeps the loop and the word prefetched after it
+    // in the same flash line, so the cycle count does not depend on where the
+    // linker places the function.
     __asm volatile(".syntax unified\n"
                    "CPUDel%=:\n"           /* Label with unique suffix */
                    "    subs r0, r0, #1\n" /* Subtract 1 from r0 (count) - Thumb16 compatible */

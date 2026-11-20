@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,13 @@ static Temperature_NotifyObj temperatureChangeNotifyObj = {0};
 
 static void RCL_Hal_cancelLrfdSystim0(void);
 
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+/** CKMD_HFTRACKCTL_RATIO_REF48M is undefined for CC23X1 device
+ */
+#define RCL_DEFAULT_HFTRACKCTL_RATIO    ((0x00400000U))
+#else
 #define RCL_DEFAULT_HFTRACKCTL_RATIO    CKMD_HFTRACKCTL_RATIO_REF48M
+#endif
 
 static HwiP_Struct schedHwi;
 void (*halSchedFsmCb)(void) = NULL;
@@ -114,6 +120,14 @@ uint32_t RCL_Hal_getCommandIfgReg(void)
     dbellIrq = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_MIS0);
     /* Remove SYSTIM 0 and 1 interrupts, as they should be handled by RCL_Hal_checkClearTimerCompare() */
     dbellIrq &= ~(LRFDDBELL_MIS0_SYSTIM0_M | LRFDDBELL_MIS0_SYSTIM1_M);
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    /* SYSTIM cleared only when SYSTIM2 is the confirmed source */
+    if ((dbellIrq & LRFDDBELL_MIS1_SYSTIM2_M) != 0U)
+    {
+        /* Read CH4CC to acknowledge capture */
+        HWREG(SYSTIM_BASE + SYSTIM_O_CH4CC);
+    }
+#endif
     /* Clear interrupts (unmasked only) */
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = dbellIrq;
 
@@ -123,11 +137,17 @@ uint32_t RCL_Hal_getCommandIfgReg(void)
 uint32_t RCL_Hal_getDispatchIfgReg(void)
 {
     uint32_t dbellIrq;
-    /* Using masked interrupt */
     dbellIrq = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_MIS1);
-    /* Clear interrupts (unmasked only) */
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    /* SYSTIM cleared only when SYSTIM2 is the confirmed source */
+    if ((dbellIrq & LRFDDBELL_MIS1_SYSTIM2_M) != 0U)
+    {
+        /* Read CH4CC to acknowledge capture */
+        HWREG(SYSTIM_BASE + SYSTIM_O_CH4CC);
+    }
+#endif
+    /* Clear DBELL RIS1 latch */
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR1) = dbellIrq;
-
     return dbellIrq;
 }
 
@@ -139,6 +159,7 @@ void RCL_Hal_initFsm(void (*dispatchFsmCb)(void), void (*schedFsmCb)(void),
 {
     HwiP_Params hp;
     HwiP_Params_init(&hp);
+    /* TODO: See RCL-345 */
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     hp.priority = INT_PRI_LEVEL4;
 #else
@@ -161,9 +182,6 @@ void RCL_Hal_initFsm(void (*dispatchFsmCb)(void), void (*schedFsmCb)(void),
     halDispatchFsmCb = dispatchFsmCb;
     halSchedFsmCb = schedFsmCb;
     halCommandFsmCb = commandFsmCb;
-    /* TODO: See RCL-345 */
-
-    HWREG(EVTSVT_BASE + EVTSVT_O_CPUIRQ4SEL) = 0xE; /* LRFDIRQ2 */
 }
 
 
@@ -193,7 +211,7 @@ uint32_t RCL_Hal_getCurrentTime(void)
 enum {
     SYSTIM_CH2_SETUP = 1, /* Early start, to kick off setup */
     SYSTIM_CH2_START = 2, /* Start event to radio */
-    SYSTIM_CH2_STOP = 3,  /* Hard stop time */
+    SYSTIM_CH2_STOP = 3,  /* Graceful stop time */
 } channel2usage = SYSTIM_CH2_SETUP;
 
 void RCL_Hal_enableSetupTimeIrq(void)
@@ -224,38 +242,33 @@ void RCL_Hal_setupStartTime(uint32_t time)
 
 void RCL_Hal_setupHardStopTime(uint32_t time)
 {
-    channel2usage = SYSTIM_CH2_STOP;
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
-    HWREG(SYSTIM_BASE + SYSTIM_O_CH2CC) = time;
-    /* Interrupt is not always needed, as event will be handled by PBE */
-}
-
-void RCL_Hal_enableHardStopTimeIrq(void)
-{
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM0_M;
-}
-
-void RCL_Hal_disableHardStopTimeIrq(void)
-{
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & ~LRFDDBELL_IMASK0_SYSTIM0_M;
-}
-
-void RCL_Hal_setupGracefulStopTime(uint32_t time)
-{
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM1_M;
     HWREG(SYSTIM_BASE + SYSTIM_O_CH3CC) = time;
     /* Interrupt is not always needed, as event will be handled by PBE */
 }
 
-void RCL_Hal_enableGracefulStopTimeIrq(void)
+void RCL_Hal_enableHardStopTimeIrq(void)
 {
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM1_M;
+}
+
+void RCL_Hal_setupGracefulStopTime(uint32_t time)
+{
+    channel2usage = SYSTIM_CH2_STOP;
+    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH2CC) = time;
+    /* Since LRF is not listening to Graceful stop events coming from SYSTIM, we need to enable interrupts*/
+    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) | LRFDDBELL_IMASK0_SYSTIM0_M;
 }
 
 static void RCL_Hal_cancelLrfdSystim0(void)
 {
     HWREG(SYSTIM_BASE + SYSTIM_O_CH2CC) = 0;
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH2CFG) = SYSTIM_CH2CFG_MODE_CPT;
+#else
     HWREG(SYSTIM_BASE + SYSTIM_O_CH2CFG) = SYSTIM_CH2CFG_MODE_CAPT;
+#endif
     HWREG(SYSTIM_BASE + SYSTIM_O_CH2CFG) = SYSTIM_CH2CFG_MODE_DIS;
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & (~LRFDDBELL_IMASK0_SYSTIM0_M);
 #ifndef SOCFPGA
@@ -277,23 +290,31 @@ void RCL_Hal_cancelStartTime(void)
 
 void RCL_Hal_cancelHardStopTime(void)
 {
-    RCL_Hal_cancelLrfdSystim0();
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CC) = 0;
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CFG) = SYSTIM_CH3CFG_MODE_CPT;
+#else
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CFG) = SYSTIM_CH3CFG_MODE_CAPT;
+#endif
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CFG) = SYSTIM_CH3CFG_MODE_DIS;
+    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) =  HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & ~LRFDDBELL_IMASK0_SYSTIM1_M;
 }
 
 void RCL_Hal_cancelGracefulStopTime(void)
 {
-    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CC) = 0;
-    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CFG) = SYSTIM_CH3CFG_MODE_CAPT;
-    HWREG(SYSTIM_BASE + SYSTIM_O_CH3CFG) = SYSTIM_CH3CFG_MODE_DIS;
-    HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) =  HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & ~LRFDDBELL_IMASK0_SYSTIM1_M;
+    RCL_Hal_cancelLrfdSystim0();
 }
 
 void RCL_Hal_enableClkBuffer(void)
 {
 #ifndef SOCFPGA
     /* FPGA doesn't support standby */
-    HWREG( CKMD_BASE + CKMD_O_HFXTCTL ) |= CKMD_HFXTCTL_HPBUFEN;
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    HWREG(CKMD_BASE + CKMD_O_XBHFCTL) |= CKMD_XBHFCTL_XBHFHPBUFEN;
+#else
+    HWREG(CKMD_BASE + CKMD_O_HFXTCTL) |= CKMD_HFXTCTL_HPBUFEN;
 #endif
+#endif /* SOCFPGA */
 }
 
 void RCL_Hal_setupSyncFoundCap(void)
@@ -304,7 +325,11 @@ void RCL_Hal_setupSyncFoundCap(void)
     /* Route through DBELL */
     HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_SYSTIMOEV) = (LRFDDBELL_SYSTIMOEV_SRC2_MCESYSTIM0);
     /* SYSTIM channel 4 uses srat_ievent(0) as repeated capture trigger */
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    HWREG(SYSTIM_BASE + SYSTIM_O_CH4CFG) |= SYSTIM_CH4CFG_INP_RISE | SYSTIM_CH4CFG_MODE_CPT | SYSTIM_CH4CFG_REARM_EN;
+#else
     HWREG(SYSTIM_BASE + SYSTIM_O_CH4CFG) |= SYSTIM_CH4CFG_INP_RISE | SYSTIM_CH4CFG_MODE_CAPT | SYSTIM_CH4CFG_REARM_EN;
+#endif
 }
 
 HalTimerEvent RCL_Hal_checkClearTimerCompare(void)
@@ -313,9 +338,21 @@ HalTimerEvent RCL_Hal_checkClearTimerCompare(void)
 
     uint32_t mis0 = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_MIS0);
 
-    /* Start or hard-stop takes priority, meaning hard-stop takes priority over graceful. */
-    if ((mis0 & LRFDDBELL_MIS0_SYSTIM0_M) != 0U)
+    /* Hard-stop takes priority, meaning hard-stop takes priority over start and graceful. */
+    if ((mis0 & LRFDDBELL_MIS0_SYSTIM1_M) != 0U)
     {
+        RCL_Hal_clearHardStopTimerEvent();
+        HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & (~LRFDDBELL_IMASK0_SYSTIM1_M);
+        HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM1_M;
+        event = HAL_TIMER_EVT_HARD_STOP;
+    }
+
+    else if ((mis0 & LRFDDBELL_MIS0_SYSTIM0_M) != 0U)
+    {
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+        /* On CC23x1, SYSTIM CMP event needs to be cleared by reading CHxCC.*/
+        HWREG(SYSTIM_BASE + SYSTIM_O_CH2CC);
+#endif
         HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & (~LRFDDBELL_IMASK0_SYSTIM0_M);
         HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM0_M;
 #ifndef SOCFPGA
@@ -332,17 +369,11 @@ HalTimerEvent RCL_Hal_checkClearTimerCompare(void)
                 event = HAL_TIMER_EVT_START;
                 break;
             case SYSTIM_CH2_STOP:
-                event = HAL_TIMER_EVT_HARD_STOP;
+                event = HAL_TIMER_EVT_GRACEFUL_STOP;
                 break;
             default:
                 break;
         }
-    }
-    else if ((mis0 & LRFDDBELL_MIS0_SYSTIM1_M) != 0U)
-    {
-        HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) = HWREG_READ_LRF(LRFDDBELL_BASE + LRFDDBELL_O_IMASK0) & (~LRFDDBELL_IMASK0_SYSTIM1_M);
-        HWREG_WRITE_LRF(LRFDDBELL_BASE + LRFDDBELL_O_ICLR0) = LRFDDBELL_ICLR0_SYSTIM1_M;
-        event = HAL_TIMER_EVT_GRACEFUL_STOP;
     }
     else
     {
@@ -399,6 +430,15 @@ void RCL_Hal_clearRclClockEnable(uint16_t mask)
     uintptr_t key = HwiP_disable();
     LRFDReleaseClockDependency(mask, LRFD_CLK_DEP_RCL);
     HwiP_restore(key);
+}
+
+void RCL_Hal_clearHardStopTimerEvent(void)
+{
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
+    (void) HWREG(SYSTIM_BASE + SYSTIM_O_CH3CC);
+#else
+    /* SYSTIM IP for other devices behave different and event should be cleaned already */
+#endif
 }
 
 uint8_t RCL_Hal_setDcdcIpeakSetting(uint8_t setting)
@@ -484,6 +524,12 @@ void RCL_Hal_powerReleaseSwTcxoUpdateConstraint(void)
         PowerLPF3_forceHFXTCompensationUpdate();
     }
 #endif
+}
+
+void RCL_Hal_powerSwTcxoUpdate(void)
+{
+    /* Note: The power driver is not performing any temperature driven HFXT calibration */
+    PowerLPF3_updateHFXTCompensation();
 }
 
 void RCL_Hal_powerOpen(void (*rclPowerNotifyFunction)(RCL_PowerEvent))

@@ -1,4 +1,8 @@
 /******************************************************************************
+ *  Filename:       flash.h
+ *
+ *  Description:    Defines and prototypes for the flash peripheral.
+ *
  *  Copyright (c) 2025-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -29,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __FLASH_H__
-#define __FLASH_H__
+#ifndef ti_devices_flash__include
+#define ti_devices_flash__include
 
 //*****************************************************************************
 //
@@ -356,21 +360,7 @@ __STATIC_INLINE uint32_t FlashEraseBank(uint32_t bankSelect)
 //! - \ref FAPI_STATUS_FSM_ERROR                   : A programming error is encountered.
 //
 //*****************************************************************************
-__STATIC_INLINE uint32_t FlashProgram(uint8_t *dataBuffer, uint32_t address, uint32_t count)
-{
-    // Store current configuration
-    uint32_t cchctl = HWREG(VIMS_BASE + VIMS_O_CCHCTL);
-
-    // Clear instruction cache
-    HWREG(VIMS_BASE + VIMS_O_CCHCTL) = (VIMS_CCHCTL_CCHEN_DIS | VIMS_CCHCTL_LINEN_DIS);
-
-    uint32_t retCode = HapiFlashProgram(FLASH_API_KEY, dataBuffer, address, count);
-
-    // Restore configuration
-    HWREG(VIMS_BASE + VIMS_O_CCHCTL) = cchctl;
-
-    return (retCode);
-}
+extern uint32_t FlashProgram(uint8_t *dataBuffer, uint32_t address, uint32_t count);
 
 #else
     //*****************************************************************************
@@ -403,4 +393,4 @@ __STATIC_INLINE uint32_t FlashProgram(uint8_t *dataBuffer, uint32_t address, uin
 //
 //*****************************************************************************
 
-#endif // __FLASH_H__
+#endif // ti_devices_flash__include

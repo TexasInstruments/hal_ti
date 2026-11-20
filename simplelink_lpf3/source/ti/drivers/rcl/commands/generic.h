@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2026, Texas Instruments Incorporated
+ * Copyright (c) 2021-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include <ti/drivers/rcl/RCL_Command.h>
 #include <ti/drivers/rcl/RCL_Buffer.h>
 #include <ti/drivers/rcl/handlers/generic.h>
-#include <ti/drivers/rcl/LRF.h>
+#include <ti/drivers/rcl/lrf/LRF_Interface_Generic_Defs.h>
 
 #include <ti/drivers/utils/List.h>
 

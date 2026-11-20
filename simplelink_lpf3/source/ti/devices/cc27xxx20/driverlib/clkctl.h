@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __CLKCTL_H__
-#define __CLKCTL_H__
+#ifndef ti_devices_clkctl__include
+#define ti_devices_clkctl__include
 
 //*****************************************************************************
 //
@@ -284,4 +284,4 @@ extern void CLKCTLDisableLrfdClock_veneer(void);
 //
 //*****************************************************************************
 
-#endif // __CLKCTL_H__
+#endif // ti_devices_clkctl__include

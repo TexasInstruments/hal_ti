@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026, Texas Instruments Incorporated
+ * Copyright (c) 2025-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,24 @@
 #ifndef ti_drivers_rcl_lrf_LRFLPF3_Interface_Generic__include
 #define ti_drivers_rcl_lrf_LRFLPF3_Interface_Generic__include
 
+#include <ti/devices/DeviceFamily.h>
+#if (DeviceFamily_PARENT != DeviceFamily_PARENT_CC23X0) && \
+    (DeviceFamily_PARENT != DeviceFamily_PARENT_CC23X1) && \
+    (DeviceFamily_PARENT != DeviceFamily_PARENT_CC27XX)
+    #error "This LRFLPF3_Interface_Generic.h header file is only for CC23XX and CC27XX devices!"
+#endif
+
 #include <stdint.h>
 
-#include <ti/drivers/rcl/LRF.h>
-#include <ti/drivers/rcl/lrf/LRFLPF3_Interface.h>
-
-#include <ti/devices/DeviceFamily.h>
 #include DeviceFamily_constructPath(inc/hw_types.h)
 #include DeviceFamily_constructPath(inc/hw_lrfdrfe.h)
 #include DeviceFamily_constructPath(inc/hw_memmap.h)
 #include DeviceFamily_constructPath(inc/pbe_generic_ram_regs.h)
 #include DeviceFamily_constructPath(inc/pbe_generic_regdef_regs.h)
 
-#if (DeviceFamily_PARENT != DeviceFamily_PARENT_CC23X0) && (DeviceFamily_PARENT != DeviceFamily_PARENT_CC27XX)
-    #error "This LRFLPF3_Interface_Generic.h header file is only for CC23X0 and CC27XX devices!"
-#endif
+#include <ti/drivers/rcl/LRF.h>
+#include <ti/drivers/rcl/lrf/LRFLPF3_Interface.h>
+#include <ti/drivers/rcl/lrf/LRFLPF3_Interface_Generic_Defs.h>
 
 /* ============================================================================
  * Forward Declarations
@@ -58,8 +61,8 @@ typedef struct LRF_MODULATION_CTRL_t LRF_ModulationCtrl;
 
 void LRF_Interface_Generic_configOpNesbPrx(uint16_t lrfOpCfg, uint8_t addrLen, const RCL_ConfigAddress* syncWordCfg);
 void LRF_Interface_Generic_setModulationMode(uint32_t sendCw, uint32_t whitenMode, LRF_ModulationCtrl* modulationCtrl);
-void LRF_Interface_Generic_disableSyncSearch(bool disableSyncWordA, bool disableSyncWordB, LRF_SyncSearchCtrl* syncSearchCtrl);
 void LRF_Interface_Generic_updateSyncWordCfg(RCL_ConfigAddress* syncWordCfg);
+void LRF_Interface_Generic_configDualSyncWords(uint32_t syncWordA, uint32_t syncWordB, bool disableSyncWordA, bool disableSyncWordB, LRF_SyncSearchCtrl * syncSearchCtrl);
 
 /* ============================================================================
  * Type Definitions
@@ -86,14 +89,6 @@ struct LRF_MODULATION_CTRL_t
  * Macros
  * ============================================================================
  */
-#define LRF_INTERFACE_GENERIC_API_OP_PING                            ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_PING))
-#define LRF_INTERFACE_GENERIC_API_OP_STOP                            ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_STOP))
-#define LRF_INTERFACE_GENERIC_API_OP_EOP_STOP                        ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_EOPSTOP))
-#define LRF_INTERFACE_GENERIC_API_OP_TX                              ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_TX))
-#define LRF_INTERFACE_GENERIC_API_OP_RX                              ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_RX))
-#define LRF_INTERFACE_GENERIC_API_OP_FS                              ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_FS))
-#define LRF_INTERFACE_GENERIC_API_OP_STOP_FS                         ((uint16_t)(PBE_GENERIC_REGDEF_API_OP_STOPFS))
-
 #define LRFDRFE_SPARE4_SYNTHLOCK_M                                   (0x00000001U)
 #define LRFDRFE_SPARE4_SYNTHLOCK_NOT_LOCKED                          (0x00000000U)
 

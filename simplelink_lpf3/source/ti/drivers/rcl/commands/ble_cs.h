@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2026, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ typedef struct RCL_CMD_BLE_CS_PRECAL_t                    RCL_CmdBleCs_Precal;
 typedef struct RCL_CMD_BLE_CS_PRECAL_TABLE_t              RCL_CmdBleCs_PrecalTable;
 typedef struct RCL_CMD_BLE_CS_PRECAL_ENTRY_t              RCL_CmdBleCs_PrecalEntry;
 
-typedef struct RCL_CMD_BLE_CS_PCT_COMP_TABLE_t            RCL_CmdBleCs_PctCompTable;
+typedef struct RCL_CMD_BLE_CS_PCT_COMP_t                  RCL_CmdBleCs_PctComp;
 typedef struct RCL_CMD_BLE_CS_PCT_COMP_ENTRY_t            RCL_CmdBleCs_PctCompEntry;
 
 typedef struct RCL_CMD_BLE_CS_STEP_RESULTS_TONE_t         RCL_CmdBleCs_Tone;
@@ -94,7 +94,6 @@ typedef enum   RCL_CMD_BLE_CS_Nadm_e                      RCL_CmdBleCs_Nadm;
 #define RCL_BLE_CS_PBE_TIMER_TO_US(x)           ((x)/12U)
 #define RCL_BLE_CS_MCE_TIMER_TO_PBE_TIMER(x)    (uint16_t) ((x)/4U)
 #define RCL_BLE_CS_MCE_TIMER_TO_PREFREF(x)      ((x)/3U)
-#define RCL_BLE_CS_DELAY_PS_TO_LUT(x)           (((x)+16U)/32U)
 
 /* Helper macros for constants */
 #define RCL_BLE_CS_MAX_NUM_ANT                  4U
@@ -199,7 +198,8 @@ struct RCL_CMD_BLE_CS_STEP_INTERNAL_t {
     int16_t  foffErr;                                /*!< Used for frequency offset compensation */
     int16_t  tAdjustA;                               /*!< Used for timegrid adjustment */
     int16_t  tAdjustB;                               /*!< Used for timegrid adjustment */
-    uint16_t tPllRx;                                 /*!< Used for PLL adjustment */    
+    uint16_t tPllRx;                                 /*!< Used for PLL adjustment */
+    uint16_t inlinePctPhaseComp[RCL_BLE_CS_MAX_NUM_ANT]; /*!< PCT phase compensation for each local antenna (chronological order), when reflector with Inline PCT Transfer */
     RCL_CmdBleCs_IQSample dcComp[RCL_BLE_CS_NUM_RX_GAIN_LEVEL]; /*!< Used for DC compensation with precalibrated values */
     uint32_t payloadTx[RCL_BLE_CS_MAX_PAYLOAD_SIZE]; /*!< Payload to transmit containing random bit sequence (TX) */
     uint32_t payloadRx[RCL_BLE_CS_MAX_PAYLOAD_SIZE]; /*!< Expected payload to receive containing random bit sequence (RX) */
@@ -212,7 +212,7 @@ struct RCL_CMD_BLE_CS_STEP_INTERNAL_t {
     int16_t  tAntennaA;                              /*!< Antenna timing adjustment */
     int16_t  tAntennaB;                              /*!< Antenna timing adjustment */
     uint16_t reserved4;
-};
+    };
 
 /**
  *  @brief BLE Channel Sounding QQ data
@@ -594,33 +594,88 @@ struct RCL_CMD_BLE_CS_PRECAL_t {
     PCT compensation for antenna/front-end delay
 *****************************************************/
 
+/* Unity gain in the Q1.15 magnitude compensation format */
+#define RCL_BLE_CS_PCT_MAGN_UNITY       (0x8000U)
+
+/* Bit flags for the compSelect argument of RCL_Handler_BLE_CS_getPctComp() */
+#define RCL_BLE_CS_PCT_COMP_SEL_PHASE   (1U << 0)   /*!< Phase compensation is requested */
+#define RCL_BLE_CS_PCT_COMP_SEL_MAGN    (1U << 1)   /*!< Magnitude compensation is requested */
+
 /**
- *  @brief Channel entry for PCT compensation for antenna/front-end delay
+ *  @brief PCT compensation for one local antenna
  *
- *  Data structure for PCT compensation for antenna delay (phase) and magnitude.
+ *  Compensation to apply to the PCT of a tone measured through one local antenna, to remove
+ *  antenna/front-end delay and gain imbalance.
  */
 struct RCL_CMD_BLE_CS_PCT_COMP_ENTRY_t {
-    uint8_t phaseDelay;                 /*!< Phase delay to subtract, in multiple of 32 picoseconds (i.e. max compensation is 255*32=8.16ns)*/
-    uint8_t magnCoeff;                  /*!< Linear magnitude compensation coefficient of I/Q of PCT, k = magnCoeff/128 */
+    uint16_t phase;   /*!< Phase rotation applied to the PCT. Unit: 2*pi/65536 per LSB, range [0, 2*pi), wraps naturally. 0 = no rotation */
+    uint16_t magn;    /*!< Linear magnitude gain applied to I and Q of the PCT, unsigned Q1.15 (0x8000 = 1.0, range [0, 2.0)). @ref RCL_BLE_CS_PCT_MAGN_UNITY */
 };
 
 /**
- *  @brief PCT compensation table for antenna/front-end delay
+ *  @brief PCT compensation for all local antennas for one channel
  *
- *  Data describing the magnitude/phase compensation to adjust PCT due to antenna/fronte-end.
+ *  Indexed by physical antenna number: ant[0] = A1, ant[1] = A2, ant[2] = A3, ant[3] = A4.
+ *  RCL maps from the (chronological) antenna path of a tone to the physical antenna.
  */
-struct RCL_CMD_BLE_CS_PCT_COMP_TABLE_t {
-    uint8_t firstChannelIdx;            /*!< Integer channel index (0: 2402MHz) for first entry */
-    uint8_t chSpacing          : 7;     /*!< Channel spacing between entries in the table, assuming uniform spacing */
-    uint8_t enPhaseComp        : 1;     /*!< Enable phase compensation */
-    uint8_t enMagnComp         : 1;     /*!< Enable magnitude compensation */
-    uint8_t numEntries         : 7;     /*!< Number of channel entries per antenna */
-    RCL_CmdBleCs_PctCompEntry entries[];
+struct RCL_CMD_BLE_CS_PCT_COMP_t {
+    RCL_CmdBleCs_PctCompEntry ant[RCL_BLE_CS_MAX_NUM_ANT];
 };
 
+/* A PCT compensation entry for no compensation */
+#define RCL_CMD_BLE_CS_PCT_COMP_ENTRY_NOCOMP                            \
+{                                                                       \
+    .phase = 0,                                                         \
+    .magn  = RCL_BLE_CS_PCT_MAGN_UNITY                                  \
+}
 
-/* Adjust RCL_BLE_CS_PHASE_DELAY_PS for linear PCT phase compensation due to antenna/front-end design,
- * or adjust RCL_CmdBleCs_PctCompTable bleCsPctCompTable, using a calibrated instrument */
+/* Default PCT compensation for no compensation on all antennas */
+#define RCL_CMD_BLE_CS_PCT_COMP_DEFAULT                                 \
+{                                                                       \
+    .ant = { RCL_CMD_BLE_CS_PCT_COMP_ENTRY_NOCOMP,                      \
+             RCL_CMD_BLE_CS_PCT_COMP_ENTRY_NOCOMP,                      \
+             RCL_CMD_BLE_CS_PCT_COMP_ENTRY_NOCOMP,                      \
+             RCL_CMD_BLE_CS_PCT_COMP_ENTRY_NOCOMP                       \
+    }                                                                   \
+}
+
+/**
+ *  @brief Get PCT compensation for antenna/front-end delay and gain imbalance
+ *
+ *  Weakly linked in the driver. The application can provide its own implementation (e.g. generated
+ *  from a calibration script) to supply compensation values for each channel and local antenna.
+ *
+ *  Contract:
+ *  - @p channelIdx follows the CS step convention: 0 = 2402 MHz, 1 = 2403 MHz, ...
+ *  - @p compSelect tells which compensation RCL needs in this call, as a combination of
+ *    RCL_BLE_CS_PCT_COMP_SEL_PHASE and RCL_BLE_CS_PCT_COMP_SEL_MAGN. The function must fill in the
+ *    selected fields for all antennas, and must leave the fields that are not selected untouched.
+ *    RCL applies whatever is in @p pComp afterwards, so writing a field that was not selected
+ *    gives wrong results (e.g. a reflector with inline phase would rotate the PCT a second time).
+ *  - RCL initializes @p pComp to no compensation (phase = 0, magn = RCL_BLE_CS_PCT_MAGN_UNITY)
+ *    for all antennas before the call. The function only needs to write the entries it wants to
+ *    change, and may return early for channels it does not cover.
+ *  - Called at most once per CS mode-2/3 step and use case:
+ *    - Initiator, or reflector without inline phase: when results are converted, with both
+ *      phase and magnitude selected.
+ *    - Reflector with inline phase: when the step is prepared for the radio, with only phase selected
+ *      (the radio applies the phase before transmitting back), and again when results are converted,
+ *      with only magnitude selected (the phase is already applied).
+ *  - Must be fast, non-blocking, must not call RCL APIs, and should avoid floating point (the target
+ *    may lack an FPU).
+ *  - The phase rotation is applied in the same direction as the earlier table-based compensation, for
+ *    the absolute channel frequency (2402 + channelIdx MHz).
+ *  - Magnitude gain above 1.0 risks overflowing the 13-bit signed PCT I/Q range (saturated by RCL).
+ *    Prefer attenuation to flatten a non-flat response.
+ *
+ *  @param[in]  channelIdx  Channel index, 0 = 2402 MHz
+ *  @param[in]  compSelect  Requested compensation, @ref RCL_BLE_CS_PCT_COMP_SEL_PHASE and @ref RCL_BLE_CS_PCT_COMP_SEL_MAGN
+ *  @param[out] pComp       Compensation for each physical antenna
+ */
+void RCL_Handler_BLE_CS_getPctComp(uint8_t channelIdx, uint8_t compSelect, RCL_CmdBleCs_PctComp *pComp);
+
+/* Adjust RCL_BLE_CS_PHASE_DELAY_PS for linear PCT phase compensation due to antenna/front-end design in the
+ * default RCL_Handler_BLE_CS_getPctComp(), or provide your own RCL_Handler_BLE_CS_getPctComp() using calibration data */
 #ifndef RCL_BLE_CS_PHASE_DELAY_PS
 #if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     /* Example: LP-EM-CC2745R10-Q1 Launchpad development kit, SMA port */
@@ -630,27 +685,6 @@ struct RCL_CMD_BLE_CS_PCT_COMP_TABLE_t {
     #define RCL_BLE_CS_PHASE_DELAY_PS  (1500UL)
 #endif
 #endif
-
-/* Default PCT compensation table: Only phase comp. Channels: 2402, 2402+n*8, ..., 2402+(11-1)*8 = 2482MHz */
-#define RCL_CmdBleCs_PctCompTable_Default()                                                     \
-{                                                                                               \
-    .firstChannelIdx = 0,                                                                       \
-    .chSpacing       = 8,                                                                       \
-    .enPhaseComp     = 1,                                                                       \
-    .enMagnComp      = 0,                                                                       \
-    .numEntries      = 11,                                                                      \
-    .entries         = {{.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)},  \
-                        {.phaseDelay = RCL_BLE_CS_DELAY_PS_TO_LUT(RCL_BLE_CS_PHASE_DELAY_PS)}}, \
-}
 
 
 /*****************************************************

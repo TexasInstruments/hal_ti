@@ -3,7 +3,7 @@
  *
  *  Description:    Driverlib for the high accuracy temperature diode
  *
- *  Copyright (c) 2023-2024, Texas Instruments Incorporated
+ *  Copyright (c) 2023-2026 Texas Instruments Incorporated
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -217,13 +217,12 @@ int32_t __attribute__((weak)) voltageToTempHardcoded(uint32_t microVolts)
 //*****************************************************************************
 static int32_t voltageToTemp(uint32_t microVolts)
 {
-    /* Check if coefficients are directly available in FCFG. If not, fall back
-     * on function using hardcoded values. Coefficients were only introduced in
-     * FCFG layout revision 6.
+    /* Check if coefficients are directly available in FCFG. If the first word
+     * is all 0xFF, fall back on function using hardcoded values.
      */
-    uint8_t fcfgRevision = fcfg->appTrims.revision;
+    const uint32_t auxDiodeCoefficientPtrW0 = *(const uint32_t *)&fcfg->appTrims.cc23x0r5.auxDiodeCoeff;
 
-    if (fcfgRevision < 0x06)
+    if (auxDiodeCoefficientPtrW0 == 0xFFFFFFFFU)
     {
         return voltageToTempHardcoded(microVolts);
     }

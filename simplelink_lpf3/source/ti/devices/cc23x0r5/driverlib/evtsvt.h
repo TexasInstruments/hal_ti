@@ -3,7 +3,7 @@
  *
  *  Description:    Prototypes and defines for the EVTSVT API.
  *
- *  Copyright (c) 2025 Texas Instruments Incorporated
+ *  Copyright (c) 2025-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __EVTSVT_H__
-#define __EVTSVT_H__
+#ifndef ti_devices_evtsvt__include
+#define ti_devices_evtsvt__include
 
 //*****************************************************************************
 //
@@ -176,7 +176,7 @@ extern "C" {
 #define EVTSVT_PUB_LRFD_IRQ1      EVTSVT_DMACH6SEL_PUBID_LRFD_IRQ1      //!< Publisher ID for LRFD_IRQ1
 #define EVTSVT_PUB_LRFD_IRQ0      EVTSVT_DMACH6SEL_PUBID_LRFD_IRQ0      //!< Publisher ID for LRFD_IRQ0
 #define EVTSVT_PUB_FLASH_IRQ      EVTSVT_DMACH6SEL_PUBID_FLASH_IRQ      //!< Publisher ID for FLASH_IRQ
-#define EVTSVT_PUB_GPIO_EVT       EVTSVT_DMACH6SEL_PUBID_GPIO_EVT       //!< Publisher ID for GPIO_EVT
+#define EVTSVT_PUB_GPIO_EVT0      EVTSVT_DMACH6SEL_PUBID_GPIO_EVT       //!< Publisher ID for GPIO_EVT
 #define EVTSVT_PUB_GPIO_COMB      EVTSVT_DMACH6SEL_PUBID_GPIO_COMB      //!< Publisher ID for GPIO_COMB
 #define EVTSVT_PUB_SYSTIM_COMB    EVTSVT_DMACH6SEL_PUBID_SYSTIM_COMB    //!< Publisher ID for SYSTIM_COMB
 #define EVTSVT_PUB_AON_IOC_COMB   EVTSVT_DMACH6SEL_PUBID_AON_IOC_COMB   //!< Publisher ID for AON_IOC_COMB
@@ -299,7 +299,7 @@ extern "C" {
 //! - \ref EVTSVT_PUB_LRFD_IRQ1
 //! - \ref EVTSVT_PUB_LRFD_IRQ0
 //! - \ref EVTSVT_PUB_FLASH_IRQ
-//! - \ref EVTSVT_PUB_GPIO_EVT
+//! - \ref EVTSVT_PUB_GPIO_EVT0
 //! - \ref EVTSVT_PUB_GPIO_COMB
 //! - \ref EVTSVT_PUB_SYSTIM_COMB
 //! - \ref EVTSVT_PUB_AON_IOC_COMB
@@ -399,7 +399,7 @@ extern void EVTSVTConfigureDma(uint32_t channel, uint32_t id);
 //! - \ref EVTSVT_PUB_LRFD_IRQ1
 //! - \ref EVTSVT_PUB_LRFD_IRQ0
 //! - \ref EVTSVT_PUB_FLASH_IRQ
-//! - \ref EVTSVT_PUB_GPIO_EVT
+//! - \ref EVTSVT_PUB_GPIO_EVT0
 //! - \ref EVTSVT_PUB_GPIO_COMB
 //! - \ref EVTSVT_PUB_SYSTIM_COMB
 //! - \ref EVTSVT_PUB_AON_IOC_COMB
@@ -430,4 +430,4 @@ extern void EVTSVTConfigureEvent(uint32_t subscriber, uint32_t pubId);
 //
 //*****************************************************************************
 
-#endif //  __EVTSVT_H__
+#endif // ti_devices_evtsvt__include

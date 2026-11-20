@@ -3,7 +3,7 @@
  *
  *  Description:    Macros for assisting debug of the driver library.
  *
- *  Copyright (c) 2022-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2022-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __DEBUG_H__
-#define __DEBUG_H__
+#ifndef ti_devices_debug__include
+#define ti_devices_debug__include
 
 //*****************************************************************************
 //
@@ -98,4 +98,4 @@ extern void __error__(char *pFilename, uint32_t line);
 //
 //*****************************************************************************
 
-#endif // __DEBUG_H__
+#endif // ti_devices_debug__include

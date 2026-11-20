@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __SYSTICK_H__
-#define __SYSTICK_H__
+#ifndef ti_devices_systick__include
+#define ti_devices_systick__include
 
 //*****************************************************************************
 //
@@ -273,4 +273,4 @@ __STATIC_INLINE uint32_t SysTickGetValue(void)
 //
 //*****************************************************************************
 
-#endif // __SYSTICK_H__
+#endif // ti_devices_systick__include

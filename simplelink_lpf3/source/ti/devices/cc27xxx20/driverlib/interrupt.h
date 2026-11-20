@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INTERRUPT_H__
-#define __INTERRUPT_H__
+#ifndef ti_devices_interrupt__include
+#define ti_devices_interrupt__include
 
 //*****************************************************************************
 //
@@ -61,8 +61,7 @@ extern "C" {
 #include "../inc/hw_ints.h"
 #include "../inc/hw_types.h"
 
-#include "../cmsis/cc27xxx20.h"
-#include "../cmsis/core/core_cm33.h"
+#include "../cmsis/device.h"
 
 #include "cpu.h"
 
@@ -457,4 +456,4 @@ __STATIC_INLINE bool IntDisableMaster(void)
 //
 //*****************************************************************************
 
-#endif // __INTERRUPT_H__
+#endif // ti_devices_interrupt__include

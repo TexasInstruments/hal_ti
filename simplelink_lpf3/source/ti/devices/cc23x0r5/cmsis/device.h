@@ -3,7 +3,7 @@
  *
  *  Description:    Redirection file for CMSIS core device header file
  *
- *  Copyright (c) 2024-2025 Texas Instruments Incorporated
+ *  Copyright (c) 2024-2026 Texas Instruments Incorporated
  *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -38,12 +38,13 @@
 // Device-specific configuration file
 #include "cc23x0r5.h"
 
-// Core-specific cmsis header file.
-// Use the CMSIS-Core provided by Zephyr (the cmsis_6 module) rather than the
-// copy bundled with hal_ti, so the core definitions match the Zephyr version in
-// use (e.g. SCB->SHPR in CMSIS 6 vs SCB->SHP in the bundled CMSIS 5). The
-// angle-bracket include resolves through the cmsis_6 module include path, and
-// core_cm0plus.h pulls in the matching toolchain header via cmsis_compiler.h.
+// Core-specific CMSIS header file. The core header includes the
+// toolchain-specific CMSIS header files through cmsis_compiler.h.
+#if defined(__ZEPHYR__)
+// Zephyr provides CMSIS-Core through the cmsis_6 module.
 #include <core_cm0plus.h>
+#else
+#include "core/core_cm0plus.h"
+#endif
 
 #endif // #ifndef __DEVICE_H__

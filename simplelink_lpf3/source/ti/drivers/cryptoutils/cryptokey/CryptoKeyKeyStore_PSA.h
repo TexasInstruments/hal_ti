@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2026, Texas Instruments Incorporated
+ * Copyright (c) 2022-2026 Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -107,7 +107,8 @@
 #include <ti/devices/DeviceFamily.h>
 
 #if (TFM_ENABLED == 0) || defined(TFM_BUILD) /* TFM_BUILD indicates this is a TF-M build */
-    #if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX))
+    #if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) || \
+         (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX))
         #include <third_party/mbedtls/include/psa/crypto.h>
         #include <third_party/mbedtls/include/psa/crypto_extra.h>
         #include <third_party/mbedtls/include/mbedtls/private_access.h>
@@ -119,8 +120,10 @@
         #include <third_party/mbedtls/ti/driver/ti_sl_transparent_driver_entrypoints.h>
     #else
         #error "Unsupported DeviceFamily_Parent for CryptoKeyKeyStore_PSA"
-    #endif /* #if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == \
-              DeviceFamily_PARENT_CC35XX)) */
+    #endif /* (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == \
+            * DeviceFamily_PARENT_CC35XX)                                                    \
+            * || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)                         \
+            */
 #else
     #include <third_party/tfm/interface/include/psa/crypto.h>
 #endif /* #if (TFM_ENABLED == 0) || defined(TFM_BUILD) */
@@ -586,9 +589,46 @@ typedef psa_algorithm_t KeyStore_PSA_Algorithm;
 #define KEYSTORE_PSA_ALG_SHA_512_224 ((KeyStore_PSA_Algorithm)PSA_ALG_SHA_512_224)
 /** SHA2-512/256 */
 #define KEYSTORE_PSA_ALG_SHA_512_256 ((KeyStore_PSA_Algorithm)PSA_ALG_SHA_512_256)
+/** SHA3-224 */
+#define KEYSTORE_PSA_ALG_SHA3_224    ((KeyStore_PSA_Algorithm)PSA_ALG_SHA3_224)
+/** SHA3-256 */
+#define KEYSTORE_PSA_ALG_SHA3_256    ((KeyStore_PSA_Algorithm)PSA_ALG_SHA3_256)
+/** SHA3-384 */
+#define KEYSTORE_PSA_ALG_SHA3_384    ((KeyStore_PSA_Algorithm)PSA_ALG_SHA3_384)
+/** SHA3-512 */
+#define KEYSTORE_PSA_ALG_SHA3_512    ((KeyStore_PSA_Algorithm)PSA_ALG_SHA3_512)
+
+/** @brief In a hash-and-sign algorithm policy, allow any hash algorithm.
+ *
+ * This value may be used to form the algorithm usage field of a policy
+ * for a signature algorithm that is parametrized by a hash. The key
+ * may then be used to perform operations using the same signature
+ * algorithm parametrized with any supported hash.
+ *
+ * This value may not be used to build an algorithm specification to
+ * perform an operation. It is only valid to build policies.
+ */
+#define KEYSTORE_PSA_ALG_ANY_HASH ((psa_algorithm_t)PSA_ALG_ANY_HASH)
 
 /** Macro to build an HMAC algorithm */
 #define KEYSTORE_PSA_ALG_HMAC(hash_alg) ((KeyStore_PSA_Algorithm)(PSA_ALG_HMAC(hash_alg)))
+
+/** @brief Macro to build an RSA PKCS#1 v1.5 signature algorithm
+ * (RSASSA-PKCS1-v1_5) over a precomputed hash.
+ *
+ * This is the algorithm used by the RSA driver (see RSA.h). The hash is not
+ * computed by the key store. The signature covers the DER encoded DigestInfo
+ * structure of the given hash, as defined in RFC 8017 section 9.2.
+ *
+ * Use with keys of type #KEYSTORE_PSA_KEY_TYPE_RSA_KEY_PAIR (sign) or
+ * #KEYSTORE_PSA_KEY_TYPE_RSA_PUBLIC_KEY (verify), and the usage flags
+ * #KEYSTORE_PSA_KEY_USAGE_SIGN_HASH or #KEYSTORE_PSA_KEY_USAGE_VERIFY_HASH.
+ *
+ * @param hash_alg  A hash algorithm, e.g. #KEYSTORE_PSA_ALG_SHA_256, or
+ *                  #KEYSTORE_PSA_ALG_ANY_HASH in a key policy to allow any
+ *                  supported hash.
+ */
+#define KEYSTORE_PSA_ALG_RSA_PKCS1V15_SIGN(hash_alg) ((KeyStore_PSA_Algorithm)PSA_ALG_RSA_PKCS1V15_SIGN(hash_alg))
 
 /** The CBC-MAC construction over a block cipher
  *
@@ -838,6 +878,25 @@ typedef psa_algorithm_t KeyStore_PSA_Algorithm;
  */
 #define KEYSTORE_PSA_KEY_LIFETIME_PERSISTENT ((KeyStore_PSA_KeyLifetime)PSA_KEY_LIFETIME_PERSISTENT)
 
+/**
+ * Wrapped key blob in RAM
+ */
+#define KEYSTORE_PSA_KEY_LIFETIME_VOLATILE_BLOB \
+    (PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_VOLATILE, PSA_KEY_LOCATION_HSM_ASSET_STORE))
+
+/**
+ * Wrapped key blob in flash
+ */
+#define KEYSTORE_PSA_KEY_LIFETIME_PERSISTENT_BLOB \
+    (PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_DEFAULT, PSA_KEY_LOCATION_HSM_ASSET_STORE))
+
+/**
+ * Volatile HSM asset that stays a dynamic asset across HSM operations
+ */
+#define KEYSTORE_PSA_KEY_LIFETIME_ASSET_STORE                                            \
+    (PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_HSM_ASSET_STORE, \
+                                                    PSA_KEY_LOCATION_HSM_ASSET_STORE))
+
 /** The persistence level of volatile keys.
  *
  * See ::KeyStore_PSA_KeyPersistence for more information.
@@ -1005,9 +1064,11 @@ typedef psa_algorithm_t KeyStore_PSA_Algorithm;
  * This flag allows the implementation to make additional copies of the key
  * material that are not in storage and not for the purpose of an ongoing
  * operation. Applications can use it as a hint to keep the key around
- * for repeated access.
- * An application can request that cached key material is removed
- * from memory by calling psa_purge_key().
+ * for repeated access. Volatile encrypted keys using this flag set will
+ * keep their associated assets in the HSM Asset Store after usage.
+ *
+ * An application can request that cached key material or HSM assets are
+ * removed from memory by calling psa_purge_key().
  */
 #define KEYSTORE_PSA_KEY_USAGE_CACHE ((KeyStore_PSA_KeyUsage)PSA_KEY_USAGE_CACHE)
 
@@ -1851,7 +1912,8 @@ int_fast16_t KeyStore_PSA_purgeKey(KeyStore_PSA_KeyFileId key);
  */
 int_fast16_t KeyStore_PSA_destroyKey(KeyStore_PSA_KeyFileId key);
 
-#if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX))
+#if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) || \
+     (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC37XX))
 
 /**
  * @brief Make a copy of a key.
@@ -1944,8 +2006,9 @@ int_fast16_t KeyStore_PSA_copyKey(KeyStore_PSA_KeyFileId source_key,
                                   KeyStore_PSA_KeyAttributes *attributes,
                                   KeyStore_PSA_KeyFileId *target_key);
 
-#endif /* #if ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == \
-          DeviceFamily_PARENT_CC35XX)) */
+#endif /* (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC35XX) \
+        * || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)                                                     \
+        */
 #ifdef __cplusplus
 }
 #endif

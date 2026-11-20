@@ -61,7 +61,9 @@ struct RCL_CommandRuntime_s {
     LRF_Events lrfCallbackMask;         /*!< Callbacks enabled for events directly from LRF */
     RCL_Events rclCallbackMask;         /*!< Callbacks enabled for events generated in RCL */
     RCL_Callback callback;              /*!< Callback function */
-#if defined(DeviceFamily_PARENT) && ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0))
+#if defined(DeviceFamily_PARENT) && ((DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX) || \
+                                     (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || \
+                                     (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1))
     uint32_t activityInfo;              /*!< DMM (Dynamic Multi-protocol Manager) run-time priority information */
 #endif
 };

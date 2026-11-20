@@ -33,8 +33,8 @@
  *
  ******************************************************************************/
 
-#ifndef __APU_H__
-#define __APU_H__
+#ifndef ti_devices_apu__include
+#define ti_devices_apu__include
 
 //*****************************************************************************
 //
@@ -928,6 +928,51 @@ void APUHermLo(uint16_t N, void *pInput, void *pResult);
 
 //*****************************************************************************
 //
+//! \brief APU accelerator for computing autocorrelation of input vector
+//!
+//! APU accelerator for one-sided autocorrelation of input vector (non-negative lags)
+//!
+//! Defined as:
+//! \code
+//!    C[k] = dot_product(A[k:N-1], conj(A[0:N-1-k])), k=0:N-1
+//! \endcode
+//! in which A, C are two complex vectors
+//!
+//! \param N length of the vector A/C
+//! \param pInputA a pointer to the base of the input vector A, in APU memory
+//! \param pResult autocorrelation of input vector
+//!
+//! \return None
+//
+//*****************************************************************************
+void APUVectorAutoCorrelation(uint16_t N, void *pInputA, void *pResult);
+
+//*****************************************************************************
+//
+//! \brief APU accelerator for computing 1D Convolution between 2 vectors
+//!
+//! APU accelerator for computing 1D Convolution between vector X (sample vector)
+//! and kernel H (filter), assume that length of H is less or equal length of X
+//!
+//! Defined as:
+//! \code
+//!  Y = conv1d(X, H, 'full')
+//! \endcode
+//! in which, X, H and Y are complex vectors.
+//!
+//! \param length_H length of kernel H
+//! \param length_X length of vector X
+//! \param pH a pointer to the base of vector H, in APU memory
+//! \param pX a pointer to the base of vector X, in APU memory
+//! \param pResult a pointer to the output vector Y, in APU memory
+//!
+//! \return None
+//
+//*****************************************************************************
+void APUVectorConv1d(uint16_t length_H, uint16_t length_X, void *pH, void *pX, void *pResult);
+
+//*****************************************************************************
+//
 //! Close the Doxygen group.
 //! @}
 //
@@ -950,4 +995,4 @@ void APUHermLo(uint16_t N, void *pInput, void *pResult);
 //
 //*****************************************************************************
 
-#endif //  __APU_H__
+#endif // ti_devices_apu__include

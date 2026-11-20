@@ -69,17 +69,18 @@ LRF_SetupResult LRF_loadImage(const LRF_TOPsmImage *image, uint32_t destinationA
             /* Check if the image is 128-bit aligned, and if not, read out 32-bit word(s) */
             while ((((uintptr_t) topsmSourcePointer) & 0x0FU) != 0U)
             {
-#if (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC27XX)
+                /* Protect the first memory write on CC27xxx10, ref. RCL-515. */
+#if (DeviceFamily_CC27XXX10)
                 ASM_4_NOPS();
-#endif //DeviceFamily_PARENT_CC27XX
+#endif //DeviceFamily_CC27XXX10
                 *ram++ = *topsmSourcePointer++;
                 i++;
             }
             /* Load most of the image using aligned 128-bit reads */
-#if (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC27XX)
-            /* We don't need to use HWREG_READ_LRF every time, as the loop only writes to RAM without registers inbetween, but we should protect the first write */
+            /* Protect the first memory write on CC27xxx10, ref. RCL-515. */
+#if DeviceFamily_CC27XXX10
             ASM_4_NOPS();
-#endif
+#endif //DeviceFamily_CC27XXX10
 #ifdef DeviceFamily_CC1404_CC1407
             ASM_2_NOPS();
 #endif //DeviceFamily_CC1404_CC1407
@@ -93,7 +94,7 @@ LRF_SetupResult LRF_loadImage(const LRF_TOPsmImage *image, uint32_t destinationA
                 topsmSourcePointer += 4;
                 ram += 4;
 #else
-#if (DeviceFamily_LRF_PARENT == DeviceFamily_PARENT_CC27XX)
+#if (DeviceFamily_CC27XXX10)
                 __asm volatile(
                     "LDMIA %0!, {r4, r5, r6, r7} \n"
                     /* Split the the quad write into four individual writes with dummy operations between each write. Ref. RCL-1063 */
@@ -129,7 +130,7 @@ LRF_SetupResult LRF_loadImage(const LRF_TOPsmImage *image, uint32_t destinationA
                       "+r" (ram) :
                     : "r4", "r5", "r6", "r7"
                 );
-#endif //DeviceFamily_PARENT_CC27XX
+#endif //DeviceFamily_CC27XXX10
 #endif
                 i += 4U;
             }
