@@ -125,7 +125,8 @@ void HwiP_delete(HwiP_Handle handle)
 
 	irq_disable(interruptNum - 16);
 }
-#elif defined(CONFIG_SOC_SERIES_CC13X2_CC26X2) || defined(CONFIG_SOC_SERIES_CC13X2X7_CC26X2X7)
+#elif defined(CONFIG_SOC_SERIES_CC13X2_CC26X2) || defined(CONFIG_SOC_SERIES_CC13X2X7_CC26X2X7) || \
+    defined(CONFIG_SOC_SERIES_CC13X4_CC26X4)
 /* INT_PENDSV is already taken by Zephyr, so let's use INT_SWEV0 to support
  * SwiP since this line is usually unused. Change this to a different
  * interrupt if desired.
@@ -272,7 +273,8 @@ void HwiP_Params_init(HwiP_Params *params)
 /* Zephyr has no functions for clearing an interrupt, so use driverlib: */
 void HwiP_clearInterrupt(int interruptNum)
 {
-#if defined(CONFIG_SOC_SERIES_CC13X2_CC26X2) || defined(CONFIG_SOC_SERIES_CC13X2X7_CC26X2X7)
+#if defined(CONFIG_SOC_SERIES_CC13X2_CC26X2) || defined(CONFIG_SOC_SERIES_CC13X2X7_CC26X2X7) || \
+    defined(CONFIG_SOC_SERIES_CC13X4_CC26X4)
         IntPendClear((unsigned long)interruptNum);
 #elif defined(CONFIG_SOC_SERIES_CC32XX)
 	MAP_IntPendClear((unsigned long)interruptNum);
@@ -303,7 +305,8 @@ void HwiP_restore(uintptr_t key)
 	irq_unlock(key);
 }
 
-#if defined(CONFIG_SOC_SERIES_CC13X2_CC26X2) || defined(CONFIG_SOC_SERIES_CC13X2X7_CC26X2X7)
+#if defined(CONFIG_SOC_SERIES_CC13X2_CC26X2) || defined(CONFIG_SOC_SERIES_CC13X2X7_CC26X2X7) || \
+    defined(CONFIG_SOC_SERIES_CC13X4_CC26X4)
 void HwiP_post(int interruptNum)
 {
 	IntPendSet((uint32_t)interruptNum);
