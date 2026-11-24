@@ -531,6 +531,27 @@ static void inc_mac_addr(uint8_t* pMacAddr)
     u64_to_mac_addr(mac64, pMacAddr);
 }
 
+static int32_t validate_fuse_mac_addr(const uint8_t *fuse)
+{
+    const uint8 address2[MAC_ADDRESS_LEN] = {0};
+
+    if (MAC_MULTICAST(fuse))
+    {
+        Report("\n\rMulticast MAC addresses are not allowed");
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__DEVICE,
+                         WLAN_ERROR_TYPE__HOST_RESPONSE_INVALID_MAC_ADDR);
+    }
+
+    if (!os_memcmp(fuse, address2, MAC_ADDRESS_LEN))
+    {
+        Report("\n\rZero MAC address is not allowed");
+        return WlanError(WLAN_ERROR_SEVERITY__LOW, WLAN_ERROR_MODULE__DEVICE,
+                         WLAN_ERROR_TYPE__HOST_RESPONSE_INVALID_MAC_ADDR);
+    }
+
+    return 0;
+}
+
 /******************************************************************************
 
     NAME:           set_device_fuse_mac_addr
@@ -543,40 +564,37 @@ static void inc_mac_addr(uint8_t* pMacAddr)
 ******************************************************************************/
 static void set_device_fuse_mac_addr(device_info_t pgDevInfo)
 {
-    WlanMacAddress_t macAddressParams;
-    memset(&macAddressParams, 0, sizeof(WlanMacAddress_t));
     const uint8 address2[MAC_ADDRESS_LEN] = {0};
 
     //set sta mac address
-    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_STA]), address2, MAC_ADDRESS_LEN))
+    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_STA]), address2, MAC_ADDRESS_LEN) &&
+        !validate_fuse_mac_addr(pgDevInfo.mac_address[0]))
     {
-        macAddressParams.roleType = WLAN_ROLE_STA;
-        os_memcpy(macAddressParams.pMacAddress, pgDevInfo.mac_address[0], MAC_ADDRESS_LEN);
-        Wlan_Set(WLAN_SET_MACADDRESS, &macAddressParams);
+        os_memcpy(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_STA], pgDevInfo.mac_address[0],
+                  MAC_ADDRESS_LEN);
     }
 
     //set ap mac address
-    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_AP]), address2, MAC_ADDRESS_LEN))
+    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_AP]), address2, MAC_ADDRESS_LEN) &&
+        !validate_fuse_mac_addr(pgDevInfo.mac_address[3]))
     {
-        macAddressParams.roleType = WLAN_ROLE_AP;
-        os_memcpy(macAddressParams.pMacAddress, pgDevInfo.mac_address[3], MAC_ADDRESS_LEN);
-        Wlan_Set(WLAN_SET_MACADDRESS, &macAddressParams);
+        os_memcpy(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_AP], pgDevInfo.mac_address[3],
+                  MAC_ADDRESS_LEN);
     }
 
     //set device mac address
-    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_DEVICE]), address2, MAC_ADDRESS_LEN))
+    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_DEVICE]), address2, MAC_ADDRESS_LEN) &&
+        !validate_fuse_mac_addr(pgDevInfo.mac_address[2]))
     {
-        macAddressParams.roleType = WLAN_ROLE_DEVICE;
-        os_memcpy(macAddressParams.pMacAddress, pgDevInfo.mac_address[2], MAC_ADDRESS_LEN);
-        Wlan_Set(WLAN_SET_MACADDRESS, &macAddressParams);
+        os_memcpy(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_DEVICE], pgDevInfo.mac_address[2],
+                  MAC_ADDRESS_LEN);
     }
 
     //set ble mac address
-    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_BLE]), address2, MAC_ADDRESS_LEN))
+    if(!os_memcmp(&(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_BLE]), address2, MAC_ADDRESS_LEN) &&
+        !validate_fuse_mac_addr(pgDevInfo.mac_address[1]))
     {
-        macAddressParams.roleType = WLAN_ROLE_IBSS; //BLE role, we do not have role type BLE so we use this
-        os_memcpy(macAddressParams.pMacAddress, pgDevInfo.mac_address[1], MAC_ADDRESS_LEN);
-        Wlan_Set(WLAN_SET_MACADDRESS, &macAddressParams);
+        os_memcpy(g_fuse_mac_addr[WLAN_MAC_OFFSET_ROLE_BLE], pgDevInfo.mac_address[1],
+                  MAC_ADDRESS_LEN);
     }
-
 }
