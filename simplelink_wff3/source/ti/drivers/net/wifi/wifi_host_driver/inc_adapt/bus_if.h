@@ -48,6 +48,8 @@ int bus_sendWriteCommand(uint32_t address, uint8_t *data, uint32_t length, uint8
 
 int bus_sendDeInitCommand();
 
+int bus_Send_deInit(void);
+
 // returns the alignment needed for the interface protocol
 uint32_t bus_AlignLength(uint32_t length);
 
