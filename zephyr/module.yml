@@ -5,6 +5,11 @@ build:
   settings:
     dts_root: .
 
+package-managers:
+  pip:
+    requirement-files:
+      - zephyr/requirements.txt
+
 blobs:
   # TIFS (TI Foundational Security) firmware for AM62Lx SoC
   - path: ti-sysfw/ti-fs-firmware-am62lx-hs-enc.bin
