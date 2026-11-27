@@ -16,7 +16,7 @@
 
 #if DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX
     #define SWIP_INT_NUM INT_SW0
-#elif DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0
+#elif (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1)
     #define SWIP_INT_NUM INT_CPUIRQ1
 #endif
 

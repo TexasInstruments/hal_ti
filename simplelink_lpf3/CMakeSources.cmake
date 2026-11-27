@@ -57,6 +57,11 @@ set(SOURCES_DRIVERS_CC23X0
     ecdh/ECDHLPF3SW.c
 )
 
+set(SOURCES_DRIVERS_CC23X1
+    # Default Simplelink configurations
+    power/PowerCC23X1.c
+)
+
 set(SOURCES_DRIVERS_CC27XX
     # Default Simplelink configurations
     power/PowerCC27XX.c
@@ -73,6 +78,7 @@ set(SOURCES_DRIVERS_CC27XX
 
 list(TRANSFORM SOURCES_DRIVERS_LPF3 PREPEND source/ti/drivers/)
 list(TRANSFORM SOURCES_DRIVERS_CC23X0 PREPEND source/ti/drivers/)
+list(TRANSFORM SOURCES_DRIVERS_CC23X1 PREPEND source/ti/drivers/)
 list(TRANSFORM SOURCES_DRIVERS_CC27XX PREPEND source/ti/drivers/)
 
 set(SOURCES_KERNEL

@@ -98,6 +98,31 @@ if(CONFIG_HAS_CC23X0_SDK)
 
 endif()
 
+if(CONFIG_HAS_CC23X1_SDK)
+
+  if(CONFIG_SOC_CC2341R10)
+    zephyr_compile_definitions(DeviceFamily_CC23X1R10 ${COMPILER})
+  endif()
+
+  zephyr_include_directories(
+    .
+    source
+    )
+
+  zephyr_library()
+  zephyr_library_compile_definitions(${COMPILER})
+  zephyr_library_sources(
+    ${SOURCES_DRIVERS_LPF3}
+    ${SOURCES_DRIVERS_CC23X1}
+    ${SOURCES_KERNEL}
+    ${SOURCES_OVERLOADS}
+    )
+  zephyr_linker_sources(RAM_SECTIONS
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/ti/drivers/dma/dma.ld
+  )
+
+endif()
+
 if(CONFIG_HAS_CC27XXX10_SDK OR CONFIG_HAS_CC27XXX20_SDK)
 
   if(CONFIG_SOC_CC2745R10_Q1)

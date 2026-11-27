@@ -78,7 +78,8 @@
  */
 #define ClockP_PERIOD_MAX_SEC (SYSTIMER_MAX_DELTA / 1000000)
 
-#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
+#if (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X0) || (DeviceFamily_PARENT == DeviceFamily_PARENT_CC23X1) || \
+    (DeviceFamily_PARENT == DeviceFamily_PARENT_CC27XX)
     #define ClockP_EVTSVT_SUB_CPUIRQ (EVTSVT_SUB_CPUIRQ16)
     #define ClockP_INT_CPUIRQ        (INT_CPUIRQ16)
     #define ClockP_SYSTIM_CHANNEL    (0)
